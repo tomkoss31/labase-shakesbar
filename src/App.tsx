@@ -272,6 +272,9 @@ function App() {
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
+
+
 
   const allItems = useMemo<ItemWithCategory[]>(
     () =>
@@ -343,6 +346,39 @@ function App() {
 
   function toggleExtra(extra: string) {
     setSelectedExtras((prev) => (prev.includes(extra) ? prev.filter((entry) => entry !== extra) : [...prev, extra]));
+async function handleSquareCheckout() {
+  try {
+    if (cart.length === 0) {
+      alert('Ton panier est vide.');
+      return;
+    }
+
+    setIsCreatingPayment(true);
+
+    const response = await fetch('/api/create-payment-link', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ cart }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      console.error(data);
+      alert("Impossible de créer le paiement Square pour le moment.");
+      return;
+    }
+
+    window.location.href = data.url;
+  } catch (error) {
+    console.error(error);
+    alert("Une erreur est survenue lors de la création du paiement.");
+  } finally {
+    setIsCreatingPayment(false);
+  }
+}
   }
 
   const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(cart, customerName, pickupTime)}`;
@@ -898,14 +934,13 @@ function App() {
                     <MessageCircle size={18} /> Envoyer sur WhatsApp
                   </a>
 
-                  <a
-                    href={BRAND.squareCheckoutBaseUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-400 py-4 text-lg font-black text-black"
-                  >
-                    Payer avec Square
-                  </a>
+                  <button
+  onClick={handleSquareCheckout}
+  disabled={isCreatingPayment}
+  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-400 py-4 text-lg font-black text-black disabled:opacity-60"
+>
+  {isCreatingPayment ? 'Création du paiement...' : 'Payer avec Square'}
+</button>
                 </div>
               )}
             </motion.aside>
