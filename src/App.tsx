@@ -919,7 +919,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
+            <AnimatePresence>
         {drawerOpen && (
           <>
             <motion.div
@@ -1017,6 +1017,7 @@ function App() {
             </div>
           </>
         )}
+      </AnimatePresence>
       </AnimatePresence>
     </div>
   );
