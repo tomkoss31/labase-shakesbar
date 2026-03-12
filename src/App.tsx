@@ -861,12 +861,7 @@ async function handleSquareCheckout() {
               className="fixed inset-0 z-40 bg-black/60"
               onClick={() => setDrawerOpen(false)}
             />
-            <motion.aside
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 24, stiffness: 230 }}
-              className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-white/10 bg-[radial-gradient(circle_at_top,_rgba(236,72,153,0.10),_transparent_20%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(18,18,18,0.99))] p-5"
+           <div className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-white/10 bg-neutral-950 p-5">
             >
               <div className="mb-5 flex items-center justify-between">
                 <h3 className="text-2xl font-black">Ton panier</h3>
@@ -943,7 +938,7 @@ async function handleSquareCheckout() {
 </button>
                 </div>
               )}
-            </motion.aside>
+            </div>
           </>
         )}
       </AnimatePresence>
