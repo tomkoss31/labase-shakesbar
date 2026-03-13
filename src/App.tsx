@@ -355,36 +355,30 @@ function App() {
   }
 
   async function handleSquareCheckout() {
-    try {
-      if (cart.length === 0) {
-        alert('Ton panier est vide.');
-        return;
-      }
+   const handleSquareCheckout = async () => {
+  try {
+    setIsCreatingPayment(true);
 
-      setIsCreatingPayment(true);
+    const response = await fetch('/api/create-payment-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cart }),
+    });
 
-      const response = await fetch('/api/create-payment-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart }),
-      });
+    const data = await response.json();
 
-      const data = await response.json();
-
-      if (!response.ok || !data.url) {
-  console.error(data);
-  alert(JSON.stringify(data, null, 2));
-  return;
-}
-      }
-
-      window.location.href = data.url;
-    } catch (error) {
-      console.error(error);
-      alert('Une erreur est survenue lors de la création du paiement.');
-    } finally {
-      setIsCreatingPayment(false);
+    if (!response.ok || !data.url) {
+      alert('Erreur Square: ' + JSON.stringify(data));
+      return;
     }
+
+    window.location.href = data.url;
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors de la création du paiement');
+  } finally {
+    setIsCreatingPayment(false);
+  
   }
 
   const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(cart, customerName, pickupTime)}`;
