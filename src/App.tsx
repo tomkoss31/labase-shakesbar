@@ -206,15 +206,7 @@ const featuredItems = [
   },
 ] as const;
 
-const extras = [
-  'Collagène',
-  'Booster immunité',
-  'Fibres à la pomme',
-  'Probiotiques',
-  'Électrolytes',
-  'Créatine',
-  'Protéines',
-] as const;
+const extras = ['Collagène', 'Booster immunité', 'Fibres à la pomme', 'Probiotiques', 'Électrolytes', 'Créatine', 'Protéines'] as const;
 
 type Category = (typeof categories)[number];
 type ProductItem = Category['items'][number];
@@ -260,9 +252,7 @@ function buildWhatsAppMessage(
     '',
     ...cart.map(
       (item) =>
-        `• ${item.quantity}x ${item.categoryName} - ${item.name}${item.option ? ` (${item.option})` : ''}${
-          item.extras?.length ? ` + ${item.extras.join(', ')}` : ''
-        }`
+        `• ${item.quantity}x ${item.categoryName} - ${item.name}${item.option ? ` (${item.option})` : ''}${item.extras?.length ? ` + ${item.extras.join(', ')}` : ''}`
     ),
     '',
     `Nom : ${name || 'À compléter'}`,
@@ -396,11 +386,7 @@ function App() {
     }
   }
 
-  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
-    cart,
-    customerName,
-    pickupTime
-  )}`;
+  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(cart, customerName, pickupTime)}`;
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
@@ -446,9 +432,7 @@ function App() {
                   </h1>
 
                   <p className="mt-4 max-w-2xl text-base text-white/75 md:text-lg">
-                    Smoothie bar healthy, club de nutrition et espace bien-être : découvre des boissons gourmandes, des
-                    recettes fonctionnelles et un accompagnement orienté perte de poids, prise de masse, énergie au
-                    quotidien et récupération.
+                    Smoothie bar healthy, club de nutrition et espace bien-être : découvre des boissons gourmandes, des recettes fonctionnelles et un accompagnement orienté perte de poids, prise de masse, énergie au quotidien et récupération.
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3 text-sm">
@@ -595,12 +579,7 @@ function App() {
           <div className="flex gap-3 overflow-x-auto pb-2">
             <FilterPill active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} label="Tout" />
             {categories.map((category) => (
-              <FilterPill
-                key={category.id}
-                active={activeCategory === category.id}
-                onClick={() => setActiveCategory(category.id)}
-                label={category.name}
-              />
+              <FilterPill key={category.id} active={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} label={category.name} />
             ))}
           </div>
         </section>
@@ -613,9 +592,7 @@ function App() {
               <div key={category.id} className="space-y-4">
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <div
-                      className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-bold text-black`}
-                    >
+                    <div className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-bold text-black`}>
                       <Icon size={16} /> {category.name}
                     </div>
 
@@ -625,10 +602,7 @@ function App() {
                     {category.options && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {category.options.map((opt) => (
-                          <span
-                            key={opt}
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80"
-                          >
+                          <span key={opt} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
                             {opt}
                           </span>
                         ))}
@@ -779,8 +753,7 @@ function App() {
               </p>
               <h2 className="mt-2 text-2xl font-black text-white">Partage ton expérience</h2>
               <p className="mt-2 text-sm text-white/70">
-                Ton avis aide le club à grandir et permet à de nouvelles personnes de découvrir La Base Shakes &
-                Drinks.
+                Ton avis aide le club à grandir et permet à de nouvelles personnes de découvrir La Base Shakes & Drinks.
               </p>
             </a>
 
@@ -795,8 +768,7 @@ function App() {
               </p>
               <h2 className="mt-2 text-2xl font-black text-white">Retrouve l’univers du club sur Instagram</h2>
               <p className="mt-2 text-sm text-white/70">
-                Nouveautés, saveurs du moment, visuels gourmands, ambiance du club et coulisses : tout l’univers La
-                Base en un coup d’œil.
+                Nouveautés, saveurs du moment, visuels gourmands, ambiance du club et coulisses : tout l’univers La Base en un coup d’œil.
               </p>
             </a>
           </div>
@@ -808,9 +780,7 @@ function App() {
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">La Base Shakes & Drinks</p>
               <h2 className="mt-2 text-2xl font-black">Des boissons gourmandes avec une vraie logique bien-être</h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Nos smoothies nutritionnels, boissons énergisantes, boissons santé et options sportives sont pensés
-                pour allier plaisir, praticité et accompagnement. Le club t’accueille à Verdun pour découvrir un
-                univers orienté énergie, nutrition, perte de poids, prise de masse et routine healthy au quotidien.
+                Nos smoothies nutritionnels, boissons énergisantes, boissons santé et options sportives sont pensés pour allier plaisir, praticité et accompagnement. Le club t’accueille à Verdun pour découvrir un univers orienté énergie, nutrition, perte de poids, prise de masse et routine healthy au quotidien.
               </p>
             </div>
 
@@ -858,9 +828,7 @@ function App() {
               onClick={(e) => e.stopPropagation()}
               className="absolute bottom-0 left-0 right-0 mx-auto rounded-t-[32px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_32%),linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.98))] p-6 md:static md:max-w-xl md:rounded-[32px]"
             >
-              <div
-                className={`mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.accent} px-3 py-1 text-sm font-bold text-black`}
-              >
+              <div className={`mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.accent} px-3 py-1 text-sm font-bold text-black`}>
                 {selected.categoryName}
               </div>
 
@@ -919,7 +887,7 @@ function App() {
         )}
       </AnimatePresence>
 
-            <AnimatePresence>
+      <AnimatePresence>
         {drawerOpen && (
           <>
             <motion.div
@@ -955,9 +923,7 @@ function App() {
                             <p className="font-black text-black">{item.name}</p>
                             <p className="text-sm text-black/60">{item.categoryName}</p>
                             {item.option && <p className="mt-1 text-sm font-medium text-amber-700">{item.option}</p>}
-                            {item.extras?.length > 0 && (
-                              <p className="mt-1 text-sm text-emerald-700">+ {item.extras.join(', ')}</p>
-                            )}
+                            {item.extras?.length > 0 && <p className="mt-1 text-sm text-emerald-700">+ {item.extras.join(', ')}</p>}
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -1017,7 +983,6 @@ function App() {
             </div>
           </>
         )}
-      </AnimatePresence>
       </AnimatePresence>
     </div>
   );
