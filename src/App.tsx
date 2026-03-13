@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -17,6 +17,7 @@ import {
   Baby,
   Instagram,
   Star,
+  CheckCircle2,
 } from 'lucide-react';
 
 type ProductOption = {
@@ -122,131 +123,21 @@ const categories: Category[] = [
     accent: 'from-fuchsia-500 to-pink-600',
     description: '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
     items: [
-      {
-        name: 'Cherry White Grappe',
-        flavors: 'Citron • Framboise • Cerise • Raisin blanc',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Red Paradize',
-        flavors: 'Citron • Pêche • Ananas',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Electric Blue',
-        flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
-        badge: 'Iconique',
-        image: '/images/electric-blue.jpg',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Pomelon',
-        flavors: 'Citron • Framboise • Melon • Pomme',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Tonic Mandarine',
-        flavors: 'Citron • Mandarine',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Apple Kiss',
-        flavors: 'Citron • Pomme verte',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Pina Colada',
-        flavors: 'Citron • Pina colada • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Soleil',
-        flavors: 'Citron • Pêche • Mandarine • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Black Panther',
-        flavors: 'Citron • Cerise • Framboise bleue',
-        badge: 'Dark vibe',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: "L'Exotic",
-        flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: "T'Coco",
-        flavors: 'Citron • Pêche • Mandarine • Coco',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Elf',
-        flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Perroquet',
-        flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'La Vie en Rose',
-        flavors: 'Citron • Framboise • Pomme • Fruit du dragon',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Sortilège Noir',
-        flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
+      { name: 'Cherry White Grappe', flavors: 'Citron • Framboise • Cerise • Raisin blanc', badge: 'Nouveau', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Red Paradize', flavors: 'Citron • Pêche • Ananas', badge: 'Nouveau', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Electric Blue', flavors: 'Citron • Framboise bleue • Myrtille • Raisin', badge: 'Iconique', image: '/images/electric-blue.jpg', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Pomelon', flavors: 'Citron • Framboise • Melon • Pomme', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Tonic Mandarine', flavors: 'Citron • Mandarine', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Apple Kiss', flavors: 'Citron • Pomme verte', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Pina Colada', flavors: 'Citron • Pina colada • Ananas', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Soleil', flavors: 'Citron • Pêche • Mandarine • Ananas', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Black Panther', flavors: 'Citron • Cerise • Framboise bleue', badge: 'Dark vibe', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: "L'Exotic", flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: "T'Coco", flavors: 'Citron • Pêche • Mandarine • Coco', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Elf', flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Perroquet', flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'La Vie en Rose', flavors: 'Citron • Framboise • Pomme • Fruit du dragon', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Sortilège Noir', flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
     ],
   },
   {
@@ -287,39 +178,31 @@ const categories: Category[] = [
     accent: 'from-orange-400 to-yellow-500',
     description: 'Chauds ou glacés • gourmands • options protéinées',
     items: [
+      { name: 'Café chaud', flavors: 'Petit ou grand format', options: [{ label: 'Petit 3,90€', priceCents: 390 }, { label: 'Grand 5,90€', priceCents: 590 }] },
+      { name: 'Chocolat chaud', flavors: 'Noisette • Speculoos • Caramel • Vanille • Cookie', options: [{ label: 'Petit 4,90€', priceCents: 490 }, { label: 'Grand 6,90€', priceCents: 690 }] },
+      { name: 'Thé aloe vera chaud', flavors: 'Pêche • Framboise • Citron', options: [{ label: 'Petit 3,90€', priceCents: 390 }, { label: 'Grand 5,90€', priceCents: 590 }] },
+      { name: 'Café gourmand glacé', flavors: 'Macchiato • Choco mocha • Latte noisettes • Vanille latte', options: [{ label: 'Grand 5,90€', priceCents: 590 }] },
+      { name: 'Café glacé', flavors: 'Macchiato', options: [{ label: 'Grand 6,90€', priceCents: 690 }] },
+    ],
+  },
+  {
+    id: 'waffles',
+    name: 'Gaufres healthy',
+    icon: Coffee,
+    price: '6,90€',
+    accent: 'from-amber-400 to-orange-500',
+    description: '24g de protéines • 200 kcal • choisis ton topping',
+    items: [
       {
-        name: 'Café chaud',
-        flavors: 'Petit ou grand format',
+        name: 'Gaufre healthy',
+        flavors: 'Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
         options: [
-          { label: 'Petit 3,90€', priceCents: 390 },
-          { label: 'Grand 5,90€', priceCents: 590 },
+          { label: 'Miel 6,90€', priceCents: 690 },
+          { label: 'Chocolat 6,90€', priceCents: 690 },
+          { label: 'Chocolat blanc 6,90€', priceCents: 690 },
+          { label: 'Caramel 6,90€', priceCents: 690 },
+          { label: 'Caramel beurre salé 6,90€', priceCents: 690 },
         ],
-      },
-      {
-        name: 'Chocolat chaud',
-        flavors: 'Noisette • Speculoos • Caramel • Vanille • Cookie',
-        options: [
-          { label: 'Petit 4,90€', priceCents: 490 },
-          { label: 'Grand 6,90€', priceCents: 690 },
-        ],
-      },
-      {
-        name: 'Thé aloe vera chaud',
-        flavors: 'Pêche • Framboise • Citron',
-        options: [
-          { label: 'Petit 3,90€', priceCents: 390 },
-          { label: 'Grand 5,90€', priceCents: 590 },
-        ],
-      },
-      {
-        name: 'Café gourmand glacé',
-        flavors: 'Macchiato • Choco mocha • Latte noisettes • Vanille latte',
-        options: [{ label: 'Grand 5,90€', priceCents: 590 }],
-      },
-      {
-        name: 'Café glacé',
-        flavors: 'Macchiato',
-        options: [{ label: 'Grand 6,90€', priceCents: 690 }],
       },
     ],
   },
@@ -331,20 +214,8 @@ const categories: Category[] = [
     accent: 'from-violet-500 to-blue-600',
     description: 'Hydratation sport • récupération • créatine',
     items: [
-      {
-        name: 'Electro’Lyte',
-        flavors: 'Boisson glucidique & électrolytes',
-        badge: 'Performance',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-      {
-        name: 'Post Workout',
-        flavors: 'Boisson chocolat • récupération',
-        options: [{ label: 'Unique 5,90€', priceCents: 590 }],
-      },
+      { name: 'Electro’Lyte', flavors: 'Boisson glucidique & électrolytes', badge: 'Performance', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Post Workout', flavors: 'Boisson chocolat • récupération', options: [{ label: 'Unique 5,90€', priceCents: 590 }] },
     ],
   },
 ];
@@ -386,6 +257,15 @@ function App() {
   const [selectedOption, setSelectedOption] = useState('');
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      setShowThankYou(true);
+    }
+  }, []);
 
   const allProducts = useMemo(() => {
     return categories.flatMap((category) =>
@@ -434,7 +314,6 @@ function App() {
         items: category.items.filter((item) => {
           const q = query.toLowerCase().trim();
           const matchesCategory = activeCategory === 'all' || activeCategory === category.id;
-
           if (!q) return matchesCategory;
 
           return (
@@ -449,6 +328,7 @@ function App() {
   }, [query, activeCategory]);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const hasRequiredPickupInfo = customerName.trim().length > 0 && pickupTime.trim().length > 0;
 
   function getSelectedBasePrice(product: SelectedProduct) {
     if (selectedOption && product.options?.length) {
@@ -468,7 +348,6 @@ function App() {
   function openProduct(productName: string) {
     const product = allProducts.find((entry) => entry.name === productName);
     if (!product) return;
-
     setSelected(product);
     setSelectedOption(product.options?.[0]?.label ?? '');
     setSelectedExtras([]);
@@ -491,7 +370,6 @@ function App() {
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
-
       if (existing) {
         return prev.map((item) =>
           item.key === key ? { ...item, quantity: item.quantity + 1 } : item
@@ -534,10 +412,29 @@ function App() {
     );
   }
 
+  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
+    cart,
+    customerName,
+    pickupTime
+  )}`;
+
+  function handleWhatsAppOrder() {
+    if (!hasRequiredPickupInfo) {
+      window.alert('Merci de renseigner ton prénom / nom et ton heure de retrait.');
+      return;
+    }
+    window.open(whatsappLink, '_blank', 'noopener,noreferrer');
+  }
+
   async function handleSquareCheckout() {
     try {
       if (cart.length === 0) {
         window.alert('Ton panier est vide.');
+        return;
+      }
+
+      if (!hasRequiredPickupInfo) {
+        window.alert('Merci de renseigner ton prénom / nom et ton heure de retrait.');
         return;
       }
 
@@ -546,7 +443,7 @@ function App() {
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart }),
+        body: JSON.stringify({ cart, customerName, pickupTime }),
       });
 
       const data = await response.json();
@@ -565,12 +462,6 @@ function App() {
       setIsCreatingPayment(false);
     }
   }
-
-  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
-    cart,
-    customerName,
-    pickupTime
-  )}`;
 
   const selectedTotal = selected ? getSelectedBasePrice(selected) + getSelectedExtrasTotal() : 0;
 
@@ -602,6 +493,42 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 pb-32">
+        {showThankYou && (
+          <section className="pt-6">
+            <div className="rounded-[28px] border border-emerald-400/20 bg-emerald-500/10 p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="max-w-2xl">
+                  <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
+                    <CheckCircle2 size={14} /> Paiement confirmé
+                  </p>
+                  <h2 className="mt-3 text-2xl font-black md:text-3xl">Merci pour ta commande 💛</h2>
+                  <p className="mt-2 text-white/75">
+                    Ton paiement a bien été pris en compte. Merci pour ta confiance. Ton avis compte beaucoup pour nous et aide La Base à grandir.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={googleReviewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-yellow-400 px-5 py-3 font-bold text-black"
+                  >
+                    <Star size={16} /> Laisser un avis Google
+                  </a>
+
+                  <button
+                    onClick={() => setShowThankYou(false)}
+                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white"
+                  >
+                    Revenir au menu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="pt-8 pb-6">
           <div className="rounded-[28px] overflow-hidden border border-white/10 bg-gradient-to-br from-fuchsia-600/20 via-yellow-400/10 to-cyan-400/20 p-1 shadow-2xl">
             <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.20),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.18),_transparent_26%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(20,20,20,0.94))] p-6 md:p-8">
@@ -702,33 +629,37 @@ function App() {
           </div>
 
           <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Commande rapide</p>
-            <h2 className="mt-1 text-2xl font-black">Le bon format pour convertir</h2>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">Commande simple & rapide</p>
+            <h2 className="mt-1 text-2xl font-black">Choisis, complète, confirme</h2>
 
             <div className="mt-4 space-y-3">
               <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
                 <p className="font-black">1. Je choisis ma boisson</p>
-                <p className="mt-1 text-sm text-white/65">Par catégorie, par envie ou via la recherche.</p>
+                <p className="mt-1 text-sm text-white/65">
+                  Par catégorie, par envie, par taille et selon mes goûts.
+                </p>
               </div>
 
               <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                <p className="font-black">2. J’envoie ma commande</p>
-                <p className="mt-1 text-sm text-white/65">Le panier prépare automatiquement le message WhatsApp.</p>
+                <p className="font-black">2. Je prépare ma commande</p>
+                <p className="mt-1 text-sm text-white/65">
+                  J’ajoute mes produits au panier, puis je renseigne mon prénom / nom et mon heure de retrait.
+                </p>
               </div>
 
               <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                <p className="font-black">3. Je récupère au club</p>
-                <p className="mt-1 text-sm text-white/65">Retrait sur place à Verdun, rapidement et simplement.</p>
+                <p className="font-black">3. Je confirme et je récupère au club</p>
+                <p className="mt-1 text-sm text-white/65">
+                  J’envoie ma commande sur WhatsApp ou je règle directement en ligne avec Square, puis je viens la récupérer au club.
+                </p>
               </div>
 
-              <a
-                href={`https://wa.me/${BRAND.whatsappNumber}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-green-500 px-4 py-3 font-bold text-white"
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-yellow-400 px-4 py-3 font-bold text-black"
               >
-                <MessageCircle size={18} /> Commander maintenant
-              </a>
+                <ShoppingCart size={18} /> Ouvrir mon panier
+              </button>
             </div>
           </div>
         </section>
@@ -747,12 +678,7 @@ function App() {
           <div className="flex gap-3 overflow-x-auto pb-2">
             <FilterPill active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} label="Tout" />
             {categories.map((category) => (
-              <FilterPill
-                key={category.id}
-                active={activeCategory === category.id}
-                onClick={() => setActiveCategory(category.id)}
-                label={category.name}
-              />
+              <FilterPill key={category.id} active={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} label={category.name} />
             ))}
           </div>
         </section>
@@ -910,7 +836,7 @@ function App() {
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">La Base Shakes & Drinks</p>
               <h2 className="mt-2 text-2xl font-black">Des boissons gourmandes avec une vraie logique bien-être</h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Nos smoothies nutritionnels, boissons énergisantes, boissons santé et options sportives sont pensés pour allier plaisir, praticité et accompagnement. Le club t’accueille à Verdun pour découvrir un univers orienté énergie, nutrition, perte de poids, prise de masse et routine healthy au quotidien.
+                Nos smoothies nutritionnels, boissons énergisantes, boissons santé, gaufres healthy et options sportives sont pensés pour allier plaisir, praticité et accompagnement.
               </p>
             </div>
 
@@ -919,15 +845,6 @@ function App() {
                 <p className="font-bold text-white">Adresse</p>
                 <p className="mt-1">{BRAND.address}</p>
               </div>
-
-              <a
-                href={`https://wa.me/${BRAND.whatsappNumber}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-green-500 px-4 py-3 font-bold text-white"
-              >
-                <MessageCircle size={18} /> Commander sur WhatsApp
-              </a>
 
               <a
                 href={BRAND.mapsUrl}
@@ -1093,19 +1010,24 @@ function App() {
                       />
                     </div>
 
-                    <a
-                      href={whatsappLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-lg font-black text-white"
+                    {!hasRequiredPickupInfo && (
+                      <div className="rounded-2xl border border-amber-300/40 bg-amber-100 px-4 py-3 text-sm font-medium text-amber-900">
+                        Merci de renseigner ton prénom / nom et ton heure de retrait avant d’envoyer ou payer la commande.
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleWhatsAppOrder}
+                      disabled={!hasRequiredPickupInfo}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <MessageCircle size={18} /> Envoyer sur WhatsApp
-                    </a>
+                    </button>
 
                     <button
                       onClick={handleSquareCheckout}
-                      disabled={isCreatingPayment}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-400 py-4 text-lg font-black text-black disabled:opacity-60"
+                      disabled={!hasRequiredPickupInfo || isCreatingPayment}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-400 py-4 text-lg font-black text-black disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isCreatingPayment ? 'Création du paiement...' : 'Payer avec Square'}
                     </button>
