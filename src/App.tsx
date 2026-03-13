@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
 import {
   ShoppingCart,
   MessageCircle,
@@ -18,6 +19,52 @@ import {
   Star,
 } from 'lucide-react';
 
+type ProductOption = {
+  label: string;
+  priceCents: number;
+};
+
+type Product = {
+  name: string;
+  flavors: string;
+  badge?: string;
+  image?: string;
+  basePriceCents?: number;
+  options?: ProductOption[];
+};
+
+type Category = {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  price: string;
+  accent: string;
+  description: string;
+  items: Product[];
+};
+
+type ExtraOption = {
+  name: string;
+  label: string;
+  priceCents: number;
+};
+
+type SelectedProduct = Product & {
+  categoryId: string;
+  categoryName: string;
+  categoryAccent: string;
+  categoryPriceLabel: string;
+};
+
+type CartItem = {
+  key: string;
+  name: string;
+  categoryName: string;
+  quantity: number;
+  option: string;
+  extras: string[];
+};
+
 const BRAND = {
   name: 'La Base Shakes & Drinks',
   domainPath: 'www.labase-nutrition.com/shakesbar',
@@ -31,7 +78,17 @@ const BRAND = {
 const googleReviewUrl = 'https://g.page/r/CeJabN1yW1toEAE/review';
 const instagramUrl = 'https://www.instagram.com/labase_verdun/';
 
-const categories = [
+const extraCatalog: ExtraOption[] = [
+  { name: 'Collagène', label: 'Collagène +2,50€', priceCents: 250 },
+  { name: 'Booster immunité', label: 'Booster immunité +2,50€', priceCents: 250 },
+  { name: 'Fibres à la pomme', label: 'Fibres à la pomme +2,50€', priceCents: 250 },
+  { name: 'Probiotiques', label: 'Probiotiques +2,50€', priceCents: 250 },
+  { name: 'Électrolytes', label: 'Électrolytes +2,50€', priceCents: 250 },
+  { name: 'Créatine', label: 'Créatine +2,50€', priceCents: 250 },
+  { name: 'Protéines', label: 'Protéines +2,50€', priceCents: 250 },
+];
+
+const categories: Category[] = [
   {
     id: 'smoothies',
     name: 'Smoothies nutritionnels',
@@ -40,21 +97,21 @@ const categories = [
     accent: 'from-yellow-400 to-amber-500',
     description: '24g de protéines végétales • 25 vitamines & minéraux • 250 calories',
     items: [
-      { name: 'Choco Buenos', flavors: 'Saveur type Kinder Bueno', badge: 'Produit du mois' },
-      { name: 'M&M', flavors: 'Saveur type M&M', badge: 'Produit du mois' },
-      { name: 'Casse Noisette', flavors: 'Café latte • Noisette', badge: 'Best-seller' },
-      { name: 'Cappuccino', flavors: 'Café latte • Chocolat intense' },
-      { name: 'Pina Colada', flavors: 'Vanille • Ananas • Coco' },
-      { name: 'Fraise Bonbon', flavors: 'Vanille • Fraise', badge: 'Gourmand' },
-      { name: "Pim's", flavors: 'Chocolat • Framboise' },
-      { name: 'Tarte à la pomme', flavors: 'Vanille • Pomme' },
-      { name: 'Snickers', flavors: 'Chocolat • Cacahuètes', badge: 'Ultra gourmand' },
-      { name: 'Full Oréo', flavors: 'Cookies cream • Oréo' },
-      { name: 'Speculoos', flavors: 'Chocolat • Speculoos' },
-      { name: 'Banana Split', flavors: 'Banane • Caramel • Cerise • Chocolat' },
-      { name: 'Banana Noisette', flavors: 'Banane • Caramel • Noisette • Chocolat' },
-      { name: 'Cookies', flavors: 'Cookies cream • Chocolat blanc' },
-      { name: 'Tropical', flavors: 'Vanille • Fraise • Banane' },
+      { name: 'Choco Buenos', flavors: 'Saveur type Kinder Bueno', badge: 'Produit du mois', basePriceCents: 890, image: '/images/choco-buenos.jpg' },
+      { name: 'M&M', flavors: 'Saveur type M&M', badge: 'Produit du mois', basePriceCents: 890, image: '/images/mm.jpg' },
+      { name: 'Casse Noisette', flavors: 'Café latte • Noisette', badge: 'Best-seller', basePriceCents: 890 },
+      { name: 'Cappuccino', flavors: 'Café latte • Chocolat intense', basePriceCents: 890 },
+      { name: 'Pina Colada', flavors: 'Vanille • Ananas • Coco', basePriceCents: 890 },
+      { name: 'Fraise Bonbon', flavors: 'Vanille • Fraise', badge: 'Gourmand', basePriceCents: 890 },
+      { name: "Pim's", flavors: 'Chocolat • Framboise', basePriceCents: 890 },
+      { name: 'Tarte à la pomme', flavors: 'Vanille • Pomme', basePriceCents: 890 },
+      { name: 'Snickers', flavors: 'Chocolat • Cacahuètes', badge: 'Ultra gourmand', basePriceCents: 890, image: '/images/snickers.jpg' },
+      { name: 'Full Oréo', flavors: 'Cookies cream • Oréo', basePriceCents: 890, image: '/images/full-oreo.jpg' },
+      { name: 'Speculoos', flavors: 'Chocolat • Speculoos', basePriceCents: 890 },
+      { name: 'Banana Split', flavors: 'Banane • Caramel • Cerise • Chocolat', basePriceCents: 890 },
+      { name: 'Banana Noisette', flavors: 'Banane • Caramel • Noisette • Chocolat', basePriceCents: 890 },
+      { name: 'Cookies', flavors: 'Cookies cream • Chocolat blanc', basePriceCents: 890 },
+      { name: 'Tropical', flavors: 'Vanille • Fraise • Banane', basePriceCents: 890 },
     ],
   },
   {
@@ -64,53 +121,162 @@ const categories = [
     price: '6,90€ / 8,90€',
     accent: 'from-fuchsia-500 to-pink-600',
     description: '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
-    options: ['Start 6,90€', 'Boost 8,90€'],
     items: [
-      { name: 'Cherry White Grappe', flavors: 'Citron • Framboise • Cerise • Raisin blanc', badge: 'Nouveau' },
-      { name: 'Red Paradize', flavors: 'Citron • Pêche • Ananas', badge: 'Nouveau' },
-      { name: 'Electric Blue', flavors: 'Citron • Framboise bleue • Myrtille • Raisin', badge: 'Iconique' },
-      { name: 'Pomelon', flavors: 'Citron • Framboise • Melon • Pomme' },
-      { name: 'Tonic Mandarine', flavors: 'Citron • Mandarine' },
-      { name: 'Apple Kiss', flavors: 'Citron • Pomme verte' },
-      { name: 'Pina Colada', flavors: 'Citron • Pina colada • Ananas' },
-      { name: 'Soleil', flavors: 'Citron • Pêche • Mandarine • Ananas' },
-      { name: 'Black Panther', flavors: 'Citron • Cerise • Framboise bleue', badge: 'Dark vibe' },
-      { name: "L'Exotic", flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas' },
-      { name: "T'Coco", flavors: 'Citron • Pêche • Mandarine • Coco' },
-      { name: 'Elf', flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas' },
-      { name: 'Perroquet', flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche' },
-      { name: 'La Vie en Rose', flavors: 'Citron • Framboise • Pomme • Fruit du dragon' },
-      { name: 'Sortilège Noir', flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille' },
+      {
+        name: 'Cherry White Grappe',
+        flavors: 'Citron • Framboise • Cerise • Raisin blanc',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Red Paradize',
+        flavors: 'Citron • Pêche • Ananas',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Electric Blue',
+        flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
+        badge: 'Iconique',
+        image: '/images/electric-blue.jpg',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Pomelon',
+        flavors: 'Citron • Framboise • Melon • Pomme',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Tonic Mandarine',
+        flavors: 'Citron • Mandarine',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Apple Kiss',
+        flavors: 'Citron • Pomme verte',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Pina Colada',
+        flavors: 'Citron • Pina colada • Ananas',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Soleil',
+        flavors: 'Citron • Pêche • Mandarine • Ananas',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Black Panther',
+        flavors: 'Citron • Cerise • Framboise bleue',
+        badge: 'Dark vibe',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: "L'Exotic",
+        flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: "T'Coco",
+        flavors: 'Citron • Pêche • Mandarine • Coco',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Elf',
+        flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Perroquet',
+        flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'La Vie en Rose',
+        flavors: 'Citron • Framboise • Pomme • Fruit du dragon',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Sortilège Noir',
+        flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
     ],
   },
   {
     id: 'health',
     name: 'Boissons santé',
     icon: Heart,
-    price: '6,90€ / 8,90€',
+    price: '6,90€',
     accent: 'from-emerald-400 to-lime-500',
     description: 'Hydratation • fibres • probiotiques • bien-être ciblé',
     items: [
-      { name: 'Hydrat’Max', flavors: 'Orange • Mandarine', badge: 'Vitamine C' },
-      { name: 'Casse Grippe', flavors: 'Baies sauvages • Framboise • Pomme', badge: 'Immunité' },
-      { name: 'Limonade Rose', flavors: 'Fraise • Citron • Framboise', badge: 'Glow' },
-      { name: 'Digest', flavors: 'Pomme • Fraise • Citron', badge: 'Fibres & probiotiques' },
+      { name: 'Hydrat’Max', flavors: 'Orange • Mandarine', badge: 'Vitamine C', basePriceCents: 690 },
+      { name: 'Casse Grippe', flavors: 'Baies sauvages • Framboise • Pomme', badge: 'Immunité', basePriceCents: 690 },
+      { name: 'Limonade Rose', flavors: 'Fraise • Citron • Framboise', badge: 'Glow', basePriceCents: 690, image: '/images/limonade-rose.jpg' },
+      { name: 'Digest', flavors: 'Pomme • Fraise • Citron', badge: 'Fibres & probiotiques', basePriceCents: 690 },
     ],
   },
   {
     id: 'kids',
     name: 'Boissons enfants',
     icon: Baby,
-    price: '5€',
+    price: '5,00€',
     accent: 'from-sky-400 to-indigo-500',
     description: '0 sucre • 0 calorie • saveurs fun',
     items: [
-      { name: 'Bulle de Fée', flavors: 'Pomme • Fruit du dragon' },
-      { name: 'Spiderman', flavors: 'Fruits rouges' },
-      { name: 'Stitch', flavors: 'Passion • Limonade non pétillante' },
-      { name: 'Licorne', flavors: 'Myrtille • Fraise • Raisin' },
-      { name: 'Hulk', flavors: 'Pomme verte' },
-      { name: 'Tropicool', flavors: 'Melon • Ananas' },
+      { name: 'Bulle de Fée', flavors: 'Pomme • Fruit du dragon', basePriceCents: 500 },
+      { name: 'Spiderman', flavors: 'Fruits rouges', basePriceCents: 500 },
+      { name: 'Stitch', flavors: 'Passion • Limonade non pétillante', basePriceCents: 500 },
+      { name: 'Licorne', flavors: 'Myrtille • Fraise • Raisin', basePriceCents: 500 },
+      { name: 'Hulk', flavors: 'Pomme verte', basePriceCents: 500 },
+      { name: 'Tropicool', flavors: 'Melon • Ananas', basePriceCents: 500 },
     ],
   },
   {
@@ -121,11 +287,40 @@ const categories = [
     accent: 'from-orange-400 to-yellow-500',
     description: 'Chauds ou glacés • gourmands • options protéinées',
     items: [
-      { name: 'Café chaud', flavors: 'Petit 3,90€ • Grand 5,90€' },
-      { name: 'Chocolat chaud', flavors: 'Noisette • Speculoos • Caramel • Vanille • Cookie', badge: '25g protéines' },
-      { name: 'Thé aloe vera chaud', flavors: 'Pêche • Framboise • Citron' },
-      { name: 'Café gourmand glacé', flavors: 'Macchiato • Choco mocha • Latte noisettes • Vanille latte', badge: '5,90€' },
-      { name: 'Café glacé', flavors: 'Macchiato', badge: '6,90€' },
+      {
+        name: 'Café chaud',
+        flavors: 'Petit ou grand format',
+        options: [
+          { label: 'Petit 3,90€', priceCents: 390 },
+          { label: 'Grand 5,90€', priceCents: 590 },
+        ],
+      },
+      {
+        name: 'Chocolat chaud',
+        flavors: 'Noisette • Speculoos • Caramel • Vanille • Cookie',
+        options: [
+          { label: 'Petit 4,90€', priceCents: 490 },
+          { label: 'Grand 6,90€', priceCents: 690 },
+        ],
+      },
+      {
+        name: 'Thé aloe vera chaud',
+        flavors: 'Pêche • Framboise • Citron',
+        options: [
+          { label: 'Petit 3,90€', priceCents: 390 },
+          { label: 'Grand 5,90€', priceCents: 590 },
+        ],
+      },
+      {
+        name: 'Café gourmand glacé',
+        flavors: 'Macchiato • Choco mocha • Latte noisettes • Vanille latte',
+        options: [{ label: 'Grand 5,90€', priceCents: 590 }],
+      },
+      {
+        name: 'Café glacé',
+        flavors: 'Macchiato',
+        options: [{ label: 'Grand 6,90€', priceCents: 690 }],
+      },
     ],
   },
   {
@@ -136,124 +331,39 @@ const categories = [
     accent: 'from-violet-500 to-blue-600',
     description: 'Hydratation sport • récupération • créatine',
     items: [
-      { name: 'Electro’Lyte', flavors: 'Boisson glucidique & électrolytes', badge: 'Performance' },
-      { name: 'Post Workout', flavors: 'Boisson chocolat • 25g protéines • BCAA' },
+      {
+        name: 'Electro’Lyte',
+        flavors: 'Boisson glucidique & électrolytes',
+        badge: 'Performance',
+        options: [
+          { label: 'Start 6,90€', priceCents: 690 },
+          { label: 'Boost 8,90€', priceCents: 890 },
+        ],
+      },
+      {
+        name: 'Post Workout',
+        flavors: 'Boisson chocolat • récupération',
+        options: [{ label: 'Unique 5,90€', priceCents: 590 }],
+      },
     ],
   },
-] as const;
+];
 
-const monthlyItems = [
-  {
-    name: 'Choco Buenos',
-    subtitle: 'Produit du mois • Mars',
-    description:
-      'Une recette ultra gourmande inspirée de l’univers Bueno, pensée pour celles et ceux qui veulent se faire plaisir avec une saveur forte et réconfortante.',
-    image: '/images/choco-buenos.jpg',
-    color: 'from-amber-400 to-orange-500',
-  },
-  {
-    name: 'M&M',
-    subtitle: 'Produit du mois • Mars',
-    description:
-      'Une saveur fun, régressive et généreuse, parfaite pour créer l’effet waouh dès le premier regard et la première gorgée.',
-    image: '/images/mm.jpg',
-    color: 'from-red-500 to-yellow-400',
-  },
-] as const;
+function euroFromCents(cents: number) {
+  return `${(cents / 100).toFixed(2).replace('.', ',')}€`;
+}
 
-const featuredItems = [
-  {
-    name: 'Choco Buenos',
-    category: 'Smoothies nutritionnels',
-    vibe: 'Produit du mois',
-    color: 'from-amber-400 to-orange-500',
-    image: '/images/choco-buenos.jpg',
-  },
-  {
-    name: 'M&M',
-    category: 'Smoothies nutritionnels',
-    vibe: 'Produit du mois',
-    color: 'from-red-500 to-yellow-400',
-    image: '/images/mm.jpg',
-  },
-  {
-    name: 'Snickers',
-    category: 'Smoothies nutritionnels',
-    vibe: 'Ultra gourmand',
-    color: 'from-yellow-400 to-amber-500',
-    image: '/images/snickers.jpg',
-  },
-  {
-    name: 'Electric Blue',
-    category: 'Boissons énergisantes',
-    vibe: 'Iconique',
-    color: 'from-cyan-400 to-blue-600',
-    image: '/images/electric-blue.jpg',
-  },
-  {
-    name: 'Limonade Rose',
-    category: 'Boissons santé',
-    vibe: 'Glow',
-    color: 'from-pink-400 to-rose-500',
-    image: '/images/limonade-rose.jpg',
-  },
-  {
-    name: 'Full Oréo',
-    category: 'Smoothies nutritionnels',
-    vibe: 'Crémeux',
-    color: 'from-zinc-300 to-zinc-500',
-    image: '/images/full-oreo.jpg',
-  },
-] as const;
-
-const extras = ['Collagène', 'Booster immunité', 'Fibres à la pomme', 'Probiotiques', 'Électrolytes', 'Créatine', 'Protéines'] as const;
-
-type Category = (typeof categories)[number];
-type ProductItem = Category['items'][number];
-
-type ItemWithCategory = ProductItem & {
-  categoryId: string;
-  categoryName: string;
-  categoryPrice: string;
-  categoryAccent: string;
-  categoryOptions: string[];
-};
-
-type CartItem = {
-  key: string;
-  name: string;
-  categoryName: string;
-  quantity: number;
-  option: string;
-  extras: string[];
-};
-
-type SelectedProduct = ProductItem &
-  Category & {
-    categoryName: string;
-    categoryId: string;
-  };
-
-function buildWhatsAppMessage(
-  cart: Array<{
-    quantity: number;
-    categoryName: string;
-    name: string;
-    option?: string;
-    extras?: string[];
-  }>,
-  name: string,
-  pickupTime: string
-) {
+function buildWhatsAppMessage(cart: CartItem[], name: string, pickupTime: string) {
   const lines = [
     'Bonjour 👋',
     '',
     'Je souhaite commander :',
     '',
-    ...cart.map(
-      (item) =>
-        `• ${item.quantity}x ${item.categoryName} - ${item.name}${item.option ? ` (${item.option})` : ''}${item.extras?.length ? ` + ${item.extras.join(', ')}` : ''}`
-    ),
+    ...cart.map((item) => {
+      const optionPart = item.option ? ` (${item.option})` : '';
+      const extrasPart = item.extras.length ? ` + ${item.extras.join(', ')}` : '';
+      return `• ${item.quantity}x ${item.name}${optionPart}${extrasPart}`;
+    }),
     '',
     `Nom : ${name || 'À compléter'}`,
     `Heure de retrait : ${pickupTime || 'À compléter'}`,
@@ -277,20 +387,45 @@ function App() {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
 
-  const allItems = useMemo<ItemWithCategory[]>(
-    () =>
-      categories.flatMap((category) =>
-        category.items.map((item) => ({
-          ...item,
-          categoryId: category.id,
-          categoryName: category.name,
-          categoryPrice: category.price,
-          categoryAccent: category.accent,
-          categoryOptions: category.options ? [...category.options] : [],
-        }))
-      ),
-    []
-  );
+  const allProducts = useMemo(() => {
+    return categories.flatMap((category) =>
+      category.items.map((item) => ({
+        ...item,
+        categoryId: category.id,
+        categoryName: category.name,
+        categoryAccent: category.accent,
+        categoryPriceLabel: category.price,
+      }))
+    );
+  }, []);
+
+  const monthlyItems = [
+    {
+      name: 'Choco Buenos',
+      subtitle: 'Produit du mois • Mars',
+      description:
+        'Une recette ultra gourmande inspirée de l’univers Bueno, pensée pour celles et ceux qui veulent se faire plaisir avec une saveur forte et réconfortante.',
+      image: '/images/choco-buenos.jpg',
+      color: 'from-amber-400 to-orange-500',
+    },
+    {
+      name: 'M&M',
+      subtitle: 'Produit du mois • Mars',
+      description:
+        'Une saveur fun, régressive et généreuse, parfaite pour créer l’effet waouh dès le premier regard et la première gorgée.',
+      image: '/images/mm.jpg',
+      color: 'from-red-500 to-yellow-400',
+    },
+  ];
+
+  const featuredItems = [
+    { name: 'Choco Buenos', subtitle: 'Produit du mois', image: '/images/choco-buenos.jpg' },
+    { name: 'M&M', subtitle: 'Produit du mois', image: '/images/mm.jpg' },
+    { name: 'Snickers', subtitle: 'Ultra gourmand', image: '/images/snickers.jpg' },
+    { name: 'Electric Blue', subtitle: 'Iconique', image: '/images/electric-blue.jpg' },
+    { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/limonade-rose.jpg' },
+    { name: 'Full Oréo', subtitle: 'Crémeux', image: '/images/full-oreo.jpg' },
+  ];
 
   const filteredCategories = useMemo(() => {
     return categories
@@ -315,13 +450,52 @@ function App() {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  function addToCart(product: { categoryId: string; categoryName: string; name: string }) {
+  function getSelectedBasePrice(product: SelectedProduct) {
+    if (selectedOption && product.options?.length) {
+      const option = product.options.find((opt) => opt.label === selectedOption);
+      if (option) return option.priceCents;
+    }
+    return product.basePriceCents ?? 0;
+  }
+
+  function getSelectedExtrasTotal() {
+    return selectedExtras.reduce((sum, extraName) => {
+      const extra = extraCatalog.find((entry) => entry.name === extraName);
+      return sum + (extra?.priceCents ?? 0);
+    }, 0);
+  }
+
+  function openProduct(productName: string) {
+    const product = allProducts.find((entry) => entry.name === productName);
+    if (!product) return;
+
+    setSelected(product);
+    setSelectedOption(product.options?.[0]?.label ?? '');
+    setSelectedExtras([]);
+  }
+
+  function openProductFromCategory(category: Category, item: Product) {
+    setSelected({
+      ...item,
+      categoryId: category.id,
+      categoryName: category.name,
+      categoryAccent: category.accent,
+      categoryPriceLabel: category.price,
+    });
+    setSelectedOption(item.options?.[0]?.label ?? '');
+    setSelectedExtras([]);
+  }
+
+  function addToCart(product: SelectedProduct) {
     const key = `${product.categoryId}-${product.name}-${selectedOption}-${selectedExtras.join('|')}`;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
+
       if (existing) {
-        return prev.map((item) => (item.key === key ? { ...item, quantity: item.quantity + 1 } : item));
+        return prev.map((item) =>
+          item.key === key ? { ...item, quantity: item.quantity + 1 } : item
+        );
       }
 
       return [
@@ -332,7 +506,7 @@ function App() {
           categoryName: product.categoryName,
           quantity: 1,
           option: selectedOption,
-          extras: selectedExtras,
+          extras: [...selectedExtras],
         },
       ];
     });
@@ -345,43 +519,60 @@ function App() {
   function updateQuantity(key: string, delta: number) {
     setCart((prev) =>
       prev
-        .map((item) => (item.key === key ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item))
+        .map((item) =>
+          item.key === key ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item
+        )
         .filter((item) => item.quantity > 0)
     );
   }
 
-  function toggleExtra(extra: string) {
-    setSelectedExtras((prev) => (prev.includes(extra) ? prev.filter((entry) => entry !== extra) : [...prev, extra]));
+  function toggleExtra(extraName: string) {
+    setSelectedExtras((prev) =>
+      prev.includes(extraName)
+        ? prev.filter((entry) => entry !== extraName)
+        : [...prev, extraName]
+    );
   }
 
   async function handleSquareCheckout() {
-   const handleSquareCheckout = async () => {
-  try {
-    setIsCreatingPayment(true);
+    try {
+      if (cart.length === 0) {
+        window.alert('Ton panier est vide.');
+        return;
+      }
 
-    const response = await fetch('/api/create-payment-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cart }),
-    });
+      setIsCreatingPayment(true);
 
-    const data = await response.json();
+      const response = await fetch('/api/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart }),
+      });
 
-    if (!response.ok || !data.url) {
-      alert('Erreur Square: ' + JSON.stringify(data));
-      return;
+      const data = await response.json();
+
+      if (!response.ok || !data.url) {
+        console.error(data);
+        window.alert(JSON.stringify(data, null, 2));
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      window.alert('Erreur lors de la création du paiement Square.');
+    } finally {
+      setIsCreatingPayment(false);
     }
-
-    window.location.href = data.url;
-  } catch (error) {
-    console.error(error);
-    alert('Erreur lors de la création du paiement');
-  } finally {
-    setIsCreatingPayment(false);
-  
   }
 
-  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(cart, customerName, pickupTime)}`;
+  const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
+    cart,
+    customerName,
+    pickupTime
+  )}`;
+
+  const selectedTotal = selected ? getSelectedBasePrice(selected) + getSelectedExtrasTotal() : 0;
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
@@ -474,57 +665,39 @@ function App() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {monthlyItems.map((item) => {
-                const linkedProduct = allItems.find((entry) => entry.name === item.name);
-
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => {
-                      if (!linkedProduct) return;
-                      const category = categories.find((entry) => entry.id === linkedProduct.categoryId);
-                      if (!category) return;
-
-                      setSelected({
-                        ...linkedProduct,
-                        ...category,
-                        categoryName: category.name,
-                        categoryId: category.id,
-                      } as SelectedProduct);
-
-                      setSelectedOption(category.options ? category.options[0] : '');
-                      setSelectedExtras([]);
-                    }}
-                    className="group overflow-hidden rounded-[24px] border border-white/10 bg-black/30 text-left transition hover:border-yellow-400/30"
-                  >
-                    <div className="relative h-52 overflow-hidden border-b border-white/10 bg-black/20">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const next = e.currentTarget.nextElementSibling;
-                          if (next instanceof HTMLElement) next.style.display = 'block';
-                        }}
-                      />
-                      <div className={`hidden h-full w-full bg-gradient-to-br ${item.color} opacity-90`} />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">{item.subtitle}</p>
-                        <p className="mt-1 text-2xl font-black text-white">{item.name}</p>
-                      </div>
+              {monthlyItems.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => openProduct(item.name)}
+                  className="group overflow-hidden rounded-[24px] border border-white/10 bg-black/30 text-left transition hover:border-yellow-400/30"
+                >
+                  <div className="relative h-52 overflow-hidden border-b border-white/10 bg-black/20">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const next = e.currentTarget.nextElementSibling;
+                        if (next instanceof HTMLElement) next.style.display = 'block';
+                      }}
+                    />
+                    <div className={`hidden h-full w-full bg-gradient-to-br ${item.color} opacity-90`} />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">{item.subtitle}</p>
+                      <p className="mt-1 text-2xl font-black text-white">{item.name}</p>
                     </div>
+                  </div>
 
-                    <div className="p-4">
-                      <p className="text-sm leading-relaxed text-white/70">{item.description}</p>
-                      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-300">
-                        Voir la fiche produit <ChevronRight size={15} />
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                  <div className="p-4">
+                    <p className="text-sm leading-relaxed text-white/70">{item.description}</p>
+                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-300">
+                      Voir la fiche produit <ChevronRight size={15} />
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -574,7 +747,12 @@ function App() {
           <div className="flex gap-3 overflow-x-auto pb-2">
             <FilterPill active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} label="Tout" />
             {categories.map((category) => (
-              <FilterPill key={category.id} active={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} label={category.name} />
+              <FilterPill
+                key={category.id}
+                active={activeCategory === category.id}
+                onClick={() => setActiveCategory(category.id)}
+                label={category.name}
+              />
             ))}
           </div>
         </section>
@@ -593,16 +771,6 @@ function App() {
 
                     <h2 className="text-2xl font-black md:text-3xl">{category.price}</h2>
                     <p className="text-white/60">{category.description}</p>
-
-                    {category.options && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {category.options.map((opt) => (
-                          <span key={opt} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-                            {opt}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
                   <button className="hidden items-center gap-2 text-sm text-yellow-300 md:inline-flex">
@@ -613,13 +781,12 @@ function App() {
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {[...category.items]
                     .sort((a, b) => {
-                      const rank = (item: { badge?: string }) => {
+                      const rank = (item: Product) => {
                         if (item.badge === 'Produit du mois') return 3;
                         if (item.badge === 'Nouveau') return 2;
                         if (item.badge === 'Best-seller') return 1;
                         return 0;
                       };
-
                       return rank(b) - rank(a);
                     })
                     .map((item) => (
@@ -627,17 +794,7 @@ function App() {
                         key={`${category.id}-${item.name}`}
                         whileHover={{ y: -3 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setSelected({
-                            ...item,
-                            ...category,
-                            categoryName: category.name,
-                            categoryId: category.id,
-                          } as SelectedProduct);
-
-                          setSelectedOption(category.options ? category.options[0] : '');
-                          setSelectedExtras([]);
-                        }}
+                        onClick={() => openProductFromCategory(category, item)}
                         className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 text-left transition hover:border-yellow-400/30 hover:bg-white/[0.07]"
                       >
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(250,204,21,0.18),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(236,72,153,0.16),_transparent_25%)] opacity-0 transition group-hover:opacity-100" />
@@ -678,61 +835,39 @@ function App() {
                 <p className="text-xs uppercase tracking-[0.22em] text-white/45">Best sellers</p>
                 <h2 className="text-2xl font-black md:text-3xl">Les boissons signatures du club</h2>
                 <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Une sélection pensée pour mettre en avant les recettes qui représentent le mieux l’univers La Base :
-                  gourmandise, énergie, fraîcheur et visuel fort.
+                  Une sélection pensée pour mettre en avant les recettes qui représentent le mieux l’univers La Base : gourmandise, énergie, fraîcheur et visuel fort.
                 </p>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              {featuredItems.map((item) => {
-                const linkedProduct = allItems.find((entry) => entry.name === item.name);
+              {featuredItems.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => openProduct(item.name)}
+                  className="relative overflow-hidden rounded-[24px] border border-white/10 bg-black/30 p-4 text-left transition hover:border-yellow-400/30"
+                >
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
 
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => {
-                      if (!linkedProduct) return;
-                      const category = categories.find((entry) => entry.id === linkedProduct.categoryId);
-                      if (!category) return;
+                  <div className="mb-4 overflow-hidden rounded-[20px] border border-white/10 bg-black/20">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-40 w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const next = e.currentTarget.nextElementSibling;
+                        if (next instanceof HTMLElement) next.style.display = 'block';
+                      }}
+                    />
+                    <div className="hidden h-40 w-full bg-gradient-to-br from-yellow-400 to-pink-500 opacity-90" />
+                  </div>
 
-                      setSelected({
-                        ...linkedProduct,
-                        ...category,
-                        categoryName: category.name,
-                        categoryId: category.id,
-                      } as SelectedProduct);
-
-                      setSelectedOption(category.options ? category.options[0] : '');
-                      setSelectedExtras([]);
-                    }}
-                    className="relative overflow-hidden rounded-[24px] border border-white/10 bg-black/30 p-4 text-left transition hover:border-yellow-400/30"
-                  >
-                    <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${item.color}`} />
-
-                    <div className="mb-4 overflow-hidden rounded-[20px] border border-white/10 bg-black/20">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-40 w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const next = e.currentTarget.nextElementSibling;
-                          if (next instanceof HTMLElement) next.style.display = 'block';
-                        }}
-                      />
-                      <div className={`hidden h-40 w-full bg-gradient-to-br ${item.color} opacity-90`} />
-                    </div>
-
-                    <p className="text-lg font-black">{item.name}</p>
-                    <p className="mt-1 text-sm text-white/60">{item.category}</p>
-                    <span className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-                      {item.vibe}
-                    </span>
-                  </button>
-                );
-              })}
+                  <p className="text-lg font-black">{item.name}</p>
+                  <p className="mt-1 text-sm text-white/60">{item.subtitle}</p>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -823,29 +958,29 @@ function App() {
               onClick={(e) => e.stopPropagation()}
               className="absolute bottom-0 left-0 right-0 mx-auto rounded-t-[32px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_32%),linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.98))] p-6 md:static md:max-w-xl md:rounded-[32px]"
             >
-              <div className={`mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.accent} px-3 py-1 text-sm font-bold text-black`}>
+              <div className={`mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.categoryAccent} px-3 py-1 text-sm font-bold text-black`}>
                 {selected.categoryName}
               </div>
 
               <h3 className="text-3xl font-black">{selected.name}</h3>
               <p className="mt-2 text-white/65">{selected.flavors}</p>
-              <p className="mt-3 font-bold text-yellow-400">Prix : {selected.price}</p>
+              <p className="mt-3 font-bold text-yellow-400">Prix : {euroFromCents(selectedTotal)}</p>
 
-              {selected.options && (
+              {selected.options && selected.options.length > 0 && (
                 <div className="mt-6">
                   <p className="mb-2 font-bold">Choix de format</p>
                   <div className="flex flex-wrap gap-2">
                     {selected.options.map((opt) => (
                       <button
-                        key={opt}
-                        onClick={() => setSelectedOption(opt)}
+                        key={opt.label}
+                        onClick={() => setSelectedOption(opt.label)}
                         className={`rounded-2xl border px-4 py-2 ${
-                          selectedOption === opt
+                          selectedOption === opt.label
                             ? 'border-yellow-400 bg-yellow-400 font-bold text-black'
                             : 'border-white/10 bg-white/5 text-white'
                         }`}
                       >
-                        {opt}
+                        {opt.label}
                       </button>
                     ))}
                   </div>
@@ -853,19 +988,19 @@ function App() {
               )}
 
               <div className="mt-6">
-                <p className="mb-2 font-bold">Extras santé</p>
+                <p className="mb-2 font-bold">Suppléments</p>
                 <div className="flex flex-wrap gap-2">
-                  {extras.map((extra) => (
+                  {extraCatalog.map((extra) => (
                     <button
-                      key={extra}
-                      onClick={() => toggleExtra(extra)}
+                      key={extra.name}
+                      onClick={() => toggleExtra(extra.name)}
                       className={`rounded-full border px-3 py-2 text-sm ${
-                        selectedExtras.includes(extra)
+                        selectedExtras.includes(extra.name)
                           ? 'border-emerald-400 bg-emerald-400/15 text-emerald-300'
                           : 'border-white/10 bg-white/5 text-white/80'
                       }`}
                     >
-                      {extra}
+                      {extra.label}
                     </button>
                   ))}
                 </div>
@@ -918,7 +1053,9 @@ function App() {
                             <p className="font-black text-black">{item.name}</p>
                             <p className="text-sm text-black/60">{item.categoryName}</p>
                             {item.option && <p className="mt-1 text-sm font-medium text-amber-700">{item.option}</p>}
-                            {item.extras?.length > 0 && <p className="mt-1 text-sm text-emerald-700">+ {item.extras.join(', ')}</p>}
+                            {item.extras.length > 0 && (
+                              <p className="mt-1 text-sm text-emerald-700">+ {item.extras.join(', ')}</p>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-2">

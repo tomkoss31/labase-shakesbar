@@ -70,41 +70,49 @@ export default async function handler(req: any, res: any) {
       'Tropicool': 500,
 
       'Café chaud': 390,
-      'Chocolat chaud': 690,
+      'Chocolat chaud': 490,
       'Thé aloe vera chaud': 390,
       'Café gourmand glacé': 590,
       'Café glacé': 690,
 
-      'Electro’Lyte': 590,
-      'Post Workout': 890,
+      'Electro’Lyte': 690,
+      'Post Workout': 590,
     };
 
     const extraPrices: Record<string, number> = {
-      Collagène: 250,
+      'Collagène': 250,
       'Booster immunité': 250,
       'Fibres à la pomme': 250,
-      Probiotiques: 250,
-      Électrolytes: 250,
-      Créatine: 250,
-      Protéines: 250,
+      'Probiotiques': 250,
+      'Électrolytes': 250,
+      'Créatine': 250,
+      'Protéines': 250,
     };
 
     const optionPrices: Record<string, number> = {
       'Start 6,90€': 690,
       'Boost 8,90€': 890,
+      'Petit 3,90€': 390,
+      'Grand 5,90€': 590,
+      'Petit 4,90€': 490,
+      'Grand 6,90€': 690,
     };
 
     const lineItems = cart.map((item: any) => {
       const quantity = Number(item.quantity || 1);
 
-      const baseAmount = optionPrices[item.option] ?? productPrices[item.name];
+      const baseAmount =
+        optionPrices[item.option] ??
+        productPrices[item.name];
 
       if (!baseAmount) {
         throw new Error(`Produit inconnu: ${item.name}`);
       }
 
       const extrasTotal = Array.isArray(item.extras)
-        ? item.extras.reduce((sum: number, extra: string) => sum + (extraPrices[extra] || 0), 0)
+        ? item.extras.reduce((sum: number, extra: string) => {
+            return sum + (extraPrices[extra] || 0);
+          }, 0)
         : 0;
 
       const totalUnitAmount = baseAmount + extrasTotal;
