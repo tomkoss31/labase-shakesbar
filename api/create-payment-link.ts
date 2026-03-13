@@ -10,6 +10,10 @@ export default async function handler(req: any, res: any) {
     if (!accessToken || !locationId) {
       return res.status(500).json({
         error: 'Variables Square manquantes dans Vercel',
+        debug: {
+          hasAccessToken: !!accessToken,
+          hasLocationId: !!locationId,
+        },
       });
     }
 
@@ -21,7 +25,6 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // Table de prix fiable côté serveur
     const productPrices: Record<string, number> = {
       'Choco Buenos': 890,
       'M&M': 890,
@@ -94,18 +97,14 @@ export default async function handler(req: any, res: any) {
     const lineItems = cart.map((item: any) => {
       const quantity = Number(item.quantity || 1);
 
-      let baseAmount =
-        optionPrices[item.option] ??
-        productPrices[item.name];
+      const baseAmount = optionPrices[item.option] ?? productPrices[item.name];
 
       if (!baseAmount) {
         throw new Error(`Produit inconnu: ${item.name}`);
       }
 
       const extrasTotal = Array.isArray(item.extras)
-        ? item.extras.reduce((sum: number, extra: string) => {
-            return sum + (extraPrices[extra] || 0);
-          }, 0)
+        ? item.extras.reduce((sum: number, extra: string) => sum + (extraPrices[extra] || 0), 0)
         : 0;
 
       const totalUnitAmount = baseAmount + extrasTotal;
@@ -134,7 +133,7 @@ export default async function handler(req: any, res: any) {
         line_items: lineItems,
       },
       checkout_options: {
-        redirect_url: 'https://www.labase-nutrition.com/shakesbar',
+        redirect_url: 'https://labase-shakesbar.vercel.app',
       },
     };
 
@@ -145,7 +144,7 @@ export default async function handler(req: any, res: any) {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'Square-Version': '2025-10-16',
+          'Square-Version': '2026-01-22',
         },
         body: JSON.stringify(body),
       }
@@ -154,9 +153,14 @@ export default async function handler(req: any, res: any) {
     const data = await squareResponse.json();
 
     if (!squareResponse.ok) {
-      return res.status(500).json({
+      return res.status(squareResponse.status).json({
         error: 'Erreur Square',
+        squareStatus: squareResponse.status,
         details: data,
+        debug: {
+          locationId,
+          lineItems,
+        },
       });
     }
 

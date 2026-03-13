@@ -372,9 +372,10 @@ function App() {
       const data = await response.json();
 
       if (!response.ok || !data.url) {
-        console.error(data);
-        alert('Impossible de créer le paiement Square pour le moment.');
-        return;
+  console.error(data);
+  alert(JSON.stringify(data, null, 2));
+  return;
+}
       }
 
       window.location.href = data.url;
