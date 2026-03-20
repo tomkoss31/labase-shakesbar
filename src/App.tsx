@@ -98,7 +98,7 @@ const categories: Category[] = [
     name: 'Smoothies nutritionnels',
     icon: Coffee,
     price: '8,90€',
-    accent: 'from-yellow-400 to-amber-500',
+    accent: 'from-yellow-400 via-amber-400 to-orange-500',
     description:
       '24g de protéines végétales • 25 vitamines & minéraux • texture gourmande',
     items: [
@@ -234,7 +234,7 @@ const categories: Category[] = [
     name: 'Boissons énergisantes',
     icon: Zap,
     price: 'Start 6,90€ • Boost 8,90€',
-    accent: 'from-fuchsia-500 to-pink-600',
+    accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
     description:
       '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
     items: [
@@ -392,7 +392,7 @@ const categories: Category[] = [
     name: 'Boissons santé',
     icon: Heart,
     price: '6,90€',
-    accent: 'from-emerald-400 to-lime-500',
+    accent: 'from-emerald-400 via-lime-400 to-green-500',
     description: 'Hydratation • fibres • probiotiques • bien-être ciblé',
     items: [
       {
@@ -420,7 +420,7 @@ const categories: Category[] = [
         flavors: 'Fraise • Citron • Framboise',
         badge: 'Glow',
         basePriceCents: 690,
-        image: '/images/sante/limonade-rose.png',
+        image: '/images/sante/limonade rose.png',
       },
       {
         name: 'Digest',
@@ -438,7 +438,7 @@ const categories: Category[] = [
     name: 'Sport',
     icon: Dumbbell,
     price: 'Start 6,90€ • Boost 8,90€',
-    accent: 'from-violet-500 to-blue-600',
+    accent: 'from-violet-500 via-indigo-500 to-blue-600',
     description: 'Hydratation sport • électrolytes • récupération',
     items: [
       {
@@ -460,7 +460,7 @@ const categories: Category[] = [
     name: 'Café / Thé',
     icon: Coffee,
     price: 'Petit 3,90€ • Grand 5,90€',
-    accent: 'from-orange-400 to-yellow-500',
+    accent: 'from-orange-400 via-amber-400 to-yellow-500',
     description: 'Boissons chaudes simples, efficaces et gourmandes',
     items: [
       {
@@ -472,7 +472,6 @@ const categories: Category[] = [
           { label: 'Petit 3,90€', priceCents: 390 },
           { label: 'Grand 5,90€', priceCents: 590 },
         ],
-        image: '/images/sante/cafe.png',
       },
       {
         name: 'Thé',
@@ -483,7 +482,6 @@ const categories: Category[] = [
           { label: 'Petit 3,90€', priceCents: 390 },
           { label: 'Grand 5,90€', priceCents: 590 },
         ],
-        image: '/images/sante/the.png',
       },
     ],
   },
@@ -492,7 +490,7 @@ const categories: Category[] = [
     name: 'Gaufre',
     icon: Coffee,
     price: '6,90€',
-    accent: 'from-amber-400 to-orange-500',
+    accent: 'from-amber-400 via-yellow-400 to-orange-500',
     description: 'Gaufre healthy • toppings inclus',
     items: [
       {
@@ -501,10 +499,7 @@ const categories: Category[] = [
           'Une gaufre gourmande avec toppings inclus, pensée pour le plaisir sans casser l’univers healthy du club.',
         flavors:
           'Toppings inclus : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
-        options: [
-          { label: 'Gaufre 6,90€', priceCents: 690 },
-        ],
-        image: '/images/shake/gaufre.png',
+        options: [{ label: 'Gaufre 6,90€', priceCents: 690 }],
       },
     ],
   },
@@ -542,15 +537,44 @@ function buildWhatsAppMessage(
   return encodeURIComponent(lines.join('\n'));
 }
 
-function getProductImageFallback(name: string) {
+function getFallbackVisual(name: string) {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-white text-center">
-      <div className="px-4">
-        <p className="text-sm font-black uppercase tracking-[0.18em] text-neutral-400">
-          La Base
+    <div className="flex h-full w-full items-center justify-center rounded-[22px] border border-white/10 bg-gradient-to-br from-white/8 via-white/[0.02] to-transparent">
+      <div className="px-4 text-center">
+        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
+          LA BASE
         </p>
-        <p className="mt-2 text-lg font-black text-neutral-900">{name}</p>
+        <p className="mt-2 text-lg font-black text-white/80">{name}</p>
       </div>
+    </div>
+  );
+}
+
+function ProductImage({
+  src,
+  alt,
+  className,
+  wrapperClassName = '',
+}: {
+  src?: string;
+  alt: string;
+  className: string;
+  wrapperClassName?: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className={wrapperClassName}>
+      {src && !hasError ? (
+        <img
+          src={src}
+          alt={alt}
+          className={className}
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        getFallbackVisual(alt)
+      )}
     </div>
   );
 }
@@ -570,7 +594,6 @@ function App() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
       setShowThankYou(true);
@@ -598,7 +621,7 @@ function App() {
         description:
           'Une recette ultra gourmande inspirée de l’univers Bueno, parfaite pour attirer l’œil et donner envie immédiatement.',
         image: '/images/shake/bueno.png',
-        color: 'from-amber-400 to-orange-500',
+        color: 'from-amber-400 via-yellow-300 to-orange-500',
       },
       {
         name: 'M&M',
@@ -606,7 +629,7 @@ function App() {
         description:
           'Une saveur fun, généreuse et très visuelle, idéale pour créer l’effet waouh dès le premier regard.',
         image: '/images/shake/mm.png',
-        color: 'from-red-500 to-yellow-400',
+        color: 'from-red-500 via-pink-400 to-yellow-400',
       },
     ],
     [],
@@ -618,7 +641,7 @@ function App() {
       { name: 'M&M', subtitle: 'Produit du mois', image: '/images/shake/mm.png' },
       { name: 'Snickers', subtitle: 'Ultra gourmand', image: '/images/shake/snikers.png' },
       { name: 'Electric Blue', subtitle: 'Iconique', image: '/images/drinks/electric-blue.png' },
-      { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/sante/limonade-rose.png' },
+      { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/sante/limonade rose.png' },
       { name: 'Electro’Lyte', subtitle: 'Performance', image: '/images/sport/electro-lyte.png' },
     ],
     [],
@@ -673,7 +696,6 @@ function App() {
       const option = product.options.find((opt) => opt.label === selectedOption);
       if (option) return option.priceCents;
     }
-
     return product.basePriceCents ?? 0;
   }
 
@@ -687,7 +709,6 @@ function App() {
   function openProduct(productName: string) {
     const product = allProducts.find((entry) => entry.name === productName);
     if (!product) return;
-
     setSelected(product);
     setSelectedOption(product.options?.[0]?.label ?? '');
     setSelectedExtras([]);
@@ -826,28 +847,32 @@ function App() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.12),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.12),_transparent_30%)]" />
+    <div className="min-h-screen bg-[#060606] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.10),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.08),_transparent_28%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:36px_36px]" />
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-neutral-950/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
-          <div>
-            <p className="text-2xl font-black tracking-tight">{BRAND.shortName}</p>
-            <p className="text-xs text-white/60">
-              Shakes & Drinks • Verdun • Commande rapide
-            </p>
+      <header className="sticky top-0 z-30 border-b border-white/8 bg-black/70 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
+          <div className="flex items-center gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_0_30px_rgba(255,255,255,0.04)]">
+              <p className="text-3xl font-black tracking-tight leading-none">
+                {BRAND.shortName}
+              </p>
+              <p className="mt-1 text-xs text-white/55">
+                Shakes & Drinks • Verdun • Commande rapide
+              </p>
+            </div>
           </div>
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="relative rounded-2xl border border-yellow-400/40 bg-yellow-400 px-4 py-2 font-bold text-black shadow-lg shadow-yellow-500/20"
+            className="relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
           >
             <span className="inline-flex items-center gap-2">
               <ShoppingCart size={18} /> Panier
             </span>
-
             {cartCount > 0 && (
-              <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs text-white">
+              <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs font-bold text-white shadow-lg">
                 {cartCount}
               </span>
             )}
@@ -858,7 +883,7 @@ function App() {
       <main className="mx-auto max-w-7xl px-4 pb-32">
         {showThankYou && (
           <section className="pt-6">
-            <div className="rounded-[28px] border border-emerald-400/20 bg-emerald-500/10 p-6">
+            <div className="rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="max-w-2xl">
                   <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
@@ -878,14 +903,14 @@ function App() {
                     href={googleReviewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-yellow-400 px-5 py-3 font-bold text-black"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 to-amber-500 px-5 py-3 font-bold text-black shadow-[0_10px_35px_rgba(250,204,21,0.22)]"
                   >
                     <Star size={16} /> Laisser un avis Google
                   </a>
 
                   <button
                     onClick={() => setShowThankYou(false)}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white"
+                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
                   >
                     Revenir au menu
                   </button>
@@ -895,37 +920,37 @@ function App() {
           </section>
         )}
 
-        <section className="pb-6 pt-8">
-          <div className="overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-fuchsia-600/20 via-yellow-400/10 to-cyan-400/20 p-1 shadow-2xl">
-            <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.20),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.18),_transparent_26%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(20,20,20,0.94))] p-6 md:p-8">
+        <section className="pb-7 pt-8">
+          <div className="overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-yellow-400/8 via-white/[0.02] to-fuchsia-500/8 p-[1px] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
+            <div className="rounded-[33px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.13),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_24%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(17,17,17,0.95))] p-6 md:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">
                     {BRAND.name}
                   </div>
 
                   <h1 className="text-3xl font-black leading-none tracking-tight md:text-5xl">
-                    Le <span className="text-yellow-400">Shake Bar</span> de Verdun,
+                    Le <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Shake Bar</span> de Verdun,
                     <br />
                     entre plaisir, énergie et nutrition.
                   </h1>
 
-                  <p className="mt-4 max-w-2xl text-base text-white/75 md:text-lg">
-                    Smoothies, boissons énergisantes, boissons santé, sport, café,
-                    thé et gaufre : une app simple, rapide et pensée pour commander
-                    facilement avec panier, WhatsApp et paiement Square.
+                  <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
+                    Smoothies, boissons énergisantes, santé, sport, café, thé et gaufre :
+                    une expérience plus premium, plus fluide et pensée pour commander
+                    rapidement avec panier, WhatsApp et paiement Square.
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3 text-sm">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                       <MapPin size={16} className="text-yellow-400" /> {BRAND.address}
                     </div>
 
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                       <Clock3 size={16} className="text-yellow-400" /> {BRAND.pickup}
                     </div>
 
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                       <Clock3 size={16} className="text-yellow-400" /> {BRAND.prep}
                     </div>
 
@@ -933,7 +958,7 @@ function App() {
                       href={BRAND.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 font-bold text-black"
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-2 font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.22)]"
                     >
                       <MapPin size={16} /> Je m’y rends
                     </a>
@@ -941,14 +966,14 @@ function App() {
                 </div>
 
                 <div className="hidden items-end gap-2 md:flex md:flex-col">
-                  <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">
-                    Rapide
+                  <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black shadow-lg">
+                    Premium
                   </span>
-                  <span className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-black text-black">
-                    Fluide
+                  <span className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-black text-black shadow-lg">
+                    Fast order
                   </span>
-                  <span className="rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white">
-                    Commande facile
+                  <span className="rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white shadow-lg">
+                    Shake bar vibes
                   </span>
                 </div>
               </div>
@@ -956,8 +981,8 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-8 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.12),_transparent_25%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5">
+        <section className="mb-9 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
+          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
@@ -979,29 +1004,22 @@ function App() {
                   key={item.name}
                   type="button"
                   onClick={() => openProduct(item.name)}
-                  className="group overflow-hidden rounded-[24px] border border-white/10 bg-black/30 text-left transition hover:border-yellow-400/30"
+                  className="group overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-left shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
                 >
-                  <div className="relative h-56 overflow-hidden border-b border-white/10 bg-white">
-                    <img
+                  <div className="relative h-60 overflow-hidden border-b border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_58%)]">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),transparent_50%)]" />
+                    <ProductImage
                       src={item.image}
                       alt={item.name}
-                      className="h-full w-full object-contain bg-white p-3 transition duration-300 group-hover:scale-[1.03]"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const next = e.currentTarget.nextElementSibling;
-                        if (next instanceof HTMLElement) next.style.display = 'flex';
-                      }}
+                      wrapperClassName="relative z-10 flex h-full w-full items-center justify-center"
+                      className="h-full w-full object-contain p-4 drop-shadow-[0_25px_35px_rgba(0,0,0,0.45)] transition duration-300 group-hover:scale-[1.04]"
                     />
-                    <div
-                      className={`hidden h-full w-full items-center justify-center bg-gradient-to-br ${item.color} opacity-90`}
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div className={`pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${item.color} opacity-10 blur-2xl`} />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-4">
                       <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
                         {item.subtitle}
                       </p>
-                      <p className="mt-1 text-2xl font-black text-white">
-                        {item.name}
-                      </p>
+                      <p className="mt-1 text-2xl font-black text-white">{item.name}</p>
                     </div>
                   </div>
 
@@ -1018,21 +1036,21 @@ function App() {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5">
+          <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <p className="text-xs uppercase tracking-[0.22em] text-white/45">
               Commande simple & rapide
             </p>
             <h2 className="mt-1 text-2xl font-black">Choisis, complète, confirme</h2>
 
             <div className="mt-4 space-y-3">
-              <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-black">1. Je choisis mon produit</p>
                 <p className="mt-1 text-sm text-white/65">
                   Via les catégories, la recherche ou les produits mis en avant.
                 </p>
               </div>
 
-              <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-black">2. Je personnalise</p>
                 <p className="mt-1 text-sm text-white/65">
                   Format Start / Boost, petit / grand, extras à +2,50€, puis ajout
@@ -1040,7 +1058,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-black">3. Je valide</p>
                 <p className="mt-1 text-sm text-white/65">
                   Je renseigne mon nom et mon heure de retrait, puis j’envoie sur
@@ -1050,7 +1068,7 @@ function App() {
 
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-yellow-400 px-4 py-3 font-bold text-black"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
                 <ShoppingCart size={18} /> Ouvrir mon panier
               </button>
@@ -1058,7 +1076,7 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-6 flex flex-col gap-4">
+        <section className="mb-7 flex flex-col gap-4">
           <div className="relative">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
@@ -1068,7 +1086,7 @@ function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher une saveur, une catégorie, un goût..."
-              className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-11 pr-4 outline-none focus:border-yellow-400/50"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-4 pl-11 pr-4 text-white outline-none backdrop-blur focus:border-yellow-400/50"
             />
           </div>
 
@@ -1089,7 +1107,7 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-8 space-y-8">
+        <section className="mb-8 space-y-9">
           {filteredCategories.map((category) => {
             const Icon = category.icon;
 
@@ -1098,7 +1116,7 @@ function App() {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <div
-                      className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-bold text-black`}
+                      className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-black text-black shadow-lg`}
                     >
                       <Icon size={16} /> {category.name}
                     </div>
@@ -1123,39 +1141,30 @@ function App() {
                     .map((item) => (
                       <motion.button
                         key={`${category.id}-${item.name}`}
-                        whileHover={{ y: -3 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ y: -4 }}
+                        whileTap={{ scale: 0.985 }}
                         onClick={() => openProductFromCategory(category, item)}
-                        className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 text-left transition hover:border-yellow-400/30 hover:bg-white/[0.07]"
+                        className="group relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02))] p-5 text-left shadow-[0_14px_40px_rgba(0,0,0,0.26)] transition hover:border-yellow-400/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.34)]"
                       >
-                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(250,204,21,0.18),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(236,72,153,0.16),_transparent_25%)] opacity-0 transition group-hover:opacity-100" />
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(250,204,21,0.16),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(236,72,153,0.12),_transparent_25%)] opacity-0 transition duration-300 group-hover:opacity-100" />
 
                         <div className="relative flex items-start justify-between gap-3">
                           <div className="flex-1">
-                            {item.image && (
-                              <div className="mb-4 overflow-hidden rounded-[20px] border border-white/10 bg-white">
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className="h-44 w-full object-contain bg-white p-3"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    const next = e.currentTarget.nextElementSibling;
-                                    if (next instanceof HTMLElement) next.style.display = 'flex';
-                                  }}
-                                />
-                                <div className="hidden h-44 w-full items-center justify-center bg-white">
-                                  {getProductImageFallback(item.name)}
-                                </div>
-                              </div>
-                            )}
+                            <div className="mb-4 overflow-hidden rounded-[22px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_60%)]">
+                              <ProductImage
+                                src={item.image}
+                                alt={item.name}
+                                wrapperClassName="flex h-48 w-full items-center justify-center"
+                                className="h-full w-full object-contain p-3 drop-shadow-[0_24px_32px_rgba(0,0,0,0.42)] transition duration-300 group-hover:scale-[1.03]"
+                              />
+                            </div>
 
                             <p className="text-xl font-black leading-tight">{item.name}</p>
                             <p className="mt-2 text-sm text-white/65">{item.flavors}</p>
                           </div>
 
                           <div
-                            className={`ml-3 h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${category.accent} opacity-90`}
+                            className={`ml-3 h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${category.accent} opacity-95 shadow-lg`}
                           />
                         </div>
 
@@ -1168,7 +1177,7 @@ function App() {
                             )}
                           </div>
 
-                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/80">
+                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition group-hover:text-yellow-300">
                             Ajouter <ChevronRight size={15} />
                           </span>
                         </div>
@@ -1181,7 +1190,7 @@ function App() {
         </section>
 
         <section className="mb-8 grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
-          <div className="rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5">
+          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
             <div className="mb-4">
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">
                 Best sellers
@@ -1201,24 +1210,17 @@ function App() {
                   key={item.name}
                   type="button"
                   onClick={() => openProduct(item.name)}
-                  className="relative overflow-hidden rounded-[24px] border border-white/10 bg-black/30 p-4 text-left transition hover:border-yellow-400/30"
+                  className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02))] p-4 text-left shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
                 >
                   <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
 
-                  <div className="mb-4 overflow-hidden rounded-[20px] border border-white/10 bg-white">
-                    <img
+                  <div className="mb-4 overflow-hidden rounded-[20px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_60%)]">
+                    <ProductImage
                       src={item.image}
                       alt={item.name}
-                      className="h-40 w-full object-contain bg-white p-3"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const next = e.currentTarget.nextElementSibling;
-                        if (next instanceof HTMLElement) next.style.display = 'flex';
-                      }}
+                      wrapperClassName="flex h-40 w-full items-center justify-center"
+                      className="h-full w-full object-contain p-2 drop-shadow-[0_20px_26px_rgba(0,0,0,0.4)]"
                     />
-                    <div className="hidden h-40 w-full items-center justify-center bg-white">
-                      {getProductImageFallback(item.name)}
-                    </div>
                   </div>
 
                   <p className="text-lg font-black">{item.name}</p>
@@ -1233,7 +1235,7 @@ function App() {
               href={googleReviewUrl}
               target="_blank"
               rel="noreferrer"
-              className="block rounded-[28px] border border-yellow-400/20 bg-yellow-400/10 p-5 transition hover:bg-yellow-400/15"
+              className="block rounded-[30px] border border-yellow-400/20 bg-gradient-to-br from-yellow-400/12 via-yellow-300/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
             >
               <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-yellow-300">
                 <Star size={14} /> Avis Google
@@ -1251,7 +1253,7 @@ function App() {
               href={instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="block rounded-[28px] border border-fuchsia-400/20 bg-fuchsia-500/10 p-5 transition hover:bg-fuchsia-500/15"
+              className="block rounded-[30px] border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/12 via-pink-500/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
             >
               <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-fuchsia-300">
                 <Instagram size={14} /> Instagram
@@ -1267,7 +1269,7 @@ function App() {
           </div>
         </section>
 
-        <footer className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+        <footer className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
           <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">
@@ -1284,7 +1286,7 @@ function App() {
             </div>
 
             <div className="space-y-3">
-              <div className="rounded-[22px] border border-white/10 bg-black/20 p-4 text-sm text-white/75">
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 text-sm text-white/75">
                 <p className="font-bold text-white">Adresse</p>
                 <p className="mt-1">{BRAND.address}</p>
               </div>
@@ -1293,7 +1295,7 @@ function App() {
                 href={BRAND.mapsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-yellow-400 px-4 py-3 font-bold text-black"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)]"
               >
                 <MapPin size={18} /> Je m’y rends
               </a>
@@ -1308,19 +1310,20 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/70 p-4 backdrop-blur-sm md:grid md:place-items-center"
+            className="fixed inset-0 z-40 bg-black/75 p-4 backdrop-blur-md md:grid md:place-items-center"
             onClick={() => setSelected(null)}
           >
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[32px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_32%),linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.98))] p-6 md:static md:max-w-xl md:rounded-[32px]"
+              className="absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-xl md:rounded-[34px]"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div
-                  className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.categoryAccent} px-3 py-1 text-sm font-bold text-black`}
+                  className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.categoryAccent} px-3 py-1 text-sm font-black text-black`}
                 >
                   {selected.categoryName}
                 </div>
@@ -1328,50 +1331,42 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setSelected(null)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              {selected.image && (
-                <div className="mb-4 overflow-hidden rounded-[24px] border border-white/10 bg-white">
-                  <img
-                    src={selected.image}
-                    alt={selected.name}
-                    className="h-64 w-full object-contain bg-white p-4"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const next = e.currentTarget.nextElementSibling;
-                      if (next instanceof HTMLElement) next.style.display = 'flex';
-                    }}
-                  />
-                  <div className="hidden h-64 w-full items-center justify-center bg-white">
-                    {getProductImageFallback(selected.name)}
-                  </div>
-                </div>
-              )}
+              <div className="mb-5 overflow-hidden rounded-[26px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_62%)]">
+                <ProductImage
+                  src={selected.image}
+                  alt={selected.name}
+                  wrapperClassName="flex h-72 w-full items-center justify-center"
+                  className="h-full w-full object-contain p-4 drop-shadow-[0_28px_35px_rgba(0,0,0,0.45)]"
+                />
+              </div>
 
               <h3 className="text-3xl font-black">{selected.name}</h3>
-              <p className="mt-2 text-white/65">{selected.description}</p>
-              <p className="mt-3 text-sm text-white/55">{selected.flavors}</p>
-              <p className="mt-4 font-bold text-yellow-400">
+              <p className="mt-2 text-white/68">{selected.description}</p>
+              <p className="mt-3 text-sm text-white/50">{selected.flavors}</p>
+
+              <div className="mt-4 inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
                 Prix : {euroFromCents(selectedTotal)}
-              </p>
+              </div>
 
               {selected.options && selected.options.length > 0 && (
                 <div className="mt-6">
-                  <p className="mb-2 font-bold">Choix de format</p>
+                  <p className="mb-3 font-bold">Choix de format</p>
                   <div className="flex flex-wrap gap-2">
                     {selected.options.map((opt) => (
                       <button
                         key={opt.label}
                         type="button"
                         onClick={() => setSelectedOption(opt.label)}
-                        className={`rounded-2xl border px-4 py-2 ${
+                        className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition ${
                           selectedOption === opt.label
-                            ? 'border-yellow-400 bg-yellow-400 font-bold text-black'
-                            : 'border-white/10 bg-white/5 text-white'
+                            ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black shadow-[0_8px_25px_rgba(250,204,21,0.18)]'
+                            : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
                         }`}
                       >
                         {opt.label}
@@ -1382,17 +1377,17 @@ function App() {
               )}
 
               <div className="mt-6">
-                <p className="mb-2 font-bold">Extras +2,50€</p>
+                <p className="mb-3 font-bold">Extras +2,50€</p>
                 <div className="flex flex-wrap gap-2">
                   {extraCatalog.map((extra) => (
                     <button
                       key={extra.name}
                       type="button"
                       onClick={() => toggleExtra(extra.name)}
-                      className={`rounded-full border px-3 py-2 text-sm ${
+                      className={`rounded-full border px-3 py-2 text-sm font-medium transition ${
                         selectedExtras.includes(extra.name)
                           ? 'border-emerald-400 bg-emerald-400/15 text-emerald-300'
-                          : 'border-white/10 bg-white/5 text-white/80'
+                          : 'border-white/10 bg-white/[0.04] text-white/80 hover:bg-white/[0.08]'
                       }`}
                     >
                       {extra.label}
@@ -1403,7 +1398,7 @@ function App() {
 
               <button
                 onClick={() => addToCart(selected)}
-                className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 py-4 text-lg font-black text-black shadow-lg shadow-yellow-500/20"
+                className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
                 Ajouter au panier
               </button>
@@ -1419,12 +1414,18 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/55"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
               onClick={() => setDrawerOpen(false)}
             />
 
-            <div className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-black/10 bg-white text-black shadow-2xl">
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-white px-5 py-4">
+            <motion.div
+              initial={{ x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 40, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-white/10 bg-[linear-gradient(180deg,#ffffff,#f8f8f8)] text-black shadow-[0_0_80px_rgba(0,0,0,0.35)]"
+            >
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-white/90 px-5 py-4 backdrop-blur">
                 <div>
                   <h3 className="text-2xl font-black">Ton panier</h3>
                   <p className="text-sm text-black/55">
@@ -1434,7 +1435,7 @@ function App() {
 
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="rounded-full border border-black/10 px-3 py-1.5 text-sm font-semibold text-black/70 hover:bg-black/5"
+                  className="rounded-full border border-black/10 px-3 py-1.5 text-sm font-semibold text-black/70 transition hover:bg-black/5"
                 >
                   Fermer
                 </button>
@@ -1450,7 +1451,7 @@ function App() {
                     {cart.map((item) => (
                       <div
                         key={item.key}
-                        className="rounded-3xl border border-black/10 bg-black/[0.03] p-4"
+                        className="rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -1466,7 +1467,7 @@ function App() {
                                 + {item.extras.join(', ')}
                               </p>
                             )}
-                            <p className="mt-2 text-sm font-bold text-black">
+                            <p className="mt-2 text-sm font-black text-black">
                               {euroFromCents(item.unitPriceCents * item.quantity)}
                             </p>
                           </div>
@@ -1474,7 +1475,7 @@ function App() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => updateQuantity(item.key, -1)}
-                              className="grid h-8 w-8 place-items-center rounded-full border border-black/10 bg-white hover:bg-black/[0.04]"
+                              className="grid h-8 w-8 place-items-center rounded-full border border-black/10 bg-white transition hover:bg-black/[0.04]"
                             >
                               <Minus size={14} />
                             </button>
@@ -1483,7 +1484,7 @@ function App() {
                             </span>
                             <button
                               onClick={() => updateQuantity(item.key, 1)}
-                              className="grid h-8 w-8 place-items-center rounded-full border border-black/10 bg-white hover:bg-black/[0.04]"
+                              className="grid h-8 w-8 place-items-center rounded-full border border-black/10 bg-white transition hover:bg-black/[0.04]"
                             >
                               <Plus size={14} />
                             </button>
@@ -1492,7 +1493,7 @@ function App() {
                       </div>
                     ))}
 
-                    <div className="rounded-3xl border border-black/10 bg-black/[0.03] p-4">
+                    <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-yellow-50 to-amber-50 p-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-semibold text-black/70">Total</span>
                         <span className="text-xl font-black text-black">
@@ -1501,7 +1502,7 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.03] p-4">
+                    <div className="space-y-3 rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                       <p className="font-bold text-black">Infos de retrait</p>
                       <input
                         value={customerName}
@@ -1527,7 +1528,7 @@ function App() {
                     <button
                       onClick={handleWhatsAppOrder}
                       disabled={!hasRequiredPickupInfo}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 py-4 text-lg font-black text-white shadow-[0_12px_30px_rgba(34,197,94,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <MessageCircle size={18} /> Envoyer sur WhatsApp
                     </button>
@@ -1535,7 +1536,7 @@ function App() {
                     <button
                       onClick={handleSquareCheckout}
                       disabled={!hasRequiredPickupInfo || isCreatingPayment}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-400 py-4 text-lg font-black text-black disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isCreatingPayment
                         ? 'Création du paiement...'
@@ -1544,7 +1545,7 @@ function App() {
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
@@ -1564,10 +1565,10 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm transition ${
+      className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
         active
-          ? 'border-yellow-400 bg-yellow-400 font-bold text-black'
-          : 'border-white/10 bg-white/5 text-white/75 hover:bg-white/10'
+          ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 font-black text-black shadow-[0_10px_24px_rgba(250,204,21,0.16)]'
+          : 'border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.08]'
       }`}
     >
       {label}
