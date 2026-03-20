@@ -98,21 +98,21 @@ const categories: Category[] = [
     accent: 'from-yellow-400 to-amber-500',
     description: '24g de protéines végétales • 25 vitamines & minéraux • 250 calories',
     items: [
-      { name: 'Choco Buenos', flavors: 'Saveur type Kinder Bueno', badge: 'Produit du mois', basePriceCents: 890, image: '/images/choco-buenos.jpg' },
-      { name: 'M&M', flavors: 'Saveur type M&M', badge: 'Produit du mois', basePriceCents: 890, image: '/images/mm.jpg' },
-      { name: 'Casse Noisette', flavors: 'Café latte • Noisette', badge: 'Best-seller', basePriceCents: 890 },
-      { name: 'Cappuccino', flavors: 'Café latte • Chocolat intense', basePriceCents: 890 },
-      { name: 'Pina Colada', flavors: 'Vanille • Ananas • Coco', basePriceCents: 890 },
-      { name: 'Fraise Bonbon', flavors: 'Vanille • Fraise', badge: 'Gourmand', basePriceCents: 890 },
+      { name: 'Choco Buenos', flavors: 'Saveur type Kinder Bueno', badge: 'Produit du mois', basePriceCents: 890, image: '/images/shake/bueno.png' },
+      { name: 'M&M', flavors: 'Saveur type M&M', badge: 'Produit du mois', basePriceCents: 890, image: '/images/shake/mm.png' },
+      { name: 'Casse Noisette', flavors: 'Café latte • Noisette', badge: 'Best-seller', basePriceCents: 890, image: '/images/shake/casse-noisette.png' },
+      { name: 'Cappuccino', flavors: 'Café latte • Chocolat intense', basePriceCents: 890, image: '/images/shake/cappuccino.png' },
+      { name: 'Pina Colada', flavors: 'Vanille • Ananas • Coco', basePriceCents: 890, image: '/images/shake/pina-colada.png' },
+      { name: 'Fraise Bonbon', flavors: 'Vanille • Fraise', badge: 'Gourmand', basePriceCents: 890, image: '/images/shake/fraise-bonbon.png' },
       { name: "Pim's", flavors: 'Chocolat • Framboise', basePriceCents: 890 },
-      { name: 'Tarte à la pomme', flavors: 'Vanille • Pomme', basePriceCents: 890 },
-      { name: 'Snickers', flavors: 'Chocolat • Cacahuètes', badge: 'Ultra gourmand', basePriceCents: 890, image: '/images/snickers.jpg' },
-      { name: 'Full Oréo', flavors: 'Cookies cream • Oréo', basePriceCents: 890, image: '/images/full-oreo.jpg' },
-      { name: 'Speculoos', flavors: 'Chocolat • Speculoos', basePriceCents: 890 },
-      { name: 'Banana Split', flavors: 'Banane • Caramel • Cerise • Chocolat', basePriceCents: 890 },
-      { name: 'Banana Noisette', flavors: 'Banane • Caramel • Noisette • Chocolat', basePriceCents: 890 },
-      { name: 'Cookies', flavors: 'Cookies cream • Chocolat blanc', basePriceCents: 890 },
-      { name: 'Tropical', flavors: 'Vanille • Fraise • Banane', basePriceCents: 890 },
+      { name: 'Tarte à la pomme', flavors: 'Vanille • Pomme', basePriceCents: 890, image: '/images/shake/tarte-a-la-pomme.png' },
+      { name: 'Snickers', flavors: 'Chocolat • Cacahuètes', badge: 'Ultra gourmand', basePriceCents: 890, image: '/images/shake/snikers.png' },
+      { name: 'Full Oréo', flavors: 'Cookies cream • Oréo', basePriceCents: 890, image: '/images/shake/full-oreo.png' },
+      { name: 'Speculoos', flavors: 'Chocolat • Speculoos', basePriceCents: 890, image: '/images/shake/speculoos.png' },
+      { name: 'Banana Split', flavors: 'Banane • Caramel • Cerise • Chocolat', basePriceCents: 890, image: '/images/shake/banana-split.png' },
+      { name: 'Banana Noisette', flavors: 'Banane • Caramel • Noisette • Chocolat', basePriceCents: 890, image: '/images/shake/banane-noisette.png' },
+      { name: 'Cookies', flavors: 'Cookies cream • Chocolat blanc', basePriceCents: 890, image: '/images/shake/cookies-cream.png' },
+      { name: 'Tropical', flavors: 'Vanille • Fraise • Banane', basePriceCents: 890, image: '/images/shake/tropical.png' },
     ],
   },
   {
@@ -125,7 +125,7 @@ const categories: Category[] = [
     items: [
       { name: 'Cherry White Grappe', flavors: 'Citron • Framboise • Cerise • Raisin blanc', badge: 'Nouveau', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
       { name: 'Red Paradize', flavors: 'Citron • Pêche • Ananas', badge: 'Nouveau', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
-      { name: 'Electric Blue', flavors: 'Citron • Framboise bleue • Myrtille • Raisin', badge: 'Iconique', image: '/images/electric-blue.jpg', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Electric Blue', flavors: 'Citron • Framboise bleue • Myrtille • Raisin', badge: 'Iconique', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
       { name: 'Pomelon', flavors: 'Citron • Framboise • Melon • Pomme', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
       { name: 'Tonic Mandarine', flavors: 'Citron • Mandarine', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
       { name: 'Apple Kiss', flavors: 'Citron • Pomme verte', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
@@ -148,10 +148,10 @@ const categories: Category[] = [
     accent: 'from-emerald-400 to-lime-500',
     description: 'Hydratation • fibres • probiotiques • bien-être ciblé',
     items: [
-      { name: 'Hydrat’Max', flavors: 'Orange • Mandarine', badge: 'Vitamine C', basePriceCents: 690 },
-      { name: 'Casse Grippe', flavors: 'Baies sauvages • Framboise • Pomme', badge: 'Immunité', basePriceCents: 690 },
-      { name: 'Limonade Rose', flavors: 'Fraise • Citron • Framboise', badge: 'Glow', basePriceCents: 690, image: '/images/limonade-rose.jpg' },
-      { name: 'Digest', flavors: 'Pomme • Fraise • Citron', badge: 'Fibres & probiotiques', basePriceCents: 690 },
+      { name: 'Hydrat’Max', flavors: 'Orange • Mandarine', badge: 'Vitamine C', basePriceCents: 690, image: '/images/sante/hydrat-max.png' },
+      { name: 'Casse Grippe', flavors: 'Baies sauvages • Framboise • Pomme', badge: 'Immunité', basePriceCents: 690, image: '/images/sante/casse-grippe.png' },
+      { name: 'Limonade Rose', flavors: 'Fraise • Citron • Framboise', badge: 'Glow', basePriceCents: 690, image: '/images/sante/limonade rose.png' },
+      { name: 'Digest', flavors: 'Pomme • Fraise • Citron', badge: 'Fibres & probiotiques', basePriceCents: 690, image: '/images/sante/di-gest.png' },
     ],
   },
   {
@@ -214,7 +214,7 @@ const categories: Category[] = [
     accent: 'from-violet-500 to-blue-600',
     description: 'Hydratation sport • récupération • créatine',
     items: [
-      { name: 'Electro’Lyte', flavors: 'Boisson glucidique & électrolytes', badge: 'Performance', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
+      { name: 'Electro’Lyte', flavors: 'Boisson glucidique & électrolytes', badge: 'Performance', image: '/images/sport/electro-lyte.png', options: [{ label: 'Start 6,90€', priceCents: 690 }, { label: 'Boost 8,90€', priceCents: 890 }] },
       { name: 'Post Workout', flavors: 'Boisson chocolat • récupération', options: [{ label: 'Unique 5,90€', priceCents: 590 }] },
     ],
   },
@@ -285,7 +285,7 @@ function App() {
       subtitle: 'Produit du mois • Mars',
       description:
         'Une recette ultra gourmande inspirée de l’univers Bueno, pensée pour celles et ceux qui veulent se faire plaisir avec une saveur forte et réconfortante.',
-      image: '/images/choco-buenos.jpg',
+      image: '/images/shake/bueno.png',
       color: 'from-amber-400 to-orange-500',
     },
     {
@@ -293,18 +293,18 @@ function App() {
       subtitle: 'Produit du mois • Mars',
       description:
         'Une saveur fun, régressive et généreuse, parfaite pour créer l’effet waouh dès le premier regard et la première gorgée.',
-      image: '/images/mm.jpg',
+      image: '/images/shake/mm.png',
       color: 'from-red-500 to-yellow-400',
     },
   ];
 
   const featuredItems = [
-    { name: 'Choco Buenos', subtitle: 'Produit du mois', image: '/images/choco-buenos.jpg' },
-    { name: 'M&M', subtitle: 'Produit du mois', image: '/images/mm.jpg' },
-    { name: 'Snickers', subtitle: 'Ultra gourmand', image: '/images/snickers.jpg' },
-    { name: 'Electric Blue', subtitle: 'Iconique', image: '/images/electric-blue.jpg' },
-    { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/limonade-rose.jpg' },
-    { name: 'Full Oréo', subtitle: 'Crémeux', image: '/images/full-oreo.jpg' },
+    { name: 'Choco Buenos', subtitle: 'Produit du mois', image: '/images/shake/bueno.png' },
+    { name: 'M&M', subtitle: 'Produit du mois', image: '/images/shake/mm.png' },
+    { name: 'Snickers', subtitle: 'Ultra gourmand', image: '/images/shake/snikers.png' },
+    { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/sante/limonade rose.png' },
+    { name: 'Full Oréo', subtitle: 'Crémeux', image: '/images/shake/full-oreo.png' },
+    { name: 'Electro’Lyte', subtitle: 'Performance', image: '/images/sport/electro-lyte.png' },
   ];
 
   const filteredCategories = useMemo(() => {
@@ -678,7 +678,12 @@ function App() {
           <div className="flex gap-3 overflow-x-auto pb-2">
             <FilterPill active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} label="Tout" />
             {categories.map((category) => (
-              <FilterPill key={category.id} active={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} label={category.name} />
+              <FilterPill
+                key={category.id}
+                active={activeCategory === category.id}
+                onClick={() => setActiveCategory(category.id)}
+                label={category.name}
+              />
             ))}
           </div>
         </section>
@@ -726,11 +731,25 @@ function App() {
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(250,204,21,0.18),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(236,72,153,0.16),_transparent_25%)] opacity-0 transition group-hover:opacity-100" />
 
                         <div className="relative flex items-start justify-between gap-3">
-                          <div>
+                          <div className="flex-1">
+                            {item.image && (
+                              <div className="mb-4 overflow-hidden rounded-[20px] border border-white/10 bg-black/20">
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="h-40 w-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
+
                             <p className="text-xl font-black leading-tight">{item.name}</p>
                             <p className="mt-2 text-sm text-white/65">{item.flavors}</p>
                           </div>
-                          <div className={`h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${category.accent} opacity-90`} />
+
+                          <div className={`ml-3 h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${category.accent} opacity-90`} />
                         </div>
 
                         <div className="relative mt-4 flex items-center justify-between">
@@ -878,6 +897,19 @@ function App() {
               <div className={`mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selected.categoryAccent} px-3 py-1 text-sm font-bold text-black`}>
                 {selected.categoryName}
               </div>
+
+              {selected.image && (
+                <div className="mb-4 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+                  <img
+                    src={selected.image}
+                    alt={selected.name}
+                    className="h-56 w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
 
               <h3 className="text-3xl font-black">{selected.name}</h3>
               <p className="mt-2 text-white/65">{selected.flavors}</p>
