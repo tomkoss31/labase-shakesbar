@@ -105,7 +105,7 @@ const categories: Category[] = [
       {
         name: 'Choco Buenos',
         description:
-          'Le smoothie signature ultra gourmand, inspiré d’une saveur type Bueno, parfait pour se faire plaisir avec une vraie logique nutrition.',
+          'Le smoothie signature ultra gourmand, inspiré d’une saveur type Bueno.',
         flavors: 'Saveur type Kinder Bueno',
         badge: 'Produit du mois',
         basePriceCents: 890,
@@ -114,7 +114,7 @@ const categories: Category[] = [
       {
         name: 'M&M',
         description:
-          'Une recette fun et généreuse, pensée pour un maximum d’effet waouh dès le premier regard.',
+          'Une recette fun et généreuse, pensée pour un maximum d’effet waouh.',
         flavors: 'Saveur type M&M',
         badge: 'Produit du mois',
         basePriceCents: 890,
@@ -139,8 +139,7 @@ const categories: Category[] = [
       },
       {
         name: 'Pina Colada',
-        description:
-          'Une recette fraîche et exotique, à l’esprit vacances.',
+        description: 'Une recette fraîche et exotique, à l’esprit vacances.',
         flavors: 'Vanille • Ananas • Coco',
         basePriceCents: 890,
         image: '/images/shake/pina-colada.png',
@@ -157,7 +156,7 @@ const categories: Category[] = [
       {
         name: "Pim's",
         description:
-          'Une association fruitée et chocolatée avec une belle intensité en bouche.',
+          'Une association fruitée et chocolatée avec une belle intensité.',
         flavors: 'Chocolat • Framboise',
         basePriceCents: 890,
         image: '/images/shake/pims.png',
@@ -165,7 +164,7 @@ const categories: Category[] = [
       {
         name: 'Tarte à la pomme',
         description:
-          'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille très agréable.',
+          'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille.',
         flavors: 'Vanille • Pomme',
         basePriceCents: 890,
         image: '/images/shake/tarte-a-la-pomme.png',
@@ -235,8 +234,7 @@ const categories: Category[] = [
     icon: Zap,
     price: 'Start 6,90€ • Boost 8,90€',
     accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
-    description:
-      '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
+    description: '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
     items: [
       {
         name: 'Apple Kiss',
@@ -264,7 +262,7 @@ const categories: Category[] = [
       {
         name: 'Cherry White Grappe',
         description:
-          'Une création fruitée très complète, avec un profil original et rafraîchissant.',
+          'Une création fruitée très complète, avec un profil original.',
         flavors: 'Citron • Framboise • Cerise • Raisin blanc',
         badge: 'Nouveau',
         options: [
@@ -287,8 +285,7 @@ const categories: Category[] = [
       },
       {
         name: 'Elf',
-        description:
-          'Une recette fun et fruitée, très agréable et très accessible.',
+        description: 'Une recette fun et fruitée, très agréable et accessible.',
         flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
         options: [
           { label: 'Start 6,90€', priceCents: 690 },
@@ -353,8 +350,7 @@ const categories: Category[] = [
       },
       {
         name: 'Red Paradize',
-        description:
-          'Une boisson lumineuse, fruitée et très agréable à boire.',
+        description: 'Une boisson lumineuse, fruitée et très agréable à boire.',
         flavors: 'Citron • Pêche • Ananas',
         badge: 'Nouveau',
         options: [
@@ -365,8 +361,7 @@ const categories: Category[] = [
       },
       {
         name: 'Soleil',
-        description:
-          'Un mix ensoleillé aux notes pêche, mandarine et ananas.',
+        description: 'Un mix ensoleillé aux notes pêche, mandarine et ananas.',
         flavors: 'Citron • Pêche • Mandarine • Ananas',
         options: [
           { label: 'Start 6,90€', priceCents: 690 },
@@ -407,7 +402,7 @@ const categories: Category[] = [
       {
         name: 'Casse Grippe',
         description:
-          'Une recette pensée autour du confort, de la chaleur et du soutien immunité.',
+          'Une recette pensée autour du confort et du soutien immunité.',
         flavors: 'Baies sauvages • Framboise • Pomme',
         badge: 'Immunité',
         basePriceCents: 690,
@@ -425,7 +420,7 @@ const categories: Category[] = [
       {
         name: 'Digest',
         description:
-          'Un soutien ciblé avec fibres et probiotiques, dans une version simple et efficace.',
+          'Un soutien ciblé avec fibres et probiotiques, simple et efficace.',
         flavors: 'Pomme • Fraise • Citron',
         badge: 'Fibres & probiotiques',
         basePriceCents: 690,
@@ -496,7 +491,7 @@ const categories: Category[] = [
       {
         name: 'Gaufre healthy',
         description:
-          'Une gaufre gourmande avec toppings inclus, pensée pour le plaisir sans casser l’univers healthy du club.',
+          'Une gaufre gourmande avec toppings inclus, pensée pour le plaisir.',
         flavors:
           'Toppings inclus : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
         options: [{ label: 'Gaufre 6,90€', priceCents: 690 }],
@@ -537,45 +532,64 @@ function buildWhatsAppMessage(
   return encodeURIComponent(lines.join('\n'));
 }
 
-function getFallbackVisual(name: string) {
+function ProductCardBackground({
+  image,
+  name,
+}: {
+  image?: string;
+  name: string;
+}) {
+  const [errored, setErrored] = useState(false);
+
+  if (!image || errored) {
+    return (
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_55%),linear-gradient(180deg,rgba(20,20,20,0.95),rgba(5,5,5,1))]" />
+    );
+  }
+
   return (
-    <div className="flex h-full w-full items-center justify-center rounded-[22px] border border-white/10 bg-gradient-to-br from-white/8 via-white/[0.02] to-transparent">
-      <div className="px-4 text-center">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-          LA BASE
-        </p>
-        <p className="mt-2 text-lg font-black text-white/80">{name}</p>
-      </div>
+    <div className="absolute inset-0">
+      <img
+        src={image}
+        alt={name}
+        onError={() => setErrored(true)}
+        className="h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.28)_35%,rgba(0,0,0,0.78)_78%,rgba(0,0,0,0.95)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),transparent_35%)]" />
     </div>
   );
 }
 
-function ProductImage({
-  src,
-  alt,
-  className,
-  wrapperClassName = '',
+function ProductModalImage({
+  image,
+  name,
 }: {
-  src?: string;
-  alt: string;
-  className: string;
-  wrapperClassName?: string;
+  image?: string;
+  name: string;
 }) {
-  const [hasError, setHasError] = useState(false);
+  const [errored, setErrored] = useState(false);
+
+  if (!image || errored) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.07),_transparent_55%),linear-gradient(180deg,rgba(20,20,20,0.95),rgba(5,5,5,1))]">
+        <div className="text-center">
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
+            LA BASE
+          </p>
+          <p className="mt-2 text-xl font-black text-white/80">{name}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={wrapperClassName}>
-      {src && !hasError ? (
-        <img
-          src={src}
-          alt={alt}
-          className={className}
-          onError={() => setHasError(true)}
-        />
-      ) : (
-        getFallbackVisual(alt)
-      )}
-    </div>
+    <img
+      src={image}
+      alt={name}
+      onError={() => setErrored(true)}
+      className="h-full w-full object-cover"
+    />
   );
 }
 
@@ -619,17 +633,13 @@ function App() {
         name: 'Choco Buenos',
         subtitle: 'Produit du mois',
         description:
-          'Une recette ultra gourmande inspirée de l’univers Bueno, parfaite pour attirer l’œil et donner envie immédiatement.',
-        image: '/images/shake/bueno.png',
-        color: 'from-amber-400 via-yellow-300 to-orange-500',
+          'Une recette ultra gourmande inspirée de l’univers Bueno.',
       },
       {
         name: 'M&M',
         subtitle: 'Produit du mois',
         description:
-          'Une saveur fun, généreuse et très visuelle, idéale pour créer l’effet waouh dès le premier regard.',
-        image: '/images/shake/mm.png',
-        color: 'from-red-500 via-pink-400 to-yellow-400',
+          'Une saveur fun, généreuse et très visuelle, idéale pour créer l’effet waouh.',
       },
     ],
     [],
@@ -637,12 +647,12 @@ function App() {
 
   const featuredItems = useMemo(
     () => [
-      { name: 'Choco Buenos', subtitle: 'Produit du mois', image: '/images/shake/bueno.png' },
-      { name: 'M&M', subtitle: 'Produit du mois', image: '/images/shake/mm.png' },
-      { name: 'Snickers', subtitle: 'Ultra gourmand', image: '/images/shake/snikers.png' },
-      { name: 'Electric Blue', subtitle: 'Iconique', image: '/images/drinks/electric-blue.png' },
-      { name: 'Limonade Rose', subtitle: 'Glow', image: '/images/sante/limonade rose.png' },
-      { name: 'Electro’Lyte', subtitle: 'Performance', image: '/images/sport/electro-lyte.png' },
+      { name: 'Choco Buenos', subtitle: 'Produit du mois' },
+      { name: 'M&M', subtitle: 'Produit du mois' },
+      { name: 'Snickers', subtitle: 'Ultra gourmand' },
+      { name: 'Electric Blue', subtitle: 'Iconique' },
+      { name: 'Limonade Rose', subtitle: 'Glow' },
+      { name: 'Electro’Lyte', subtitle: 'Performance' },
     ],
     [],
   );
@@ -847,21 +857,19 @@ function App() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#060606] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.10),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.08),_transparent_28%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:36px_36px]" />
+    <div className="min-h-screen bg-[#050505] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.06),_transparent_28%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.045] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:40px_40px]" />
 
-      <header className="sticky top-0 z-30 border-b border-white/8 bg-black/70 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
-          <div className="flex items-center gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_0_30px_rgba(255,255,255,0.04)]">
-              <p className="text-3xl font-black tracking-tight leading-none">
-                {BRAND.shortName}
-              </p>
-              <p className="mt-1 text-xs text-white/55">
-                Shakes & Drinks • Verdun • Commande rapide
-              </p>
-            </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_0_30px_rgba(255,255,255,0.04)]">
+            <p className="text-3xl font-black leading-none tracking-tight">
+              {BRAND.shortName}
+            </p>
+            <p className="mt-1 text-xs text-white/55">
+              Shakes & Drinks • Verdun • Commande rapide
+            </p>
           </div>
 
           <button
@@ -872,7 +880,7 @@ function App() {
               <ShoppingCart size={18} /> Panier
             </span>
             {cartCount > 0 && (
-              <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs font-bold text-white shadow-lg">
+              <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs font-bold text-white">
                 {cartCount}
               </span>
             )}
@@ -930,7 +938,11 @@ function App() {
                   </div>
 
                   <h1 className="text-3xl font-black leading-none tracking-tight md:text-5xl">
-                    Le <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Shake Bar</span> de Verdun,
+                    Le{' '}
+                    <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
+                      Shake Bar
+                    </span>{' '}
+                    de Verdun,
                     <br />
                     entre plaisir, énergie et nutrition.
                   </h1>
@@ -942,18 +954,15 @@ function App() {
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3 text-sm">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <MapPin size={16} className="text-yellow-400" /> {BRAND.address}
                     </div>
-
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <Clock3 size={16} className="text-yellow-400" /> {BRAND.pickup}
                     </div>
-
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <Clock3 size={16} className="text-yellow-400" /> {BRAND.prep}
                     </div>
-
                     <a
                       href={BRAND.mapsUrl}
                       target="_blank"
@@ -966,13 +975,13 @@ function App() {
                 </div>
 
                 <div className="hidden items-end gap-2 md:flex md:flex-col">
-                  <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black shadow-lg">
+                  <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">
                     Premium
                   </span>
-                  <span className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-black text-black shadow-lg">
+                  <span className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-black text-black">
                     Fast order
                   </span>
-                  <span className="rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white shadow-lg">
+                  <span className="rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white">
                     Shake bar vibes
                   </span>
                 </div>
@@ -992,47 +1001,39 @@ function App() {
                   Les saveurs à découvrir maintenant
                 </h2>
               </div>
-
-              <span className="hidden rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-300 md:inline-flex">
-                Mise en avant
-              </span>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {monthlyItems.map((item) => (
-                <button
-                  key={item.name}
-                  type="button"
-                  onClick={() => openProduct(item.name)}
-                  className="group overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-left shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
-                >
-                  <div className="relative h-60 overflow-hidden border-b border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_58%)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),transparent_50%)]" />
-                    <ProductImage
-                      src={item.image}
-                      alt={item.name}
-                      wrapperClassName="relative z-10 flex h-full w-full items-center justify-center"
-                      className="h-full w-full object-contain p-4 drop-shadow-[0_25px_35px_rgba(0,0,0,0.45)] transition duration-300 group-hover:scale-[1.04]"
-                    />
-                    <div className={`pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${item.color} opacity-10 blur-2xl`} />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                        {item.subtitle}
-                      </p>
-                      <p className="mt-1 text-2xl font-black text-white">{item.name}</p>
+              {monthlyItems.map((item) => {
+                const product = allProducts.find((p) => p.name === item.name);
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => openProduct(item.name)}
+                    className="group relative overflow-hidden rounded-[28px] border border-white/10 text-left shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
+                  >
+                    <div className="relative h-[340px]">
+                      <ProductCardBackground image={product?.image} name={item.name} />
+                      <div className="absolute right-4 top-4 h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 shadow-lg" />
+                      <div className="absolute inset-x-0 bottom-0 p-5">
+                        <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
+                          {item.subtitle}
+                        </p>
+                        <p className="mt-2 text-3xl font-black text-white">
+                          {item.name}
+                        </p>
+                        <p className="mt-2 max-w-md text-sm leading-relaxed text-white/72">
+                          {item.description}
+                        </p>
+                        <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-300">
+                          Voir la fiche produit <ChevronRight size={15} />
+                        </span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="p-4">
-                    <p className="text-sm leading-relaxed text-white/70">
-                      {item.description}
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-300">
-                      Voir la fiche produit <ChevronRight size={15} />
-                    </span>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -1144,42 +1145,38 @@ function App() {
                         whileHover={{ y: -4 }}
                         whileTap={{ scale: 0.985 }}
                         onClick={() => openProductFromCategory(category, item)}
-                        className="group relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02))] p-5 text-left shadow-[0_14px_40px_rgba(0,0,0,0.26)] transition hover:border-yellow-400/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.34)]"
+                        className="group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:border-yellow-400/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.36)]"
                       >
-                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(250,204,21,0.16),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(236,72,153,0.12),_transparent_25%)] opacity-0 transition duration-300 group-hover:opacity-100" />
+                        <div className="relative h-[460px]">
+                          <ProductCardBackground image={item.image} name={item.name} />
 
-                        <div className="relative flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="mb-4 overflow-hidden rounded-[22px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_60%)]">
-                              <ProductImage
-                                src={item.image}
-                                alt={item.name}
-                                wrapperClassName="flex h-48 w-full items-center justify-center"
-                                className="h-full w-full object-contain p-3 drop-shadow-[0_24px_32px_rgba(0,0,0,0.42)] transition duration-300 group-hover:scale-[1.03]"
-                              />
+                          <div className="absolute right-4 top-4 h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 shadow-lg opacity-95" />
+
+                          <div className="absolute inset-x-0 bottom-0 p-5">
+                            <div className="mb-3 flex flex-wrap gap-2">
+                              {item.badge && (
+                                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/12 px-3 py-1 text-xs font-semibold text-yellow-300 backdrop-blur">
+                                  {item.badge}
+                                </span>
+                              )}
                             </div>
 
-                            <p className="text-xl font-black leading-tight">{item.name}</p>
-                            <p className="mt-2 text-sm text-white/65">{item.flavors}</p>
-                          </div>
+                            <p className="text-[2rem] leading-none font-black text-white drop-shadow-lg">
+                              {item.name}
+                            </p>
+                            <p className="mt-3 text-base text-white/72">
+                              {item.flavors}
+                            </p>
 
-                          <div
-                            className={`ml-3 h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${category.accent} opacity-95 shadow-lg`}
-                          />
-                        </div>
-
-                        <div className="relative mt-4 flex items-center justify-between">
-                          <div className="flex flex-wrap gap-2">
-                            {item.badge && (
-                              <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-2.5 py-1 text-xs font-semibold text-yellow-300">
-                                {item.badge}
+                            <div className="mt-6 flex items-center justify-between gap-3">
+                              <span className="text-sm font-semibold text-white/85">
+                                Ajouter
                               </span>
-                            )}
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur">
+                                <ChevronRight size={18} />
+                              </span>
+                            </div>
                           </div>
-
-                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition group-hover:text-yellow-300">
-                            Ajouter <ChevronRight size={15} />
-                          </span>
                         </div>
                       </motion.button>
                     ))}
@@ -1205,28 +1202,26 @@ function App() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              {featuredItems.map((item) => (
-                <button
-                  key={item.name}
-                  type="button"
-                  onClick={() => openProduct(item.name)}
-                  className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02))] p-4 text-left shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
-                >
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
-
-                  <div className="mb-4 overflow-hidden rounded-[20px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_60%)]">
-                    <ProductImage
-                      src={item.image}
-                      alt={item.name}
-                      wrapperClassName="flex h-40 w-full items-center justify-center"
-                      className="h-full w-full object-contain p-2 drop-shadow-[0_20px_26px_rgba(0,0,0,0.4)]"
-                    />
-                  </div>
-
-                  <p className="text-lg font-black">{item.name}</p>
-                  <p className="mt-1 text-sm text-white/60">{item.subtitle}</p>
-                </button>
-              ))}
+              {featuredItems.map((item) => {
+                const product = allProducts.find((p) => p.name === item.name);
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => openProduct(item.name)}
+                    className="group relative overflow-hidden rounded-[24px] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
+                  >
+                    <div className="relative h-[250px]">
+                      <ProductCardBackground image={product?.image} name={item.name} />
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
+                      <div className="absolute inset-x-0 bottom-0 p-4 text-left">
+                        <p className="text-lg font-black text-white">{item.name}</p>
+                        <p className="mt-1 text-sm text-white/68">{item.subtitle}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -1337,13 +1332,9 @@ function App() {
                 </button>
               </div>
 
-              <div className="mb-5 overflow-hidden rounded-[26px] border border-white/8 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_62%)]">
-                <ProductImage
-                  src={selected.image}
-                  alt={selected.name}
-                  wrapperClassName="flex h-72 w-full items-center justify-center"
-                  className="h-full w-full object-contain p-4 drop-shadow-[0_28px_35px_rgba(0,0,0,0.45)]"
-                />
+              <div className="relative mb-5 h-80 overflow-hidden rounded-[26px] border border-white/8">
+                <ProductModalImage image={selected.image} name={selected.name} />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06)_0%,rgba(0,0,0,0.18)_38%,rgba(0,0,0,0.56)_100%)]" />
               </div>
 
               <h3 className="text-3xl font-black">{selected.name}</h3>
