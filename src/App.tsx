@@ -99,7 +99,7 @@ const categories: Category[] = [
     price: 'Medium 550ml • 6,90€ | Large 950ml • 8,90€',
     accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
     description:
-      'Boissons énergisantes, fraîches et sportives • 0 sucre • effet visuel premium',
+      'Boissons énergisantes, fraîches et sportives • 0 sucre • visuel premium • format medium ou large',
     items: [
       {
         name: 'Apple Kiss',
@@ -152,7 +152,7 @@ const categories: Category[] = [
       {
         name: 'Elf',
         description:
-          'Une recette très fruitée et fun, facile à boire et parfaite au quotidien.',
+          'Une recette très fruitée, fun et facile à boire, parfaite au quotidien.',
         flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
         options: [
           { label: 'Medium 550ml — 6,90€', priceCents: 690 },
@@ -185,7 +185,7 @@ const categories: Category[] = [
       {
         name: 'Perroquet',
         description:
-          'Une recette ultra colorée, fun et expressive, parfaite pour l’univers Shake Bar.',
+          'Une boisson ultra colorée, fun et expressive, parfaite pour l’univers Shake Bar.',
         flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
         options: [
           { label: 'Medium 550ml — 6,90€', priceCents: 690 },
@@ -270,7 +270,7 @@ const categories: Category[] = [
     price: '8,90€',
     accent: 'from-yellow-400 via-amber-400 to-orange-500',
     description:
-      'Smoothies gourmands et protéinés • repas plaisir • texture premium',
+      'Smoothies gourmands et protéinés • repas plaisir • texture premium • 25g de protéines sur plusieurs recettes',
     items: [
       {
         name: 'Choco Buenos',
@@ -451,7 +451,7 @@ const categories: Category[] = [
     icon: Coffee,
     price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€',
     accent: 'from-orange-400 via-amber-400 to-yellow-500',
-    description: 'Thés, cafés et boissons gourmandes chaudes',
+    description: 'Thés, cafés et boissons gourmandes chaudes • options classiques et premium',
     items: [
       {
         name: 'Thé aloe vera',
