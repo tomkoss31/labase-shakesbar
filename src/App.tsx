@@ -13,7 +13,6 @@ import {
   Coffee,
   Zap,
   Heart,
-  Dumbbell,
   Instagram,
   Star,
   CheckCircle2,
@@ -94,19 +93,190 @@ const extraCatalog: ExtraOption[] = [
 
 const categories: Category[] = [
   {
+    id: 'drinks',
+    name: 'Boissons',
+    icon: Zap,
+    price: 'Medium 550ml • 6,90€ | Large 950ml • 8,90€',
+    accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
+    description:
+      'Boissons énergisantes, fraîches et sportives • 0 sucre • effet visuel premium',
+    items: [
+      {
+        name: 'Apple Kiss',
+        description:
+          'Une boisson fraîche et vive avec une vraie sensation de fraîcheur et une belle intensité visuelle.',
+        flavors: 'Citron • Pomme verte • énergie clean',
+        badge: 'Fresh',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/apple-kiss.png',
+      },
+      {
+        name: 'Black Panther',
+        description:
+          'Une recette plus dark, plus intense, très premium et très marquante visuellement.',
+        flavors: 'Citron • Cerise • Framboise bleue • énergie intense',
+        badge: 'Dark vibe',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/black-panther.png',
+      },
+      {
+        name: 'Cherry White Grappe',
+        description:
+          'Une création fruitée complète avec un profil plus original et rafraîchissant.',
+        flavors: 'Citron • Framboise • Cerise • Raisin blanc',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/cherry-white-grappe.png',
+      },
+      {
+        name: 'Electric Blue',
+        description:
+          'Une boisson iconique du club, pensée pour l’énergie et l’impact visuel.',
+        flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
+        badge: 'Iconique',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/electric-blue.png',
+      },
+      {
+        name: 'Elf',
+        description:
+          'Une recette très fruitée et fun, facile à boire et parfaite au quotidien.',
+        flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/elf.png',
+      },
+      {
+        name: 'La Vie en Rose',
+        description:
+          'Une boisson pink signature, fraîche, légère et très visuelle.',
+        flavors: 'Citron • Framboise • Pomme • Fruit du dragon',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/la-vie-en-rose.png',
+      },
+      {
+        name: "L'Exotic",
+        description:
+          'La version exotique du menu, pensée pour un rendu tropical et premium.',
+        flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/l-exotic.png',
+      },
+      {
+        name: 'Perroquet',
+        description:
+          'Une recette ultra colorée, fun et expressive, parfaite pour l’univers Shake Bar.',
+        flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/perroquet.png',
+      },
+      {
+        name: 'Pina Colada',
+        description:
+          'Une version énergisante à l’esprit vacances, très facile à aimer.',
+        flavors: 'Citron • Pina colada • Ananas',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/pina-colada.png',
+      },
+      {
+        name: 'Po Melon',
+        description:
+          'Une recette fraîche, fruitée et désaltérante avec une belle identité.',
+        flavors: 'Citron • Framboise • Melon • Pomme',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/po-melon.png',
+      },
+      {
+        name: 'Red Paradize',
+        description:
+          'Une boisson lumineuse, fruitée et solaire, très agréable à boire.',
+        flavors: 'Citron • Pêche • Ananas',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/red-paradize.png',
+      },
+      {
+        name: 'Soleil',
+        description:
+          'Une recette très ensoleillée aux notes d’ananas, pêche et mandarine.',
+        flavors: 'Citron • Pêche • Mandarine • Ananas',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/soleil.png',
+      },
+      {
+        name: 'Sortilège Noir',
+        description:
+          'Une recette mystérieuse et fruitée, très impactante en carte.',
+        flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/sortilege-noir.png',
+      },
+      {
+        name: 'Electro’Lyte',
+        description:
+          'La boisson sport du club, pensée pour l’hydratation, l’effort et la récupération.',
+        flavors: 'Électrolytes • hydratation sport • performance',
+        badge: 'Performance',
+        options: [
+          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
+          { label: 'Large 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/sport/electro-lyte.png',
+      },
+    ],
+  },
+  {
     id: 'smoothies',
     name: 'Smoothies nutritionnels',
     icon: Coffee,
     price: '8,90€',
     accent: 'from-yellow-400 via-amber-400 to-orange-500',
     description:
-      '24g de protéines végétales • 25 vitamines & minéraux • texture gourmande',
+      'Smoothies gourmands et protéinés • repas plaisir • texture premium',
     items: [
       {
         name: 'Choco Buenos',
         description:
           'Le smoothie signature ultra gourmand, inspiré d’une saveur type Bueno.',
-        flavors: 'Saveur type Kinder Bueno',
+        flavors: 'Saveur type Kinder Bueno • 25g protéines végétales',
         badge: 'Produit du mois',
         basePriceCents: 890,
         image: '/images/shake/bueno.png',
@@ -115,7 +285,7 @@ const categories: Category[] = [
         name: 'M&M',
         description:
           'Une recette fun et généreuse, pensée pour un maximum d’effet waouh.',
-        flavors: 'Saveur type M&M',
+        flavors: 'Saveur type M&M • texture gourmande',
         badge: 'Produit du mois',
         basePriceCents: 890,
         image: '/images/shake/mm.png',
@@ -124,7 +294,7 @@ const categories: Category[] = [
         name: 'Casse Noisette',
         description:
           'Un smoothie rond et réconfortant, avec une vraie identité café/noisette.',
-        flavors: 'Café latte • Noisette',
+        flavors: 'Café latte • Noisette • gourmand',
         badge: 'Best-seller',
         basePriceCents: 890,
         image: '/images/shake/casse-noisette.png',
@@ -132,14 +302,15 @@ const categories: Category[] = [
       {
         name: 'Cappuccino',
         description:
-          'Un grand classique gourmand pour les amateurs de café et chocolat.',
+          'Un grand classique pour les amateurs de café et chocolat.',
         flavors: 'Café latte • Chocolat intense',
         basePriceCents: 890,
         image: '/images/shake/cappuccino.png',
       },
       {
         name: 'Pina Colada',
-        description: 'Une recette fraîche et exotique, à l’esprit vacances.',
+        description:
+          'Une recette fraîche, exotique et facile à aimer.',
         flavors: 'Vanille • Ananas • Coco',
         basePriceCents: 890,
         image: '/images/shake/pina-colada.png',
@@ -148,7 +319,7 @@ const categories: Category[] = [
         name: 'Fraise Bonbon',
         description:
           'Une saveur douce et régressive, très appréciée pour son côté dessert.',
-        flavors: 'Vanille • Fraise',
+        flavors: 'Vanille • Fraise • ultra plaisir',
         badge: 'Gourmand',
         basePriceCents: 890,
         image: '/images/shake/fraise-bonbon.png',
@@ -156,7 +327,7 @@ const categories: Category[] = [
       {
         name: "Pim's",
         description:
-          'Une association fruitée et chocolatée avec une belle intensité.',
+          'Une association fruitée et chocolatée avec une belle intensité en bouche.',
         flavors: 'Chocolat • Framboise',
         basePriceCents: 890,
         image: '/images/shake/pims.png',
@@ -164,7 +335,7 @@ const categories: Category[] = [
       {
         name: 'Tarte à la pomme',
         description:
-          'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille.',
+          'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille très agréable.',
         flavors: 'Vanille • Pomme',
         basePriceCents: 890,
         image: '/images/shake/tarte-a-la-pomme.png',
@@ -173,7 +344,7 @@ const categories: Category[] = [
         name: 'Snickers',
         description:
           'Le smoothie très gourmand pour les amateurs de chocolat et cacahuètes.',
-        flavors: 'Chocolat • Cacahuètes',
+        flavors: 'Chocolat • Cacahuètes • 25g protéines',
         badge: 'Ultra gourmand',
         basePriceCents: 890,
         image: '/images/shake/snikers.png',
@@ -229,160 +400,6 @@ const categories: Category[] = [
     ],
   },
   {
-    id: 'drinks',
-    name: 'Boissons énergisantes',
-    icon: Zap,
-    price: 'Start 6,90€ • Boost 8,90€',
-    accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
-    description: '0 sucre • 20 calories • vitamines B & C • extraits végétaux',
-    items: [
-      {
-        name: 'Apple Kiss',
-        description:
-          'Une boisson fraîche et vive, parfaite pour un boost léger ou renforcé.',
-        flavors: 'Citron • Pomme verte',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/apple-kiss.png',
-      },
-      {
-        name: 'Black Panther',
-        description:
-          'Une recette plus intense et plus dark dans l’esprit, très visuelle.',
-        flavors: 'Citron • Cerise • Framboise bleue',
-        badge: 'Dark vibe',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/black-panther.png',
-      },
-      {
-        name: 'Cherry White Grappe',
-        description:
-          'Une création fruitée très complète, avec un profil original.',
-        flavors: 'Citron • Framboise • Cerise • Raisin blanc',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/cherry-white-grappe.png',
-      },
-      {
-        name: 'Electric Blue',
-        description:
-          'Une boisson iconique, ultra visuelle, parfaite pour l’univers Shake Bar.',
-        flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
-        badge: 'Iconique',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/electric-blue.png',
-      },
-      {
-        name: 'Elf',
-        description: 'Une recette fun et fruitée, très agréable et accessible.',
-        flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/elf.png',
-      },
-      {
-        name: 'La Vie en Rose',
-        description:
-          'Une boisson pleine de fraîcheur avec un vrai côté pink signature.',
-        flavors: 'Citron • Framboise • Pomme • Fruit du dragon',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/la-vie-en-rose.png',
-      },
-      {
-        name: "L'Exotic",
-        description:
-          'La recette exotique par excellence pour ceux qui aiment les notes tropicales.',
-        flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/l-exotic.png',
-      },
-      {
-        name: 'Perroquet',
-        description:
-          'Une boisson très colorée et très fun, pensée pour marquer visuellement.',
-        flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/perroquet.png',
-      },
-      {
-        name: 'Pina Colada',
-        description:
-          'Une version énergisante à l’esprit vacances, très facile à aimer.',
-        flavors: 'Citron • Pina colada • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/pina-colada.png',
-      },
-      {
-        name: 'Po Melon',
-        description:
-          'Une recette fraîche et fruitée avec une belle personnalité.',
-        flavors: 'Citron • Framboise • Melon • Pomme',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/po-melon.png',
-      },
-      {
-        name: 'Red Paradize',
-        description: 'Une boisson lumineuse, fruitée et très agréable à boire.',
-        flavors: 'Citron • Pêche • Ananas',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/red-paradize.png',
-      },
-      {
-        name: 'Soleil',
-        description: 'Un mix ensoleillé aux notes pêche, mandarine et ananas.',
-        flavors: 'Citron • Pêche • Mandarine • Ananas',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/soleil.png',
-      },
-      {
-        name: 'Sortilège Noir',
-        description:
-          'Une recette mystérieuse, fruitée et très impactante visuellement.',
-        flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/sortilege-noir.png',
-      },
-    ],
-  },
-  {
     id: 'health',
     name: 'Boissons santé',
     icon: Heart,
@@ -394,7 +411,7 @@ const categories: Category[] = [
         name: 'Hydrat’Max',
         description:
           'Une boisson orientée hydratation et fraîcheur, parfaite au quotidien.',
-        flavors: 'Orange • Mandarine',
+        flavors: 'Orange • Mandarine • vitamine C',
         badge: 'Vitamine C',
         basePriceCents: 690,
         image: '/images/sante/hydrat-max.png',
@@ -402,7 +419,7 @@ const categories: Category[] = [
       {
         name: 'Casse Grippe',
         description:
-          'Une recette pensée autour du confort et du soutien immunité.',
+          'Une recette pensée autour du confort, de la chaleur et du soutien immunité.',
         flavors: 'Baies sauvages • Framboise • Pomme',
         badge: 'Immunité',
         basePriceCents: 690,
@@ -429,54 +446,58 @@ const categories: Category[] = [
     ],
   },
   {
-    id: 'sport',
-    name: 'Sport',
-    icon: Dumbbell,
-    price: 'Start 6,90€ • Boost 8,90€',
-    accent: 'from-violet-500 via-indigo-500 to-blue-600',
-    description: 'Hydratation sport • électrolytes • récupération',
-    items: [
-      {
-        name: 'Electro’Lyte',
-        description:
-          'La boisson sport pensée pour l’hydratation et le soutien de l’effort.',
-        flavors: 'Boisson glucidique & électrolytes',
-        badge: 'Performance',
-        image: '/images/sport/electro-lyte.png',
-        options: [
-          { label: 'Start 6,90€', priceCents: 690 },
-          { label: 'Boost 8,90€', priceCents: 890 },
-        ],
-      },
-    ],
-  },
-  {
     id: 'hot',
-    name: 'Café / Thé',
+    name: 'Café & Thé',
     icon: Coffee,
-    price: 'Petit 3,90€ • Grand 5,90€',
+    price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€',
     accent: 'from-orange-400 via-amber-400 to-yellow-500',
-    description: 'Boissons chaudes simples, efficaces et gourmandes',
+    description: 'Thés, cafés et boissons gourmandes chaudes',
     items: [
       {
-        name: 'Café',
+        name: 'Thé aloe vera',
         description:
-          'Un café chaud simple et efficace, en petit ou grand format.',
-        flavors: 'Petit ou grand format',
+          'Une boisson chaude légère et agréable, parfaite pour une pause bien-être.',
+        flavors: 'Pêche • Framboise • Citron',
         options: [
-          { label: 'Petit 3,90€', priceCents: 390 },
-          { label: 'Grand 5,90€', priceCents: 590 },
+          { label: 'Petit 250ml — 3,90€', priceCents: 390 },
+          { label: 'Grand 450ml — 5,90€', priceCents: 590 },
         ],
+        image: '/images/hot/the-aloe-vera.png',
       },
       {
-        name: 'Thé',
+        name: 'Café classique',
         description:
-          'Une boisson chaude légère et agréable, idéale à tout moment.',
-        flavors: 'Petit ou grand format',
+          'Un café simple, efficace et premium, en petit ou grand format.',
+        flavors: 'Intense • chaud • réconfortant',
         options: [
-          { label: 'Petit 3,90€', priceCents: 390 },
-          { label: 'Grand 5,90€', priceCents: 590 },
+          { label: 'Petit 250ml — 3,90€', priceCents: 390 },
+          { label: 'Grand 450ml — 5,90€', priceCents: 590 },
         ],
+        image: '/images/hot/cafe-classique.png',
+      },
+      {
+        name: 'Chocolat chaud',
+        description:
+          'Un chocolat chaud gourmand, onctueux et réconfortant.',
+        flavors: 'Chaud • gourmand • cocooning',
+        options: [
+          { label: 'Petit 250ml — 4,90€', priceCents: 490 },
+          { label: 'Grand 450ml — 6,90€', priceCents: 690 },
+        ],
+        image: '/images/hot/chocolat-chaud.png',
+      },
+      {
+        name: 'Café gourmet',
+        description:
+          'Une boisson café premium avec sélection de saveurs gourmandes.',
+        flavors: 'Macchiato • Choco Mocha • Latte noisettes • Vanille latte',
+        options: [
+          { label: 'Macchiato — Grand 450ml — 5,90€', priceCents: 590 },
+          { label: 'Choco Mocha — Grand 450ml — 5,90€', priceCents: 590 },
+          { label: 'Latte aux noisettes — Grand 450ml — 5,90€', priceCents: 590 },
+          { label: 'Vanille latte — Grand 450ml — 5,90€', priceCents: 590 },
+        ],
+        image: '/images/hot/cafe-gourmet.png',
       },
     ],
   },
@@ -493,8 +514,9 @@ const categories: Category[] = [
         description:
           'Une gaufre gourmande avec toppings inclus, pensée pour le plaisir.',
         flavors:
-          'Toppings inclus : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
+          'Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
         options: [{ label: 'Gaufre 6,90€', priceCents: 690 }],
+        image: '/images/waffle/gaufre-healthy.png',
       },
     ],
   },
@@ -556,7 +578,7 @@ function ProductCardBackground({
         className="h-full w-full object-cover"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.28)_35%,rgba(0,0,0,0.78)_78%,rgba(0,0,0,0.95)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),transparent_35%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),transparent_35%)]" />
     </div>
   );
 }
@@ -648,11 +670,11 @@ function App() {
   const featuredItems = useMemo(
     () => [
       { name: 'Choco Buenos', subtitle: 'Produit du mois' },
-      { name: 'M&M', subtitle: 'Produit du mois' },
       { name: 'Snickers', subtitle: 'Ultra gourmand' },
+      { name: 'Black Panther', subtitle: 'Dark vibe' },
       { name: 'Electric Blue', subtitle: 'Iconique' },
-      { name: 'Limonade Rose', subtitle: 'Glow' },
       { name: 'Electro’Lyte', subtitle: 'Performance' },
+      { name: 'Café gourmet', subtitle: 'Premium' },
     ],
     [],
   );
@@ -858,10 +880,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.06),_transparent_28%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.045] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:40px_40px]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.06),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.05),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.05),_transparent_30%),linear-gradient(180deg,#040404_0%,#090909_100%)]" />
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/80 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_0_30px_rgba(255,255,255,0.04)]">
             <p className="text-3xl font-black leading-none tracking-tight">
@@ -930,7 +951,7 @@ function App() {
 
         <section className="pb-7 pt-8">
           <div className="overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-yellow-400/8 via-white/[0.02] to-fuchsia-500/8 p-[1px] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-            <div className="rounded-[33px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.13),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_24%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(17,17,17,0.95))] p-6 md:p-8">
+            <div className="rounded-[33px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.12),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_24%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(17,17,17,0.95))] p-6 md:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
                   <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">
@@ -948,9 +969,8 @@ function App() {
                   </h1>
 
                   <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
-                    Smoothies, boissons énergisantes, santé, sport, café, thé et gaufre :
-                    une expérience plus premium, plus fluide et pensée pour commander
-                    rapidement avec panier, WhatsApp et paiement Square.
+                    Smoothies, boissons, santé, cafés, thés et gourmandises :
+                    une expérience premium, fluide et pensée pour commander rapidement.
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3 text-sm">
@@ -991,7 +1011,7 @@ function App() {
         </section>
 
         <section className="mb-9 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
+          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
@@ -1054,16 +1074,14 @@ function App() {
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-black">2. Je personnalise</p>
                 <p className="mt-1 text-sm text-white/65">
-                  Format Start / Boost, petit / grand, extras à +2,50€, puis ajout
-                  au panier.
+                  Taille, saveur, extras à +2,50€, puis ajout au panier.
                 </p>
               </div>
 
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-black">3. Je valide</p>
                 <p className="mt-1 text-sm text-white/65">
-                  Je renseigne mon nom et mon heure de retrait, puis j’envoie sur
-                  WhatsApp ou je paie directement avec Square.
+                  J’envoie sur WhatsApp ou je paie directement avec Square, puis je viens récupérer au club.
                 </p>
               </div>
 
@@ -1193,11 +1211,11 @@ function App() {
                 Best sellers
               </p>
               <h2 className="text-2xl font-black md:text-3xl">
-                Les boissons signatures du club
+                Les signatures du club
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-white/65">
-                Une sélection qui représente le mieux l’univers La Base : gourmandise,
-                énergie, fraîcheur et visuel fort.
+                Une sélection qui représente le mieux l’univers La Base :
+                gourmandise, énergie, fraîcheur et visuel fort.
               </p>
             </div>
 
@@ -1274,9 +1292,8 @@ function App() {
                 Des produits gourmands avec une vraie logique bien-être
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Smoothies nutritionnels, boissons énergisantes, boissons santé,
-                sport, café, thé et gaufre : tout est pensé pour allier plaisir,
-                rapidité et expérience simple à commander.
+                Smoothies nutritionnels, boissons, santé, cafés, thés et gaufres :
+                tout est pensé pour allier plaisir, rapidité et expérience simple à commander.
               </p>
             </div>
 
@@ -1347,7 +1364,7 @@ function App() {
 
               {selected.options && selected.options.length > 0 && (
                 <div className="mt-6">
-                  <p className="mb-3 font-bold">Choix de format</p>
+                  <p className="mb-3 font-bold">Choix / taille</p>
                   <div className="flex flex-wrap gap-2">
                     {selected.options.map((opt) => (
                       <button
