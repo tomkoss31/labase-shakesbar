@@ -456,6 +456,7 @@ const categories: Category[] = [
         options: [
           { label: 'Petit 250ml — 3,90€', priceCents: 390 },
           { label: 'Grand 450ml — 5,90€', priceCents: 590 },
+image: '/images/hot/cafe-classique.png',
         ],
       },
       {
@@ -1164,7 +1165,7 @@ function App() {
                         <div className="relative h-[460px]">
                           <ProductCardBackground image={item.image} name={item.name} />
 
-                          <div className="absolute right-4 top-4 h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 shadow-lg opacity-95" />
+                          <div className="absolute right-4 top-4 h-8 w-8 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm" />
 
                           <div className="absolute inset-x-0 bottom-0 p-5">
                             <div className="mb-3 flex flex-wrap gap-2">
