@@ -737,6 +737,42 @@ function buildWhatsAppMessage(
   return encodeURIComponent(lines.join('\n'));
 }
 
+function getBadgeLabel(badge?: string) {
+  switch (badge) {
+    case 'Produit du mois':
+      return 'Nouveau';
+    case 'Best-seller':
+      return 'Le plus commandé';
+    case 'Ultra gourmand':
+    case 'Gourmand':
+      return 'Gourmand';
+    case 'Performance':
+      return 'Perf';
+    case 'Iconique':
+      return 'Le plus commandé';
+    default:
+      return badge ?? '';
+  }
+}
+
+function getBadgeClassName(badge?: string) {
+  switch (badge) {
+    case 'Produit du mois':
+    case 'Nouveau':
+      return 'border-cyan-400/20 bg-cyan-400/12 text-cyan-200';
+    case 'Best-seller':
+    case 'Iconique':
+      return 'border-emerald-400/20 bg-emerald-400/12 text-emerald-200';
+    case 'Ultra gourmand':
+    case 'Gourmand':
+      return 'border-pink-400/20 bg-pink-400/12 text-pink-200';
+    case 'Performance':
+      return 'border-orange-400/20 bg-orange-400/12 text-orange-200';
+    default:
+      return 'border-yellow-400/20 bg-yellow-400/12 text-yellow-300';
+  }
+}
+
 function ProductCardBackground({
   image,
   name,
@@ -925,6 +961,11 @@ function App() {
       { name: 'Café gourmet', subtitle: 'Premium' },
       { name: 'Electro’Lyte', subtitle: 'Performance' },
     ],
+    [],
+  );
+
+  const bestCombo = useMemo(
+    () => comboOffers.find((combo) => combo.id === 'combo-power') ?? comboOffers[0],
     [],
   );
 
@@ -1350,8 +1391,18 @@ function App() {
             </p>
           </div>
 
-          <button
+          <motion.button
             onClick={() => setDrawerOpen(true)}
+            animate={
+              cartCount > 0
+                ? { scale: [1, 1.03, 1] }
+                : { scale: 1 }
+            }
+            transition={
+              cartCount > 0
+                ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
+                : { duration: 0.2 }
+            }
             className="relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
           >
             <span className="inline-flex items-center gap-2">
@@ -1362,7 +1413,7 @@ function App() {
                 {cartCount}
               </span>
             )}
-          </button>
+          </motion.button>
         </div>
       </header>
 
@@ -1507,8 +1558,19 @@ function App() {
                   Produits du mois
                 </p>
                 <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                  Les saveurs à découvrir maintenant
+                  Les saveurs qui attirent le plus en ce moment
                 </h2>
+                <p className="mt-2 max-w-2xl text-sm text-white/65">
+                  Deux recettes très visuelles, gourmandes et parfaites pour créer l’effet waouh dès la première visite.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+                    Édition du moment
+                  </span>
+                  <span className="rounded-full border border-pink-400/20 bg-pink-400/10 px-3 py-1 text-xs font-semibold text-pink-200">
+                    Très demandé au club
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1581,11 +1643,51 @@ function App() {
         <section className="mb-10">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Formules combo</p>
-              <h2 className="mt-1 text-2xl font-black md:text-3xl">Les offres les plus complètes du club</h2>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-300">
+                Formules combo
+              </p>
+              <h2 className="mt-1 text-2xl font-black md:text-3xl">
+                Les offres les plus complètes du club
+              </h2>
               <p className="mt-2 max-w-3xl text-sm text-white/65">
                 Associe un smoothie nutritionnel et une boisson énergisante, ou crée une vraie pause chaude avec thé, café, chocolat chaud ou café gourmet + gaufre topping au choix.
               </p>
+            </div>
+          </div>
+
+          <div className="mb-5 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.10),rgba(236,72,153,0.08),rgba(250,204,21,0.10))] p-[1px] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+            <div className="grid gap-5 rounded-[29px] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.96))] p-5 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
+              <div>
+                <p className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
+                  <Flame size={14} /> Best combo
+                </p>
+                <h3 className="mt-3 text-2xl font-black text-white md:text-3xl">
+                  {bestCombo.name}
+                </h3>
+                <p className="mt-2 text-white/70">
+                  {bestCombo.subtitle} — la formule la plus forte visuellement et la plus complète à mettre en avant.
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
+                    Prix : {euroFromCents(bestCombo.priceCents)}
+                  </span>
+                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-200">
+                    Économie : {euroFromCents(bestCombo.normalPriceCents - bestCombo.priceCents)}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openCombo(bestCombo.id)}
+                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
+                >
+                  Composer ce combo <ChevronRight size={18} />
+                </button>
+              </div>
+
+              <div className="relative h-[220px] overflow-hidden rounded-[24px] border border-white/10">
+                <ComboCardImage image={bestCombo.image} name={bestCombo.name} />
+              </div>
             </div>
           </div>
 
@@ -1597,7 +1699,7 @@ function App() {
                 onClick={() => openCombo(combo.id)}
                 className="group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:-translate-y-1 hover:border-yellow-400/25"
               >
-                <div className="relative h-[320px]">
+                <div className="relative h-[255px] md:h-[270px]">
                   <ComboCardImage image={combo.image} name={combo.name} />
                   <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-cyan-400 to-pink-500" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
@@ -1609,9 +1711,9 @@ function App() {
                         Économise {euroFromCents(combo.normalPriceCents - combo.priceCents)}
                       </span>
                     </div>
-                    <p className="text-3xl font-black text-white">{combo.name}</p>
-                    <p className="mt-2 max-w-lg text-sm text-white/72">{combo.description}</p>
-                    <div className="mt-4 flex items-center justify-between gap-3">
+                    <p className="text-2xl font-black text-white">{combo.name}</p>
+                    <p className="mt-1 max-w-lg text-sm text-white/72">{combo.description}</p>
+                    <div className="mt-3 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-2xl font-black text-white">{euroFromCents(combo.priceCents)}</p>
                         <p className="text-sm text-white/55 line-through">{euroFromCents(combo.normalPriceCents)}</p>
@@ -1703,8 +1805,12 @@ function App() {
                           <div className="absolute inset-x-0 bottom-0 p-5">
                             <div className="mb-3 flex flex-wrap items-center gap-2">
                               {item.badge && (
-                                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/12 px-3 py-1 text-xs font-semibold text-yellow-300 backdrop-blur">
-                                  {item.badge}
+                                <span
+                                  className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur ${getBadgeClassName(
+                                    item.badge,
+                                  )}`}
+                                >
+                                  {getBadgeLabel(item.badge)}
                                 </span>
                               )}
                               {getStartingPriceLabel(item) && (
@@ -2507,12 +2613,22 @@ function App() {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/80 px-4 py-3 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur"
+            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.98 }}
+            className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 overflow-hidden rounded-[22px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.16),rgba(0,0,0,0.86))] px-4 py-3 text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur"
           >
-            {toastMessage}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
+                <CheckCircle2 size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                  Ajout confirmé
+                </p>
+                <p className="text-sm font-black text-white">{toastMessage}</p>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
