@@ -17,6 +17,10 @@ import {
   Star,
   CheckCircle2,
   X,
+  Sparkles,
+  Flame,
+  Trophy,
+  Target,
 } from 'lucide-react';
 
 type ProductOption = {
@@ -520,6 +524,24 @@ const categories: Category[] = [
   },
 ];
 
+const accompagnementCards = [
+  {
+    icon: Target,
+    title: 'Perte de poids & bien-être',
+    text: 'Fais le point sur tes habitudes, ton objectif et la meilleure direction à prendre.',
+  },
+  {
+    icon: Trophy,
+    title: 'Énergie & nutrition sportive',
+    text: 'Découvre un accompagnement orienté routine, récupération, effort et équilibre au quotidien.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Découverte du projet',
+    text: 'Tu peux aussi réserver un créneau pour échanger sur le club, les produits ou le côté activité.',
+  },
+];
+
 function euroFromCents(cents: number) {
   return `${(cents / 100).toFixed(2).replace('.', ',')}€`;
 }
@@ -573,7 +595,7 @@ function ProductCardBackground({
         src={image}
         alt={name}
         onError={() => setErrored(true)}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.28)_35%,rgba(0,0,0,0.78)_78%,rgba(0,0,0,0.95)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),transparent_35%)]" />
@@ -613,6 +635,29 @@ function ProductModalImage({
   );
 }
 
+function FilterPill({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
+        active
+          ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 font-black text-black shadow-[0_10px_24px_rgba(250,204,21,0.16)]'
+          : 'border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.08]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function App() {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -625,6 +670,7 @@ function App() {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -634,6 +680,12 @@ function App() {
       setCart([]);
     }
   }, []);
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = window.setTimeout(() => setToastMessage(null), 1800);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
 
   const allProducts = useMemo(() => {
     return categories.flatMap((category) =>
@@ -721,6 +773,29 @@ function App() {
   const hasRequiredPickupInfo =
     customerName.trim().length > 0 && pickupTime.trim().length > 0;
 
+  const hasSweetInCart = cart.some((item) =>
+    item.name.toLowerCase().includes('gaufre') ||
+    item.categoryName.toLowerCase().includes('gaufre'),
+  );
+
+  const hasHealthInCart = cart.some((item) =>
+    item.categoryName.toLowerCase().includes('santé'),
+  );
+
+  const cartSuggestion = useMemo(() => {
+    if (cart.length === 0) return null;
+
+    if (!hasHealthInCart) {
+      return allProducts.find((product) => product.name === 'Limonade Rose') ?? null;
+    }
+
+    if (!hasSweetInCart) {
+      return allProducts.find((product) => product.name === 'Gaufre healthy') ?? null;
+    }
+
+    return allProducts.find((product) => product.name === 'Café gourmet') ?? null;
+  }, [allProducts, cart.length, hasHealthInCart, hasSweetInCart]);
+
   function getSelectedBasePrice(product: SelectedProduct) {
     if (selectedOption && product.options?.length) {
       const option = product.options.find((opt) => opt.label === selectedOption);
@@ -734,6 +809,18 @@ function App() {
       const extra = extraCatalog.find((entry) => entry.name === extraName);
       return sum + (extra?.priceCents ?? 0);
     }, 0);
+  }
+
+  function getStartingPriceLabel(product: Product) {
+    if (product.options?.length) {
+      return euroFromCents(Math.min(...product.options.map((opt) => opt.priceCents)));
+    }
+
+    if (typeof product.basePriceCents === 'number') {
+      return euroFromCents(product.basePriceCents);
+    }
+
+    return '';
   }
 
   function openProduct(productName: string) {
@@ -797,9 +884,40 @@ function App() {
       ];
     });
 
+    setToastMessage(`${product.name} ajouté au panier`);
     setSelected(null);
     setSelectedOption('');
     setSelectedExtras([]);
+  }
+
+  function addQuickProductToCart(product: SelectedProduct) {
+    const option = product.options?.[0]?.label ?? '';
+    const basePrice = product.options?.[0]?.priceCents ?? product.basePriceCents ?? 0;
+    const key = `${product.categoryId}-${product.name}-${option}-`;
+
+    setCart((prev) => {
+      const existing = prev.find((item) => item.key === key);
+      if (existing) {
+        return prev.map((item) =>
+          item.key === key ? { ...item, quantity: item.quantity + 1 } : item,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          key,
+          name: product.name,
+          categoryName: product.categoryName,
+          quantity: 1,
+          option,
+          extras: [],
+          unitPriceCents: basePrice,
+        },
+      ];
+    });
+
+    setToastMessage(`${product.name} ajouté au panier`);
   }
 
   function updateQuantity(key: string, delta: number) {
@@ -1096,26 +1214,17 @@ function App() {
             </h2>
 
             <div className="mt-4 space-y-3">
-              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">Perte de poids & bien-être</p>
-                <p className="mt-1 text-sm text-white/65">
-                  Fais le point sur tes habitudes, ton objectif et la meilleure direction à prendre.
-                </p>
-              </div>
-
-              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">Énergie & nutrition sportive</p>
-                <p className="mt-1 text-sm text-white/65">
-                  Découvre un accompagnement orienté routine, récupération, effort et équilibre au quotidien.
-                </p>
-              </div>
-
-              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">Découverte du projet</p>
-                <p className="mt-1 text-sm text-white/65">
-                  Tu peux aussi réserver un créneau pour échanger sur le club, les produits ou le côté activité.
-                </p>
-              </div>
+              {accompagnementCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div key={card.title} className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                    <p className="inline-flex items-center gap-2 font-black">
+                      <Icon size={16} className="text-yellow-300" /> {card.title}
+                    </p>
+                    <p className="mt-1 text-sm text-white/65">{card.text}</p>
+                  </div>
+                );
+              })}
 
               <a
                 href={BRAND.discoveryUrl}
@@ -1203,10 +1312,15 @@ function App() {
                           <ProductCardBackground image={item.image} name={item.name} />
 
                           <div className="absolute inset-x-0 bottom-0 p-5">
-                            <div className="mb-3 flex flex-wrap gap-2">
+                            <div className="mb-3 flex flex-wrap items-center gap-2">
                               {item.badge && (
                                 <span className="rounded-full border border-yellow-400/20 bg-yellow-400/12 px-3 py-1 text-xs font-semibold text-yellow-300 backdrop-blur">
                                   {item.badge}
+                                </span>
+                              )}
+                              {getStartingPriceLabel(item) && (
+                                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
+                                  Dès {getStartingPriceLabel(item)}
                                 </span>
                               )}
                             </div>
@@ -1220,7 +1334,7 @@ function App() {
 
                             <div className="mt-6 flex items-center justify-between gap-3">
                               <span className="text-sm font-semibold text-white/85">
-                                Ajouter
+                                Personnaliser
                               </span>
                               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur">
                                 <ChevronRight size={18} />
@@ -1238,17 +1352,22 @@ function App() {
 
         <section className="mb-8 grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
           <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="mb-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                Best sellers
-              </p>
-              <h2 className="text-2xl font-black md:text-3xl">
-                Les signatures du club
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm text-white/65">
-                Une sélection qui représente le mieux l’univers La Base :
-                gourmandise, énergie, fraîcheur et visuel fort.
-              </p>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+                  Best sellers
+                </p>
+                <h2 className="text-2xl font-black md:text-3xl">
+                  Les signatures du club
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-white/65">
+                  Une sélection qui représente le mieux l’univers La Base :
+                  gourmandise, énergie, fraîcheur et visuel fort.
+                </p>
+              </div>
+              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
+                Déjà testé & approuvé au club
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
@@ -1545,6 +1664,22 @@ function App() {
                       </div>
                     ))}
 
+                    {cartSuggestion && (
+                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-fuchsia-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">
+                          <Flame size={14} /> Suggestion du moment
+                        </p>
+                        <h4 className="mt-2 text-lg font-black text-black">{cartSuggestion.name}</h4>
+                        <p className="mt-1 text-sm text-black/65">{cartSuggestion.flavors}</p>
+                        <button
+                          onClick={() => addQuickProductToCart(cartSuggestion)}
+                          className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-black px-4 py-2.5 text-sm font-bold text-white transition hover:bg-black/85"
+                        >
+                          <Plus size={15} /> Ajouter au panier
+                        </button>
+                      </div>
+                    )}
+
                     <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-yellow-50 to-amber-50 p-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-semibold text-black/70">Total</span>
@@ -1601,30 +1736,20 @@ function App() {
           </>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
 
-function FilterPill({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
-        active
-          ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 font-black text-black shadow-[0_10px_24px_rgba(250,204,21,0.16)]'
-          : 'border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.08]'
-      }`}
-    >
-      {label}
-    </button>
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/80 px-4 py-3 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur"
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
