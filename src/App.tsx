@@ -76,6 +76,7 @@ const BRAND = {
   address: '11 rue Saint Pierre, Verdun',
   mapsUrl:
     'https://www.google.com/maps/search/?api=1&query=11+rue+Saint+Pierre+Verdun',
+  discoveryUrl: 'https://linktr.ee/milmel55',
 };
 
 const googleReviewUrl = 'https://g.page/r/CeJabN1yW1toEAE/review';
@@ -444,7 +445,7 @@ const categories: Category[] = [
     id: 'hot',
     name: 'Café / Thé',
     icon: Coffee,
-    price: 'Petit 250ml • 3,90€ | Grand 450ml • 6,90€',
+    price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€ | Premium jusqu’à 6,90€',
     accent: 'from-orange-400 via-amber-400 to-yellow-500',
     description: 'Boissons chaudes simples, premium et gourmandes',
     items: [
@@ -457,6 +458,7 @@ const categories: Category[] = [
           { label: 'Petit 250ml — 3,90€', priceCents: 390 },
           { label: 'Grand 450ml — 5,90€', priceCents: 590 },
         ],
+        image: '/images/hot/cafe-classique.png',
       },
       {
         name: 'Thé',
@@ -467,6 +469,7 @@ const categories: Category[] = [
           { label: 'Petit 250ml — 3,90€', priceCents: 390 },
           { label: 'Grand 450ml — 5,90€', priceCents: 590 },
         ],
+        image: '/images/hot/the-aloe-vera.png',
       },
       {
         name: 'Chocolat chaud protéiné',
@@ -478,6 +481,7 @@ const categories: Category[] = [
           { label: 'Petit 250ml — 5,90€', priceCents: 590 },
           { label: 'Grand 450ml — 6,90€', priceCents: 690 },
         ],
+        image: '/images/hot/chocolat-chaud.png',
       },
       {
         name: 'Café gourmet',
@@ -491,6 +495,7 @@ const categories: Category[] = [
           { label: 'Latte noisette — Grand 450ml — 5,90€', priceCents: 590 },
           { label: 'Vanille latte — Grand 450ml — 5,90€', priceCents: 590 },
         ],
+        image: '/images/hot/cafe-gourmet.png',
       },
     ],
   },
@@ -509,6 +514,7 @@ const categories: Category[] = [
         flavors:
           'Toppings inclus : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
         options: [{ label: 'Gaufre 6,90€', priceCents: 690 }],
+        image: '/images/waffle/gaufre-healthy.png',
       },
     ],
   },
@@ -954,18 +960,28 @@ function App() {
                   <h1 className="text-3xl font-black leading-none tracking-tight md:text-5xl">
                     Le{' '}
                     <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                      Shake Bar
+                      Shake Bar healthy
                     </span>{' '}
                     de Verdun,
                     <br />
-                    entre plaisir, énergie et nutrition.
+                    entre plaisir, énergie et accompagnement.
                   </h1>
 
                   <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
-                    Smoothies, boissons énergisantes, santé, café, thé et gaufre :
-                    une expérience plus premium, plus fluide et pensée pour commander
-                    rapidement avec panier, WhatsApp et paiement Square.
+                    Smoothies nutritionnels, boissons énergisantes, café, thé, gaufres healthy et accompagnement personnalisé :
+                    La Base t’accueille pour découvrir un univers orienté perte de poids, bien-être, énergie au quotidien et nutrition sportive.
                   </p>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {['Perte de poids', 'Bien-être', 'Énergie', 'Sport'].map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/85"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
 
                   <div className="mt-6 flex flex-wrap gap-3 text-sm">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
@@ -977,13 +993,34 @@ function App() {
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <Clock3 size={16} className="text-yellow-400" /> {BRAND.prep}
                     </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
                     <a
                       href={BRAND.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-2 font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.22)]"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.22)]"
                     >
                       <MapPin size={16} /> Je m’y rends
+                    </a>
+
+                    <a
+                      href={googleReviewUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 font-semibold text-white transition hover:bg-white/[0.09]"
+                    >
+                      <Star size={16} /> Laisser un avis
+                    </a>
+
+                    <a
+                      href={BRAND.discoveryUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
+                    >
+                      <ChevronRight size={16} /> Découvrir l’accompagnement
                     </a>
                   </div>
                 </div>
@@ -1029,7 +1066,6 @@ function App() {
                   >
                     <div className="relative h-[340px]">
                       <ProductCardBackground image={product?.image} name={item.name} />
-                      <div className="absolute right-4 top-4 h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 shadow-lg" />
                       <div className="absolute inset-x-0 bottom-0 p-5">
                         <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
                           {item.subtitle}
@@ -1053,40 +1089,42 @@ function App() {
 
           <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-              Commande simple & rapide
+              Découvrir l’accompagnement
             </p>
-            <h2 className="mt-1 text-2xl font-black">Choisis, complète, confirme</h2>
+            <h2 className="mt-1 text-2xl font-black">
+              Envie d’aller plus loin que la commande ?
+            </h2>
 
             <div className="mt-4 space-y-3">
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">1. Je choisis mon produit</p>
+                <p className="font-black">Perte de poids & bien-être</p>
                 <p className="mt-1 text-sm text-white/65">
-                  Via les catégories, la recherche ou les produits mis en avant.
+                  Fais le point sur tes habitudes, ton objectif et la meilleure direction à prendre.
                 </p>
               </div>
 
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">2. Je personnalise</p>
+                <p className="font-black">Énergie & nutrition sportive</p>
                 <p className="mt-1 text-sm text-white/65">
-                  Format Medium / Large, petit / grand, extras à +2,50€, puis ajout
-                  au panier.
+                  Découvre un accompagnement orienté routine, récupération, effort et équilibre au quotidien.
                 </p>
               </div>
 
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black">3. Je valide</p>
+                <p className="font-black">Découverte du projet</p>
                 <p className="mt-1 text-sm text-white/65">
-                  Je renseigne mon nom et mon heure de retrait, puis j’envoie sur
-                  WhatsApp ou je paie directement avec Square.
+                  Tu peux aussi réserver un créneau pour échanger sur le club, les produits ou le côté activité.
                 </p>
               </div>
 
-              <button
-                onClick={() => setDrawerOpen(true)}
+              <a
+                href={BRAND.discoveryUrl}
+                target="_blank"
+                rel="noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
-                <ShoppingCart size={18} /> Ouvrir mon panier
-              </button>
+                <ChevronRight size={18} /> Découvrir l’accompagnement
+              </a>
             </div>
           </div>
         </section>
@@ -1164,8 +1202,6 @@ function App() {
                         <div className="relative h-[460px]">
                           <ProductCardBackground image={item.image} name={item.name} />
 
-                          <div className="absolute right-4 top-4 h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 shadow-lg opacity-95" />
-
                           <div className="absolute inset-x-0 bottom-0 p-5">
                             <div className="mb-3 flex flex-wrap gap-2">
                               {item.badge && (
@@ -1207,11 +1243,11 @@ function App() {
                 Best sellers
               </p>
               <h2 className="text-2xl font-black md:text-3xl">
-                Les boissons signatures du club
+                Les signatures du club
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-white/65">
-                Une sélection qui représente le mieux l’univers La Base : gourmandise,
-                énergie, fraîcheur et visuel fort.
+                Une sélection qui représente le mieux l’univers La Base :
+                gourmandise, énergie, fraîcheur et visuel fort.
               </p>
             </div>
 
@@ -1290,7 +1326,9 @@ function App() {
               <p className="mt-3 text-sm leading-relaxed text-white/70">
                 Smoothies nutritionnels, boissons énergisantes, boissons santé,
                 café, thé et gaufre : tout est pensé pour allier plaisir,
-                rapidité et expérience simple à commander.
+                rapidité et expérience simple à commander. Tu peux aussi découvrir
+                l’accompagnement autour du bien-être, de la perte de poids, de l’énergie
+                et de la nutrition sportive.
               </p>
             </div>
 
@@ -1299,6 +1337,15 @@ function App() {
                 <p className="font-bold text-white">Adresse</p>
                 <p className="mt-1">{BRAND.address}</p>
               </div>
+
+              <a
+                href={BRAND.discoveryUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
+              >
+                <ChevronRight size={18} /> Découvrir l’accompagnement
+              </a>
 
               <a
                 href={BRAND.mapsUrl}
