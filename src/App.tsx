@@ -48,12 +48,6 @@ type Category = {
   items: Product[];
 };
 
-type ExtraOption = {
-  name: string;
-  label: string;
-  priceCents: number;
-};
-
 type SelectedProduct = Product & {
   categoryId: string;
   categoryName: string;
@@ -67,8 +61,34 @@ type CartItem = {
   categoryName: string;
   quantity: number;
   option: string;
-  extras: string[];
   unitPriceCents: number;
+};
+
+type ComboSelectionConfig = {
+  label: string;
+  categoryId: string;
+  fixedProductName?: string;
+  allowedProductNames?: string[];
+  fixedOptionLabel?: string;
+};
+
+type ComboOffer = {
+  id:
+    | 'combo-medium'
+    | 'combo-power'
+    | 'combo-tea-time'
+    | 'combo-coffee-break'
+    | 'combo-choco-cocoon'
+    | 'combo-gourmet-break';
+  name: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  priceCents: number;
+  normalPriceCents: number;
+  accent: string;
+  primary: ComboSelectionConfig;
+  secondary: ComboSelectionConfig;
 };
 
 const BRAND = {
@@ -86,14 +106,134 @@ const BRAND = {
 const googleReviewUrl = 'https://g.page/r/CeJabN1yW1toEAE/review';
 const instagramUrl = 'https://www.instagram.com/labase_verdun/';
 
-const extraCatalog: ExtraOption[] = [
-  { name: 'Collagène', label: 'Collagène +2,50€', priceCents: 250 },
-  { name: 'Booster immunité', label: 'Booster immunité +2,50€', priceCents: 250 },
-  { name: 'Fibres à la pomme', label: 'Fibres à la pomme +2,50€', priceCents: 250 },
-  { name: 'Probiotiques', label: 'Probiotiques +2,50€', priceCents: 250 },
-  { name: 'Électrolytes', label: 'Électrolytes +2,50€', priceCents: 250 },
-  { name: 'Créatine', label: 'Créatine +2,50€', priceCents: 250 },
-  { name: 'Protéines', label: 'Protéines +2,50€', priceCents: 250 },
+const comboOffers: ComboOffer[] = [
+  {
+    id: 'combo-medium',
+    name: 'Combo Medium',
+    subtitle: 'Smoothie + boisson Medium',
+    description:
+      'Une formule complète pour profiter d’un smoothie nutritionnel et d’une boisson énergisante medium à prix avantage.',
+    image: '/images/combo/combo-medium.png',
+    priceCents: 1480,
+    normalPriceCents: 1580,
+    accent: 'from-cyan-400 via-sky-400 to-blue-500',
+    primary: {
+      label: 'Choisis ton smoothie',
+      categoryId: 'smoothies',
+    },
+    secondary: {
+      label: 'Choisis ta boisson',
+      categoryId: 'drinks',
+      fixedOptionLabel: 'Medium 550ml — 6,90€',
+    },
+  },
+  {
+    id: 'combo-power',
+    name: 'Combo Power',
+    subtitle: 'Smoothie + boisson Large',
+    description:
+      'La formule la plus complète pour associer un smoothie nutritionnel et une grande boisson énergisante tout en profitant d’un tarif avantageux.',
+    image: '/images/combo/combo-power.png',
+    priceCents: 1590,
+    normalPriceCents: 1780,
+    accent: 'from-fuchsia-500 via-pink-500 to-orange-500',
+    primary: {
+      label: 'Choisis ton smoothie',
+      categoryId: 'smoothies',
+    },
+    secondary: {
+      label: 'Choisis ta boisson',
+      categoryId: 'drinks',
+      fixedOptionLabel: 'Large 950ml — 8,90€',
+    },
+  },
+  {
+    id: 'combo-tea-time',
+    name: 'Tea Time',
+    subtitle: 'Thé grand + gaufre topping au choix',
+    description:
+      'Une formule pause douce et gourmande, idéale pour associer une boisson chaude légère et une gaufre healthy.',
+    image: '/images/combo/combo-tea-time.png',
+    priceCents: 1090,
+    normalPriceCents: 1280,
+    accent: 'from-emerald-400 via-lime-400 to-yellow-400',
+    primary: {
+      label: 'Choisis ton thé',
+      categoryId: 'hot',
+      allowedProductNames: ['Thé'],
+      fixedOptionLabel: 'Grand 450ml — 5,90€',
+    },
+    secondary: {
+      label: 'Choisis ton topping',
+      categoryId: 'waffles',
+      fixedProductName: 'Gaufre healthy',
+    },
+  },
+  {
+    id: 'combo-coffee-break',
+    name: 'Coffee Break',
+    subtitle: 'Café grand + gaufre topping au choix',
+    description:
+      'Une formule simple, lisible et efficace pour une vraie pause café gourmande au club.',
+    image: '/images/combo/combo-coffee-break.png',
+    priceCents: 1090,
+    normalPriceCents: 1280,
+    accent: 'from-amber-400 via-orange-400 to-yellow-500',
+    primary: {
+      label: 'Choisis ton café',
+      categoryId: 'hot',
+      allowedProductNames: ['Café'],
+      fixedOptionLabel: 'Grand 450ml — 5,90€',
+    },
+    secondary: {
+      label: 'Choisis ton topping',
+      categoryId: 'waffles',
+      fixedProductName: 'Gaufre healthy',
+    },
+  },
+  {
+    id: 'combo-choco-cocoon',
+    name: 'Choco Cocoon',
+    subtitle: 'Chocolat chaud + gaufre topping au choix',
+    description:
+      'La formule cocooning du menu pour les amateurs de chocolat chaud protéiné et de pause réconfortante.',
+    image: '/images/combo/combo-choco-cocoon.png',
+    priceCents: 1190,
+    normalPriceCents: 1380,
+    accent: 'from-rose-500 via-orange-400 to-yellow-400',
+    primary: {
+      label: 'Choisis ton chocolat chaud',
+      categoryId: 'hot',
+      allowedProductNames: ['Chocolat chaud protéiné'],
+      fixedOptionLabel: 'Grand 450ml — 6,90€',
+    },
+    secondary: {
+      label: 'Choisis ton topping',
+      categoryId: 'waffles',
+      fixedProductName: 'Gaufre healthy',
+    },
+  },
+  {
+    id: 'combo-gourmet-break',
+    name: 'Gourmet Break',
+    subtitle: 'Café gourmet + gaufre topping au choix',
+    description:
+      'La formule premium pour associer un café gourmet 650 ml à une gaufre healthy et créer un panier plus fort.',
+    image: '/images/combo/combo-gourmet-break.png',
+    priceCents: 1390,
+    normalPriceCents: 1580,
+    accent: 'from-violet-500 via-fuchsia-500 to-orange-400',
+    primary: {
+      label: 'Choisis ta recette café gourmet',
+      categoryId: 'hot',
+      fixedProductName: 'Café gourmet',
+    },
+    secondary: {
+      label: 'Choisis ton topping',
+      categoryId: 'waffles',
+      fixedProductName: 'Gaufre healthy',
+    },
+  },
 ];
 
 const categories: Category[] = [
@@ -101,16 +241,17 @@ const categories: Category[] = [
     id: 'smoothies',
     name: 'Smoothies nutritionnels',
     icon: Coffee,
-    price: '8,90€',
+    price: '650 ml • 8,90€',
     accent: 'from-yellow-400 via-amber-400 to-orange-500',
     description:
-      '24g de protéines végétales • 25 vitamines & minéraux • texture gourmande',
+      '24g de protéines • 25 vitamines & minéraux • 250 calories • texture gourmande',
     items: [
       {
         name: 'Choco Buenos',
         description:
           'Le smoothie signature ultra gourmand, inspiré d’une saveur type Bueno.',
-        flavors: 'Saveur type Kinder Bueno',
+        flavors:
+          'Saveur type Kinder Bueno • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         badge: 'Produit du mois',
         basePriceCents: 890,
         image: '/images/shake/bueno.png',
@@ -119,7 +260,8 @@ const categories: Category[] = [
         name: 'M&M',
         description:
           'Une recette fun et généreuse, pensée pour un maximum d’effet waouh.',
-        flavors: 'Saveur type M&M',
+        flavors:
+          'Saveur type M&M • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         badge: 'Produit du mois',
         basePriceCents: 890,
         image: '/images/shake/mm.png',
@@ -128,7 +270,8 @@ const categories: Category[] = [
         name: 'Casse Noisette',
         description:
           'Un smoothie rond et réconfortant, avec une vraie identité café/noisette.',
-        flavors: 'Café latte • Noisette',
+        flavors:
+          'Café latte • Noisette • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         badge: 'Best-seller',
         basePriceCents: 890,
         image: '/images/shake/casse-noisette.png',
@@ -137,14 +280,16 @@ const categories: Category[] = [
         name: 'Cappuccino',
         description:
           'Un grand classique gourmand pour les amateurs de café et chocolat.',
-        flavors: 'Café latte • Chocolat intense',
+        flavors:
+          'Café latte • Chocolat intense • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/cappuccino.png',
       },
       {
         name: 'Pina Colada',
         description: 'Une recette fraîche et exotique, à l’esprit vacances.',
-        flavors: 'Vanille • Ananas • Coco',
+        flavors:
+          'Vanille • Ananas • Coco • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/pina-colada.png',
       },
@@ -152,7 +297,8 @@ const categories: Category[] = [
         name: 'Fraise Bonbon',
         description:
           'Une saveur douce et régressive, très appréciée pour son côté dessert.',
-        flavors: 'Vanille • Fraise',
+        flavors:
+          'Vanille • Fraise • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         badge: 'Gourmand',
         basePriceCents: 890,
         image: '/images/shake/fraise-bonbon.png',
@@ -161,7 +307,8 @@ const categories: Category[] = [
         name: "Pim's",
         description:
           'Une association fruitée et chocolatée avec une belle intensité.',
-        flavors: 'Chocolat • Framboise',
+        flavors:
+          'Chocolat • Framboise • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/pims.png',
       },
@@ -169,7 +316,8 @@ const categories: Category[] = [
         name: 'Tarte à la pomme',
         description:
           'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille.',
-        flavors: 'Vanille • Pomme',
+        flavors:
+          'Vanille • Pomme • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/tarte-a-la-pomme.png',
       },
@@ -177,7 +325,8 @@ const categories: Category[] = [
         name: 'Snickers',
         description:
           'Le smoothie très gourmand pour les amateurs de chocolat et cacahuètes.',
-        flavors: 'Chocolat • Cacahuètes',
+        flavors:
+          'Chocolat • Cacahuètes • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         badge: 'Ultra gourmand',
         basePriceCents: 890,
         image: '/images/shake/snikers.png',
@@ -186,7 +335,8 @@ const categories: Category[] = [
         name: 'Full Oréo',
         description:
           'Une texture onctueuse et un profil cookie cream très réconfortant.',
-        flavors: 'Cookies cream • Oréo',
+        flavors:
+          'Cookies cream • Oréo • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/full-oreo.png',
       },
@@ -194,7 +344,8 @@ const categories: Category[] = [
         name: 'Speculoos',
         description:
           'Une saveur chaude, épicée et gourmande, parfaite toute l’année.',
-        flavors: 'Chocolat • Speculoos',
+        flavors:
+          'Chocolat • Speculoos • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/speculoos.png',
       },
@@ -202,7 +353,8 @@ const categories: Category[] = [
         name: 'Banana Split',
         description:
           'Une recette inspirée du dessert culte, version smoothie nutritionnel.',
-        flavors: 'Banane • Caramel • Cerise • Chocolat',
+        flavors:
+          'Banane • Caramel • Cerise • Chocolat • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/banana-split.png',
       },
@@ -210,7 +362,8 @@ const categories: Category[] = [
         name: 'Banana Noisette',
         description:
           'Le mariage réussi de la banane, du chocolat et de la noisette.',
-        flavors: 'Banane • Caramel • Noisette • Chocolat',
+        flavors:
+          'Banane • Caramel • Noisette • Chocolat • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/banane-noisette.png',
       },
@@ -218,7 +371,8 @@ const categories: Category[] = [
         name: 'Cookies',
         description:
           'Une recette douce, crémeuse et très appréciée des amateurs de saveurs dessert.',
-        flavors: 'Cookies cream • Chocolat blanc',
+        flavors:
+          'Cookies cream • Chocolat blanc • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/cookies-cream.png',
       },
@@ -226,7 +380,8 @@ const categories: Category[] = [
         name: 'Tropical',
         description:
           'Un smoothie ensoleillé aux notes fruitées et faciles à boire.',
-        flavors: 'Vanille • Fraise • Banane',
+        flavors:
+          'Vanille • Fraise • Banane • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
         basePriceCents: 890,
         image: '/images/shake/tropical.png',
       },
@@ -432,7 +587,7 @@ const categories: Category[] = [
         flavors: 'Fraise • Citron • Framboise',
         badge: 'Glow',
         basePriceCents: 690,
-        image: '/images/sante/limonade rose.png',
+        image: '/images/sante/limonade-rose.png',
       },
       {
         name: 'Digest',
@@ -449,9 +604,10 @@ const categories: Category[] = [
     id: 'hot',
     name: 'Café / Thé',
     icon: Coffee,
-    price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€ | Premium jusqu’à 6,90€',
+    price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€ | Café gourmet 650ml • 8,90€',
     accent: 'from-orange-400 via-amber-400 to-yellow-500',
-    description: 'Boissons chaudes simples, premium et gourmandes',
+    description:
+      'Boissons chaudes simples, premium et gourmandes • café gourmet 24g protéines • 190 calories',
     items: [
       {
         name: 'Café',
@@ -490,14 +646,15 @@ const categories: Category[] = [
       {
         name: 'Café gourmet',
         description:
-          'Une boisson café premium déclinée en plusieurs recettes gourmandes.',
-        flavors: 'Macchiato • Choco mocha • Latte noisette • Vanille latte',
+          'Une boisson café premium déclinée en plusieurs recettes gourmandes avec un format plus généreux.',
+        flavors:
+          'Macchiato • Choco mocha • Latte noisette • Vanille latte • 650 ml • 24g protéines • 190 calories',
         badge: 'Gourmet',
         options: [
-          { label: 'Macchiato — Grand 450ml — 5,90€', priceCents: 590 },
-          { label: 'Choco mocha — Grand 450ml — 5,90€', priceCents: 590 },
-          { label: 'Latte noisette — Grand 450ml — 5,90€', priceCents: 590 },
-          { label: 'Vanille latte — Grand 450ml — 5,90€', priceCents: 590 },
+          { label: 'Macchiato — 650ml — 8,90€', priceCents: 890 },
+          { label: 'Choco mocha — 650ml — 8,90€', priceCents: 890 },
+          { label: 'Latte noisette — 650ml — 8,90€', priceCents: 890 },
+          { label: 'Vanille latte — 650ml — 8,90€', priceCents: 890 },
         ],
         image: '/images/hot/cafe-gourmet.png',
       },
@@ -509,15 +666,22 @@ const categories: Category[] = [
     icon: Coffee,
     price: '6,90€',
     accent: 'from-amber-400 via-yellow-400 to-orange-500',
-    description: 'Gaufre healthy • toppings inclus',
+    description:
+      'Choisis ton topping • miel • chocolat • chocolat blanc • caramel • caramel beurre salé',
     items: [
       {
         name: 'Gaufre healthy',
         description:
-          'Une gaufre gourmande avec toppings inclus, pensée pour le plaisir.',
+          'Une gaufre gourmande avec topping au choix, pensée pour le plaisir.',
         flavors:
-          'Toppings inclus : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
-        options: [{ label: 'Gaufre 6,90€', priceCents: 690 }],
+          'Choix du topping : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
+        options: [
+          { label: 'Miel — 6,90€', priceCents: 690 },
+          { label: 'Chocolat — 6,90€', priceCents: 690 },
+          { label: 'Chocolat blanc — 6,90€', priceCents: 690 },
+          { label: 'Caramel — 6,90€', priceCents: 690 },
+          { label: 'Caramel beurre salé — 6,90€', priceCents: 690 },
+        ],
         image: '/images/waffle/gaufre-healthy.png',
       },
     ],
@@ -559,8 +723,7 @@ function buildWhatsAppMessage(
     '',
     ...cart.map((item) => {
       const optionPart = item.option ? ` (${item.option})` : '';
-      const extrasPart = item.extras.length ? ` + ${item.extras.join(', ')}` : '';
-      return `• ${item.quantity}x ${item.name}${optionPart}${extrasPart}`;
+      return `• ${item.quantity}x ${item.name}${optionPart}`;
     }),
     '',
     `Nom : ${name || 'À compléter'}`,
@@ -635,6 +798,34 @@ function ProductModalImage({
   );
 }
 
+function ComboCardImage({
+  image,
+  name,
+}: {
+  image?: string;
+  name: string;
+}) {
+  const [errored, setErrored] = useState(false);
+
+  if (!image || errored) {
+    return (
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_transparent_55%),linear-gradient(180deg,rgba(30,30,30,0.98),rgba(8,8,8,1))]" />
+    );
+  }
+
+  return (
+    <div className="absolute inset-0">
+      <img
+        src={image}
+        alt={name}
+        onError={() => setErrored(true)}
+        className="h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.12)_0%,rgba(0,0,0,0.28)_45%,rgba(0,0,0,0.88)_100%)]" />
+    </div>
+  );
+}
+
 function FilterPill({
   active,
   onClick,
@@ -667,17 +858,25 @@ function App() {
   const [customerName, setCustomerName] = useState('');
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const [selectedCombo, setSelectedCombo] = useState<ComboOffer | null>(null);
+  const [selectedComboPrimaryName, setSelectedComboPrimaryName] = useState('');
+  const [selectedComboSecondaryName, setSelectedComboSecondaryName] = useState('');
+  const [selectedComboPrimaryOption, setSelectedComboPrimaryOption] = useState('');
+  const [selectedComboSecondaryOption, setSelectedComboSecondaryOption] = useState('');
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('payment') === 'success') {
       setShowThankYou(true);
       setCart([]);
+      url.searchParams.delete('payment');
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 
@@ -773,28 +972,14 @@ function App() {
   const hasRequiredPickupInfo =
     customerName.trim().length > 0 && pickupTime.trim().length > 0;
 
-  const hasSweetInCart = cart.some((item) =>
-    item.name.toLowerCase().includes('gaufre') ||
-    item.categoryName.toLowerCase().includes('gaufre'),
+  const firstSmoothieInCart = cart.find(
+    (item) => item.categoryName === 'Smoothies nutritionnels',
   );
-
-  const hasHealthInCart = cart.some((item) =>
-    item.categoryName.toLowerCase().includes('santé'),
+  const firstDrinkInCart = cart.find(
+    (item) => item.categoryName === 'Boissons énergisantes',
   );
-
-  const cartSuggestion = useMemo(() => {
-    if (cart.length === 0) return null;
-
-    if (!hasHealthInCart) {
-      return allProducts.find((product) => product.name === 'Limonade Rose') ?? null;
-    }
-
-    if (!hasSweetInCart) {
-      return allProducts.find((product) => product.name === 'Gaufre healthy') ?? null;
-    }
-
-    return allProducts.find((product) => product.name === 'Café gourmet') ?? null;
-  }, [allProducts, cart.length, hasHealthInCart, hasSweetInCart]);
+  const firstHotInCart = cart.find((item) => item.categoryName === 'Café / Thé');
+  const firstWaffleInCart = cart.find((item) => item.categoryName === 'Gaufre');
 
   function getSelectedBasePrice(product: SelectedProduct) {
     if (selectedOption && product.options?.length) {
@@ -802,13 +987,6 @@ function App() {
       if (option) return option.priceCents;
     }
     return product.basePriceCents ?? 0;
-  }
-
-  function getSelectedExtrasTotal() {
-    return selectedExtras.reduce((sum, extraName) => {
-      const extra = extraCatalog.find((entry) => entry.name === extraName);
-      return sum + (extra?.priceCents ?? 0);
-    }, 0);
   }
 
   function getStartingPriceLabel(product: Product) {
@@ -823,15 +1001,56 @@ function App() {
     return '';
   }
 
+  function getOptionSectionLabel(product: SelectedProduct) {
+    if (product.categoryId === 'waffles') return 'Choix du topping';
+    if (product.categoryId === 'hot' && product.name === 'Café gourmet') {
+      return 'Choix de la recette';
+    }
+    return 'Choix de format';
+  }
+
+  function getComboCandidates(config: ComboSelectionConfig) {
+    return allProducts.filter((product) => {
+      if (product.categoryId !== config.categoryId) return false;
+      if (config.fixedProductName && product.name !== config.fixedProductName) {
+        return false;
+      }
+      if (
+        config.allowedProductNames &&
+        !config.allowedProductNames.includes(product.name)
+      ) {
+        return false;
+      }
+      if (
+        config.fixedOptionLabel &&
+        product.options &&
+        !product.options.some((opt) => opt.label === config.fixedOptionLabel)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  function getDefaultOptionForComboProduct(
+    product: SelectedProduct | undefined,
+    config: ComboSelectionConfig,
+  ) {
+    if (config.fixedOptionLabel) return config.fixedOptionLabel;
+    if (product?.options?.length) return product.options[0].label;
+    return '';
+  }
+
   function openProduct(productName: string) {
     const product = allProducts.find((entry) => entry.name === productName);
     if (!product) return;
+    setSelectedCombo(null);
     setSelected(product);
     setSelectedOption(product.options?.[0]?.label ?? '');
-    setSelectedExtras([]);
   }
 
   function openProductFromCategory(category: Category, item: Product) {
+    setSelectedCombo(null);
     setSelected({
       ...item,
       categoryId: category.id,
@@ -840,26 +1059,75 @@ function App() {
       categoryPriceLabel: category.price,
     });
     setSelectedOption(item.options?.[0]?.label ?? '');
-    setSelectedExtras([]);
   }
 
-  function toggleExtra(extraName: string) {
-    setSelectedExtras((prev) =>
-      prev.includes(extraName)
-        ? prev.filter((entry) => entry !== extraName)
-        : [...prev, extraName],
+  function openCombo(
+    comboId: ComboOffer['id'],
+    presets?: { primaryName?: string; secondaryName?: string },
+  ) {
+    const combo = comboOffers.find((offer) => offer.id === comboId);
+    if (!combo) return;
+
+    const primaryCandidates = getComboCandidates(combo.primary);
+    const secondaryCandidates = getComboCandidates(combo.secondary);
+
+    const initialPrimary =
+      presets?.primaryName &&
+      primaryCandidates.some((product) => product.name === presets.primaryName)
+        ? presets.primaryName
+        : combo.primary.fixedProductName ?? primaryCandidates[0]?.name ?? '';
+
+    const initialSecondary =
+      presets?.secondaryName &&
+      secondaryCandidates.some((product) => product.name === presets.secondaryName)
+        ? presets.secondaryName
+        : combo.secondary.fixedProductName ?? secondaryCandidates[0]?.name ?? '';
+
+    const primaryProduct = primaryCandidates.find(
+      (product) => product.name === initialPrimary,
+    );
+    const secondaryProduct = secondaryCandidates.find(
+      (product) => product.name === initialSecondary,
+    );
+
+    setSelected(null);
+    setSelectedOption('');
+    setSelectedCombo(combo);
+    setSelectedComboPrimaryName(initialPrimary);
+    setSelectedComboSecondaryName(initialSecondary);
+    setSelectedComboPrimaryOption(
+      getDefaultOptionForComboProduct(primaryProduct, combo.primary),
+    );
+    setSelectedComboSecondaryOption(
+      getDefaultOptionForComboProduct(secondaryProduct, combo.secondary),
+    );
+  }
+
+  function handleComboPrimaryProductChange(name: string) {
+    if (!selectedCombo) return;
+    const primaryProduct = getComboCandidates(selectedCombo.primary).find(
+      (product) => product.name === name,
+    );
+    setSelectedComboPrimaryName(name);
+    setSelectedComboPrimaryOption(
+      getDefaultOptionForComboProduct(primaryProduct, selectedCombo.primary),
+    );
+  }
+
+  function handleComboSecondaryProductChange(name: string) {
+    if (!selectedCombo) return;
+    const secondaryProduct = getComboCandidates(selectedCombo.secondary).find(
+      (product) => product.name === name,
+    );
+    setSelectedComboSecondaryName(name);
+    setSelectedComboSecondaryOption(
+      getDefaultOptionForComboProduct(secondaryProduct, selectedCombo.secondary),
     );
   }
 
   function addToCart(product: SelectedProduct) {
-    const basePrice = getSelectedBasePrice(product);
-    const extrasTotal = getSelectedExtrasTotal();
-    const unitPriceCents = basePrice + extrasTotal;
-
-    const key = `${product.categoryId}-${product.name}-${selectedOption}-${selectedExtras
-      .slice()
-      .sort()
-      .join('|')}`;
+    const unitPriceCents = getSelectedBasePrice(product);
+    const key = `${product.categoryId}-${product.name}-${selectedOption}`;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
@@ -878,7 +1146,6 @@ function App() {
           categoryName: product.categoryName,
           quantity: 1,
           option: selectedOption,
-          extras: [...selectedExtras].sort(),
           unitPriceCents,
         },
       ];
@@ -887,13 +1154,36 @@ function App() {
     setToastMessage(`${product.name} ajouté au panier`);
     setSelected(null);
     setSelectedOption('');
-    setSelectedExtras([]);
   }
 
-  function addQuickProductToCart(product: SelectedProduct) {
-    const option = product.options?.[0]?.label ?? '';
-    const basePrice = product.options?.[0]?.priceCents ?? product.basePriceCents ?? 0;
-    const key = `${product.categoryId}-${product.name}-${option}-`;
+  function addComboToCart() {
+    if (!selectedCombo || !selectedComboPrimaryName || !selectedComboSecondaryName) {
+      return;
+    }
+
+    const primaryCandidates = getComboCandidates(selectedCombo.primary);
+    const secondaryCandidates = getComboCandidates(selectedCombo.secondary);
+
+    const primaryProduct = primaryCandidates.find(
+      (product) => product.name === selectedComboPrimaryName,
+    );
+    const secondaryProduct = secondaryCandidates.find(
+      (product) => product.name === selectedComboSecondaryName,
+    );
+
+    if (primaryProduct?.options?.length && !selectedComboPrimaryOption) return;
+    if (secondaryProduct?.options?.length && !selectedComboSecondaryOption) return;
+
+    const primaryOptionPart = selectedComboPrimaryOption
+      ? `${selectedComboPrimaryName} (${selectedComboPrimaryOption})`
+      : selectedComboPrimaryName;
+
+    const secondaryOptionPart = selectedComboSecondaryOption
+      ? `${selectedComboSecondaryName} (${selectedComboSecondaryOption})`
+      : selectedComboSecondaryName;
+
+    const optionText = `${primaryOptionPart} + ${secondaryOptionPart}`;
+    const key = `${selectedCombo.id}-${optionText}`;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
@@ -907,17 +1197,21 @@ function App() {
         ...prev,
         {
           key,
-          name: product.name,
-          categoryName: product.categoryName,
+          name: selectedCombo.name,
+          categoryName: 'Formule combo',
           quantity: 1,
-          option,
-          extras: [],
-          unitPriceCents: basePrice,
+          option: optionText,
+          unitPriceCents: selectedCombo.priceCents,
         },
       ];
     });
 
-    setToastMessage(`${product.name} ajouté au panier`);
+    setToastMessage(`${selectedCombo.name} ajoutée au panier`);
+    setSelectedCombo(null);
+    setSelectedComboPrimaryName('');
+    setSelectedComboSecondaryName('');
+    setSelectedComboPrimaryOption('');
+    setSelectedComboSecondaryOption('');
   }
 
   function updateQuantity(key: string, delta: number) {
@@ -929,6 +1223,30 @@ function App() {
             : item,
         )
         .filter((item) => item.quantity > 0),
+    );
+  }
+
+  function getHotComboSuggestions(productName?: string) {
+    if (!productName) return [];
+    if (productName === 'Thé') {
+      return comboOffers.filter((combo) => combo.id === 'combo-tea-time');
+    }
+    if (productName === 'Café') {
+      return comboOffers.filter((combo) => combo.id === 'combo-coffee-break');
+    }
+    if (productName === 'Chocolat chaud protéiné') {
+      return comboOffers.filter((combo) => combo.id === 'combo-choco-cocoon');
+    }
+    if (productName === 'Café gourmet') {
+      return comboOffers.filter((combo) => combo.id === 'combo-gourmet-break');
+    }
+    return comboOffers.filter((combo) =>
+      [
+        'combo-tea-time',
+        'combo-coffee-break',
+        'combo-choco-cocoon',
+        'combo-gourmet-break',
+      ].includes(combo.id),
     );
   }
 
@@ -973,11 +1291,22 @@ function App() {
         body: JSON.stringify({ cart, customerName, pickupTime }),
       });
 
-      const data = await response.json();
+      const raw = await response.text();
+      let data: { url?: string; error?: string; message?: string } = {};
 
-      if (!response.ok || !data.url) {
-        console.error(data);
-        window.alert(JSON.stringify(data, null, 2));
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = { error: raw || 'Réponse invalide du serveur.' };
+      }
+
+      if (!response.ok || !data?.url) {
+        console.error('Square error:', data);
+        window.alert(
+          data?.error ||
+            data?.message ||
+            'Erreur lors de la création du paiement Square.',
+        );
         return;
       }
 
@@ -990,9 +1319,20 @@ function App() {
     }
   }
 
-  const selectedTotal = selected
-    ? getSelectedBasePrice(selected) + getSelectedExtrasTotal()
-    : 0;
+  const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
+  const selectedComboPrimaryCandidates = selectedCombo
+    ? getComboCandidates(selectedCombo.primary)
+    : [];
+  const selectedComboSecondaryCandidates = selectedCombo
+    ? getComboCandidates(selectedCombo.secondary)
+    : [];
+
+  const selectedComboPrimaryProduct = selectedComboPrimaryCandidates.find(
+    (product) => product.name === selectedComboPrimaryName,
+  );
+  const selectedComboSecondaryProduct = selectedComboSecondaryCandidates.find(
+    (product) => product.name === selectedComboSecondaryName,
+  );
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
@@ -1238,6 +1578,55 @@ function App() {
           </div>
         </section>
 
+        <section className="mb-10">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Formules combo</p>
+              <h2 className="mt-1 text-2xl font-black md:text-3xl">Les offres les plus complètes du club</h2>
+              <p className="mt-2 max-w-3xl text-sm text-white/65">
+                Associe un smoothie nutritionnel et une boisson énergisante, ou crée une vraie pause chaude avec thé, café, chocolat chaud ou café gourmet + gaufre topping au choix.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {comboOffers.map((combo) => (
+              <button
+                key={combo.id}
+                type="button"
+                onClick={() => openCombo(combo.id)}
+                className="group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:-translate-y-1 hover:border-yellow-400/25"
+              >
+                <div className="relative h-[320px]">
+                  <ComboCardImage image={combo.image} name={combo.name} />
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-cyan-400 to-pink-500" />
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+                        {combo.subtitle}
+                      </span>
+                      <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+                        Économise {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                      </span>
+                    </div>
+                    <p className="text-3xl font-black text-white">{combo.name}</p>
+                    <p className="mt-2 max-w-lg text-sm text-white/72">{combo.description}</p>
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-black text-white">{euroFromCents(combo.priceCents)}</p>
+                        <p className="text-sm text-white/55 line-through">{euroFromCents(combo.normalPriceCents)}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                        Composer <ChevronRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="mb-7 flex flex-col gap-4">
           <div className="relative">
             <Search
@@ -1444,7 +1833,7 @@ function App() {
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
                 Smoothies nutritionnels, boissons énergisantes, boissons santé,
-                café, thé et gaufre : tout est pensé pour allier plaisir,
+                café, thé, formules combo et gaufre : tout est pensé pour allier plaisir,
                 rapidité et expérience simple à commander. Tu peux aussi découvrir
                 l’accompagnement autour du bien-être, de la perte de poids, de l’énergie
                 et de la nutrition sportive.
@@ -1527,7 +1916,7 @@ function App() {
 
               {selected.options && selected.options.length > 0 && (
                 <div className="mt-6">
-                  <p className="mb-3 font-bold">Choix de format</p>
+                  <p className="mb-3 font-bold">{getOptionSectionLabel(selected)}</p>
                   <div className="flex flex-wrap gap-2">
                     {selected.options.map((opt) => (
                       <button
@@ -1547,31 +1936,294 @@ function App() {
                 </div>
               )}
 
-              <div className="mt-6">
-                <p className="mb-3 font-bold">Extras +2,50€</p>
-                <div className="flex flex-wrap gap-2">
-                  {extraCatalog.map((extra) => (
-                    <button
-                      key={extra.name}
-                      type="button"
-                      onClick={() => toggleExtra(extra.name)}
-                      className={`rounded-full border px-3 py-2 text-sm font-medium transition ${
-                        selectedExtras.includes(extra.name)
-                          ? 'border-emerald-400 bg-emerald-400/15 text-emerald-300'
-                          : 'border-white/10 bg-white/[0.04] text-white/80 hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      {extra.label}
-                    </button>
-                  ))}
+              {selected.categoryId === 'smoothies' && (
+                <div className="mt-6 rounded-[24px] border border-cyan-400/15 bg-cyan-400/5 p-4">
+                  <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+                    <Flame size={14} /> Passe en formule combo
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {comboOffers
+                      .filter((combo) => combo.id === 'combo-medium' || combo.id === 'combo-power')
+                      .map((combo) => (
+                        <button
+                          key={combo.id}
+                          type="button"
+                          onClick={() => openCombo(combo.id, { primaryName: selected.name })}
+                          className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]"
+                        >
+                          <p className="font-black text-white">{combo.name}</p>
+                          <p className="mt-1 text-sm text-white/65">
+                            {combo.subtitle} • {euroFromCents(combo.priceCents)}
+                          </p>
+                          <p className="mt-2 text-sm font-semibold text-cyan-200">
+                            Économie : {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                          </p>
+                        </button>
+                      ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {selected.categoryId === 'drinks' && (
+                <div className="mt-6 rounded-[24px] border border-cyan-400/15 bg-cyan-400/5 p-4">
+                  <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+                    <Flame size={14} /> Passe en formule combo
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {comboOffers
+                      .filter((combo) => combo.id === 'combo-medium' || combo.id === 'combo-power')
+                      .map((combo) => (
+                        <button
+                          key={combo.id}
+                          type="button"
+                          onClick={() => openCombo(combo.id, { secondaryName: selected.name })}
+                          className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]"
+                        >
+                          <p className="font-black text-white">{combo.name}</p>
+                          <p className="mt-1 text-sm text-white/65">{combo.subtitle}</p>
+                          <p className="mt-2 text-sm font-semibold text-cyan-200">
+                            Économie : {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                          </p>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {selected.categoryId === 'hot' && (
+                <div className="mt-6 rounded-[24px] border border-cyan-400/15 bg-cyan-400/5 p-4">
+                  <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+                    <Flame size={14} /> Passe en formule combo chaude
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {getHotComboSuggestions(selected.name).map((combo) => (
+                      <button
+                        key={combo.id}
+                        type="button"
+                        onClick={() => openCombo(combo.id, { primaryName: selected.name })}
+                        className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]"
+                      >
+                        <p className="font-black text-white">{combo.name}</p>
+                        <p className="mt-1 text-sm text-white/65">{combo.subtitle}</p>
+                        <p className="mt-2 text-sm font-semibold text-cyan-200">
+                          Économie : {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selected.categoryId === 'waffles' && (
+                <div className="mt-6 rounded-[24px] border border-cyan-400/15 bg-cyan-400/5 p-4">
+                  <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+                    <Flame size={14} /> Ajoute une boisson chaude en formule
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {comboOffers
+                      .filter((combo) =>
+                        ['combo-tea-time', 'combo-coffee-break', 'combo-choco-cocoon', 'combo-gourmet-break'].includes(combo.id),
+                      )
+                      .map((combo) => (
+                        <button
+                          key={combo.id}
+                          type="button"
+                          onClick={() => openCombo(combo.id, { secondaryName: selected.name })}
+                          className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]"
+                        >
+                          <p className="font-black text-white">{combo.name}</p>
+                          <p className="mt-1 text-sm text-white/65">{combo.subtitle}</p>
+                          <p className="mt-2 text-sm font-semibold text-cyan-200">
+                            Économie : {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                          </p>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={() => addToCart(selected)}
                 className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
                 Ajouter au panier
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedCombo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/80 p-4 backdrop-blur-md md:grid md:place-items-center"
+            onClick={() => setSelectedCombo(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-2xl md:rounded-[34px]"
+            >
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selectedCombo.accent} px-3 py-1 text-sm font-black text-black`}>
+                  Formule combo
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedCombo(null)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="relative mb-5 h-72 overflow-hidden rounded-[26px] border border-white/8">
+                <ComboCardImage image={selectedCombo.image} name={selectedCombo.name} />
+              </div>
+
+              <h3 className="text-3xl font-black text-white">{selectedCombo.name}</h3>
+              <p className="mt-2 text-white/68">{selectedCombo.description}</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
+                  Prix : {euroFromCents(selectedCombo.priceCents)}
+                </span>
+                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
+                  Économie : {euroFromCents(selectedCombo.normalPriceCents - selectedCombo.priceCents)}
+                </span>
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div>
+                  <p className="mb-3 font-bold text-white">{selectedCombo.primary.label}</p>
+
+                  {selectedComboPrimaryCandidates.length > 1 && !selectedCombo.primary.fixedProductName && (
+                    <div className="space-y-2">
+                      {selectedComboPrimaryCandidates.map((product) => (
+                        <button
+                          key={product.name}
+                          type="button"
+                          onClick={() => handleComboPrimaryProductChange(product.name)}
+                          className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${
+                            selectedComboPrimaryName === product.name
+                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
+                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {product.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedCombo.primary.fixedProductName && selectedComboPrimaryProduct && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white">
+                      {selectedComboPrimaryProduct.name}
+                    </div>
+                  )}
+
+                  {selectedComboPrimaryProduct?.options?.length && !selectedCombo.primary.fixedOptionLabel && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {selectedComboPrimaryProduct.options.map((opt) => (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => setSelectedComboPrimaryOption(opt.label)}
+                          className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                            selectedComboPrimaryOption === opt.label
+                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
+                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedCombo.primary.fixedOptionLabel && (
+                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white/80">
+                      {selectedCombo.primary.fixedOptionLabel}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-3 font-bold text-white">{selectedCombo.secondary.label}</p>
+
+                  {selectedComboSecondaryCandidates.length > 1 && !selectedCombo.secondary.fixedProductName && (
+                    <div className="space-y-2">
+                      {selectedComboSecondaryCandidates.map((product) => (
+                        <button
+                          key={product.name}
+                          type="button"
+                          onClick={() => handleComboSecondaryProductChange(product.name)}
+                          className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${
+                            selectedComboSecondaryName === product.name
+                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
+                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {product.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedCombo.secondary.fixedProductName && selectedComboSecondaryProduct && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white">
+                      {selectedComboSecondaryProduct.name}
+                    </div>
+                  )}
+
+                  {selectedComboSecondaryProduct?.options?.length && !selectedCombo.secondary.fixedOptionLabel && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {selectedComboSecondaryProduct.options.map((opt) => (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => setSelectedComboSecondaryOption(opt.label)}
+                          className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                            selectedComboSecondaryOption === opt.label
+                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
+                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedCombo.secondary.fixedOptionLabel && (
+                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white/80">
+                      {selectedCombo.secondary.fixedOptionLabel}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-sm text-white/70">Formule sélectionnée</p>
+                <p className="mt-2 text-lg font-black text-white">
+                  {selectedComboPrimaryName || 'Choisis le premier produit'} + {selectedComboSecondaryName || 'Choisis le second produit'}
+                </p>
+                <p className="mt-1 text-sm text-white/60">{selectedCombo.subtitle}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addComboToCart}
+                disabled={!selectedComboPrimaryName || !selectedComboSecondaryName}
+                className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Ajouter la formule au panier
               </button>
             </motion.div>
           </motion.div>
@@ -1633,11 +2285,6 @@ function App() {
                                 {item.option}
                               </p>
                             )}
-                            {item.extras.length > 0 && (
-                              <p className="mt-1 text-sm text-emerald-700">
-                                + {item.extras.join(', ')}
-                              </p>
-                            )}
                             <p className="mt-2 text-sm font-black text-black">
                               {euroFromCents(item.unitPriceCents * item.quantity)}
                             </p>
@@ -1664,19 +2311,139 @@ function App() {
                       </div>
                     ))}
 
-                    {cartSuggestion && (
+                    {firstSmoothieInCart && !firstDrinkInCart && (
+                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-cyan-50 to-blue-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
+                          <Flame size={14} /> Passe en formule combo
+                        </p>
+                        <p className="mt-2 text-sm text-black/70">
+                          Ajoute une boisson et profite d’un tarif plus avantageux.
+                        </p>
+                        <div className="mt-3 space-y-2">
+                          {comboOffers
+                            .filter((combo) => combo.id === 'combo-medium' || combo.id === 'combo-power')
+                            .map((combo) => (
+                              <button
+                                key={combo.id}
+                                type="button"
+                                onClick={() => openCombo(combo.id, { primaryName: firstSmoothieInCart.name })}
+                                className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-3 text-left transition hover:bg-black/[0.03]"
+                              >
+                                <div>
+                                  <p className="font-black text-black">{combo.name}</p>
+                                  <p className="text-sm text-black/60">{combo.subtitle}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-black text-black">{euroFromCents(combo.priceCents)}</p>
+                                  <p className="text-xs font-semibold text-cyan-700">
+                                    Économie {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!firstSmoothieInCart && firstDrinkInCart && (
                       <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-fuchsia-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">
-                          <Flame size={14} /> Suggestion du moment
+                          <Flame size={14} /> Complète avec un smoothie
                         </p>
-                        <h4 className="mt-2 text-lg font-black text-black">{cartSuggestion.name}</h4>
-                        <p className="mt-1 text-sm text-black/65">{cartSuggestion.flavors}</p>
-                        <button
-                          onClick={() => addQuickProductToCart(cartSuggestion)}
-                          className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-black px-4 py-2.5 text-sm font-bold text-white transition hover:bg-black/85"
-                        >
-                          <Plus size={15} /> Ajouter au panier
-                        </button>
+                        <p className="mt-2 text-sm text-black/70">
+                          Passe en formule combo et ajoute un smoothie pour un prix plus fort et plus lisible.
+                        </p>
+                        <div className="mt-3 space-y-2">
+                          {comboOffers
+                            .filter((combo) => combo.id === 'combo-medium' || combo.id === 'combo-power')
+                            .map((combo) => (
+                              <button
+                                key={combo.id}
+                                type="button"
+                                onClick={() => openCombo(combo.id, { secondaryName: firstDrinkInCart.name })}
+                                className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-3 text-left transition hover:bg-black/[0.03]"
+                              >
+                                <div>
+                                  <p className="font-black text-black">{combo.name}</p>
+                                  <p className="text-sm text-black/60">{combo.subtitle}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-black text-black">{euroFromCents(combo.priceCents)}</p>
+                                  <p className="text-xs font-semibold text-fuchsia-700">
+                                    Économie {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {firstHotInCart && !firstWaffleInCart && (
+                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-orange-700">
+                          <Flame size={14} /> Passe en formule chaude
+                        </p>
+                        <p className="mt-2 text-sm text-black/70">
+                          Ajoute une gaufre topping au choix et profite d’une formule plus avantageuse.
+                        </p>
+                        <div className="mt-3 space-y-2">
+                          {getHotComboSuggestions(firstHotInCart.name).map((combo) => (
+                            <button
+                              key={combo.id}
+                              type="button"
+                              onClick={() => openCombo(combo.id, { primaryName: firstHotInCart.name })}
+                              className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-3 text-left transition hover:bg-black/[0.03]"
+                            >
+                              <div>
+                                <p className="font-black text-black">{combo.name}</p>
+                                <p className="text-sm text-black/60">{combo.subtitle}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-black text-black">{euroFromCents(combo.priceCents)}</p>
+                                <p className="text-xs font-semibold text-orange-700">
+                                  Économie {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!firstHotInCart && firstWaffleInCart && (
+                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-amber-50 to-rose-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
+                          <Flame size={14} /> Ajoute une boisson chaude en formule
+                        </p>
+                        <p className="mt-2 text-sm text-black/70">
+                          Associe ta gaufre à un thé, café, chocolat chaud ou café gourmet avec une économie directe.
+                        </p>
+                        <div className="mt-3 space-y-2">
+                          {comboOffers
+                            .filter((combo) =>
+                              ['combo-tea-time', 'combo-coffee-break', 'combo-choco-cocoon', 'combo-gourmet-break'].includes(combo.id),
+                            )
+                            .map((combo) => (
+                              <button
+                                key={combo.id}
+                                type="button"
+                                onClick={() => openCombo(combo.id, { secondaryName: 'Gaufre healthy' })}
+                                className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-3 text-left transition hover:bg-black/[0.03]"
+                              >
+                                <div>
+                                  <p className="font-black text-black">{combo.name}</p>
+                                  <p className="text-sm text-black/60">{combo.subtitle}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-black text-black">{euroFromCents(combo.priceCents)}</p>
+                                  <p className="text-xs font-semibold text-amber-700">
+                                    Économie {euroFromCents(combo.normalPriceCents - combo.priceCents)}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                        </div>
                       </div>
                     )}
 
