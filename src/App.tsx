@@ -100,7 +100,7 @@ const BRAND = {
   address: '11 rue Saint Pierre, Verdun',
   mapsUrl:
     'https://www.google.com/maps/search/?api=1&query=11+rue+Saint+Pierre+Verdun',
-  discoveryUrl: 'https://linktr.ee/milmel55',
+  discoveryUrl: 'https://linktr.ee/labaseverdun',
 };
 
 const googleReviewUrl = 'https://g.page/r/CeJabN1yW1toEAE/review';
