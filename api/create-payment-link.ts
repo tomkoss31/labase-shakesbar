@@ -1,61 +1,3 @@
-import { randomUUID } from 'node:crypto';
-import {
-  normalizedComboPrices,
-  normalizedOptionPrices,
-  normalizedProductAllowedAmounts,
-  normalizedProductPrices,
-  normalizeCatalogKey,
-} from './payment-catalog';
-
-type CartItemPayload = {
-  name?: string;
-  categoryName?: string;
-  quantity?: number;
-  option?: string;
-  unitPriceCents?: number;
-  extras?: string[];
-};
-
-function getRequestOrigin(req: any) {
-  const forwardedProto = req.headers?.['x-forwarded-proto'];
-  const protocol =
-    typeof forwardedProto === 'string' && forwardedProto.length > 0
-      ? forwardedProto
-      : 'https';
-  const host = req.headers?.host;
-
-  if (typeof host === 'string' && host.length > 0) {
-    return `${protocol}://${host}`;
-  }
-
-  return 'https://labase-shakesbar.vercel.app';
-}
-
-function getBody(req: any) {
-  if (typeof req.body === 'string') {
-    return JSON.parse(req.body || '{}');
-  }
-
-  return req.body ?? {};
-}
-
-function getCatalogAmount(item: CartItemPayload) {
-  if (item.categoryName === 'Formule combo') {
-    return normalizedComboPrices[normalizeCatalogKey(item.name)];
-  }
-
-  if (item.option) {
-    const optionAmount = normalizedOptionPrices[normalizeCatalogKey(item.option)];
-    if (optionAmount) return optionAmount;
-  }
-
-  return normalizedProductPrices[normalizeCatalogKey(item.name)];
-}
-
-function getAllowedProductAmounts(item: CartItemPayload) {
-  return normalizedProductAllowedAmounts[normalizeCatalogKey(item.name)] ?? [];
-}
-
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -71,14 +13,68 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const bodyPayload = getBody(req);
-    const cart = bodyPayload?.cart;
+    const { cart } = req.body;
 
     if (!Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({
         error: 'Panier vide ou invalide',
       });
     }
+
+    const normalizeKey = (value: string = '') =>
+      value
+        .normalize('NFKC')
+        .replace(/[–—]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const productPrices: Record<string, number> = {
+      'Choco Buenos': 890,
+      'M&M': 890,
+      'Casse Noisette': 890,
+      'Cappuccino': 890,
+      'Pina Colada': 890,
+      'Fraise Bonbon': 890,
+      "Pim's": 890,
+      'Tarte à la pomme': 890,
+      'Snickers': 890,
+      'Full Oréo': 890,
+      'Speculoos': 890,
+      'Banana Split': 890,
+      'Banana Noisette': 890,
+      'Cookies': 890,
+      'Tropical': 890,
+
+      'Apple Kiss': 690,
+      'Black Panther': 690,
+      'Cherry White Grappe': 690,
+      'Electric Blue': 690,
+      'Elf': 690,
+      'La Vie en Rose': 690,
+      "L'Exotic": 690,
+      'Perroquet': 690,
+      'Po Melon': 690,
+      'Red Paradize': 690,
+      'Soleil': 690,
+      'Sortilège Noir': 690,
+      'Electro’Lyte': 690,
+
+      'Hydrat’Max': 690,
+      'Casse Grippe': 690,
+      'Limonade Rose': 690,
+      'Digest': 690,
+
+      'Gaufre healthy': 690,
+    };
+
+    const comboPrices: Record<string, number> = {
+      'Combo Medium': 1480,
+      'Combo Power': 1590,
+      'Tea Time': 1090,
+      'Coffee Break': 1090,
+      'Choco Cocoon': 1190,
+      'Gourmet Break': 1390,
+    };
 
     const extraPrices: Record<string, number> = {
       'Collagène': 250,
@@ -90,27 +86,78 @@ export default async function handler(req: any, res: any) {
       'Protéines': 250,
     };
 
-    const lineItems = cart.map((item: CartItemPayload) => {
-      const quantity = Number(item.quantity || 1);
-      const clientAmount = Number(item.unitPriceCents);
-      const catalogAmount = getCatalogAmount(item);
-      const allowedProductAmounts = getAllowedProductAmounts(item);
+    const optionPrices: Record<string, number> = {
+      'Medium 550ml — 6,90€': 690,
+      'Large 950ml — 8,90€': 890,
 
-      if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
-        throw new Error('Article invalide dans le panier');
-      }
+      'Petit 250ml — 3,90€': 390,
+      'Grand 450ml — 5,90€': 590,
 
-      if (!Number.isInteger(clientAmount) || clientAmount <= 0) {
-        throw new Error(`Montant invalide pour l'article: ${item.name}`);
-      }
+      'Petit 250ml — 5,90€': 590,
+      'Grand 450ml — 6,90€': 690,
 
-      if (!Number.isInteger(catalogAmount) || catalogAmount <= 0) {
-        if (!allowedProductAmounts.includes(clientAmount)) {
-          throw new Error(`Article inconnu dans le catalogue: ${item.name}`);
+      'Macchiato — 650ml — 8,90€': 890,
+      'Choco mocha — 650ml — 8,90€': 890,
+      'Latte noisette — 650ml — 8,90€': 890,
+      'Vanille latte — 650ml — 8,90€': 890,
+
+      'Miel — 6,90€': 690,
+      'Chocolat — 6,90€': 690,
+      'Chocolat blanc — 6,90€': 690,
+      'Caramel — 6,90€': 690,
+      'Caramel beurre salé — 6,90€': 690,
+    };
+
+    const normalizedProductPrices = Object.fromEntries(
+      Object.entries(productPrices).map(([key, value]) => [normalizeKey(key), value]),
+    );
+
+    const normalizedComboPrices = Object.fromEntries(
+      Object.entries(comboPrices).map(([key, value]) => [normalizeKey(key), value]),
+    );
+
+    const normalizedOptionPrices = Object.fromEntries(
+      Object.entries(optionPrices).map(([key, value]) => [normalizeKey(key), value]),
+    );
+
+    const getBaseAmount = (item: any) => {
+      if (item.categoryName === 'Formule combo') {
+        const comboAmount =
+          comboPrices[item.name] ??
+          normalizedComboPrices[normalizeKey(item.name)] ??
+          (Number.isFinite(Number(item.unitPriceCents))
+            ? Number(item.unitPriceCents)
+            : undefined);
+
+        if (!comboAmount) {
+          throw new Error(`Combo inconnu: ${item.name}`);
         }
-      } else if (catalogAmount !== clientAmount) {
-        throw new Error(`Montant incohérent pour l'article: ${item.name}`);
+
+        return comboAmount;
       }
+
+      const optionAmount =
+        optionPrices[item.option] ??
+        normalizedOptionPrices[normalizeKey(item.option)];
+
+      if (optionAmount) {
+        return optionAmount;
+      }
+
+      const productAmount =
+        productPrices[item.name] ??
+        normalizedProductPrices[normalizeKey(item.name)];
+
+      if (productAmount) {
+        return productAmount;
+      }
+
+      throw new Error(`Produit inconnu: ${item.name}`);
+    };
+
+    const lineItems = cart.map((item: any) => {
+      const quantity = Number(item.quantity || 1);
+      const baseAmount = getBaseAmount(item);
 
       const extrasTotal = Array.isArray(item.extras)
         ? item.extras.reduce((sum: number, extra: string) => {
@@ -118,11 +165,13 @@ export default async function handler(req: any, res: any) {
           }, 0)
         : 0;
 
-      const totalUnitAmount = clientAmount + extrasTotal;
+      const totalUnitAmount = baseAmount + extrasTotal;
+
       const extrasLabel =
         Array.isArray(item.extras) && item.extras.length > 0
           ? ` + ${item.extras.join(', ')}`
           : '';
+
       const optionLabel = item.option ? ` (${item.option})` : '';
 
       return {
@@ -135,14 +184,14 @@ export default async function handler(req: any, res: any) {
       };
     });
 
-    const squarePayload = {
-      idempotency_key: randomUUID(),
+    const body = {
+      idempotency_key: crypto.randomUUID(),
       order: {
         location_id: locationId,
         line_items: lineItems,
       },
       checkout_options: {
-        redirect_url: `${getRequestOrigin(req)}/?payment=success`,
+        redirect_url: 'https://labase-shakesbar.vercel.app/?payment=success',
       },
     };
 
@@ -155,14 +204,13 @@ export default async function handler(req: any, res: any) {
           'Content-Type': 'application/json',
           'Square-Version': '2025-10-16',
         },
-        body: JSON.stringify(squarePayload),
+        body: JSON.stringify(body),
       },
     );
 
     const data = await squareResponse.json();
 
     if (!squareResponse.ok) {
-      console.error('Square API error', data);
       return res.status(500).json({
         error: 'Erreur Square',
         details: data,
@@ -174,7 +222,6 @@ export default async function handler(req: any, res: any) {
       orderId: data.payment_link?.order_id,
     });
   } catch (error: any) {
-    console.error('Create payment link failed', error);
     return res.status(500).json({
       error: error.message || 'Erreur serveur',
     });
