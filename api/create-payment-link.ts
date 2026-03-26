@@ -1,12 +1,4 @@
-import {
-  comboPrices,
-  normalizedComboPrices,
-  normalizedOptionPrices,
-  normalizedProductPrices,
-  normalizeCatalogKey,
-  optionPrices,
-  productPrices,
-} from '../src/data/pricing';
+import { randomUUID } from 'node:crypto';
 
 type CartItemPayload = {
   name?: string;
@@ -16,6 +8,29 @@ type CartItemPayload = {
   unitPriceCents?: number;
   extras?: string[];
 };
+
+function getRequestOrigin(req: any) {
+  const forwardedProto = req.headers?.['x-forwarded-proto'];
+  const protocol =
+    typeof forwardedProto === 'string' && forwardedProto.length > 0
+      ? forwardedProto
+      : 'https';
+  const host = req.headers?.host;
+
+  if (typeof host === 'string' && host.length > 0) {
+    return `${protocol}://${host}`;
+  }
+
+  return 'https://labase-shakesbar.vercel.app';
+}
+
+function getBody(req: any) {
+  if (typeof req.body === 'string') {
+    return JSON.parse(req.body || '{}');
+  }
+
+  return req.body ?? {};
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -32,7 +47,8 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const cart = req.body?.cart;
+    const bodyPayload = getBody(req);
+    const cart = bodyPayload?.cart;
 
     if (!Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({
@@ -50,44 +66,17 @@ export default async function handler(req: any, res: any) {
       'Protéines': 250,
     };
 
-    const getBaseAmount = (item: CartItemPayload) => {
-      if (item.categoryName === 'Formule combo') {
-        const comboAmount =
-          (item.name ? comboPrices[item.name] : undefined) ??
-          normalizedComboPrices[normalizeCatalogKey(item.name)] ??
-          (Number.isFinite(Number(item.unitPriceCents))
-            ? Number(item.unitPriceCents)
-            : undefined);
-
-        if (!comboAmount) {
-          throw new Error(`Combo inconnu: ${item.name}`);
-        }
-
-        return comboAmount;
-      }
-
-      const optionAmount =
-        (item.option ? optionPrices[item.option] : undefined) ??
-        normalizedOptionPrices[normalizeCatalogKey(item.option)];
-
-      if (optionAmount) {
-        return optionAmount;
-      }
-
-      const productAmount =
-        (item.name ? productPrices[item.name] : undefined) ??
-        normalizedProductPrices[normalizeCatalogKey(item.name)];
-
-      if (productAmount) {
-        return productAmount;
-      }
-
-      throw new Error(`Produit inconnu: ${item.name}`);
-    };
-
     const lineItems = cart.map((item: CartItemPayload) => {
       const quantity = Number(item.quantity || 1);
-      const baseAmount = getBaseAmount(item);
+      const baseAmount = Number(item.unitPriceCents);
+
+      if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
+        throw new Error('Article invalide dans le panier');
+      }
+
+      if (!Number.isInteger(baseAmount) || baseAmount <= 0) {
+        throw new Error(`Montant invalide pour l'article: ${item.name}`);
+      }
 
       const extrasTotal = Array.isArray(item.extras)
         ? item.extras.reduce((sum: number, extra: string) => {
@@ -96,12 +85,10 @@ export default async function handler(req: any, res: any) {
         : 0;
 
       const totalUnitAmount = baseAmount + extrasTotal;
-
       const extrasLabel =
         Array.isArray(item.extras) && item.extras.length > 0
           ? ` + ${item.extras.join(', ')}`
           : '';
-
       const optionLabel = item.option ? ` (${item.option})` : '';
 
       return {
@@ -114,14 +101,14 @@ export default async function handler(req: any, res: any) {
       };
     });
 
-    const body = {
-      idempotency_key: crypto.randomUUID(),
+    const squarePayload = {
+      idempotency_key: randomUUID(),
       order: {
         location_id: locationId,
         line_items: lineItems,
       },
       checkout_options: {
-        redirect_url: 'https://labase-shakesbar.vercel.app/?payment=success',
+        redirect_url: `${getRequestOrigin(req)}/?payment=success`,
       },
     };
 
@@ -134,13 +121,14 @@ export default async function handler(req: any, res: any) {
           'Content-Type': 'application/json',
           'Square-Version': '2025-10-16',
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(squarePayload),
       },
     );
 
     const data = await squareResponse.json();
 
     if (!squareResponse.ok) {
+      console.error('Square API error', data);
       return res.status(500).json({
         error: 'Erreur Square',
         details: data,
@@ -152,6 +140,7 @@ export default async function handler(req: any, res: any) {
       orderId: data.payment_link?.order_id,
     });
   } catch (error: any) {
+    console.error('Create payment link failed', error);
     return res.status(500).json({
       error: error.message || 'Erreur serveur',
     });
