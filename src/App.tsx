@@ -46,6 +46,13 @@ type CartItem = {
 };
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
+const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
+
+type DeferredInstallPrompt = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
+
 function euroFromCents(cents: number) {
   return `${(cents / 100).toFixed(2).replace('.', ',')}€`;
 }
@@ -237,6 +244,10 @@ function App() {
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] =
+    useState<DeferredInstallPrompt | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIosInstallHint, setIsIosInstallHint] = useState(false);
 
   const [selectedCombo, setSelectedCombo] = useState<ComboOffer | null>(null);
   const [selectedComboPrimaryName, setSelectedComboPrimaryName] = useState('');
@@ -268,6 +279,74 @@ function App() {
     const timer = window.setTimeout(() => setToastMessage(null), 1800);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const dismissed =
+      window.localStorage.getItem(INSTALL_BANNER_DISMISS_KEY) === '1';
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(userAgent);
+    const isSafari =
+      /safari/.test(userAgent) &&
+      !/crios|fxios|edgios|chrome|android/.test(userAgent);
+
+    if (!dismissed && !isStandalone && isIos && isSafari) {
+      setIsIosInstallHint(true);
+      setShowInstallBanner(true);
+    }
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      if (dismissed) return;
+      setDeferredInstallPrompt(event as DeferredInstallPrompt);
+      setIsIosInstallHint(false);
+      setShowInstallBanner(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+      setShowInstallBanner(false);
+      setIsIosInstallHint(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  async function handleInstallApp() {
+    if (!deferredInstallPrompt) return;
+
+    await deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+
+    if (choice.outcome === 'accepted') {
+      setShowInstallBanner(false);
+    }
+
+    setDeferredInstallPrompt(null);
+  }
+
+  function dismissInstallBanner() {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(INSTALL_BANNER_DISMISS_KEY, '1');
+    }
+
+    setShowInstallBanner(false);
+    setDeferredInstallPrompt(null);
+    setIsIosInstallHint(false);
+  }
 
   const allProducts = useMemo(() => {
     return categories.flatMap((category) =>
@@ -2352,6 +2431,61 @@ function App() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showInstallBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 18 }}
+            className="fixed inset-x-4 bottom-24 z-[55] md:bottom-5 md:left-5 md:right-auto md:max-w-sm"
+          >
+            <div className="rounded-[24px] border border-white/12 bg-[linear-gradient(135deg,rgba(18,28,23,0.96),rgba(6,6,6,0.96))] p-4 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#dfb86f]">
+                    Application
+                  </p>
+                  <p className="mt-1 text-lg font-black">
+                    Installe La Base sur ton mobile
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/72">
+                    {isIosInstallHint
+                      ? 'Sur iPhone, ouvre le menu Partager puis choisis "Sur l’écran d’accueil".'
+                      : 'Ajoute le site à ton écran d’accueil pour l’ouvrir comme une vraie app.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismissInstallBanner}
+                  className="rounded-full border border-white/10 p-2 text-white/60 transition hover:text-white"
+                  aria-label="Fermer l’aide d’installation"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="mt-4 flex gap-3">
+                {deferredInstallPrompt ? (
+                  <button
+                    type="button"
+                    onClick={handleInstallApp}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 text-sm font-black text-black shadow-[0_12px_30px_rgba(250,204,21,0.2)]"
+                  >
+                    Installer l’app <ChevronRight size={16} />
+                  </button>
+                ) : (
+                  <div className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/72">
+                    {isIosInstallHint
+                      ? 'Safari iPhone ne montre pas de popup native automatique.'
+                      : 'L’option d’installation apparaît selon le navigateur et son niveau d’usage du site.'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
