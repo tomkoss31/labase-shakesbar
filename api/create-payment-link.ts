@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import {
   normalizedComboPrices,
   normalizedOptionPrices,
+  normalizedProductAllowedAmounts,
   normalizedProductPrices,
   normalizeCatalogKey,
 } from './payment-catalog';
@@ -51,6 +52,10 @@ function getCatalogAmount(item: CartItemPayload) {
   return normalizedProductPrices[normalizeCatalogKey(item.name)];
 }
 
+function getAllowedProductAmounts(item: CartItemPayload) {
+  return normalizedProductAllowedAmounts[normalizeCatalogKey(item.name)] ?? [];
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -89,6 +94,7 @@ export default async function handler(req: any, res: any) {
       const quantity = Number(item.quantity || 1);
       const clientAmount = Number(item.unitPriceCents);
       const catalogAmount = getCatalogAmount(item);
+      const allowedProductAmounts = getAllowedProductAmounts(item);
 
       if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
         throw new Error('Article invalide dans le panier');
@@ -99,10 +105,10 @@ export default async function handler(req: any, res: any) {
       }
 
       if (!Number.isInteger(catalogAmount) || catalogAmount <= 0) {
-        throw new Error(`Article inconnu dans le catalogue: ${item.name}`);
-      }
-
-      if (catalogAmount !== clientAmount) {
+        if (!allowedProductAmounts.includes(clientAmount)) {
+          throw new Error(`Article inconnu dans le catalogue: ${item.name}`);
+        }
+      } else if (catalogAmount !== clientAmount) {
         throw new Error(`Montant incohérent pour l'article: ${item.name}`);
       }
 
@@ -112,7 +118,7 @@ export default async function handler(req: any, res: any) {
           }, 0)
         : 0;
 
-      const totalUnitAmount = catalogAmount + extrasTotal;
+      const totalUnitAmount = clientAmount + extrasTotal;
       const extrasLabel =
         Array.isArray(item.extras) && item.extras.length > 0
           ? ` + ${item.extras.join(', ')}`
