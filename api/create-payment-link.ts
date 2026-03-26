@@ -1,4 +1,10 @@
 import { randomUUID } from 'node:crypto';
+import {
+  normalizedComboPrices,
+  normalizedOptionPrices,
+  normalizedProductPrices,
+  normalizeCatalogKey,
+} from './payment-catalog';
 
 type CartItemPayload = {
   name?: string;
@@ -30,6 +36,19 @@ function getBody(req: any) {
   }
 
   return req.body ?? {};
+}
+
+function getCatalogAmount(item: CartItemPayload) {
+  if (item.categoryName === 'Formule combo') {
+    return normalizedComboPrices[normalizeCatalogKey(item.name)];
+  }
+
+  if (item.option) {
+    const optionAmount = normalizedOptionPrices[normalizeCatalogKey(item.option)];
+    if (optionAmount) return optionAmount;
+  }
+
+  return normalizedProductPrices[normalizeCatalogKey(item.name)];
 }
 
 export default async function handler(req: any, res: any) {
@@ -68,14 +87,23 @@ export default async function handler(req: any, res: any) {
 
     const lineItems = cart.map((item: CartItemPayload) => {
       const quantity = Number(item.quantity || 1);
-      const baseAmount = Number(item.unitPriceCents);
+      const clientAmount = Number(item.unitPriceCents);
+      const catalogAmount = getCatalogAmount(item);
 
       if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
         throw new Error('Article invalide dans le panier');
       }
 
-      if (!Number.isInteger(baseAmount) || baseAmount <= 0) {
+      if (!Number.isInteger(clientAmount) || clientAmount <= 0) {
         throw new Error(`Montant invalide pour l'article: ${item.name}`);
+      }
+
+      if (!Number.isInteger(catalogAmount) || catalogAmount <= 0) {
+        throw new Error(`Article inconnu dans le catalogue: ${item.name}`);
+      }
+
+      if (catalogAmount !== clientAmount) {
+        throw new Error(`Montant incohérent pour l'article: ${item.name}`);
       }
 
       const extrasTotal = Array.isArray(item.extras)
@@ -84,7 +112,7 @@ export default async function handler(req: any, res: any) {
           }, 0)
         : 0;
 
-      const totalUnitAmount = baseAmount + extrasTotal;
+      const totalUnitAmount = catalogAmount + extrasTotal;
       const extrasLabel =
         Array.isArray(item.extras) && item.extras.length > 0
           ? ` + ${item.extras.join(', ')}`
