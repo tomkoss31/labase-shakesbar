@@ -1,3 +1,22 @@
+import {
+  comboPrices,
+  normalizedComboPrices,
+  normalizedOptionPrices,
+  normalizedProductPrices,
+  normalizeCatalogKey,
+  optionPrices,
+  productPrices,
+} from '../src/data/pricing';
+
+type CartItemPayload = {
+  name?: string;
+  categoryName?: string;
+  quantity?: number;
+  option?: string;
+  unitPriceCents?: number;
+  extras?: string[];
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -13,68 +32,13 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { cart } = req.body;
+    const cart = req.body?.cart;
 
     if (!Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({
         error: 'Panier vide ou invalide',
       });
     }
-
-    const normalizeKey = (value: string = '') =>
-      value
-        .normalize('NFKC')
-        .replace(/[–—]/g, '-')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-    const productPrices: Record<string, number> = {
-      'Choco Buenos': 890,
-      'M&M': 890,
-      'Casse Noisette': 890,
-      'Cappuccino': 890,
-      'Pina Colada': 890,
-      'Fraise Bonbon': 890,
-      "Pim's": 890,
-      'Tarte à la pomme': 890,
-      'Snickers': 890,
-      'Full Oréo': 890,
-      'Speculoos': 890,
-      'Banana Split': 890,
-      'Banana Noisette': 890,
-      'Cookies': 890,
-      'Tropical': 890,
-
-      'Apple Kiss': 690,
-      'Black Panther': 690,
-      'Cherry White Grappe': 690,
-      'Electric Blue': 690,
-      'Elf': 690,
-      'La Vie en Rose': 690,
-      "L'Exotic": 690,
-      'Perroquet': 690,
-      'Po Melon': 690,
-      'Red Paradize': 690,
-      'Soleil': 690,
-      'Sortilège Noir': 690,
-      'Electro’Lyte': 690,
-
-      'Hydrat’Max': 690,
-      'Casse Grippe': 690,
-      'Limonade Rose': 690,
-      'Digest': 690,
-
-      'Gaufre healthy': 690,
-    };
-
-    const comboPrices: Record<string, number> = {
-      'Combo Medium': 1480,
-      'Combo Power': 1590,
-      'Tea Time': 1090,
-      'Coffee Break': 1090,
-      'Choco Cocoon': 1190,
-      'Gourmet Break': 1390,
-    };
 
     const extraPrices: Record<string, number> = {
       'Collagène': 250,
@@ -86,45 +50,11 @@ export default async function handler(req: any, res: any) {
       'Protéines': 250,
     };
 
-    const optionPrices: Record<string, number> = {
-      'Medium 550ml — 6,90€': 690,
-      'Large 950ml — 8,90€': 890,
-
-      'Petit 250ml — 3,90€': 390,
-      'Grand 450ml — 5,90€': 590,
-
-      'Petit 250ml — 5,90€': 590,
-      'Grand 450ml — 6,90€': 690,
-
-      'Macchiato — 650ml — 8,90€': 890,
-      'Choco mocha — 650ml — 8,90€': 890,
-      'Latte noisette — 650ml — 8,90€': 890,
-      'Vanille latte — 650ml — 8,90€': 890,
-
-      'Miel — 6,90€': 690,
-      'Chocolat — 6,90€': 690,
-      'Chocolat blanc — 6,90€': 690,
-      'Caramel — 6,90€': 690,
-      'Caramel beurre salé — 6,90€': 690,
-    };
-
-    const normalizedProductPrices = Object.fromEntries(
-      Object.entries(productPrices).map(([key, value]) => [normalizeKey(key), value]),
-    );
-
-    const normalizedComboPrices = Object.fromEntries(
-      Object.entries(comboPrices).map(([key, value]) => [normalizeKey(key), value]),
-    );
-
-    const normalizedOptionPrices = Object.fromEntries(
-      Object.entries(optionPrices).map(([key, value]) => [normalizeKey(key), value]),
-    );
-
-    const getBaseAmount = (item: any) => {
+    const getBaseAmount = (item: CartItemPayload) => {
       if (item.categoryName === 'Formule combo') {
         const comboAmount =
-          comboPrices[item.name] ??
-          normalizedComboPrices[normalizeKey(item.name)] ??
+          (item.name ? comboPrices[item.name] : undefined) ??
+          normalizedComboPrices[normalizeCatalogKey(item.name)] ??
           (Number.isFinite(Number(item.unitPriceCents))
             ? Number(item.unitPriceCents)
             : undefined);
@@ -137,16 +67,16 @@ export default async function handler(req: any, res: any) {
       }
 
       const optionAmount =
-        optionPrices[item.option] ??
-        normalizedOptionPrices[normalizeKey(item.option)];
+        (item.option ? optionPrices[item.option] : undefined) ??
+        normalizedOptionPrices[normalizeCatalogKey(item.option)];
 
       if (optionAmount) {
         return optionAmount;
       }
 
       const productAmount =
-        productPrices[item.name] ??
-        normalizedProductPrices[normalizeKey(item.name)];
+        (item.name ? productPrices[item.name] : undefined) ??
+        normalizedProductPrices[normalizeCatalogKey(item.name)];
 
       if (productAmount) {
         return productAmount;
@@ -155,7 +85,7 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Produit inconnu: ${item.name}`);
     };
 
-    const lineItems = cart.map((item: any) => {
+    const lineItems = cart.map((item: CartItemPayload) => {
       const quantity = Number(item.quantity || 1);
       const baseAmount = getBaseAmount(item);
 

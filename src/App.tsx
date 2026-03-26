@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { LucideIcon } from 'lucide-react';
 import {
   ShoppingCart,
   MessageCircle,
@@ -10,43 +9,25 @@ import {
   Plus,
   Minus,
   ChevronRight,
-  Coffee,
-  Zap,
-  Heart,
   Instagram,
   Star,
   CheckCircle2,
   X,
-  Sparkles,
   Flame,
-  Trophy,
-  Target,
 } from 'lucide-react';
-
-type ProductOption = {
-  label: string;
-  priceCents: number;
-};
-
-type Product = {
-  name: string;
-  description: string;
-  flavors: string;
-  badge?: string;
-  image?: string;
-  basePriceCents?: number;
-  options?: ProductOption[];
-};
-
-type Category = {
-  id: string;
-  name: string;
-  icon: LucideIcon;
-  price: string;
-  accent: string;
-  description: string;
-  items: Product[];
-};
+import {
+  BRAND,
+  accompagnementCards,
+  categories,
+  comboOffers,
+  featuredSelections,
+  googleReviewUrl,
+  instagramUrl,
+  productStories,
+  socialProofStats,
+  testimonials,
+} from './data/menu';
+import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -64,648 +45,7 @@ type CartItem = {
   unitPriceCents: number;
 };
 
-type ComboSelectionConfig = {
-  label: string;
-  categoryId: string;
-  fixedProductName?: string;
-  allowedProductNames?: string[];
-  fixedOptionLabel?: string;
-};
-
-type ComboOffer = {
-  id:
-    | 'combo-medium'
-    | 'combo-power'
-    | 'combo-tea-time'
-    | 'combo-coffee-break'
-    | 'combo-choco-cocoon'
-    | 'combo-gourmet-break';
-  name: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  priceCents: number;
-  normalPriceCents: number;
-  accent: string;
-  primary: ComboSelectionConfig;
-  secondary: ComboSelectionConfig;
-};
-
-const BRAND = {
-  name: 'La Base Shakes & Drinks',
-  shortName: 'LA BASE',
-  pickup: 'Retrait sur place • Verdun',
-  prep: 'Commande prête en 5 à 10 min',
-  whatsappNumber: '33679448759',
-  address: '11 rue Saint Pierre, Verdun',
-  mapsUrl:
-    'https://www.google.com/maps/search/?api=1&query=11+rue+Saint+Pierre+Verdun',
-  discoveryUrl: 'https://linktr.ee/labaseverdun',
-};
-
-const googleReviewUrl = 'https://g.page/r/CeJabN1yW1toEAE/review';
-const instagramUrl = 'https://www.instagram.com/labase_verdun/';
-
-const comboOffers: ComboOffer[] = [
-  {
-    id: 'combo-medium',
-    name: 'Combo Medium',
-    subtitle: 'Smoothie + boisson Medium',
-    description:
-      'Une formule complète pour profiter d’un smoothie nutritionnel et d’une boisson énergisante medium à prix avantage.',
-    image: '/images/combo/combo-medium.png',
-    priceCents: 1480,
-    normalPriceCents: 1580,
-    accent: 'from-cyan-400 via-sky-400 to-blue-500',
-    primary: {
-      label: 'Choisis ton smoothie',
-      categoryId: 'smoothies',
-    },
-    secondary: {
-      label: 'Choisis ta boisson',
-      categoryId: 'drinks',
-      fixedOptionLabel: 'Medium 550ml — 6,90€',
-    },
-  },
-  {
-    id: 'combo-power',
-    name: 'Combo Power',
-    subtitle: 'Smoothie + boisson Large',
-    description:
-      'La formule la plus complète pour associer un smoothie nutritionnel et une grande boisson énergisante tout en profitant d’un tarif avantageux.',
-    image: '/images/combo/combo-power.png',
-    priceCents: 1590,
-    normalPriceCents: 1780,
-    accent: 'from-fuchsia-500 via-pink-500 to-orange-500',
-    primary: {
-      label: 'Choisis ton smoothie',
-      categoryId: 'smoothies',
-    },
-    secondary: {
-      label: 'Choisis ta boisson',
-      categoryId: 'drinks',
-      fixedOptionLabel: 'Large 950ml — 8,90€',
-    },
-  },
-  {
-    id: 'combo-tea-time',
-    name: 'Tea Time',
-    subtitle: 'Thé grand + gaufre topping au choix',
-    description:
-      'Une formule pause douce et gourmande, idéale pour associer une boisson chaude légère et une gaufre healthy.',
-    image: '/images/combo/combo-tea-time.png',
-    priceCents: 1090,
-    normalPriceCents: 1280,
-    accent: 'from-emerald-400 via-lime-400 to-yellow-400',
-    primary: {
-      label: 'Choisis ton thé',
-      categoryId: 'hot',
-      allowedProductNames: ['Thé'],
-      fixedOptionLabel: 'Grand 450ml — 5,90€',
-    },
-    secondary: {
-      label: 'Choisis ton topping',
-      categoryId: 'waffles',
-      fixedProductName: 'Gaufre healthy',
-    },
-  },
-  {
-    id: 'combo-coffee-break',
-    name: 'Coffee Break',
-    subtitle: 'Café grand + gaufre topping au choix',
-    description:
-      'Une formule simple, lisible et efficace pour une vraie pause café gourmande au club.',
-    image: '/images/combo/combo-coffee-break.png',
-    priceCents: 1090,
-    normalPriceCents: 1280,
-    accent: 'from-amber-400 via-orange-400 to-yellow-500',
-    primary: {
-      label: 'Choisis ton café',
-      categoryId: 'hot',
-      allowedProductNames: ['Café'],
-      fixedOptionLabel: 'Grand 450ml — 5,90€',
-    },
-    secondary: {
-      label: 'Choisis ton topping',
-      categoryId: 'waffles',
-      fixedProductName: 'Gaufre healthy',
-    },
-  },
-  {
-    id: 'combo-choco-cocoon',
-    name: 'Choco Cocoon',
-    subtitle: 'Chocolat chaud + gaufre topping au choix',
-    description:
-      'La formule cocooning du menu pour les amateurs de chocolat chaud protéiné et de pause réconfortante.',
-    image: '/images/combo/combo-choco-cocoon.png',
-    priceCents: 1190,
-    normalPriceCents: 1380,
-    accent: 'from-rose-500 via-orange-400 to-yellow-400',
-    primary: {
-      label: 'Choisis ton chocolat chaud',
-      categoryId: 'hot',
-      allowedProductNames: ['Chocolat chaud protéiné'],
-      fixedOptionLabel: 'Grand 450ml — 6,90€',
-    },
-    secondary: {
-      label: 'Choisis ton topping',
-      categoryId: 'waffles',
-      fixedProductName: 'Gaufre healthy',
-    },
-  },
-  {
-    id: 'combo-gourmet-break',
-    name: 'Gourmet Break',
-    subtitle: 'Café gourmet + gaufre topping au choix',
-    description:
-      'La formule premium pour associer un café gourmet 650 ml à une gaufre healthy et créer un panier plus fort.',
-    image: '/images/combo/combo-gourmet-break.png',
-    priceCents: 1390,
-    normalPriceCents: 1580,
-    accent: 'from-violet-500 via-fuchsia-500 to-orange-400',
-    primary: {
-      label: 'Choisis ta recette café gourmet',
-      categoryId: 'hot',
-      fixedProductName: 'Café gourmet',
-    },
-    secondary: {
-      label: 'Choisis ton topping',
-      categoryId: 'waffles',
-      fixedProductName: 'Gaufre healthy',
-    },
-  },
-];
-
-const categories: Category[] = [
-  {
-    id: 'smoothies',
-    name: 'Smoothies nutritionnels',
-    icon: Coffee,
-    price: '650 ml • 8,90€',
-    accent: 'from-yellow-400 via-amber-400 to-orange-500',
-    description:
-      '24g de protéines • 25 vitamines & minéraux • 250 calories • texture gourmande',
-    items: [
-      {
-        name: 'Choco Buenos',
-        description:
-          'Le smoothie signature ultra gourmand, inspiré d’une saveur type Bueno.',
-        flavors:
-          'Saveur type Kinder Bueno • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        badge: 'Produit du mois',
-        basePriceCents: 890,
-        image: '/images/shake/bueno.png',
-      },
-      {
-        name: 'M&M',
-        description:
-          'Une recette fun et généreuse, pensée pour un maximum d’effet waouh.',
-        flavors:
-          'Saveur type M&M • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        badge: 'Produit du mois',
-        basePriceCents: 890,
-        image: '/images/shake/mm.png',
-      },
-      {
-        name: 'Casse Noisette',
-        description:
-          'Un smoothie rond et réconfortant, avec une vraie identité café/noisette.',
-        flavors:
-          'Café latte • Noisette • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        badge: 'Best-seller',
-        basePriceCents: 890,
-        image: '/images/shake/casse-noisette.png',
-      },
-      {
-        name: 'Cappuccino',
-        description:
-          'Un grand classique gourmand pour les amateurs de café et chocolat.',
-        flavors:
-          'Café latte • Chocolat intense • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/cappuccino.png',
-      },
-      {
-        name: 'Pina Colada',
-        description: 'Une recette fraîche et exotique, à l’esprit vacances.',
-        flavors:
-          'Vanille • Ananas • Coco • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/pina-colada.png',
-      },
-      {
-        name: 'Fraise Bonbon',
-        description:
-          'Une saveur douce et régressive, très appréciée pour son côté dessert.',
-        flavors:
-          'Vanille • Fraise • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        badge: 'Gourmand',
-        basePriceCents: 890,
-        image: '/images/shake/fraise-bonbon.png',
-      },
-      {
-        name: "Pim's",
-        description:
-          'Une association fruitée et chocolatée avec une belle intensité.',
-        flavors:
-          'Chocolat • Framboise • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/pims.png',
-      },
-      {
-        name: 'Tarte à la pomme',
-        description:
-          'Un smoothie inspiré d’une pâtisserie iconique, avec une note pomme/vanille.',
-        flavors:
-          'Vanille • Pomme • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/tarte-a-la-pomme.png',
-      },
-      {
-        name: 'Snickers',
-        description:
-          'Le smoothie très gourmand pour les amateurs de chocolat et cacahuètes.',
-        flavors:
-          'Chocolat • Cacahuètes • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        badge: 'Ultra gourmand',
-        basePriceCents: 890,
-        image: '/images/shake/snikers.png',
-      },
-      {
-        name: 'Full Oréo',
-        description:
-          'Une texture onctueuse et un profil cookie cream très réconfortant.',
-        flavors:
-          'Cookies cream • Oréo • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/full-oreo.png',
-      },
-      {
-        name: 'Speculoos',
-        description:
-          'Une saveur chaude, épicée et gourmande, parfaite toute l’année.',
-        flavors:
-          'Chocolat • Speculoos • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/speculoos.png',
-      },
-      {
-        name: 'Banana Split',
-        description:
-          'Une recette inspirée du dessert culte, version smoothie nutritionnel.',
-        flavors:
-          'Banane • Caramel • Cerise • Chocolat • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/banana-split.png',
-      },
-      {
-        name: 'Banana Noisette',
-        description:
-          'Le mariage réussi de la banane, du chocolat et de la noisette.',
-        flavors:
-          'Banane • Caramel • Noisette • Chocolat • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/banane-noisette.png',
-      },
-      {
-        name: 'Cookies',
-        description:
-          'Une recette douce, crémeuse et très appréciée des amateurs de saveurs dessert.',
-        flavors:
-          'Cookies cream • Chocolat blanc • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/cookies-cream.png',
-      },
-      {
-        name: 'Tropical',
-        description:
-          'Un smoothie ensoleillé aux notes fruitées et faciles à boire.',
-        flavors:
-          'Vanille • Fraise • Banane • 650 ml • 24g protéines • 25 vitamines & minéraux • 250 calories',
-        basePriceCents: 890,
-        image: '/images/shake/tropical.png',
-      },
-    ],
-  },
-  {
-    id: 'drinks',
-    name: 'Boissons énergisantes',
-    icon: Zap,
-    price: 'Medium 550ml • 6,90€ | Large 950ml • 8,90€',
-    accent: 'from-fuchsia-500 via-pink-500 to-rose-500',
-    description:
-      '0 sucre • 20 calories • vitamines B & C • extraits végétaux • hydratation sport intégrée',
-    items: [
-      {
-        name: 'Apple Kiss',
-        description:
-          'Une boisson fraîche et vive, parfaite pour un boost léger ou renforcé.',
-        flavors: 'Citron • Pomme verte',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/apple-kiss.png',
-      },
-      {
-        name: 'Black Panther',
-        description:
-          'Une recette plus intense et plus dark dans l’esprit, très visuelle.',
-        flavors: 'Citron • Cerise • Framboise bleue',
-        badge: 'Dark vibe',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/black-panther.png',
-      },
-      {
-        name: 'Cherry White Grappe',
-        description:
-          'Une création fruitée très complète, avec un profil original.',
-        flavors: 'Citron • Framboise • Cerise • Raisin blanc',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/cherry-white-grappe.png',
-      },
-      {
-        name: 'Electric Blue',
-        description:
-          'Une boisson iconique, ultra visuelle, parfaite pour l’univers Shake Bar.',
-        flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
-        badge: 'Iconique',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/electric-blue.png',
-      },
-      {
-        name: 'Elf',
-        description: 'Une recette fun et fruitée, très agréable et accessible.',
-        flavors: 'Citron • Pêche • Framboise bleue • Pomme • Ananas',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/elf.png',
-      },
-      {
-        name: 'La Vie en Rose',
-        description:
-          'Une boisson pleine de fraîcheur avec un vrai côté pink signature.',
-        flavors: 'Citron • Framboise • Pomme • Fruit du dragon',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/la-vie-en-rose.png',
-      },
-      {
-        name: "L'Exotic",
-        description:
-          'La recette exotique par excellence pour ceux qui aiment les notes tropicales.',
-        flavors: 'Citron • Pêche • Passion • Fruit du dragon • Ananas',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/l-exotic.png',
-      },
-      {
-        name: 'Perroquet',
-        description:
-          'Une boisson très colorée et très fun, pensée pour marquer visuellement.',
-        flavors: 'Citron • Fraise • Framboise bleue • Raisin • Pêche',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/perroquet.png',
-      },
-      {
-        name: 'Pina Colada',
-        description:
-          'Une version énergisante à l’esprit vacances, très facile à aimer.',
-        flavors: 'Citron • Pina colada • Ananas',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/pina-colada.png',
-      },
-      {
-        name: 'Po Melon',
-        description:
-          'Une recette fraîche et fruitée avec une belle personnalité.',
-        flavors: 'Citron • Framboise • Melon • Pomme',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/po-melon.png',
-      },
-      {
-        name: 'Red Paradize',
-        description: 'Une boisson lumineuse, fruitée et très agréable à boire.',
-        flavors: 'Citron • Pêche • Ananas',
-        badge: 'Nouveau',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/red-paradize.png',
-      },
-      {
-        name: 'Soleil',
-        description: 'Un mix ensoleillé aux notes pêche, mandarine et ananas.',
-        flavors: 'Citron • Pêche • Mandarine • Ananas',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/soleil.png',
-      },
-      {
-        name: 'Sortilège Noir',
-        description:
-          'Une recette mystérieuse, fruitée et très impactante visuellement.',
-        flavors: 'Citron • Framboise • Cerise • Fraise • Myrtille',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/drinks/sortilege-noir.png',
-      },
-      {
-        name: 'Electro’Lyte',
-        description:
-          'La boisson sport pensée pour l’hydratation, le soutien de l’effort et la récupération.',
-        flavors: 'Boisson glucidique • électrolytes • hydratation',
-        badge: 'Performance',
-        image: '/images/sport/electro-lyte.png',
-        options: [
-          { label: 'Medium 550ml — 6,90€', priceCents: 690 },
-          { label: 'Large 950ml — 8,90€', priceCents: 890 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'health',
-    name: 'Boissons santé',
-    icon: Heart,
-    price: '6,90€',
-    accent: 'from-emerald-400 via-lime-400 to-green-500',
-    description: 'Hydratation • fibres • probiotiques • bien-être ciblé',
-    items: [
-      {
-        name: 'Hydrat’Max',
-        description:
-          'Une boisson orientée hydratation et fraîcheur, parfaite au quotidien.',
-        flavors: 'Orange • Mandarine',
-        badge: 'Vitamine C',
-        basePriceCents: 690,
-        image: '/images/sante/hydrat-max.png',
-      },
-      {
-        name: 'Casse Grippe',
-        description:
-          'Une recette pensée autour du confort et du soutien immunité.',
-        flavors: 'Baies sauvages • Framboise • Pomme',
-        badge: 'Immunité',
-        basePriceCents: 690,
-        image: '/images/sante/casse-grippe.png',
-      },
-      {
-        name: 'Limonade Rose',
-        description:
-          'Une boisson fraîche et légère avec une belle identité visuelle.',
-        flavors: 'Fraise • Citron • Framboise',
-        badge: 'Glow',
-        basePriceCents: 690,
-        image: '/images/sante/limonade-rose.png',
-      },
-      {
-        name: 'Digest',
-        description:
-          'Un soutien ciblé avec fibres et probiotiques, simple et efficace.',
-        flavors: 'Pomme • Fraise • Citron',
-        badge: 'Fibres & probiotiques',
-        basePriceCents: 690,
-        image: '/images/sante/di-gest.png',
-      },
-    ],
-  },
-  {
-    id: 'hot',
-    name: 'Café / Thé',
-    icon: Coffee,
-    price: 'Petit 250ml • 3,90€ | Grand 450ml • 5,90€ | Café gourmet 650ml • 8,90€',
-    accent: 'from-orange-400 via-amber-400 to-yellow-500',
-    description:
-      'Boissons chaudes simples, premium et gourmandes • café gourmet 24g protéines • 190 calories',
-    items: [
-      {
-        name: 'Café',
-        description:
-          'Un café chaud simple et efficace, en petit ou grand format.',
-        flavors: 'Petit ou grand format',
-        options: [
-          { label: 'Petit 250ml — 3,90€', priceCents: 390 },
-          { label: 'Grand 450ml — 5,90€', priceCents: 590 },
-        ],
-        image: '/images/hot/cafe-classique.png',
-      },
-      {
-        name: 'Thé',
-        description:
-          'Une boisson chaude légère et agréable, idéale à tout moment.',
-        flavors: 'Petit ou grand format',
-        options: [
-          { label: 'Petit 250ml — 3,90€', priceCents: 390 },
-          { label: 'Grand 450ml — 5,90€', priceCents: 590 },
-        ],
-        image: '/images/hot/the-aloe-vera.png',
-      },
-      {
-        name: 'Chocolat chaud protéiné',
-        description:
-          'Une boisson chaude gourmande enrichie en protéines, parfaite en collation.',
-        flavors: 'Vanille • Caramel • Noisette • Cookie',
-        badge: '25g protéines',
-        options: [
-          { label: 'Petit 250ml — 5,90€', priceCents: 590 },
-          { label: 'Grand 450ml — 6,90€', priceCents: 690 },
-        ],
-        image: '/images/hot/chocolat-chaud.png',
-      },
-      {
-        name: 'Café gourmet',
-        description:
-          'Une boisson café premium déclinée en plusieurs recettes gourmandes avec un format plus généreux.',
-        flavors:
-          'Macchiato • Choco mocha • Latte noisette • Vanille latte • 650 ml • 24g protéines • 190 calories',
-        badge: 'Gourmet',
-        options: [
-          { label: 'Macchiato — 650ml — 8,90€', priceCents: 890 },
-          { label: 'Choco mocha — 650ml — 8,90€', priceCents: 890 },
-          { label: 'Latte noisette — 650ml — 8,90€', priceCents: 890 },
-          { label: 'Vanille latte — 650ml — 8,90€', priceCents: 890 },
-        ],
-        image: '/images/hot/cafe-gourmet.png',
-      },
-    ],
-  },
-  {
-    id: 'waffles',
-    name: 'Gaufre',
-    icon: Coffee,
-    price: '6,90€',
-    accent: 'from-amber-400 via-yellow-400 to-orange-500',
-    description:
-      'Choisis ton topping • miel • chocolat • chocolat blanc • caramel • caramel beurre salé',
-    items: [
-      {
-        name: 'Gaufre healthy',
-        description:
-          'Une gaufre gourmande avec topping au choix, pensée pour le plaisir.',
-        flavors:
-          'Choix du topping : Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
-        options: [
-          { label: 'Miel — 6,90€', priceCents: 690 },
-          { label: 'Chocolat — 6,90€', priceCents: 690 },
-          { label: 'Chocolat blanc — 6,90€', priceCents: 690 },
-          { label: 'Caramel — 6,90€', priceCents: 690 },
-          { label: 'Caramel beurre salé — 6,90€', priceCents: 690 },
-        ],
-        image: '/images/waffle/gaufre-healthy.png',
-      },
-    ],
-  },
-];
-
-const accompagnementCards = [
-  {
-    icon: Target,
-    title: 'Perte de poids & bien-être',
-    text: 'Fais le point sur tes habitudes, ton objectif et la meilleure direction à prendre.',
-  },
-  {
-    icon: Trophy,
-    title: 'Énergie & nutrition sportive',
-    text: 'Découvre un accompagnement orienté routine, récupération, effort et équilibre au quotidien.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Découverte du projet',
-    text: 'Tu peux aussi réserver un créneau pour échanger sur le club, les produits ou le côté activité.',
-  },
-];
-
+const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 function euroFromCents(cents: number) {
   return `${(cents / 100).toFixed(2).replace('.', ',')}€`;
 }
@@ -874,10 +214,10 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
+      className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-sm font-medium transition ${
         active
-          ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 font-black text-black shadow-[0_10px_24px_rgba(250,204,21,0.16)]'
-          : 'border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.08]'
+          ? 'border-[#dfb86f]/40 bg-[linear-gradient(135deg,#f0d7a7,#dfb86f,#c99745)] font-black text-[#1d160d] shadow-[0_14px_28px_rgba(227,188,114,0.18)]'
+          : 'border-[#e3d6b7]/10 bg-[rgba(255,250,240,0.05)] text-white/75 hover:border-[#e3d6b7]/20 hover:bg-[rgba(255,250,240,0.08)]'
       }`}
     >
       {label}
@@ -909,8 +249,15 @@ function App() {
 
     const url = new URL(window.location.href);
     if (url.searchParams.get('payment') === 'success') {
-      setShowThankYou(true);
-      setCart([]);
+      const hasPendingSquareCheckout =
+        window.sessionStorage.getItem(PENDING_SQUARE_CHECKOUT_KEY) === '1';
+
+      if (hasPendingSquareCheckout) {
+        setShowThankYou(true);
+        setCart([]);
+        window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
+      }
+
       url.searchParams.delete('payment');
       window.history.replaceState({}, '', url.toString());
     }
@@ -933,36 +280,6 @@ function App() {
       })),
     );
   }, []);
-
-  const monthlyItems = useMemo(
-    () => [
-      {
-        name: 'Choco Buenos',
-        subtitle: 'Produit du mois',
-        description:
-          'Une recette ultra gourmande inspirée de l’univers Bueno.',
-      },
-      {
-        name: 'M&M',
-        subtitle: 'Produit du mois',
-        description:
-          'Une saveur fun, généreuse et très visuelle, idéale pour créer l’effet waouh.',
-      },
-    ],
-    [],
-  );
-
-  const featuredItems = useMemo(
-    () => [
-      { name: 'Choco Buenos', subtitle: 'Produit du mois' },
-      { name: 'M&M', subtitle: 'Produit du mois' },
-      { name: 'Snickers', subtitle: 'Ultra gourmand' },
-      { name: 'Electric Blue', subtitle: 'Iconique' },
-      { name: 'Café gourmet', subtitle: 'Premium' },
-      { name: 'Electro’Lyte', subtitle: 'Performance' },
-    ],
-    [],
-  );
 
   const bestCombo = useMemo(
     () => comboOffers.find((combo) => combo.id === 'combo-power') ?? comboOffers[0],
@@ -1021,13 +338,69 @@ function App() {
   );
   const firstHotInCart = cart.find((item) => item.categoryName === 'Café / Thé');
   const firstWaffleInCart = cart.find((item) => item.categoryName === 'Gaufre');
+  const hasComboUpgradeOpportunity = Boolean(
+    (firstSmoothieInCart && !firstDrinkInCart) ||
+      (!firstSmoothieInCart && firstDrinkInCart) ||
+      (firstHotInCart && !firstWaffleInCart) ||
+      (!firstHotInCart && firstWaffleInCart),
+  );
 
-  function getSelectedBasePrice(product: SelectedProduct) {
-    if (selectedOption && product.options?.length) {
-      const option = product.options.find((opt) => opt.label === selectedOption);
+  function getConfiguredBasePrice(product: Product, optionLabel = '') {
+    if (optionLabel && product.options?.length) {
+      const option = product.options.find((opt) => opt.label === optionLabel);
       if (option) return option.priceCents;
     }
-    return product.basePriceCents ?? 0;
+    return product.basePriceCents ?? product.options?.[0]?.priceCents ?? 0;
+  }
+
+  function getSelectedBasePrice(product: SelectedProduct) {
+    return getConfiguredBasePrice(product, selectedOption);
+  }
+
+  function getDefaultOptionLabel(product: Product, preferredOptionLabel?: string) {
+    if (!product.options?.length) return '';
+
+    if (preferredOptionLabel) {
+      const preferred = product.options.find(
+        (option) => option.label === preferredOptionLabel,
+      );
+      if (preferred) return preferred.label;
+    }
+
+    return product.options[0]?.label ?? '';
+  }
+
+  function addPreparedProductToCart(
+    product: SelectedProduct,
+    optionLabel = '',
+    toastLabel = product.name,
+  ) {
+    const unitPriceCents = getConfiguredBasePrice(product, optionLabel);
+    const key = `${product.categoryId}-${product.name}-${optionLabel}`;
+
+    setCart((prev) => {
+      const existing = prev.find((item) => item.key === key);
+
+      if (existing) {
+        return prev.map((item) =>
+          item.key === key ? { ...item, quantity: item.quantity + 1 } : item,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          key,
+          name: product.name,
+          categoryName: product.categoryName,
+          quantity: 1,
+          option: optionLabel,
+          unitPriceCents,
+        },
+      ];
+    });
+
+    setToastMessage(`${toastLabel} ajouté au panier`);
   }
 
   function getStartingPriceLabel(product: Product) {
@@ -1167,34 +540,17 @@ function App() {
   }
 
   function addToCart(product: SelectedProduct) {
-    const unitPriceCents = getSelectedBasePrice(product);
-    const key = `${product.categoryId}-${product.name}-${selectedOption}`;
-
-    setCart((prev) => {
-      const existing = prev.find((item) => item.key === key);
-
-      if (existing) {
-        return prev.map((item) =>
-          item.key === key ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-
-      return [
-        ...prev,
-        {
-          key,
-          name: product.name,
-          categoryName: product.categoryName,
-          quantity: 1,
-          option: selectedOption,
-          unitPriceCents,
-        },
-      ];
-    });
-
-    setToastMessage(`${product.name} ajouté au panier`);
+    addPreparedProductToCart(product, selectedOption);
     setSelected(null);
     setSelectedOption('');
+  }
+
+  function addSuggestedProduct(productName: string, preferredOptionLabel?: string) {
+    const product = allProducts.find((entry) => entry.name === productName);
+    if (!product) return;
+
+    const resolvedOption = getDefaultOptionLabel(product, preferredOptionLabel);
+    addPreparedProductToCart(product, resolvedOption, product.name);
   }
 
   function addComboToCart() {
@@ -1291,6 +647,59 @@ function App() {
     );
   }
 
+  const drawerQuickAdds = useMemo(() => {
+    if (cart.length === 0) return [];
+
+    const cartNames = new Set(cart.map((item) => item.name));
+    const suggestions: Array<{
+      title: string;
+      text: string;
+      productName: string;
+      optionLabel?: string;
+      badge: string;
+    }> = [];
+
+    if (!firstWaffleInCart && !firstHotInCart) {
+      suggestions.push({
+        title: 'Ajoute une pause gourmande',
+        text: 'La gaufre healthy complète très bien une commande drink sans l’alourdir.',
+        productName: 'Gaufre healthy',
+        optionLabel: 'Caramel beurre salé — 6,90€',
+        badge: 'Ajout facile',
+      });
+    }
+
+    if (!firstHotInCart && cartTotalCents >= 890) {
+      suggestions.push({
+        title: 'Ajoute une pause premium',
+        text: 'Le café gourmet ajoute une vraie touche plaisir, idéale pour compléter la commande.',
+        productName: 'Café gourmet',
+        optionLabel: 'Macchiato — 8,90€',
+        badge: 'Pause premium',
+      });
+    }
+
+    if (!firstDrinkInCart && !firstSmoothieInCart && !cartNames.has('Electro’Lyte')) {
+      suggestions.push({
+        title: 'Ajoute une boisson performance',
+        text: 'Electro’Lyte complète très bien une pause chaude ou gourmande avec une vraie logique énergie.',
+        productName: 'Electro’Lyte',
+        optionLabel: 'Large 950ml — 8,90€',
+        badge: 'Boost énergie',
+      });
+    }
+
+    return suggestions.slice(0, hasComboUpgradeOpportunity ? 1 : 2);
+  }, [
+    cart,
+    cartTotalCents,
+    hasComboUpgradeOpportunity,
+    firstDrinkInCart,
+    firstHotInCart,
+    firstSmoothieInCart,
+    firstWaffleInCart,
+  ]);
+
   const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
     cart,
     customerName,
@@ -1351,6 +760,7 @@ function App() {
         return;
       }
 
+      window.sessionStorage.setItem(PENDING_SQUARE_CHECKOUT_KEY, '1');
       window.location.href = data.url;
     } catch (error) {
       console.error(error);
@@ -1376,19 +786,24 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.06),_transparent_28%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.018] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:40px_40px]" />
+    <div className="delivery-luxe min-h-screen bg-[#050505] text-white">
+      <div className="delivery-luxe__glow pointer-events-none fixed inset-0" />
+      <div className="delivery-luxe__grid pointer-events-none fixed inset-0" />
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_0_30px_rgba(255,255,255,0.04)]">
-            <p className="text-3xl font-black leading-none tracking-tight">
-              {BRAND.shortName}
+      <header className="dlx-header sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5">
+          <div className="dlx-brand">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/40">
+              Verdun • shakes & drinks
             </p>
-            <p className="mt-1 text-xs text-white/55">
-              Shakes & Drinks • Verdun • Commande rapide
-            </p>
+            <div className="mt-1 flex flex-col gap-1 md:flex-row md:items-end md:gap-3">
+              <p className="dlx-brand-wordmark text-3xl font-black leading-none tracking-tight">
+                La Base
+              </p>
+              <p className="text-sm text-white/58">
+                shakes, drinks & accompagnement
+              </p>
+            </div>
           </div>
 
           <motion.button
@@ -1403,7 +818,7 @@ function App() {
                 ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
                 : { duration: 0.2 }
             }
-            className="relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
+            className="dlx-cart-button relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
           >
             <span className="inline-flex items-center gap-2">
               <ShoppingCart size={18} /> Panier
@@ -1417,10 +832,10 @@ function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-32">
+      <main className="dlx-main mx-auto max-w-7xl px-4 pb-32">
         {showThankYou && (
           <section className="pt-6">
-            <div className="rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
+            <div className="dlx-panel rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="max-w-2xl">
                   <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
@@ -1458,34 +873,35 @@ function App() {
         )}
 
         <section className="pb-7 pt-8">
-          <div className="overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-yellow-400/8 via-white/[0.02] to-fuchsia-500/8 p-[1px] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-            <div className="rounded-[33px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.13),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_24%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(17,17,17,0.95))] p-6 md:p-8">
+          <div className="dlx-hero-shell overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-yellow-400/8 via-white/[0.02] to-fuchsia-500/8 p-[1px] shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
+            <div className="dlx-hero-inner rounded-[33px] bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.13),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.10),_transparent_24%),linear-gradient(135deg,rgba(10,10,10,0.98),rgba(17,17,17,0.95))] p-6 md:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">
-                    {BRAND.name}
+                  <div className="dlx-chip-green mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">
+                    Healthy drinks, pauses gourmandes & good vibes
                   </div>
 
-                  <h1 className="text-3xl font-black leading-none tracking-tight md:text-5xl">
-                    Le{' '}
+                  <h1 className="dlx-display text-3xl font-black leading-none tracking-tight md:text-5xl">
+                    Le shake bar healthy de Verdun
                     <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                      Shake Bar healthy
+                      qui fait du bien autant qu’il régale
                     </span>{' '}
-                    de Verdun,
-                    <br />
-                    entre plaisir, énergie et accompagnement.
+                    dans une ambiance simple et chaleureuse.
                   </h1>
 
                   <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
-                    Smoothies nutritionnels, boissons énergisantes, café, thé, gaufres healthy et accompagnement personnalisé :
-                    La Base t’accueille pour découvrir un univers orienté perte de poids, bien-être, énergie au quotidien et nutrition sportive.
+                    À La Base, on vient pour boire bon, boire beau et repartir bien.
+                    Shakes gourmands, healthy drinks, pauses chaudes et petites envies
+                    sucrées se retrouvent dans un même esprit: plaisir, énergie et
+                    accompagnement autour du bien-être, de la remise en forme, de la
+                    perte de poids et de la nutrition sportive.
                   </p>
 
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {['Perte de poids', 'Bien-être', 'Énergie', 'Sport'].map((item) => (
+                    {['Healthy drinks', 'Shakes gourmands', 'Pauses chaudes', 'Accompagnement'].map((item) => (
                       <span
                         key={item}
-                        className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/85"
+                        className="dlx-chip rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/85"
                       >
                         {item}
                       </span>
@@ -1509,7 +925,7 @@ function App() {
                       href={BRAND.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.22)]"
+                      className="dlx-primary-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-bold text-black shadow-[0_10px_30px_rgba(250,204,21,0.22)]"
                     >
                       <MapPin size={16} /> Je m’y rends
                     </a>
@@ -1518,7 +934,7 @@ function App() {
                       href={googleReviewUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 font-semibold text-white transition hover:bg-white/[0.09]"
+                      className="dlx-secondary-btn inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 font-semibold text-white transition hover:bg-white/[0.09]"
                     >
                       <Star size={16} /> Laisser un avis
                     </a>
@@ -1527,23 +943,106 @@ function App() {
                       href={BRAND.discoveryUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
+                      className="dlx-accent-btn inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
                     >
                       <ChevronRight size={16} /> Découvrir l’accompagnement
                     </a>
                   </div>
+
+                  <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+                        Signature du moment
+                      </p>
+                      <p className="mt-2 text-lg font-black text-white">Choco Buenos</p>
+                      <p className="mt-1 text-sm text-white/62">
+                        La recette qu’on recommande souvent pour découvrir La Base.
+                      </p>
+                    </div>
+                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+                        Retrait express
+                      </p>
+                      <p className="mt-2 text-lg font-black text-white">5 à 10 min</p>
+                      <p className="mt-1 text-sm text-white/62">
+                        Tu commandes, on prépare, tu passes récupérer au club.
+                      </p>
+                    </div>
+                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+                        Bien plus qu’un menu
+                      </p>
+                      <p className="mt-2 text-lg font-black text-white">Bien-être & énergie</p>
+                      <p className="mt-1 text-sm text-white/62">
+                        Des produits pensés pour le plaisir, avec un accompagnement si tu veux aller plus loin.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="hidden items-end gap-2 md:flex md:flex-col">
-                  <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">
-                    Premium
-                  </span>
-                  <span className="rounded-full bg-cyan-400 px-3 py-1 text-xs font-black text-black">
-                    Fast order
-                  </span>
-                  <span className="rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white">
-                    Shake bar vibes
-                  </span>
+                <div className="hidden w-full max-w-sm gap-4 lg:flex lg:flex-col">
+                  <div className="dlx-panel rounded-[28px] p-5">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
+                      Commande simple
+                    </p>
+                    <h2 className="mt-2 text-3xl font-black text-white">
+                      Ton rituel en 3 étapes
+                    </h2>
+                    <div className="mt-4 space-y-3">
+                      <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                          1. Choisis
+                        </p>
+                        <p className="mt-1 text-sm text-white/80">
+                          Choisis ce qui te fait envie parmi les shakes, drinks, pauses chaudes et formules.
+                        </p>
+                      </div>
+                      <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                          2. Personnalise
+                        </p>
+                        <p className="mt-1 text-sm text-white/80">
+                          Choisis le format, la recette ou le topping tranquillement, sans te perdre.
+                        </p>
+                      </div>
+                      <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                          3. Retire
+                        </p>
+                        <p className="mt-1 text-sm text-white/80">
+                          Tu commandes sur WhatsApp ou Square et ton retrait au club est prêt rapidement.
+                        </p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm text-white/58">
+                      Clair, rapide et naturel, pour commander sans détour.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openCombo(bestCombo.id)}
+                    className="dlx-panel-soft group overflow-hidden rounded-[28px] p-5 text-left transition hover:-translate-y-1"
+                  >
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
+                      La formule signature du moment
+                    </p>
+                    <p className="mt-2 text-3xl font-black text-white">{bestCombo.name}</p>
+                    <p className="mt-2 text-sm text-white/70">{bestCombo.subtitle}</p>
+                    <div className="mt-4 flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-black text-white">
+                          {euroFromCents(bestCombo.priceCents)}
+                        </p>
+                        <p className="text-xs font-semibold text-[#f6dfb5]">
+                          Économie {euroFromCents(bestCombo.normalPriceCents - bestCombo.priceCents)}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white">
+                        Composer <ChevronRight size={16} />
+                      </span>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1551,17 +1050,17 @@ function App() {
         </section>
 
         <section className="mb-9 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
+          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                  Produits du mois
+                  Signatures du moment
                 </p>
                 <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                  Les saveurs qui attirent le plus en ce moment
+                  Les recettes qui donnent envie d’ouvrir la fiche
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Deux recettes très visuelles, gourmandes et parfaites pour créer l’effet waouh dès la première visite.
+                  Deux recettes qui donnent le ton dès l’arrivée: visuelles, gourmandes et très faciles à aimer.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
@@ -1575,17 +1074,20 @@ function App() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {monthlyItems.map((item) => {
+              {productStories.map((item) => {
                 const product = allProducts.find((p) => p.name === item.name);
                 return (
                   <button
                     key={item.name}
                     type="button"
                     onClick={() => openProduct(item.name)}
-                    className="group relative overflow-hidden rounded-[28px] border border-white/10 text-left shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
+                    className="dlx-feature-card group relative overflow-hidden rounded-[28px] border border-white/10 text-left shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
                   >
-                    <div className="relative h-[340px]">
+                    <div className="relative h-[300px] md:h-[340px]">
                       <ProductCardBackground image={product?.image} name={item.name} />
+                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
+                        {product ? `Dès ${getStartingPriceLabel(product)}` : item.subtitle}
+                      </div>
                       <div className="absolute inset-x-0 bottom-0 p-5">
                         <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
                           {item.subtitle}
@@ -1596,8 +1098,8 @@ function App() {
                         <p className="mt-2 max-w-md text-sm leading-relaxed text-white/72">
                           {item.description}
                         </p>
-                        <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-300">
-                          Voir la fiche produit <ChevronRight size={15} />
+                        <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 backdrop-blur">
+                          Découvrir la recette <ChevronRight size={15} />
                         </span>
                       </div>
                     </div>
@@ -1607,19 +1109,22 @@ function App() {
             </div>
           </div>
 
-          <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
+          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
             <p className="text-xs uppercase tracking-[0.22em] text-white/45">
               Découvrir l’accompagnement
             </p>
             <h2 className="mt-1 text-2xl font-black">
-              Envie d’aller plus loin que la commande ?
+              Bien plus qu’une simple commande
             </h2>
+            <p className="mt-2 text-sm text-white/65">
+              La Base peut aussi t’aider à avancer avec un accompagnement concret, simple à comprendre et motivant.
+            </p>
 
             <div className="mt-4 space-y-3">
               {accompagnementCards.map((card) => {
                 const Icon = card.icon;
                 return (
-                  <div key={card.title} className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                  <div key={card.title} className="dlx-info-card rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
                     <p className="inline-flex items-center gap-2 font-black">
                       <Icon size={16} className="text-yellow-300" /> {card.title}
                     </p>
@@ -1632,7 +1137,7 @@ function App() {
                 href={BRAND.discoveryUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
+                className="dlx-primary-btn inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
                 <ChevronRight size={18} /> Découvrir l’accompagnement
               </a>
@@ -1647,25 +1152,25 @@ function App() {
                 Formules combo
               </p>
               <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                Les offres les plus complètes du club
+                Les combos healthy & gourmands du club
               </h2>
               <p className="mt-2 max-w-3xl text-sm text-white/65">
-                Associe un smoothie nutritionnel et une boisson énergisante, ou crée une vraie pause chaude avec thé, café, chocolat chaud ou café gourmet + gaufre topping au choix.
+                Des formules simples à composer pour associer un drink, une pause gourmande ou un duo plus complet en quelques clics.
               </p>
             </div>
           </div>
 
-          <div className="mb-5 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.10),rgba(236,72,153,0.08),rgba(250,204,21,0.10))] p-[1px] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="grid gap-5 rounded-[29px] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.96))] p-5 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
+          <div className="dlx-hero-shell mb-5 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.10),rgba(236,72,153,0.08),rgba(250,204,21,0.10))] p-[1px] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+            <div className="dlx-panel-soft grid gap-5 rounded-[29px] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.96))] p-5 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
-                  <Flame size={14} /> Best combo
+                  <Flame size={14} /> Combo signature
                 </p>
                 <h3 className="mt-3 text-2xl font-black text-white md:text-3xl">
                   {bestCombo.name}
                 </h3>
                 <p className="mt-2 text-white/70">
-                  {bestCombo.subtitle} — la formule la plus forte visuellement et la plus complète à mettre en avant.
+                  {bestCombo.subtitle} — une formule facile à choisir, gourmande et bien pensée.
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
@@ -1697,9 +1202,9 @@ function App() {
                 key={combo.id}
                 type="button"
                 onClick={() => openCombo(combo.id)}
-                className="group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:-translate-y-1 hover:border-yellow-400/25"
+                className="dlx-combo-card group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:-translate-y-1 hover:border-yellow-400/25"
               >
-                <div className="relative h-[255px] md:h-[270px]">
+                <div className="relative h-[240px] md:h-[270px]">
                   <ComboCardImage image={combo.image} name={combo.name} />
                   <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-cyan-400 to-pink-500" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
@@ -1729,34 +1234,55 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-7 flex flex-col gap-4">
-          <div className="relative">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
-              size={18}
-            />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher une saveur, une catégorie, un goût..."
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-4 pl-11 pr-4 text-white outline-none backdrop-blur focus:border-yellow-400/50"
-            />
-          </div>
+        <section className="mb-7">
+          <div className="dlx-panel rounded-[30px] p-4 md:p-5">
+            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
+                  Le menu
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
+                  Choisis ce qui te fait envie
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-white/68">
+                  Shakes, drinks, pauses chaudes, gaufres et formules: tout le menu du club est ici, simple à parcourir et facile à commander.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-semibold text-white/70">
+                <span className="dlx-chip rounded-full px-3 py-2">Retrait rapide</span>
+                <span className="dlx-chip rounded-full px-3 py-2">Formules signature</span>
+                <span className="dlx-chip rounded-full px-3 py-2">Pause healthy</span>
+              </div>
+            </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            <FilterPill
-              active={activeCategory === 'all'}
-              onClick={() => setActiveCategory('all')}
-              label="Tout"
-            />
-            {categories.map((category) => (
-              <FilterPill
-                key={category.id}
-                active={activeCategory === category.id}
-                onClick={() => setActiveCategory(category.id)}
-                label={category.name}
+            <div className="dlx-search relative">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+                size={18}
               />
-            ))}
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Rechercher une saveur, une catégorie, un goût..."
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-4 pl-11 pr-4 text-white outline-none backdrop-blur focus:border-yellow-400/50"
+              />
+            </div>
+
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+              <FilterPill
+                active={activeCategory === 'all'}
+                onClick={() => setActiveCategory('all')}
+                label="Tout"
+              />
+              {categories.map((category) => (
+                <FilterPill
+                  key={category.id}
+                  active={activeCategory === category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  label={category.name}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -1797,10 +1323,15 @@ function App() {
                         whileHover={{ y: -4 }}
                         whileTap={{ scale: 0.985 }}
                         onClick={() => openProductFromCategory(category, item)}
-                        className="group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:border-yellow-400/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.36)]"
+                        className="dlx-product-card group relative overflow-hidden rounded-[30px] border border-white/10 text-left shadow-[0_14px_40px_rgba(0,0,0,0.30)] transition hover:border-yellow-400/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.36)]"
                       >
-                        <div className="relative h-[460px]">
+                        <div className="relative h-[400px] md:h-[460px]">
                           <ProductCardBackground image={item.image} name={item.name} />
+                          <div className="absolute inset-x-0 top-0 p-5">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75 backdrop-blur">
+                              {category.name}
+                            </div>
+                          </div>
 
                           <div className="absolute inset-x-0 bottom-0 p-5">
                             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -1823,16 +1354,24 @@ function App() {
                             <p className="text-[2rem] leading-none font-black text-white drop-shadow-lg">
                               {item.name}
                             </p>
-                            <p className="mt-3 text-base text-white/72">
-                              {item.flavors}
+                            <p className="mt-3 text-base leading-relaxed text-white/76">
+                              {item.description}
                             </p>
+                            <p className="mt-2 text-sm text-white/58">{item.flavors}</p>
 
                             <div className="mt-6 flex items-center justify-between gap-3">
-                              <span className="text-sm font-semibold text-white/85">
-                                Personnaliser
-                              </span>
-                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur">
-                                <ChevronRight size={18} />
+                              <div>
+                                {getStartingPriceLabel(item) && (
+                                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+                                    À partir de
+                                  </p>
+                                )}
+                                <p className="mt-1 text-2xl font-black text-white">
+                                  {getStartingPriceLabel(item)}
+                                </p>
+                              </div>
+                              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                                Personnaliser <ChevronRight size={18} />
                               </span>
                             </div>
                           </div>
@@ -1846,18 +1385,17 @@ function App() {
         </section>
 
         <section className="mb-8 grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
-          <div className="rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Best sellers
+                  Incontournables
                 </p>
                 <h2 className="text-2xl font-black md:text-3xl">
-                  Les signatures du club
+                  Les produits qu’on repère en premier
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Une sélection qui représente le mieux l’univers La Base :
-                  gourmandise, énergie, fraîcheur et visuel fort.
+                  Une sélection de recettes qui représentent bien le club: visuelles, gourmandes et efficaces dès la première commande.
                 </p>
               </div>
               <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
@@ -1866,18 +1404,21 @@ function App() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              {featuredItems.map((item) => {
+              {featuredSelections.map((item) => {
                 const product = allProducts.find((p) => p.name === item.name);
                 return (
                   <button
                     key={item.name}
                     type="button"
                     onClick={() => openProduct(item.name)}
-                    className="group relative overflow-hidden rounded-[24px] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
+                    className="dlx-feature-card group relative overflow-hidden rounded-[24px] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
                   >
-                    <div className="relative h-[250px]">
+                    <div className="relative h-[220px] md:h-[250px]">
                       <ProductCardBackground image={product?.image} name={item.name} />
                       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
+                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
+                        {product ? getStartingPriceLabel(product) : item.subtitle}
+                      </div>
                       <div className="absolute inset-x-0 bottom-0 p-4 text-left">
                         <p className="text-lg font-black text-white">{item.name}</p>
                         <p className="mt-1 text-sm text-white/68">{item.subtitle}</p>
@@ -1894,7 +1435,7 @@ function App() {
               href={googleReviewUrl}
               target="_blank"
               rel="noreferrer"
-              className="block rounded-[30px] border border-yellow-400/20 bg-gradient-to-br from-yellow-400/12 via-yellow-300/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
+              className="dlx-link-card block rounded-[30px] border border-yellow-400/20 bg-gradient-to-br from-yellow-400/12 via-yellow-300/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
             >
               <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-yellow-300">
                 <Star size={14} /> Avis Google
@@ -1906,13 +1447,16 @@ function App() {
                 Ton avis aide le club à grandir et permet à de nouvelles personnes
                 de découvrir La Base Shakes & Drinks.
               </p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-yellow-200">
+                Voir les avis <ChevronRight size={15} />
+              </span>
             </a>
 
             <a
               href={instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="block rounded-[30px] border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/12 via-pink-500/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
+              className="dlx-link-card block rounded-[30px] border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/12 via-pink-500/8 to-transparent p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] transition hover:-translate-y-1"
             >
               <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-fuchsia-300">
                 <Instagram size={14} /> Instagram
@@ -1924,25 +1468,96 @@ function App() {
                 Nouveautés, saveurs du moment, visuels gourmands, ambiance du club
                 et coulisses : tout l’univers La Base en un coup d’œil.
               </p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-fuchsia-200">
+                Voir Instagram <ChevronRight size={15} />
+              </span>
             </a>
           </div>
         </section>
 
-        <footer className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
+        <section className="mb-8 grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
+          <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+            <p className="text-xs uppercase tracking-[0.22em] text-[#f6dfb5]">
+              Pourquoi on revient
+            </p>
+            <h2 className="mt-2 text-2xl font-black md:text-3xl">
+              Une adresse qui vit bien au-delà du visuel
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-white/65">
+              La Base fonctionne parce que l’expérience reste simple, chaleureuse et régulière:
+              de bons produits, une vraie ambiance club et une commande facile à refaire.
+            </p>
+
+            <div className="mt-5 grid gap-3">
+              {socialProofStats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4"
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+                    {stat.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-white">{stat.value}</p>
+                  <p className="mt-1 text-sm text-white/62">{stat.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+                  Ce qu’on retient du club
+                </p>
+                <h2 className="mt-2 text-2xl font-black md:text-3xl">
+                  Des retours qui parlent de goût, d’ambiance et de régularité
+                </h2>
+              </div>
+              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
+                Avis & ressenti
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.title}
+                  className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4"
+                >
+                  <div className="flex items-center gap-1 text-yellow-300">
+                    <Star size={14} fill="currentColor" />
+                    <Star size={14} fill="currentColor" />
+                    <Star size={14} fill="currentColor" />
+                    <Star size={14} fill="currentColor" />
+                    <Star size={14} fill="currentColor" />
+                  </div>
+                  <p className="mt-3 text-lg font-black text-white">{testimonial.title}</p>
+                  <p className="mt-2 text-sm text-white/68">{testimonial.text}</p>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
+                    {testimonial.author}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <footer className="dlx-footer rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
           <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">
                 La Base Shakes & Drinks
               </p>
               <h2 className="mt-2 text-2xl font-black">
-                Des produits gourmands avec une vraie logique bien-être
+                Des produits gourmands pensés autour du bien-être
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Smoothies nutritionnels, boissons énergisantes, boissons santé,
-                café, thé, formules combo et gaufre : tout est pensé pour allier plaisir,
-                rapidité et expérience simple à commander. Tu peux aussi découvrir
-                l’accompagnement autour du bien-être, de la perte de poids, de l’énergie
-                et de la nutrition sportive.
+                Smoothies nutritionnels, boissons énergisantes, healthy drinks,
+                pauses chaudes, gaufre et formules: tout est pensé pour allier plaisir,
+                énergie et commande facile. Et si tu veux aller plus loin, le club
+                propose aussi un accompagnement autour du bien-être, de la perte de poids,
+                de l’énergie et de la nutrition sportive.
               </p>
             </div>
 
@@ -1974,6 +1589,28 @@ function App() {
         </footer>
       </main>
 
+      {cartCount > 0 && !drawerOpen && (
+        <div className="dlx-mobile-cart fixed bottom-4 left-4 right-4 z-30 md:hidden">
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="flex w-full items-center justify-between gap-3 rounded-[24px] px-4 py-3 text-left text-white"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+                Ton panier
+              </p>
+              <p className="mt-1 text-lg font-black">
+                {cartCount} article{cartCount > 1 ? 's' : ''} • {euroFromCents(cartTotalCents)}
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+              Ouvrir <ChevronRight size={16} />
+            </span>
+          </button>
+        </div>
+      )}
+
       <AnimatePresence>
         {selected && (
           <motion.div
@@ -1989,7 +1626,7 @@ function App() {
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-xl md:rounded-[34px]"
+              className="dlx-modal absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.08),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-xl md:rounded-[34px]"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div
@@ -2016,9 +1653,9 @@ function App() {
               <p className="mt-2 text-white/68">{selected.description}</p>
               <p className="mt-3 text-sm text-white/50">{selected.flavors}</p>
 
-              <div className="mt-4 inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
-                Prix : {euroFromCents(selectedTotal)}
-              </div>
+                <div className="dlx-chip-gold mt-4 inline-flex rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
+                  Prix : {euroFromCents(selectedTotal)}
+                </div>
 
               {selected.options && selected.options.length > 0 && (
                 <div className="mt-6">
@@ -2150,7 +1787,7 @@ function App() {
 
               <button
                 onClick={() => addToCart(selected)}
-                className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
+                className="dlx-primary-btn mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
               >
                 Ajouter au panier
               </button>
@@ -2174,7 +1811,7 @@ function App() {
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-2xl md:rounded-[34px]"
+              className="dlx-modal absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.08),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-2xl md:rounded-[34px]"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selectedCombo.accent} px-3 py-1 text-sm font-black text-black`}>
@@ -2197,7 +1834,7 @@ function App() {
               <h3 className="text-3xl font-black text-white">{selectedCombo.name}</h3>
               <p className="mt-2 text-white/68">{selectedCombo.description}</p>
               <div className="mt-4 flex flex-wrap gap-3">
-                <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
+                <span className="dlx-chip-gold rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
                   Prix : {euroFromCents(selectedCombo.priceCents)}
                 </span>
                 <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
@@ -2327,7 +1964,7 @@ function App() {
                 type="button"
                 onClick={addComboToCart}
                 disabled={!selectedComboPrimaryName || !selectedComboSecondaryName}
-                className="mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+                className="dlx-primary-btn mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Ajouter la formule au panier
               </button>
@@ -2352,10 +1989,13 @@ function App() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 40, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-white/10 bg-[linear-gradient(180deg,#ffffff,#f8f8f8)] text-black shadow-[0_0_80px_rgba(0,0,0,0.35)]"
+              className="dlx-drawer fixed bottom-0 right-0 top-0 z-50 w-full max-w-md overflow-y-auto border-l border-white/10 bg-[linear-gradient(180deg,#ffffff,#f8f8f8)] text-black shadow-[0_0_80px_rgba(0,0,0,0.35)]"
             >
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-white/90 px-5 py-4 backdrop-blur">
                 <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-black/40">
+                    Finalise ta commande
+                  </p>
                   <h3 className="text-2xl font-black">Ton panier</h3>
                   <p className="text-sm text-black/55">
                     {cartCount} article{cartCount > 1 ? 's' : ''} • {euroFromCents(cartTotalCents)}
@@ -2377,10 +2017,29 @@ function App() {
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    <div className="dlx-drawer-hero rounded-[30px] border border-black/10 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-900/55">
+                            Retrait express
+                          </p>
+                          <p className="mt-2 text-lg font-black text-black">
+                            Prête en 5 à 10 min au club
+                          </p>
+                          <p className="mt-1 text-sm text-black/65">
+                            Commande simple, retrait rapide, WhatsApp ou Square selon ce que tu préfères.
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-emerald-900/10 bg-white/70 px-3 py-1 text-xs font-bold text-emerald-900/70">
+                          Verdun
+                        </div>
+                      </div>
+                    </div>
+
                     {cart.map((item) => (
                       <div
                         key={item.key}
-                        className="rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]"
+                        className="dlx-drawer-card rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -2418,12 +2077,12 @@ function App() {
                     ))}
 
                     {firstSmoothieInCart && !firstDrinkInCart && (
-                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-cyan-50 to-blue-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                      <div className="dlx-drawer-highlight rounded-3xl border border-black/10 bg-gradient-to-r from-cyan-50 to-blue-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
                           <Flame size={14} /> Passe en formule combo
                         </p>
                         <p className="mt-2 text-sm text-black/70">
-                          Ajoute une boisson et profite d’un tarif plus avantageux.
+                          Ajoute une boisson et passe sur une formule plus complète.
                         </p>
                         <div className="mt-3 space-y-2">
                           {comboOffers
@@ -2452,12 +2111,12 @@ function App() {
                     )}
 
                     {!firstSmoothieInCart && firstDrinkInCart && (
-                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-fuchsia-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                      <div className="dlx-drawer-highlight rounded-3xl border border-black/10 bg-gradient-to-r from-fuchsia-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-700">
                           <Flame size={14} /> Complète avec un smoothie
                         </p>
                         <p className="mt-2 text-sm text-black/70">
-                          Passe en formule combo et ajoute un smoothie pour un prix plus fort et plus lisible.
+                          Ajoute un smoothie et profite d’une formule plus gourmande et plus avantageuse.
                         </p>
                         <div className="mt-3 space-y-2">
                           {comboOffers
@@ -2486,12 +2145,12 @@ function App() {
                     )}
 
                     {firstHotInCart && !firstWaffleInCart && (
-                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                      <div className="dlx-drawer-highlight rounded-3xl border border-black/10 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-orange-700">
                           <Flame size={14} /> Passe en formule chaude
                         </p>
                         <p className="mt-2 text-sm text-black/70">
-                          Ajoute une gaufre topping au choix et profite d’une formule plus avantageuse.
+                          Ajoute une gaufre pour transformer ta pause chaude en formule complète.
                         </p>
                         <div className="mt-3 space-y-2">
                           {getHotComboSuggestions(firstHotInCart.name).map((combo) => (
@@ -2518,12 +2177,12 @@ function App() {
                     )}
 
                     {!firstHotInCart && firstWaffleInCart && (
-                      <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-amber-50 to-rose-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                      <div className="dlx-drawer-highlight rounded-3xl border border-black/10 bg-gradient-to-r from-amber-50 to-rose-50 p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
                         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
                           <Flame size={14} /> Ajoute une boisson chaude en formule
                         </p>
                         <p className="mt-2 text-sm text-black/70">
-                          Associe ta gaufre à un thé, café, chocolat chaud ou café gourmet avec une économie directe.
+                          Ajoute une boisson chaude et transforme ta pause gourmande en vraie formule.
                         </p>
                         <div className="mt-3 space-y-2">
                           {comboOffers
@@ -2553,17 +2212,80 @@ function App() {
                       </div>
                     )}
 
-                    <div className="rounded-3xl border border-black/10 bg-gradient-to-r from-yellow-50 to-amber-50 p-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-black/70">Total</span>
-                        <span className="text-xl font-black text-black">
-                          {euroFromCents(cartTotalCents)}
+                    {drawerQuickAdds.length > 0 && (
+                      <div className="dlx-drawer-card rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-black/45">
+                          <Flame size={14} /> Complète en 1 clic
+                        </p>
+                        <p className="mt-2 text-sm text-black/65">
+                          Des idées simples pour compléter ta commande sans te compliquer.
+                        </p>
+                        <div className="mt-3 space-y-3">
+                          {drawerQuickAdds.map((suggestion) => {
+                            const suggestionProduct = allProducts.find(
+                              (product) => product.name === suggestion.productName,
+                            );
+
+                            return (
+                              <button
+                                key={`${suggestion.productName}-${suggestion.optionLabel ?? ''}`}
+                                type="button"
+                                onClick={() =>
+                                  addSuggestedProduct(
+                                    suggestion.productName,
+                                    suggestion.optionLabel,
+                                  )
+                                }
+                                className="dlx-drawer-upsell flex w-full items-center justify-between gap-3 rounded-[24px] border border-black/10 bg-white px-4 py-4 text-left transition hover:bg-black/[0.03]"
+                              >
+                                <div>
+                                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-700">
+                                    {suggestion.badge}
+                                  </p>
+                                  <p className="mt-1 font-black text-black">
+                                    {suggestion.title}
+                                  </p>
+                                  <p className="mt-1 text-sm text-black/60">
+                                    {suggestion.text}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-semibold text-black/55">
+                                    {suggestion.productName}
+                                  </p>
+                                  <p className="mt-1 text-lg font-black text-black">
+                                    {suggestionProduct
+                                      ? euroFromCents(
+                                          getConfiguredBasePrice(
+                                            suggestionProduct,
+                                            suggestion.optionLabel,
+                                          ),
+                                        )
+                                      : ''}
+                                  </p>
+                                  <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
+                                    Ajouter <Plus size={12} />
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="dlx-drawer-card space-y-3 rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-bold text-black">Infos de retrait</p>
+                          <p className="mt-1 text-sm text-black/55">
+                            On prépare ta commande pour l’heure que tu indiques.
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold text-black/60">
+                          Retrait club
                         </span>
                       </div>
-                    </div>
-
-                    <div className="space-y-3 rounded-3xl border border-black/10 bg-white p-4 shadow-[0_10px_25px_rgba(0,0,0,0.04)]">
-                      <p className="font-bold text-black">Infos de retrait</p>
                       <input
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
@@ -2585,23 +2307,46 @@ function App() {
                       </div>
                     )}
 
-                    <button
-                      onClick={handleWhatsAppOrder}
-                      disabled={!hasRequiredPickupInfo}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 py-4 text-lg font-black text-white shadow-[0_12px_30px_rgba(34,197,94,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <MessageCircle size={18} /> Envoyer sur WhatsApp
-                    </button>
+                    <div className="dlx-drawer-summary rounded-[30px] border border-black/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-black/40">
+                            Total estimé
+                          </p>
+                          <p className="mt-1 text-3xl font-black text-black">
+                            {euroFromCents(cartTotalCents)}
+                          </p>
+                        </div>
+                        <div className="text-right text-sm text-black/55">
+                          <p>Retrait sur place</p>
+                          <p>Paiement rapide</p>
+                        </div>
+                      </div>
 
-                    <button
-                      onClick={handleSquareCheckout}
-                      disabled={!hasRequiredPickupInfo || isCreatingPayment}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isCreatingPayment
-                        ? 'Création du paiement...'
-                        : 'Payer avec Square'}
-                    </button>
+                      <div className="mt-4 grid gap-3">
+                        <button
+                          onClick={handleSquareCheckout}
+                          disabled={!hasRequiredPickupInfo || isCreatingPayment}
+                          className="dlx-primary-btn inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isCreatingPayment
+                            ? 'Création du paiement...'
+                            : 'Payer et réserver mon retrait'}
+                        </button>
+
+                        <button
+                          onClick={handleWhatsAppOrder}
+                          disabled={!hasRequiredPickupInfo}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#235847] to-[#143a2d] py-4 text-lg font-black text-white shadow-[0_12px_30px_rgba(20,58,45,0.22)] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <MessageCircle size={18} /> Commander sur WhatsApp
+                        </button>
+                      </div>
+
+                      <p className="mt-3 text-center text-sm text-black/55">
+                        Square pour payer tout de suite, WhatsApp si tu préfères valider avec nous.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2616,7 +2361,7 @@ function App() {
             initial={{ opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 18, scale: 0.98 }}
-            className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 overflow-hidden rounded-[22px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.16),rgba(0,0,0,0.86))] px-4 py-3 text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur"
+            className="dlx-toast fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 overflow-hidden rounded-[22px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.16),rgba(0,0,0,0.86))] px-4 py-3 text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur md:bottom-5"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
