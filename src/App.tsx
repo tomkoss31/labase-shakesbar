@@ -29,6 +29,7 @@ import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data
 import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
+import { OrderTracking } from './v2/OrderTracking';
 import { PALETTE_E } from './v2/palette';
 import { getSupabase } from './lib/supabase';
 
@@ -984,7 +985,7 @@ function App() {
       </header>
 
       <main className="dlx-main mx-auto max-w-7xl px-4 pb-32">
-        {showThankYou && (
+        {showThankYou && !isV2 && (
           <section className="pt-6">
             <div className="dlx-panel rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -2410,6 +2411,13 @@ function App() {
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
+          />
+          {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
+          <OrderTracking
+            palette={PALETTE_E}
+            open={showThankYou}
+            customerName={customerName || 'toi'}
+            onClose={() => setShowThankYou(false)}
           />
         </>
       )}
