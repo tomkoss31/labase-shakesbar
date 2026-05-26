@@ -1,6 +1,8 @@
 // Modale affichée après "Payer sur place"
 // Montre un code 4 chiffres + QR code à présenter au comptoir
-import React, { useEffect, useState } from 'react';
+// QR généré localement via lib qrcode (pas d'appel API externe)
+import React, { useEffect, useRef, useState } from 'react';
+import QRCode from 'qrcode';
 import type { Palette } from './palette';
 
 interface PendingCashModalProps {
@@ -18,6 +20,7 @@ function fmtEuro(c: number) {
 
 export function PendingCashModal({ palette, open, code, totalCents, customerName, onClose }: PendingCashModalProps) {
   const [now, setNow] = useState(Date.now());
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -25,11 +28,26 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
     return () => window.clearInterval(t);
   }, [open]);
 
-  if (!open || !code) return null;
+  // Génération QR locale
+  useEffect(() => {
+    if (!open || !code || !canvasRef.current) return;
+    const payload = `LABASE-CASH:${code}`;
+    QRCode.toCanvas(
+      canvasRef.current,
+      payload,
+      {
+        width: 280,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#02100e', light: '#ffffff' },
+      },
+      (err) => {
+        if (err) console.error('[PendingCashModal] QR generation failed', err);
+      },
+    );
+  }, [open, code]);
 
-  // QR pointe vers une URL de validation comptoir (ou juste le code en clair pour scan rapide)
-  const qrPayload = `LABASE-CASH:${code}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&color=02100e&bgcolor=ffffff&data=${encodeURIComponent(qrPayload)}`;
+  if (!open || !code) return null;
 
   return (
     <div
@@ -108,24 +126,24 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
           {customerName || 'Toi'} · {fmtEuro(totalCents)}
         </div>
 
-        {/* QR code */}
+        {/* QR code généré localement */}
         <div
           style={{
-            width: 240,
-            height: 240,
+            width: 280,
+            height: 280,
             margin: '0 auto 16px',
             background: '#fff',
             borderRadius: 16,
             padding: 12,
             boxShadow: `0 12px 40px rgba(0,0,0,.6)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <img
-            src={qrUrl}
-            alt={`QR code commande ${code}`}
-            width={216}
-            height={216}
-            style={{ display: 'block' }}
+          <canvas
+            ref={canvasRef}
+            style={{ display: 'block', width: 256, height: 256 }}
           />
         </div>
 

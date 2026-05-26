@@ -1,6 +1,8 @@
 // Modale "Mon code à scanner au comptoir"
 // Affiche un QR encodant LABASE-USER:<user_id> + prénom + niveau XP
-import React from 'react';
+// Génération QR locale via lib qrcode (pas de dépendance API externe)
+import React, { useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
@@ -15,15 +17,35 @@ interface MyCodeModalProps {
 }
 
 export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeModalProps) {
-  if (!open) return null;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const xp = profile?.xp ?? 0;
   const level = computeMascotteLevel(xp);
   const vipTier = VIP_TIERS.find((t) => t.id === (profile?.vip_tier ?? 'starter')) ?? VIP_TIERS[0];
 
-  // QR encode LABASE-USER:<id> — scanner lit ça et appelle l'API
-  const qrPayload = `LABASE-USER:${userId}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&color=02100e&bgcolor=ffffff&data=${encodeURIComponent(qrPayload)}`;
+  // Génération QR locale (plus fiable que api.qrserver.com)
+  useEffect(() => {
+    if (!open || !canvasRef.current) return;
+    const payload = `LABASE-USER:${userId}`;
+    QRCode.toCanvas(
+      canvasRef.current,
+      payload,
+      {
+        width: 320,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: {
+          dark: '#02100e',
+          light: '#ffffff',
+        },
+      },
+      (err) => {
+        if (err) console.error('[MyCodeModal] QR generation failed', err);
+      },
+    );
+  }, [open, userId]);
+
+  if (!open) return null;
 
   return (
     <div
@@ -131,24 +153,24 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
           </div>
         </div>
 
-        {/* QR code */}
+        {/* QR code généré localement via lib qrcode */}
         <div
           style={{
-            width: 280,
-            height: 280,
+            width: 320,
+            height: 320,
             margin: '0 auto 16px',
             background: '#fff',
             borderRadius: 18,
             padding: 14,
             boxShadow: `0 12px 40px rgba(0,0,0,.6)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <img
-            src={qrUrl}
-            alt="Mon QR code La Base"
-            width={252}
-            height={252}
-            style={{ display: 'block' }}
+          <canvas
+            ref={canvasRef}
+            style={{ display: 'block', width: 292, height: 292 }}
           />
         </div>
 

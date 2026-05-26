@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>La Base — Console admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(4, 16, 15, .92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(94,234,212,.1);
+    padding: 12px 16px;
+  }
+  .topbar-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-b {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f;
+    font-family: 'Outfit'; font-weight: 900; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(20,184,166,.5);
+  }
+  .brand-name {
+    font-family: 'Outfit'; font-weight: 900; font-size: 18px; letter-spacing: -.02em;
+  }
+  .brand-sub {
+    font-size: 9px; color: #94b8b1; letter-spacing: .2em; font-weight: 600; margin-top: 2px;
+  }
+  .topbar-spacer { flex: 1; }
+  .pwd-input {
+    padding: 8px 12px;
+    background: #0e1f1d;
+    border: 1px solid rgba(94,234,212,.1);
+    border-radius: 10px;
+    color: #ecfdf5;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    min-width: 180px;
+  }
+
+  /* Nav tabs */
+  .nav-tabs {
+    background: #0a1a18;
+    border-bottom: 1px solid rgba(94,234,212,.1);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tabs-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    padding: 6px 12px;
+  }
+  .tab {
+    padding: 10px 16px;
+    background: transparent;
+    border: 0;
+    color: #94b8b1;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 10px;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .tab:hover { color: #ecfdf5; background: rgba(94,234,212,.05); }
+  .tab.active {
+    background: rgba(20,184,166,.15);
+    color: #14b8a6;
+  }
+
+  /* Container */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -.02em;
+    margin: 0 0 6px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sub { color: #94b8b1; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+
+  /* Cards & inputs */
+  .card {
+    background: linear-gradient(135deg, #13302c, #0e1f1d);
+    border: 1px solid rgba(94,234,212,.1);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #94b8b1;
+    margin-bottom: 6px;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+  label:first-child { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.1);
+    border-radius: 12px;
+    color: #ecfdf5;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+  }
+  input:focus, textarea:focus { border-color: #14b8a6; }
+  button.primary {
+    width: 100%;
+    padding: 14px;
+    background: #f59e0b;
+    color: #1a0f00;
+    border: 0;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(245,158,11,.3);
+  }
+  button.teal {
+    background: #14b8a6;
+    color: #02100e;
+    box-shadow: 0 8px 24px rgba(20,184,166,.3);
+  }
+  button.secondary {
+    background: transparent;
+    color: #ecfdf5;
+    border: 1px solid rgba(94,234,212,.2);
+    box-shadow: none;
+  }
+  button:disabled { opacity: 0.5; cursor: wait; }
+  .ok { background: rgba(20,184,166,.15); color: #5eead4; padding: 10px 14px; border-radius: 10px; border: 1px solid #14b8a6; font-size: 13px; margin-top: 10px; }
+  .err { background: rgba(251,113,133,.15); color: #fb7185; padding: 10px 14px; border-radius: 10px; border: 1px solid #fb7185; font-size: 13px; margin-top: 10px; }
+
+  /* Hidden by default */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Comptoir rows */
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 100px auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid rgba(94,234,212,.1);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #0e1f1d, #13302c);
+  }
+  .row[data-status="ready"] { border-color: #14b8a6; background: linear-gradient(135deg, #14302c, #1a4a3e); }
+  .row[data-status="preparing"] { border-color: #f59e0b; }
+  .row[data-status="pending_cash"] { border-color: #fb7185; background: linear-gradient(135deg, #2d1620, #1a0908); }
+  .meta { font-family: 'Outfit'; font-weight: 800; }
+  .meta-sub { font-size: 11px; color: #94b8b1; margin-top: 2px; }
+  .total { font-family: 'Outfit'; font-weight: 900; font-size: 18px; text-align: right; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .btn-row {
+    padding: 8px 12px; border-radius: 10px; border: 0;
+    font-family: 'Outfit'; font-weight: 800; font-size: 12px; cursor: pointer;
+  }
+  .btn-ambre { background: #f59e0b; color: #1a0f00; }
+  .btn-teal { background: #14b8a6; color: #02100e; }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: 4px;
+  }
+  .status-pending_cash { background: rgba(251,113,133,.13); color: #fb7185; }
+  .status-paid { background: rgba(20,184,166,.13); color: #14b8a6; }
+  .status-preparing { background: rgba(245,158,11,.13); color: #f59e0b; }
+  .status-ready { background: rgba(34,197,94,.13); color: #22c55e; }
+  .empty { padding: 32px; text-align: center; color: #94b8b1; font-size: 13px; }
+
+  /* Scanner */
+  video { width: 100%; max-height: 400px; border-radius: 12px; background: #000; }
+  .scanner-zone { position: relative; border: 2px dashed rgba(94,234,212,.3); border-radius: 14px; overflow: hidden; }
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+  .stat { background: #04100f; padding: 12px; border-radius: 10px; border: 1px solid rgba(94,234,212,.1); }
+  .stat-label { font-size: 10px; color: #94b8b1; text-transform: uppercase; letter-spacing: .08em; }
+  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: #f59e0b; margin-top: 2px; }
+  .reward-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(251,113,133,.15);
+    color: #fb7185;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 2px 4px 2px 0;
+  }
+
+  /* Push preview */
+  .preview {
+    background: #fff;
+    color: #111;
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .preview-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #04100f;
+  }
+  .preview-title { font-weight: 700; font-size: 13.5px; }
+  .preview-body { font-size: 13px; color: #555; margin-top: 2px; }
+
+  .hint { font-size: 11px; color: #94b8b1; margin-top: 6px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo-b">B</div>
+      <div>
+        <div class="brand-name">LA BASE</div>
+        <div class="brand-sub">CONSOLE&nbsp;ADMIN</div>
+      </div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <input type="password" class="pwd-input" id="password" placeholder="Mot de passe admin" autocomplete="current-password" />
+  </div>
+</div>
+
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab active" data-view="comptoir">🏪 Comptoir</button>
+    <button class="tab" data-view="scanner">📷 Scanner XP</button>
+    <button class="tab" data-view="push">📣 Push notifs</button>
+    <button class="tab" data-view="health">⚙️ Diagnostic</button>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ─── COMPTOIR ─── -->
+  <div class="view active" id="view-comptoir">
+    <h1>🏪 Commandes du jour</h1>
+    <div class="sub">Gère les commandes payées + espèces en attente. Auto-refresh toutes les 15s.</div>
+    <div id="comptoir-list"></div>
+  </div>
+
+  <!-- ─── SCANNER ─── -->
+  <div class="view" id="view-scanner">
+    <h1>📷 Scanner client XP</h1>
+    <div class="sub">Scanne le QR du client pour voir ses XP et créditer une commande Square en caisse.</div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label style="margin-bottom: 0;">📷 Caméra arrière</label>
+        <button class="secondary" id="toggleCam" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Démarrer</button>
+      </div>
+      <div class="scanner-zone" id="scannerZone" style="display: none;">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+      </div>
+      <div style="margin-top: 10px;">
+        <label>Ou colle un ID manuellement</label>
+        <input type="text" id="manualId" placeholder="UUID utilisateur ou code CASH-XXXX" />
+        <button class="primary" id="manualLookup" style="margin-top: 8px;">Rechercher</button>
+      </div>
+    </div>
+
+    <div id="scanner-result"></div>
+  </div>
+
+  <!-- ─── PUSH ─── -->
+  <div class="view" id="view-push">
+    <h1>📣 Envoyer une push</h1>
+    <div class="sub">Notification envoyée à TOUS les clients qui ont activé les notifs.</div>
+
+    <div class="card">
+      <label>Titre</label>
+      <input type="text" id="push-title" placeholder="Nouveau shake dispo 🍓" maxlength="60" />
+
+      <label>Message</label>
+      <textarea id="push-body" rows="2" placeholder="Le Fraise Bonbon est de retour cette semaine !" maxlength="180"></textarea>
+
+      <label>URL à ouvrir au clic (optionnel)</label>
+      <input type="text" id="push-url" placeholder="/ (défaut)" />
+
+      <label>Aperçu</label>
+      <div class="preview">
+        <div class="preview-icon">B</div>
+        <div>
+          <div class="preview-title" id="prev-title">Titre…</div>
+          <div class="preview-body" id="prev-body">Message…</div>
+        </div>
+      </div>
+
+      <button class="primary" id="push-send" style="margin-top: 16px;">Envoyer à tous les abonnés</button>
+      <div id="push-result"></div>
+    </div>
+  </div>
+
+  <!-- ─── DIAGNOSTIC ─── -->
+  <div class="view" id="view-health">
+    <h1>⚙️ Diagnostic technique</h1>
+    <div class="sub">État des variables d'environnement Vercel + services tiers.</div>
+
+    <div class="card">
+      <button class="primary" id="health-check">🔍 Vérifier /api/health</button>
+      <pre id="health-result" style="margin-top: 14px; padding: 12px; background: #04100f; border: 1px solid rgba(94,234,212,.1); border-radius: 10px; font-family: ui-monospace, monospace; font-size: 11px; color: #94b8b1; white-space: pre-wrap; word-break: break-all; overflow-x: auto;"></pre>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const STORAGE_KEY = 'labase-console-token';
+
+// Restore token
+try {
+  const saved = sessionStorage.getItem(STORAGE_KEY);
+  if (saved) $('password').value = saved;
+} catch {}
+
+// ═══ TAB SWITCHING ═══
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const view = btn.dataset.view;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+    if (view === 'comptoir') loadComptoir();
+    if (view === 'scanner') {}
+    if (view === 'health') runHealthCheck();
+  });
+});
+
+function getPassword() {
+  const p = $('password').value.trim();
+  if (p) sessionStorage.setItem(STORAGE_KEY, p);
+  return p;
+}
+
+// ═══ COMPTOIR ═══
+async function loadComptoir() {
+  const password = getPassword();
+  if (!password) {
+    $('comptoir-list').innerHTML = '<div class="empty">Renseigne le mot de passe en haut.</div>';
+    return;
+  }
+  try {
+    const resp = await fetch('/api/orders?action=today', {
+      headers: { 'Authorization': 'Bearer ' + password },
+    });
+    if (!resp.ok) {
+      const data = await resp.json();
+      $('comptoir-list').innerHTML = '<div class="empty">❌ ' + (data.error || 'Erreur') + '</div>';
+      return;
+    }
+    const data = await resp.json();
+    renderComptoirList(data.orders);
+  } catch (err) {
+    $('comptoir-list').innerHTML = '<div class="empty">❌ ' + err.message + '</div>';
+  }
+}
+
+function renderComptoirList(orders) {
+  if (!orders || orders.length === 0) {
+    $('comptoir-list').innerHTML = '<div class="empty">Aucune commande des 12 dernières heures.</div>';
+    return;
+  }
+  $('comptoir-list').innerHTML = orders.map(o => {
+    const dt = new Date(o.paid_at || o.created_at);
+    const time = dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const total = (o.total_cents / 100).toFixed(2).replace('.', ',');
+    const name = o.customer_name || 'Client';
+    const pickup = o.pickup_time ? ' • retrait ' + o.pickup_time : '';
+    const statusLabel = {
+      pending_cash: '💵 ESPÈCES',
+      paid: 'Payée',
+      preparing: 'En prépa',
+      ready: 'Prête',
+      cancelled: 'Annulée',
+    }[o.status] || o.status;
+
+    const buttons = [];
+    if (o.status === 'pending_cash') {
+      const code = (o.square_order_id || '').replace('CASH-', '');
+      buttons.push('<button class="btn-row btn-ambre" data-action="cash" data-id="' + o.id + '">💵 Encaisser ' + code + '</button>');
+    }
+    if (o.status === 'paid') {
+      buttons.push('<button class="btn-row btn-ambre" data-action="preparing" data-id="' + o.id + '">▶ En prépa</button>');
+    }
+    if (o.status === 'preparing') {
+      buttons.push('<button class="btn-row btn-teal" data-action="ready" data-id="' + o.id + '">✓ Prête</button>');
+    }
+    if (o.status === 'ready') {
+      buttons.push('<span style="font-size: 11px; color: #22c55e; font-weight: 700;">À retirer</span>');
+    }
+
+    return '<div class="row" data-status="' + o.status + '">' +
+      '<div>' +
+        '<div class="meta">' + name + '</div>' +
+        '<div class="meta-sub">' + time + pickup + '</div>' +
+        '<span class="status-pill status-' + o.status + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="total">' + total + '€</div>' +
+      '<div class="actions">' + buttons.join('') + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => updateOrderStatus(btn.dataset.id, btn.dataset.action, btn));
+  });
+}
+
+async function updateOrderStatus(orderId, action, btn) {
+  const password = getPassword();
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const endpoint = action === 'cash' ? '/api/orders?action=mark-paid' : '/api/orders?action=update-status';
+    const body = action === 'cash' ? { orderId } : { orderId, status: action };
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+      body: JSON.stringify(body),
+    });
+    if (resp.ok) loadComptoir();
+    else {
+      const data = await resp.json();
+      alert('Erreur: ' + (data.error || 'inconnu'));
+      btn.disabled = false;
+    }
+  } catch (err) {
+    alert('Erreur: ' + err.message);
+    btn.disabled = false;
+  }
+}
+
+setInterval(() => {
+  if (document.getElementById('view-comptoir').classList.contains('active') && $('password').value.trim()) {
+    loadComptoir();
+  }
+}, 15000);
+
+// ═══ SCANNER ═══
+let stream = null;
+let scanning = false;
+let lastScanned = '';
+let lastScannedAt = 0;
+
+$('toggleCam').addEventListener('click', async () => {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null; scanning = false;
+    $('scannerZone').style.display = 'none';
+    $('toggleCam').textContent = 'Démarrer';
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+      audio: false,
+    });
+    $('video').srcObject = stream;
+    $('scannerZone').style.display = 'block';
+    $('toggleCam').textContent = 'Arrêter';
+    scanning = true;
+    scanLoop();
+  } catch (err) {
+    showScannerResult('err', '❌ Caméra refusée : ' + err.message);
+  }
+});
+
+function scanLoop() {
+  if (!scanning) return;
+  const video = $('video');
+  const canvas = $('canvas');
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = window.jsQR(imageData.data, canvas.width, canvas.height);
+    if (code && code.data) {
+      const now = Date.now();
+      if (code.data !== lastScanned || now - lastScannedAt > 3000) {
+        lastScanned = code.data;
+        lastScannedAt = now;
+        handleScanned(code.data);
+      }
+    }
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+function handleScanned(text) {
+  if (text.startsWith('LABASE-USER:')) {
+    lookupUser(text.replace('LABASE-USER:', ''));
+  } else if (text.startsWith('LABASE-CASH:')) {
+    const code = text.replace('LABASE-CASH:', '');
+    showScannerResult('ok', '💵 Code commande espèces : <b>' + code + '</b>. Va dans l\'onglet Comptoir pour encaisser.');
+  } else {
+    showScannerResult('err', 'QR non reconnu : ' + text.slice(0, 40));
+  }
+}
+
+$('manualLookup').addEventListener('click', () => {
+  const id = $('manualId').value.trim();
+  if (!id) return;
+  if (id.startsWith('CASH-')) {
+    showScannerResult('ok', '💵 Code espèces. Va dans l\'onglet Comptoir.');
+  } else lookupUser(id);
+});
+
+async function lookupUser(userId) {
+  const password = getPassword();
+  if (!password) { showScannerResult('err', 'Mot de passe requis'); return; }
+  try {
+    const resp = await fetch('/api/profile?action=lookup&id=' + encodeURIComponent(userId), {
+      headers: { 'Authorization': 'Bearer ' + password },
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      return;
+    }
+    renderProfile(data.profile, data.rewards);
+  } catch (err) {
+    showScannerResult('err', '❌ ' + err.message);
+  }
+}
+
+function renderProfile(p, rewards) {
+  const name = p.first_name || '(prénom non renseigné)';
+  const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
+  const rewardsHtml = (rewards || []).map(r =>
+    '<span class="reward-pill">🎁 ' + r.reward_label + ' · ' + r.reward_code + '</span>'
+  ).join('');
+
+  $('scanner-result').innerHTML =
+    '<div class="card" style="border-color: #14b8a6;">' +
+      '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
+      '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
+      '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+      '<div class="stats">' +
+        '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + p.xp + '</div></div>' +
+        '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + p.vip_tier + '</div></div>' +
+        '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
+        '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
+      '</div>' +
+      (rewardsHtml ? '<div style="margin-top: 12px;"><div class="stat-label" style="margin-bottom: 6px;">CODES ACTIFS</div>' + rewardsHtml + '</div>' : '') +
+    '</div>' +
+    '<div class="card">' +
+      '<label>💳 Crédit XP après paiement Square caisse</label>' +
+      '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
+      '<button class="primary teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
+      '<div class="hint">' +
+        'Saisis le montant total que tu viens d\'encaisser sur Square en caisse pour ce client.' +
+        ' Ses XP seront crédités automatiquement (10 XP / € + 50 XP / cmd).' +
+      '</div>' +
+    '</div>';
+
+  $('creditBtn').addEventListener('click', () => creditXP(p.id));
+}
+
+async function creditXP(userId) {
+  const password = getPassword();
+  const eurosRaw = $('amount').value.trim().replace(',', '.');
+  const euros = parseFloat(eurosRaw);
+  if (!Number.isFinite(euros) || euros <= 0) { alert('Montant invalide'); return; }
+  const amountCents = Math.round(euros * 100);
+
+  const btn = $('creditBtn');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const resp = await fetch('/api/profile?action=credit-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos' }),
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      showScannerResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.');
+      lookupUser(userId);
+    } else {
+      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
+    }
+  } catch (err) {
+    showScannerResult('err', '❌ ' + err.message);
+    btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
+  }
+}
+
+function showScannerResult(kind, msg) {
+  const html = '<div class="' + kind + '">' + msg + '</div>';
+  const existing = $('scanner-result').innerHTML;
+  $('scanner-result').innerHTML = html + (existing.includes('class="card"') ? existing : '');
+}
+
+// ═══ PUSH ═══
+function updatePreview() {
+  $('prev-title').textContent = $('push-title').value || 'Titre…';
+  $('prev-body').textContent = $('push-body').value || 'Message…';
+}
+$('push-title').addEventListener('input', updatePreview);
+$('push-body').addEventListener('input', updatePreview);
+
+$('push-send').addEventListener('click', async () => {
+  const password = getPassword();
+  const title = $('push-title').value.trim();
+  const body = $('push-body').value.trim();
+  const url = $('push-url').value.trim() || '/';
+  if (!password) { showPushResult('err', 'Mot de passe requis'); return; }
+  if (!title || !body) { showPushResult('err', 'Titre et message requis'); return; }
+
+  $('push-send').disabled = true;
+  $('push-send').textContent = 'Envoi…';
+  try {
+    const resp = await fetch('/api/push?action=send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+      body: JSON.stringify({ title, body, url }),
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      showPushResult('ok',
+        '✅ Envoyé à ' + data.sent + ' / ' + data.total + ' abonnés' +
+        (data.failed ? ` · ${data.failed} échecs` : '')
+      );
+      $('push-title').value = '';
+      $('push-body').value = '';
+      updatePreview();
+    } else {
+      showPushResult('err', '❌ ' + (data.error || 'Erreur'));
+    }
+  } catch (err) {
+    showPushResult('err', '❌ ' + err.message);
+  } finally {
+    $('push-send').disabled = false;
+    $('push-send').textContent = 'Envoyer à tous les abonnés';
+  }
+});
+
+function showPushResult(kind, msg) {
+  $('push-result').innerHTML = '<div class="' + kind + '">' + msg + '</div>';
+}
+
+// ═══ HEALTH ═══
+$('health-check').addEventListener('click', runHealthCheck);
+async function runHealthCheck() {
+  $('health-result').textContent = 'Chargement…';
+  try {
+    const r = await fetch('/api/health');
+    const data = await r.json();
+    $('health-result').textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    $('health-result').textContent = '❌ ' + err.message;
+  }
+}
+
+// Charge la liste comptoir au démarrage
+loadComptoir();
+</script>
+</body>
+</html>
