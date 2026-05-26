@@ -26,6 +26,7 @@ import {
   socialProofStats,
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
+import { HomeV2 } from './v2/HomeV2';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -874,6 +875,16 @@ function App() {
     } finally {
       setIsCreatingPayment(false);
     }
+  }
+
+  // Mode V2 (test) — activable via ?v2 dans l'URL
+  // L'ancienne app reste 100% fonctionnelle, le V2 est juste un aperçu de la refonte
+  const isV2 =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('v2');
+
+  if (isV2) {
+    return <HomeV2 cartCount={cartCount} onOpenCart={() => setDrawerOpen(true)} />;
   }
 
   const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
