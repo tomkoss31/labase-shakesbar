@@ -869,7 +869,7 @@ function App() {
         userEmail = data.session?.user?.email ?? undefined;
       }
 
-      const response = await fetch('/api/orders/create-pending', {
+      const response = await fetch('/api/orders?action=create-pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),

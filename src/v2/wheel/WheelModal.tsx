@@ -61,7 +61,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData.session?.access_token;
         if (token) {
-          const resp = await fetch('/api/wheel/spin', {
+          const resp = await fetch('/api/wheel?action=spin', {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
           });

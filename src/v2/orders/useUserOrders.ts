@@ -30,7 +30,7 @@ export function useUserOrders() {
         setOrders([]);
         return;
       }
-      const resp = await fetch('/api/orders/list', {
+      const resp = await fetch('/api/orders?action=list', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!resp.ok) {

@@ -267,7 +267,7 @@
     $('playBtn').textContent = 'Tirage…';
     $('formError').innerHTML = '';
     try {
-      const resp = await fetch('/api/wheel/public-spin', {
+      const resp = await fetch('/api/wheel?action=public-spin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName, source: location.search.includes('utm_source=') ? new URLSearchParams(location.search).get('utm_source') : 'public_wheel' }),

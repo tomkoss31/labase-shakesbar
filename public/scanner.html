@@ -229,7 +229,7 @@
     }
     sessionStorage.setItem(STORAGE_KEY, password);
     try {
-      const resp = await fetch('/api/profile/lookup?id=' + encodeURIComponent(userId), {
+      const resp = await fetch('/api/profile?action=lookup&id=' + encodeURIComponent(userId), {
         headers: { 'Authorization': 'Bearer ' + password },
       });
       const data = await resp.json();
@@ -290,7 +290,7 @@
     btn.disabled = true;
     btn.textContent = '…';
     try {
-      const resp = await fetch('/api/profile/credit-manual', {
+      const resp = await fetch('/api/profile?action=credit-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
         body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos' }),

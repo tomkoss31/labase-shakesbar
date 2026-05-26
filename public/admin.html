@@ -202,7 +202,7 @@
     showResult('', '');
 
     try {
-      const response = await fetch('/api/push/send', {
+      const response = await fetch('/api/push?action=send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

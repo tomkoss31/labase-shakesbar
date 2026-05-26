@@ -135,7 +135,7 @@
     }
 
     try {
-      const resp = await fetch('/api/orders/today', {
+      const resp = await fetch('/api/orders?action=today', {
         headers: { 'Authorization': 'Bearer ' + password },
       });
       if (!resp.ok) {
@@ -207,8 +207,8 @@
     btn.disabled = true;
     btn.textContent = '…';
     try {
-      // Action "cash" = encaisser espèces via /api/orders/mark-paid (crédite XP)
-      const endpoint = action === 'cash' ? '/api/orders/mark-paid' : '/api/orders/update-status';
+      // Action "cash" = encaisser espèces via /api/orders?action=mark-paid (crédite XP)
+      const endpoint = action === 'cash' ? '/api/orders?action=mark-paid' : '/api/orders?action=update-status';
       const body = action === 'cash' ? { orderId } : { orderId, status: action };
       const resp = await fetch(endpoint, {
         method: 'POST',
