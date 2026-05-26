@@ -60,6 +60,34 @@ export function HomeV2({
   const next = nextLevelThreshold(xp);
   const mascotteLevel = computeMascotteLevel(xp);
 
+  function handleBottomTab(t: NavTab) {
+    setTab(t);
+    if (t === 'home') {
+      setActiveChip('all');
+      setHeaderTab('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (t === 'menu') {
+      setActiveChip('all');
+      setHeaderTab('menu');
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('[data-v2-section="menu"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    } else if (t === 'combos') {
+      setActiveChip('combos');
+      setHeaderTab('combos');
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('[data-v2-section="combos"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    } else if (t === 'account') {
+      if (isAuthed) setProfileOpen(true);
+      else setAuthOpen(true);
+    }
+  }
+
   function handleHeaderTab(t: HeaderTab) {
     setHeaderTab(t);
     if (t === 'combos') {
@@ -339,7 +367,7 @@ export function HomeV2({
       <InfoBlock palette={palette} />
       <InstaCard palette={palette} />
 
-      <BottomNav palette={palette} active={tab} onChange={setTab} />
+      <BottomNav palette={palette} active={tab} onChange={handleBottomTab} />
 
       {/* Animation FlyingDrop signature ajout panier */}
       {flyOverlay}
