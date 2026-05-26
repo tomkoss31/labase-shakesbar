@@ -9,6 +9,10 @@ export default function handler(_req: any, res: any) {
   const squareToken = process.env.SQUARE_ACCESS_TOKEN;
   const squareLocation = process.env.SQUARE_LOCATION_ID;
   const squareWebhookKey = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY;
+  const vapidPublic = process.env.VITE_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT;
+  const adminPushPassword = process.env.ADMIN_PUSH_PASSWORD;
 
   const status = {
     timestamp: new Date().toISOString(),
@@ -28,10 +32,17 @@ export default function handler(_req: any, res: any) {
       location_id_present: Boolean(squareLocation),
       webhook_signature_key_present: Boolean(squareWebhookKey),
     },
+    push: {
+      vapid_public_present: Boolean(vapidPublic),
+      vapid_private_present: Boolean(vapidPrivate),
+      vapid_subject_present: Boolean(vapidSubject),
+      admin_password_present: Boolean(adminPushPassword),
+    },
     ready: {
       payment: Boolean(squareToken && squareLocation),
       auth_xp_push: Boolean(supabaseUrl && supabaseAnonKey),
       webhook_xp_credit: Boolean(supabaseServiceKey && squareWebhookKey),
+      push_notifications: Boolean(vapidPublic && vapidPrivate && adminPushPassword && supabaseServiceKey),
     },
   };
 

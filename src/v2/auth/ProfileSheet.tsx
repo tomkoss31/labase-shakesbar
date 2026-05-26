@@ -4,6 +4,7 @@ import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { VIP_TIERS, computeMascotteLevel, nextLevelThreshold } from './types';
+import { usePushNotifications } from '../notifications/usePushNotifications';
 
 interface ProfileSheetProps {
   palette: Palette;
@@ -34,6 +35,7 @@ export function ProfileSheet({
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const push = usePushNotifications();
 
   // Sync local state quand le profil change
   React.useEffect(() => {
@@ -336,6 +338,80 @@ export function ProfileSheet({
             </div>
           )}
         </div>
+
+        {/* Push notifications */}
+        {push.supported && (
+          <button
+            onClick={async () => {
+              if (push.subscribed) {
+                await push.disable();
+              } else {
+                await push.enable();
+              }
+            }}
+            disabled={push.loading}
+            style={{
+              width: '100%',
+              marginBottom: 12,
+              padding: '14px 16px',
+              background: push.subscribed ? palette.primary + '20' : palette.bg,
+              border: `1px solid ${push.subscribed ? palette.primary : palette.line}`,
+              borderRadius: 14,
+              color: palette.text,
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: push.loading ? 'wait' : 'pointer',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 10,
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>{push.subscribed ? '🔔' : '🔕'}</span>
+              <span>
+                {push.subscribed ? 'Notifications actives' : 'Activer les notifications'}
+                <div style={{ fontSize: 11, color: palette.textDim, fontWeight: 500, marginTop: 2 }}>
+                  {push.subscribed
+                    ? 'Reçois les nouveautés et offres'
+                    : 'Sois averti des nouveautés et offres spéciales'}
+                </div>
+              </span>
+            </span>
+            <span
+              style={{
+                width: 36,
+                height: 22,
+                borderRadius: 999,
+                background: push.subscribed ? palette.primary : palette.line,
+                position: 'relative',
+                transition: 'background .2s',
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: push.subscribed ? 16 : 2,
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left .2s',
+                }}
+              />
+            </span>
+          </button>
+        )}
+
+        {push.error && (
+          <div style={{ fontSize: 11, color: palette.emotion, marginBottom: 12 }}>
+            ⚠️ {push.error}
+          </div>
+        )}
 
         {/* Footer actions */}
         <button

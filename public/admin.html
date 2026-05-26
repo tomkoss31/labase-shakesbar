@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>La Base — Admin Push</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    margin: 8px 0 4px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sub {
+    color: #94b8b1;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: linear-gradient(180deg, #13302c, #0e1f1d);
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94b8b1;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  label:first-child { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 12px;
+    color: #ecfdf5;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+  }
+  input:focus, textarea:focus {
+    border-color: #14b8a6;
+  }
+  button.primary {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: #f59e0b;
+    color: #1a0f00;
+    border: 0;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 12px 32px rgba(245,158,11,.35);
+  }
+  button.primary:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+  .result {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+  .ok { background: rgba(20,184,166,.15); color: #5eead4; border: 1px solid #14b8a6; }
+  .err { background: rgba(251,113,133,.15); color: #fb7185; border: 1px solid #fb7185; }
+  .hint {
+    font-size: 11px;
+    color: #94b8b1;
+    margin-top: 6px;
+  }
+  .preview {
+    background: #fff;
+    color: #111;
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .preview-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #04100f;
+  }
+  .preview-title { font-weight: 700; font-size: 13.5px; }
+  .preview-body { font-size: 13px; color: #555; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📣 Push admin</h1>
+  <div class="sub">Envoie une notification à tous les clients qui ont activé les notifs.</div>
+
+  <div class="card">
+    <label>Mot de passe admin</label>
+    <input type="password" id="password" placeholder="Ton mot de passe admin (ADMIN_PUSH_PASSWORD)" autocomplete="current-password" />
+    <div class="hint">Configuré dans Vercel env vars. Mémorisé localement après envoi.</div>
+  </div>
+
+  <div class="card">
+    <label>Titre</label>
+    <input type="text" id="title" placeholder="Nouveau shake dispo 🍓" maxlength="60" />
+
+    <label>Message</label>
+    <textarea id="body" rows="2" placeholder="Le Fraise Bonbon est de retour cette semaine !" maxlength="180"></textarea>
+
+    <label>URL à ouvrir au clic (optionnel)</label>
+    <input type="text" id="url" placeholder="/ (défaut)" />
+
+    <label>Aperçu</label>
+    <div class="preview">
+      <div class="preview-icon">B</div>
+      <div>
+        <div class="preview-title" id="prev-title">Titre…</div>
+        <div class="preview-body" id="prev-body">Message…</div>
+      </div>
+    </div>
+
+    <button class="primary" id="send">Envoyer à tous les abonnés</button>
+    <div id="result"></div>
+  </div>
+
+  <div class="card">
+    <label>Diagnostic</label>
+    <button class="primary" id="health" style="background: transparent; color: #ecfdf5; border: 1px solid rgba(94,234,212,.20); box-shadow: none;">Vérifier /api/health</button>
+    <div id="health-result" class="hint" style="margin-top: 10px;"></div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = 'labase-admin-token';
+
+  // Restore token si déjà saisi
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) $('password').value = saved;
+  } catch {}
+
+  // Live preview
+  function updatePreview() {
+    $('prev-title').textContent = $('title').value || 'Titre…';
+    $('prev-body').textContent = $('body').value || 'Message…';
+  }
+  $('title').addEventListener('input', updatePreview);
+  $('body').addEventListener('input', updatePreview);
+
+  // Send
+  $('send').addEventListener('click', async () => {
+    const password = $('password').value.trim();
+    const title = $('title').value.trim();
+    const body = $('body').value.trim();
+    const url = $('url').value.trim() || '/';
+
+    if (!password) { showResult('err', 'Mot de passe requis'); return; }
+    if (!title || !body) { showResult('err', 'Titre et message requis'); return; }
+
+    $('send').disabled = true;
+    $('send').textContent = 'Envoi…';
+    showResult('', '');
+
+    try {
+      const response = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + password,
+        },
+        body: JSON.stringify({ title, body, url }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        sessionStorage.setItem(STORAGE_KEY, password);
+        showResult('ok',
+          `✅ Envoyé à ${data.sent} / ${data.total} abonnés` +
+          (data.failed ? ` · ${data.failed} échecs` : '') +
+          (data.cleanedExpired ? ` · ${data.cleanedExpired} expirés nettoyés` : '')
+        );
+        $('title').value = '';
+        $('body').value = '';
+        updatePreview();
+      } else {
+        showResult('err', '❌ ' + (data.error || 'Erreur'));
+      }
+    } catch (err) {
+      showResult('err', '❌ ' + err.message);
+    } finally {
+      $('send').disabled = false;
+      $('send').textContent = 'Envoyer à tous les abonnés';
+    }
+  });
+
+  $('health').addEventListener('click', async () => {
+    $('health-result').textContent = 'Chargement…';
+    try {
+      const r = await fetch('/api/health');
+      const data = await r.json();
+      $('health-result').textContent = JSON.stringify(data, null, 2);
+      $('health-result').style.whiteSpace = 'pre';
+      $('health-result').style.fontFamily = 'ui-monospace, monospace';
+      $('health-result').style.fontSize = '11px';
+    } catch (err) {
+      $('health-result').textContent = '❌ ' + err.message;
+    }
+  });
+
+  function showResult(kind, msg) {
+    const el = $('result');
+    el.textContent = msg;
+    el.className = msg ? 'result ' + kind : '';
+  }
+</script>
+</body>
+</html>
