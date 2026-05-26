@@ -1,4 +1,5 @@
 // order-status.jsx — Post-checkout: live tracking screen "En préparation → Prêt"
+const { useState, useEffect, useMemo } = React;
 
 function OrderStatus({ palette, cart, name, time, onClose, onBack }) {
   // status: pending (0..30s) → preparing (30s..70s) → ready (70s+)

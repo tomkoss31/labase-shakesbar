@@ -279,6 +279,52 @@ function Chips({ palette, active, setActive }) {
   );
 }
 
+// ── Habit row — Quick reorder ────────────────────────────────────
+function HabitRow({ palette, addToCart }) {
+  const items = [PRODUCTS.combos[0], PRODUCTS.popular[2]];
+  return (
+    <div style={{ padding: '0 16px 22px' }}>
+      <div style={{
+        background: `linear-gradient(135deg, ${palette.cardHi}, ${palette.card})`,
+        border: `1px solid ${palette.primary}33`,
+        borderRadius: 18, padding: 14,
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: palette.primary, textTransform: 'uppercase' }}>Ton habitude</div>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 16, color: palette.text, marginTop: 4, letterSpacing: '-.01em', lineHeight: 1.15 }}>Combo Power + Pink Rocket</div>
+            <div style={{ fontSize: 12, color: palette.textDim, marginTop: 4 }}>Les mardis · 22,80&nbsp;€</div>
+          </div>
+          <div style={{ display: 'flex', flexShrink: 0 }}>
+            {items.map((p, i) => (
+              <div key={p.id} style={{
+                width: 48, height: 48, borderRadius: '50%',
+                background: `radial-gradient(circle, ${p.hue1}88, ${p.hue2})`,
+                border: `2px solid ${palette.card}`,
+                marginLeft: i === 0 ? 0 : -14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+              }}>
+                <div style={{ transform: 'scale(.5)' }}>
+                  <DrinkPackshot product={p} size={50} palette={palette}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <button onClick={(e) => { items.forEach(p => addToCart(p, e.currentTarget)); }} style={{
+          width: '100%', marginTop: 12, padding: '11px 14px', borderRadius: 12,
+          background: palette.text, color: palette.bg, border: 0, cursor: 'pointer',
+          fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          whiteSpace: 'nowrap',
+        }}>↻ Rejouer ma commande</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Section header ───────────────────────────────────────────────
 function SectionHead({ palette, icon, title, count }) {
   return (
@@ -509,7 +555,7 @@ function BottomNav({ palette, active, setActive }) {
 }
 
 // ── Home assembled ───────────────────────────────────────────────
-function HomeScreen({ palette, cart, addToCart, openProduct, openCart, navTab, setNavTab }) {
+function HomeScreen({ palette, cart, addToCart, openProduct, openCart, openCombo, navTab, setNavTab }) {
   const [chip, setChip] = useState('all');
   const cartCount = cart.reduce((n, x) => n + x.qty, 0);
 
@@ -521,6 +567,8 @@ function HomeScreen({ palette, cart, addToCart, openProduct, openCart, navTab, s
       <SearchBar palette={palette}/>
       <Chips palette={palette} active={chip} setActive={setChip}/>
 
+      <HabitRow palette={palette} addToCart={addToCart}/>
+
       <SectionHead palette={palette} icon="🔥" title="Populaires au club" count={`${PRODUCTS.popular.length} recettes`}/>
       <Carousel>
         {PRODUCTS.popular.map(p => <ProductCard key={p.id} palette={palette} product={p} onClick={() => openProduct(p)} onAdd={addToCart}/>)}
@@ -529,7 +577,7 @@ function HomeScreen({ palette, cart, addToCart, openProduct, openCart, navTab, s
       <div style={{ height: 22 }}/>
       <SectionHead palette={palette} icon="⚡" title="Formules combo" count="économise jusqu'à 1,90€"/>
       <Carousel>
-        {PRODUCTS.combos.map(p => <ComboCard key={p.id} palette={palette} product={p} onClick={() => openProduct(p)} onAdd={addToCart}/>)}
+        {PRODUCTS.combos.map(p => <ComboCard key={p.id} palette={palette} product={p} onClick={() => openCombo(p)} onAdd={(prod) => openCombo(prod)}/>)}
       </Carousel>
 
       <div style={{ height: 22 }}/>

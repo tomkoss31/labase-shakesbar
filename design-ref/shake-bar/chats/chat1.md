@@ -419,3 +419,81 @@ Tu veux que j'attaque lesquels ? Je dirais que **5 (écran de retrait/confirmati
 
 ok fait le sur un autre visuel garde celui ci pour comparer
 
+## Assistant
+
+_[tool: copy_files]_
+
+_[tool: write_file]_
+
+_[tool: write_file]_
+
+_[tool: write_file]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: grep]_
+
+_[tool: read_file]_
+
+_[tool: grep]_
+
+_[tool: str_replace_edit]_
+
+## Assistant
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: write_file]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: show_html]_
+
+_[tool: get_webview_logs]_
+
+_[tool: save_screenshot]_
+
+_[tool: done]_
+
+_[tool: fork_verifier_agent]_
+
+**`La Base v2.html`** est en ligne, l'originale `La Base.html` reste intacte pour comparaison.
+
+Ce qui change en v2 :
+
+🐣 **Mascotte "Le Petit Shaker"** dans la carte XP — perso goutte d'eau qui change de couleur/d'expression selon le niveau (clair → teal → doré avec sparkles pour Pro), avec petite vague animée
+
+⚡ **Combo composer guidé en 3 étapes**
+- Step 1 — choisis ton smoothie (4 cards visuelles)
+- Step 2 — choisis 2 toppings (sélection numérotée 1/2)
+- Step 3 — récap complet + teaser +15 XP
+
+🟢 **Écran de live tracking post-paiement**
+- 4 phases animées : Reçue → En préparation → Finitions → Prêt à retirer
+- Progress bar live + timer en filigrane
+- Toggle "Préviens-moi 1 min avant" (push notif)
+- Mode "Prêt" déclenche une mini-pluie de confetti + bouton "J'arrive au comptoir"
+- Auto-progression en ~30s pour la démo
+
+↻ **Quick reorder "Ton habitude"** en haut du home — propose la dernière commande type avec rejeu 1-clic (ici Combo Power + Pink Rocket à 22,80€)
+
+Pour comparer : Tweaks → switch entre les deux fichiers via la barre d'onglets.
+
+## User
+
+genial direction E
+

@@ -1,4 +1,5 @@
 // composer.jsx — Guided combo composer (multi-step)
+const { useState } = React;
 
 const SMOOTHIE_CHOICES = [
   { id: 'p1', name: 'Choco Buenos', sub: '24g prot · 250 kcal', hue1: '#92400e', hue2: '#451a03' },

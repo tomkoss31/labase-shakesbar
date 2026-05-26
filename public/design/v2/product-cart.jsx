@@ -226,7 +226,7 @@ function SectionLabel({ palette, children }) {
 }
 
 // ── Cart Screen ─────────────────────────────────────────────────
-function CartScreen({ palette, cart, setCart, onClose, addToCart, allProducts }) {
+function CartScreen({ palette, cart, setCart, onClose, addToCart, allProducts, onCheckout }) {
   const [name, setName] = useState('Léa');
   const [time, setTime] = useState('Dès que prêt');
   const total = cart.reduce((s, x) => s + x.product.price * x.qty, 0);
@@ -393,7 +393,7 @@ function CartScreen({ palette, cart, setCart, onClose, addToCart, allProducts })
           background: `linear-gradient(0deg, ${palette.bg} 70%, ${palette.bg}00)`,
           display: 'flex', flexDirection: 'column', gap: 8,
         }}>
-          <button style={{
+          <button onClick={() => onCheckout && onCheckout({ name, time })} style={{
             padding: '15px 18px', borderRadius: 16,
             background: palette.cta, color: palette.ctaText, border: 0, cursor: 'pointer',
             fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 14.5,
@@ -443,4 +443,4 @@ function qtyBtnStyle(palette, primary) {
   };
 }
 
-Object.assign(window, { ProductModal, CartScreen });
+Object.assign(window, { ProductModal, CartScreen, SectionLabel });

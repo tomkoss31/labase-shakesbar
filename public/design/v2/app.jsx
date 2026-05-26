@@ -367,6 +367,8 @@ function App() {
   const [navTab, setNavTab] = uS('home');
   const [productOpen, setProductOpen] = uS(null);
   const [cartOpen, setCartOpen] = uS(false);
+  const [comboOpen, setComboOpen] = uS(null);
+  const [orderInfo, setOrderInfo] = uS(null); // { cart, name, time } when paid
   const [flying, setFlying] = uS([]);
   const cartIconRef = uR(null);
   const stageRef = uR(null);
@@ -439,10 +441,28 @@ function App() {
                     onAdd={(p, btn) => { addToCart(p, btn); setTimeout(() => setProductOpen(null), 300); }}
                   />
                 )}
+                {comboOpen && (
+                  <ComboComposer palette={palette} combo={comboOpen}
+                    onClose={() => setComboOpen(null)}
+                    onAdd={(p, btn) => { addToCart(p, btn); }}
+                  />
+                )}
                 {cartOpen && (
                   <CartScreen palette={palette} cart={cart} setCart={setCart}
                     addToCart={addToCart} allProducts={PRODUCTS}
                     onClose={() => setCartOpen(false)}
+                    onCheckout={({ name, time }) => {
+                      setOrderInfo({ cart: [...cart], name, time, snapshotTotal: cart.reduce((s,x) => s + x.product.price * x.qty, 0) });
+                      setCart([]);
+                      setCartOpen(false);
+                    }}
+                  />
+                )}
+                {orderInfo && (
+                  <OrderStatus palette={palette}
+                    cart={orderInfo.cart} name={orderInfo.name} time={orderInfo.time}
+                    onClose={() => setOrderInfo(null)}
+                    onBack={() => setOrderInfo(null)}
                   />
                 )}
               </React.Fragment>
@@ -451,7 +471,8 @@ function App() {
                 palette={palette}
                 cart={cart}
                 addToCart={addToCart}
-                openProduct={(p) => setProductOpen(p)}
+                openProduct={(p) => p.shape === 'combo' ? setComboOpen(p) : setProductOpen(p)}
+                openCombo={(p) => setComboOpen(p)}
                 openCart={() => setCartOpen(true)}
                 navTab={navTab}
                 setNavTab={(t) => setNavTab(t)}
