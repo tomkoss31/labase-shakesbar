@@ -31,13 +31,25 @@ export default async function handler(req: any, res: any) {
   // Commandes payées des 12 dernières heures
   const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
 
-  const { data, error } = await admin
+  // Récupère orders payées des 12h + toutes les pending_cash en attente
+  const { data: paidData, error: paidErr } = await admin
     .from('orders')
-    .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at')
+    .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method')
     .gte('paid_at', since)
     .in('status', ['paid', 'preparing', 'ready'])
     .order('paid_at', { ascending: false })
     .limit(50);
+
+  const { data: pendingCashData, error: pendingErr } = await admin
+    .from('orders')
+    .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method')
+    .eq('status', 'pending_cash')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  const error = paidErr || pendingErr;
+  const data = [...(pendingCashData ?? []), ...(paidData ?? [])];
 
   if (error) {
     return res.status(500).json({ error: error.message });

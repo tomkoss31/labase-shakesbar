@@ -67,6 +67,11 @@
   .row[data-status="preparing"] {
     border-color: #f59e0b;
   }
+  .row[data-status="pending_cash"] {
+    border-color: #fb7185;
+    background: linear-gradient(135deg, #2d1620, #1a0908);
+  }
+  .status-pending_cash { background: #fb718522; color: #fb7185; }
   .meta { font-family: 'Outfit', sans-serif; font-weight: 800; }
   .meta-sub { font-size: 11px; color: #94b8b1; margin-top: 2px; }
   .total { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 18px; text-align: right; }
@@ -158,6 +163,7 @@
       const name = o.customer_name || 'Client';
       const pickup = o.pickup_time ? ' • retrait ' + o.pickup_time : '';
       const statusLabel = {
+        pending_cash: '💵 ESPÈCES',
         paid: 'Payée',
         preparing: 'En prépa',
         ready: 'Prête',
@@ -165,6 +171,10 @@
       }[o.status] || o.status;
 
       const buttons = [];
+      if (o.status === 'pending_cash') {
+        const code = (o.square_order_id || '').replace('CASH-', '');
+        buttons.push('<button class="btn" data-action="cash" data-id="' + o.id + '" title="Code: ' + code + '">💵 Encaisser <b style="margin-left:4px">' + code + '</b></button>');
+      }
       if (o.status === 'paid') {
         buttons.push('<button class="btn" data-action="preparing" data-id="' + o.id + '">▶ En prépa</button>');
       }
@@ -192,15 +202,18 @@
     });
   }
 
-  async function updateStatus(orderId, status, btn) {
+  async function updateStatus(orderId, action, btn) {
     const password = $('password').value.trim();
     btn.disabled = true;
     btn.textContent = '…';
     try {
-      const resp = await fetch('/api/orders/update-status', {
+      // Action "cash" = encaisser espèces via /api/orders/mark-paid (crédite XP)
+      const endpoint = action === 'cash' ? '/api/orders/mark-paid' : '/api/orders/update-status';
+      const body = action === 'cash' ? { orderId } : { orderId, status: action };
+      const resp = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-        body: JSON.stringify({ orderId, status }),
+        body: JSON.stringify(body),
       });
       if (resp.ok) {
         loadOrders();

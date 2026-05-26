@@ -30,6 +30,7 @@ import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { OrderTracking } from './v2/OrderTracking';
+import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
 import { useUserRewards } from './v2/rewards/useUserRewards';
 import { getSupabase } from './lib/supabase';
@@ -250,6 +251,9 @@ function App() {
   const [customerName, setCustomerName] = useState('');
   const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
   const { rewards: userRewards, refetch: refetchRewards } = useUserRewards();
+  const [pendingCashCode, setPendingCashCode] = useState<string | null>(null);
+  const [pendingCashTotal, setPendingCashTotal] = useState(0);
+  const [isCreatingPendingCash, setIsCreatingPendingCash] = useState(false);
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
@@ -841,6 +845,45 @@ function App() {
     }
 
     window.open(whatsappLink, '_blank', 'noopener,noreferrer');
+  }
+
+  async function handlePayOnSite() {
+    if (cart.length === 0) {
+      window.alert('Ton panier est vide.');
+      return;
+    }
+    if (!hasRequiredPickupInfo) {
+      window.alert('Merci de renseigner ton prénom et l\'heure de retrait.');
+      return;
+    }
+    setIsCreatingPendingCash(true);
+    try {
+      let userEmail: string | undefined;
+      const supabase = getSupabase();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        userEmail = data.session?.user?.email ?? undefined;
+      }
+
+      const response = await fetch('/api/orders/create-pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        window.alert(data?.error || 'Erreur création commande');
+        return;
+      }
+      setPendingCashCode(data.code);
+      setPendingCashTotal(data.totalCents);
+      setCart([]); // vide le panier puisque la commande est créée côté serveur
+      setDrawerOpen(false);
+    } catch (err: any) {
+      window.alert('Erreur : ' + err.message);
+    } finally {
+      setIsCreatingPendingCash(false);
+    }
   }
 
   async function handleSquareCheckout() {
@@ -2443,13 +2486,21 @@ function App() {
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
             onAddSuggestion={(v2p) => {
-              // Ferme drawer + ouvre la modale produit pour choisir option si nécessaire
               setDrawerOpen(false);
               openProductFromCategory(v2p.category, v2p.raw);
             }}
+            onPayOnSite={handlePayOnSite}
             rewards={userRewards}
             selectedRewardCode={selectedRewardCode}
             setSelectedRewardCode={setSelectedRewardCode}
+          />
+          <PendingCashModal
+            palette={PALETTE_E}
+            open={Boolean(pendingCashCode)}
+            code={pendingCashCode}
+            totalCents={pendingCashTotal}
+            customerName={customerName}
+            onClose={() => setPendingCashCode(null)}
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking

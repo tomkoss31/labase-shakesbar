@@ -35,6 +35,7 @@ interface CartDrawerV2Props {
   onUpdateQty: (key: string, delta: number) => void;
   onSquareCheckout: () => void;
   onWhatsAppOrder: () => void;
+  onPayOnSite?: () => void;
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
   onAddSuggestion?: (product: V2Product) => void;
@@ -120,6 +121,7 @@ export function CartDrawerV2({
   onUpdateQty,
   onSquareCheckout,
   onWhatsAppOrder,
+  onPayOnSite,
   isCreatingPayment,
   hasRequiredPickupInfo,
   onAddSuggestion,
@@ -709,6 +711,33 @@ export function CartDrawerV2({
             >
               Commander par WhatsApp
             </button>
+
+            {onPayOnSite && (
+              <button
+                onClick={onPayOnSite}
+                disabled={!hasRequiredPickupInfo}
+                style={{
+                  width: '100%',
+                  marginTop: 8,
+                  padding: '12px',
+                  background: 'transparent',
+                  color: palette.text,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  opacity: !hasRequiredPickupInfo ? 0.4 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                }}
+              >
+                💵 Payer en espèces sur place
+              </button>
+            )}
 
             {!hasRequiredPickupInfo && (
               <div
