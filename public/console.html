@@ -260,6 +260,85 @@
     margin: 2px 4px 2px 0;
   }
 
+  /* Login gate */
+  #login-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: radial-gradient(ellipse at top, #0a2520 0%, #04100f 60%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #login-gate.hidden { display: none; }
+  .gate-card {
+    width: 100%;
+    max-width: 380px;
+    background: linear-gradient(180deg, #0a2520, #061a17);
+    border: 1px solid rgba(94,234,212,.2);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  }
+  .gate-logo {
+    width: 56px; height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f;
+    font-family: 'Outfit'; font-weight: 900; font-size: 32px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 32px rgba(94,234,212,.5);
+  }
+  .gate-title {
+    font-family: 'Outfit'; font-weight: 900;
+    font-size: 22px; letter-spacing: -.02em; color: #ecfdf5;
+    margin: 8px 0 4px;
+  }
+  .gate-sub {
+    font-size: 13px; color: #94b8b1; margin-bottom: 24px;
+  }
+  .gate-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #04100f;
+    border: 1.5px solid rgba(94,234,212,.2);
+    border-radius: 12px;
+    color: #ecfdf5;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+    box-sizing: border-box;
+  }
+  .gate-input:focus { border-color: #5eead4; }
+  .gate-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    background: #f59e0b;
+    color: #1a0f00;
+    border: 0;
+    border-radius: 12px;
+    font-family: 'Outfit';
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .gate-btn:hover { opacity: .9; }
+  .gate-btn:disabled { opacity: .5; cursor: wait; }
+  .gate-error {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 600;
+    min-height: 16px;
+  }
+  body.locked { overflow: hidden; }
+
   /* Push preview */
   .preview {
     background: #fff;
@@ -289,7 +368,24 @@
   .hint { font-size: 11px; color: #94b8b1; margin-top: 6px; line-height: 1.5; }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- LOGIN GATE — bloque tout tant que le mdp n'est pas validé -->
+<div id="login-gate">
+  <div class="gate-card">
+    <div class="gate-logo">B</div>
+    <div class="gate-title">Console Admin</div>
+    <div class="gate-sub">Accès réservé — La Base Shakes & Drinks</div>
+    <form id="gate-form" autocomplete="off">
+      <input type="password" id="gate-password" class="gate-input" placeholder="Mot de passe admin" autocomplete="off" autofocus />
+      <button type="submit" class="gate-btn" id="gate-submit">Déverrouiller</button>
+      <div class="gate-error" id="gate-error"></div>
+    </form>
+    <div style="margin-top:18px;font-size:11px;color:#94b8b1;">
+      <a href="/" style="color:#5eead4;text-decoration:none;">← Retour à l'app</a>
+    </div>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -302,9 +398,11 @@
       </div>
     </div>
     <div class="topbar-spacer"></div>
-    <input type="password" class="pwd-input" id="password" placeholder="Mot de passe admin" autocomplete="current-password" />
+    <button id="lock-btn" class="back-btn" title="Verrouiller" style="cursor:pointer;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#ef4444;">🔒 Verrouiller</button>
   </div>
 </div>
+<!-- Hidden password field for backward compatibility avec le code existant -->
+<input type="hidden" id="password" value="" />
 
 <nav class="nav-tabs">
   <div class="nav-tabs-inner">
@@ -395,11 +493,89 @@
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'labase-console-token';
 
-// Restore token
-try {
-  const saved = sessionStorage.getItem(STORAGE_KEY);
-  if (saved) $('password').value = saved;
-} catch {}
+// ═══ LOGIN GATE ═══
+// Bloque l'accès à toute la console tant que le mot de passe n'est pas
+// validé contre une vraie API admin. Ne se base PAS sur la simple
+// présence du champ, on teste l'auth réellement.
+
+function showGate() {
+  $('login-gate').classList.remove('hidden');
+  document.body.classList.add('locked');
+  $('gate-password').value = '';
+  $('gate-password').focus();
+}
+
+function hideGate() {
+  $('login-gate').classList.add('hidden');
+  document.body.classList.remove('locked');
+}
+
+async function tryUnlock(pwd) {
+  // On teste contre /api/orders?action=today qui exige le Bearer admin
+  try {
+    const res = await fetch('/api/orders?action=today', {
+      headers: { 'Authorization': 'Bearer ' + pwd },
+    });
+    return res.ok || res.status === 200;
+  } catch {
+    return false;
+  }
+}
+
+async function init() {
+  // Si un token est déjà dans sessionStorage, on le valide silencieusement
+  let saved = null;
+  try { saved = sessionStorage.getItem(STORAGE_KEY); } catch {}
+
+  if (saved) {
+    const ok = await tryUnlock(saved);
+    if (ok) {
+      $('password').value = saved;
+      hideGate();
+      loadComptoir();
+      return;
+    }
+    // Token invalide → on l'efface et on affiche le gate
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+  }
+  showGate();
+}
+
+$('gate-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pwd = $('gate-password').value.trim();
+  if (!pwd) return;
+  const submitBtn = $('gate-submit');
+  const errEl = $('gate-error');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Vérification…';
+  errEl.textContent = '';
+
+  const ok = await tryUnlock(pwd);
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Déverrouiller';
+
+  if (ok) {
+    try { sessionStorage.setItem(STORAGE_KEY, pwd); } catch {}
+    $('password').value = pwd;
+    hideGate();
+    // Lance le premier load Comptoir
+    loadComptoir();
+  } else {
+    errEl.textContent = '⚠️ Mot de passe incorrect';
+    $('gate-password').value = '';
+    $('gate-password').focus();
+  }
+});
+
+$('lock-btn').addEventListener('click', () => {
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+  $('password').value = '';
+  showGate();
+});
+
+// Démarre le check au chargement
+init();
 
 // ═══ TAB SWITCHING ═══
 document.querySelectorAll('.tab').forEach(btn => {
@@ -414,9 +590,7 @@ document.querySelectorAll('.tab').forEach(btn => {
 });
 
 function getPassword() {
-  const p = $('password').value.trim();
-  if (p) sessionStorage.setItem(STORAGE_KEY, p);
-  return p;
+  return $('password').value.trim();
 }
 
 // ═══ COMPTOIR ═══
@@ -741,8 +915,8 @@ async function runHealthCheck() {
   }
 }
 
-// Charge la liste comptoir au démarrage
-loadComptoir();
+// Note: le loadComptoir() initial est déclenché par le gate après
+// déverrouillage réussi (voir init() / submit du gate-form).
 </script>
 </body>
 </html>
