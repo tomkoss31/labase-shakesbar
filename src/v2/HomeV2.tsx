@@ -10,6 +10,9 @@ import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
 import { useFlyAnimation, colorForCategory } from './FlyAnimation';
+import { useAuth } from './auth/useAuth';
+import { AuthModal } from './auth/AuthModal';
+import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
   V2_COMBOS,
@@ -44,7 +47,13 @@ export function HomeV2({
   const [tab, setTab] = useState<NavTab>('home');
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
+  const [authOpen, setAuthOpen] = useState(false);
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
+  const auth = useAuth();
+  const isAuthed = auth.status === 'authenticated';
+  const xp = auth.profile?.xp ?? 0;
+  const next = nextLevelThreshold(xp);
+  const mascotteLevel = computeMascotteLevel(xp);
 
   // Filtrage par recherche (sur tous les produits)
   const filteredQuery = query.trim().toLowerCase();
@@ -105,8 +114,21 @@ export function HomeV2({
         paddingBottom: '96px',
       }}
     >
-      <Header palette={palette} cartCount={cartCount} onCart={onOpenCart} />
-      <XpCard palette={palette} connected={false} />
+      <Header
+        palette={palette}
+        cartCount={cartCount}
+        onCart={onOpenCart}
+        onProfile={() => setAuthOpen(true)}
+      />
+      <XpCard
+        palette={palette}
+        connected={isAuthed}
+        firstName={auth.profile?.first_name ?? undefined}
+        level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
+        xp={xp}
+        xpNext={next.xp}
+        onConnect={() => setAuthOpen(true)}
+      />
       <HeroCarousel palette={palette} onSlideClick={handleSlideClick} />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
       <CategoryChips palette={palette} active={activeChip} onChange={setActiveChip} />
@@ -245,6 +267,14 @@ export function HomeV2({
 
       {/* Animation FlyingDrop signature ajout panier */}
       {flyOverlay}
+
+      {/* Modale auth magic link */}
+      <AuthModal
+        palette={palette}
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onSendMagicLink={auth.sendMagicLink}
+      />
     </div>
   );
 }
