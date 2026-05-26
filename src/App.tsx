@@ -27,6 +27,9 @@ import {
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 import { HomeV2 } from './v2/HomeV2';
+import { ProductModalV2 } from './v2/ProductModalV2';
+import { CartDrawerV2 } from './v2/CartDrawerV2';
+import { PALETTE_E } from './v2/palette';
 import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
@@ -1549,7 +1552,7 @@ function App() {
       )}
 
       <AnimatePresence>
-        {selected && (
+        {selected && !isV2 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1911,7 +1914,7 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {drawerOpen && (
+        {drawerOpen && !isV2 && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -2372,14 +2375,43 @@ function App() {
 
       {/* Overlay V2 — rendu par-dessus le legacy quand ?v2 est dans l'URL */}
       {isV2 && (
-        <HomeV2
-          cartCount={cartCount}
-          onOpenCart={() => setDrawerOpen(true)}
-          onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
-          onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
-          onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
-          onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
-        />
+        <>
+          <HomeV2
+            cartCount={cartCount}
+            onOpenCart={() => setDrawerOpen(true)}
+            onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+            onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
+            onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+            onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
+          />
+          <ProductModalV2
+            palette={PALETTE_E}
+            open={Boolean(selected)}
+            product={selected}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            onClose={() => setSelected(null)}
+            onAdd={() => selected && addToCart(selected)}
+            getPrice={(p) => getConfiguredBasePrice(p, selectedOption)}
+            optionSectionLabel={(p) => getOptionSectionLabel(p)}
+          />
+          <CartDrawerV2
+            palette={PALETTE_E}
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            cart={cart}
+            totalCents={cartTotalCents}
+            customerName={customerName}
+            setCustomerName={setCustomerName}
+            pickupTime={pickupTime}
+            setPickupTime={setPickupTime}
+            onUpdateQty={updateQuantity}
+            onSquareCheckout={handleSquareCheckout}
+            onWhatsAppOrder={handleWhatsAppOrder}
+            isCreatingPayment={isCreatingPayment}
+            hasRequiredPickupInfo={hasRequiredPickupInfo}
+          />
+        </>
       )}
     </div>
   );
