@@ -34,27 +34,37 @@ function normalizeKey(value: string = ''): string {
     .trim();
 }
 
-// Produits avec basePriceCents (smoothies 890, santé 690)
+// Smoothies (890), enfants (590), café glacé simple (690), post workout (590)
 const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
-  ['Choco Buenos', 890], ['M&M', 890], ['Casse Noisette', 890], ['Cappuccino', 890],
-  ['Pina Colada', 890], ['Fraise Bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
-  ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890], ['Banana Split', 890],
-  ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
-  ['Hydrat’Max', 690], ['Casse Grippe', 690], ['Limonade Rose', 690], ['Digest', 690],
+  ['Casse Noisette', 890], ['Cappuccino', 890], ['Pina Colada', 890],
+  ['Fraise bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
+  ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890],
+  ['Banana Split', 890], ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
+  // Enfants
+  ['Bulle de Fée', 590], ['Spiderman', 590], ['Stitch', 590],
+  ['Licorne', 590], ['Hulk', 590], ['Tropicool', 590],
+  // Cafés / sportifs uniques
+  ['Café glacé simple', 690],
+  ['Post Workout', 590],
 ];
 
-// Options : drinks 2 formats, café/thé, café gourmet, gaufre toppings
+// Options : Start/Boost drinks/santé/sportifs, café/thé Petit/Grand,
+// chocolat chaud saveurs, café gourmet glacé recettes, gaufre toppings
 const OPTION_PRICE_ENTRIES: Array<[string, number]> = [
-  ['Medium 550ml — 6,90€', 690],
-  ['Large 950ml — 8,90€', 890],
+  ['Start 550ml — 6,90€', 690],
+  ['Boost 950ml — 8,90€', 890],
   ['Petit 250ml — 3,90€', 390],
   ['Grand 450ml — 5,90€', 590],
-  ['Petit 250ml — 5,90€', 590],
-  ['Grand 450ml — 6,90€', 690],
+  ['Nature — 5,90€', 590],
+  ['Saveur Noisette — 6,40€', 640],
+  ['Saveur Spéculoos — 6,40€', 640],
+  ['Saveur Caramel — 6,40€', 640],
+  ['Saveur Vanille — 6,40€', 640],
+  ['Saveur Cookie — 6,40€', 640],
   ['Macchiato — 650ml — 8,90€', 890],
-  ['Choco mocha — 650ml — 8,90€', 890],
-  ['Latte noisette — 650ml — 8,90€', 890],
-  ['Vanille latte — 650ml — 8,90€', 890],
+  ['Choco Mocha — 650ml — 8,90€', 890],
+  ['Latte aux Noisettes — 650ml — 8,90€', 890],
+  ['Vanille Latte — 650ml — 8,90€', 890],
   ['Miel — 6,90€', 690],
   ['Chocolat — 6,90€', 690],
   ['Chocolat blanc — 6,90€', 690],
@@ -73,7 +83,7 @@ const COMBO_PRICE_ENTRIES: Array<[string, number]> = [
 
 const EXTRA_PRICE_ENTRIES: Array<[string, number]> = [
   ['Collagène', 250],
-  ['Booster immunité', 250],
+  ['Booster Immunité', 250],
   ['Fibres à la pomme', 250],
   ['Probiotiques', 250],
   ['Électrolytes', 250],

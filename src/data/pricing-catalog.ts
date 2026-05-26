@@ -2,10 +2,10 @@
 // Utilisable côté serverless Vercel (api/) ET côté front (src/).
 // Source de vérité unique pour les montants envoyés à Square.
 //
-// IMPORTANT : à mettre à jour en parallèle de src/data/menu.ts quand on ajoute/
-// retire un produit ou qu'on change un prix. Le fichier menu.ts reste la
-// source UI (avec les icons, descriptions, badges, etc.), ce fichier-ci est
-// la source PRIX uniquement.
+// IMPORTANT : à mettre à jour en parallèle de :
+// - src/data/menu.ts (source UI)
+// - api/create-payment-link.ts (catalogue inliné dans la route serverless,
+//   nécessaire pour éviter le piège de bundling ESM Vercel)
 
 export function normalizeCatalogKey(value: string = ''): string {
   return value
@@ -32,15 +32,13 @@ export function normalizeCatalogKey(value: string = ''): string {
     .trim();
 }
 
-// ─── Produits avec basePriceCents (smoothies, santé) ────────────────
+// ─── Produits avec basePriceCents ─────────────────────────────────
 const productPriceEntries: Array<[string, number]> = [
   // Smoothies (890)
-  ['Choco Buenos', 890],
-  ['M&M', 890],
   ['Casse Noisette', 890],
   ['Cappuccino', 890],
   ['Pina Colada', 890],
-  ['Fraise Bonbon', 890],
+  ['Fraise bonbon', 890],
   ["Pim's", 890],
   ['Tarte à la pomme', 890],
   ['Snickers', 890],
@@ -50,30 +48,40 @@ const productPriceEntries: Array<[string, number]> = [
   ['Banana Noisette', 890],
   ['Cookies', 890],
   ['Tropical', 890],
-  // Boissons santé (690)
-  ['Hydrat’Max', 690],
-  ['Casse Grippe', 690],
-  ['Limonade Rose', 690],
-  ['Digest', 690],
+  // Boissons enfants (590)
+  ['Bulle de Fée', 590],
+  ['Spiderman', 590],
+  ['Stitch', 590],
+  ['Licorne', 590],
+  ['Hulk', 590],
+  ['Tropicool', 590],
+  // Café glacé simple (690)
+  ['Café glacé simple', 690],
+  // Post workout (590)
+  ['Post Workout', 590],
 ];
 
-// ─── Options (drinks Medium/Large, gaufre toppings, café gourmet, etc.) ─
+// ─── Options ──────────────────────────────────────────────────────
 const optionPriceEntries: Array<[string, number]> = [
-  // Drinks énergisants 2 formats
-  ['Medium 550ml — 6,90€', 690],
-  ['Large 950ml — 8,90€', 890],
-  // Café & thé classique
+  // Drinks & santé & sportifs format Start / Boost
+  ['Start 550ml — 6,90€', 690],
+  ['Boost 950ml — 8,90€', 890],
+  // Café / Thé Aloé Vera (petit / grand)
   ['Petit 250ml — 3,90€', 390],
   ['Grand 450ml — 5,90€', 590],
-  // Chocolat chaud protéiné
-  ['Petit 250ml — 5,90€', 590],
-  ['Grand 450ml — 6,90€', 690],
-  // Café gourmet
+  // Chocolat chaud protéiné (nature ou saveur)
+  ['Nature — 5,90€', 590],
+  ['Saveur Noisette — 6,40€', 640],
+  ['Saveur Spéculoos — 6,40€', 640],
+  ['Saveur Caramel — 6,40€', 640],
+  ['Saveur Vanille — 6,40€', 640],
+  ['Saveur Cookie — 6,40€', 640],
+  // Café gourmet glacé (4 recettes)
   ['Macchiato — 650ml — 8,90€', 890],
-  ['Choco mocha — 650ml — 8,90€', 890],
-  ['Latte noisette — 650ml — 8,90€', 890],
-  ['Vanille latte — 650ml — 8,90€', 890],
-  // Gaufre healthy toppings
+  ['Choco Mocha — 650ml — 8,90€', 890],
+  ['Latte aux Noisettes — 650ml — 8,90€', 890],
+  ['Vanille Latte — 650ml — 8,90€', 890],
+  // Gaufre healthy (toppings)
   ['Miel — 6,90€', 690],
   ['Chocolat — 6,90€', 690],
   ['Chocolat blanc — 6,90€', 690],
@@ -81,7 +89,7 @@ const optionPriceEntries: Array<[string, number]> = [
   ['Caramel beurre salé — 6,90€', 690],
 ];
 
-// ─── Combos ─────────────────────────────────────────────────────────
+// ─── Combos ────────────────────────────────────────────────────────
 const comboPriceEntries: Array<[string, number]> = [
   ['Combo Medium', 1480],
   ['Combo Power', 1590],
@@ -89,6 +97,17 @@ const comboPriceEntries: Array<[string, number]> = [
   ['Coffee Break', 1090],
   ['Choco Cocoon', 1190],
   ['Gourmet Break', 1390],
+];
+
+// ─── Extras (+2,50€) ───────────────────────────────────────────────
+const extraPriceEntries: Array<[string, number]> = [
+  ['Collagène', 250],
+  ['Booster Immunité', 250],
+  ['Fibres à la pomme', 250],
+  ['Probiotiques', 250],
+  ['Électrolytes', 250],
+  ['Créatine', 250],
+  ['Protéines', 250],
 ];
 
 function build(entries: Array<[string, number]>): Record<string, number> {
@@ -102,7 +121,9 @@ function buildNormalized(entries: Array<[string, number]>): Record<string, numbe
 export const productPrices = build(productPriceEntries);
 export const optionPrices = build(optionPriceEntries);
 export const comboPrices = build(comboPriceEntries);
+export const extraPrices = build(extraPriceEntries);
 
 export const normalizedProductPrices = buildNormalized(productPriceEntries);
 export const normalizedOptionPrices = buildNormalized(optionPriceEntries);
 export const normalizedComboPrices = buildNormalized(comboPriceEntries);
+export const normalizedExtraPrices = buildNormalized(extraPriceEntries);
