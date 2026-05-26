@@ -878,14 +878,12 @@ function App() {
   }
 
   // Mode V2 (test) — activable via ?v2 dans l'URL
-  // L'ancienne app reste 100% fonctionnelle, le V2 est juste un aperçu de la refonte
+  // L'ancienne app reste 100% fonctionnelle, le V2 est rendu en overlay
+  // par-dessus le legacy, ce qui permet de réutiliser les modales / drawer /
+  // toast / install banner existants sans dupliquer leur code.
   const isV2 =
     typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).has('v2');
-
-  if (isV2) {
-    return <HomeV2 cartCount={cartCount} onOpenCart={() => setDrawerOpen(true)} />;
-  }
 
   const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
   const selectedComboPrimaryCandidates = selectedCombo
@@ -2361,6 +2359,18 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Overlay V2 — rendu par-dessus le legacy quand ?v2 est dans l'URL */}
+      {isV2 && (
+        <HomeV2
+          cartCount={cartCount}
+          onOpenCart={() => setDrawerOpen(true)}
+          onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+          onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
+          onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+          onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
+        />
+      )}
     </div>
   );
 }
