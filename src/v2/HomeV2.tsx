@@ -9,6 +9,7 @@ import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
+import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import {
   V2_POPULAR,
   V2_COMBOS,
@@ -43,6 +44,7 @@ export function HomeV2({
   const [tab, setTab] = useState<NavTab>('home');
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
+  const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
 
   // Filtrage par recherche (sur tous les produits)
   const filteredQuery = query.trim().toLowerCase();
@@ -79,7 +81,13 @@ export function HomeV2({
 
   function handleAddProduct(product: V2Product) {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
-      onAddProduct(product, e.currentTarget);
+      const btn = e.currentTarget;
+      // Anim signature : gouttelette + éclaboussures depuis le bouton vers le panier
+      triggerFly(btn, colorForCategory(product.categoryId, palette));
+      // Léger délai pour laisser apparaître l'animation avant la modale
+      window.setTimeout(() => {
+        onAddProduct(product, btn);
+      }, 320);
     };
   }
 
@@ -234,6 +242,9 @@ export function HomeV2({
       <InstaCard palette={palette} />
 
       <BottomNav palette={palette} active={tab} onChange={setTab} />
+
+      {/* Animation FlyingDrop signature ajout panier */}
+      {flyOverlay}
     </div>
   );
 }

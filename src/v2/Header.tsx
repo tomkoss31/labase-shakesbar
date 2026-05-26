@@ -41,13 +41,17 @@ interface IconBtnProps {
   badge?: number;
   onClick?: () => void;
   ariaLabel?: string;
+  dataAttr?: string;
 }
 
-export function IconBtn({ palette, children, badge, onClick, ariaLabel }: IconBtnProps) {
+export function IconBtn({ palette, children, badge, onClick, ariaLabel, dataAttr }: IconBtnProps) {
+  const extra: Record<string, boolean> = {};
+  if (dataAttr) extra[dataAttr] = true;
   return (
     <button
       onClick={onClick}
       aria-label={ariaLabel}
+      {...extra}
       style={{
         width: 38,
         height: 38,
@@ -121,7 +125,7 @@ export function Header({ palette, cartCount, onCart, onProfile, onNotifications 
         <IconBtn palette={palette} onClick={onProfile} ariaLabel="Compte">
           <IconUser color={palette.text} />
         </IconBtn>
-        <IconBtn palette={palette} onClick={onCart} badge={cartCount} ariaLabel="Panier">
+        <IconBtn palette={palette} onClick={onCart} badge={cartCount} ariaLabel="Panier" dataAttr="data-v2-cart-icon">
           <IconCart color={palette.text} />
         </IconBtn>
       </div>
