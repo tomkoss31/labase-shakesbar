@@ -383,6 +383,44 @@ export function ProfileSheet({
           </button>
         )}
 
+        {/* Bouton Console admin — visible uniquement pour le compte admin */}
+        {email && import.meta.env.VITE_ADMIN_EMAIL &&
+          email.toLowerCase() === String(import.meta.env.VITE_ADMIN_EMAIL).toLowerCase() && (
+          <button
+            onClick={() => {
+              window.location.href = '/console.html';
+            }}
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              padding: '14px 16px',
+              background: '#1a1f2e',
+              border: `1px solid ${palette.accent}`,
+              borderRadius: 14,
+              color: palette.text,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 22, lineHeight: 1 }}>⚙️</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15, color: palette.accent }}>
+                Console admin
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 500, marginTop: 2, color: palette.textDim }}>
+                Comptoir · Scanner · Push · Diagnostic
+              </div>
+            </div>
+            <div style={{ fontSize: 18, color: palette.accent }}>→</div>
+          </button>
+        )}
+
         {/* Roue cadeau hebdomadaire */}
         <button
           onClick={() => setWheelOpen(true)}
