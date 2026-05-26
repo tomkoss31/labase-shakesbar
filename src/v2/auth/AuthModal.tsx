@@ -1,5 +1,6 @@
-// Modale d'authentification magic link
-import React, { useState } from 'react';
+// Modale d'authentification — code OTP 6 chiffres par email
+// Marche sur iOS PWA car pas de redirect : user reste dans la PWA, tape le code
+import React, { useRef, useState } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 
@@ -8,33 +9,96 @@ interface AuthModalProps {
   open: boolean;
   onClose: () => void;
   onSendMagicLink: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  onVerifyOtp: (email: string, token: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
-export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModalProps) {
+type Step = 'email' | 'code' | 'verifying';
+
+export function AuthModal({ palette, open, onClose, onSendMagicLink, onVerifyOtp }: AuthModalProps) {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
+  const [step, setStep] = useState<Step>('email');
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   if (!open) return null;
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('sending');
+    setSending(true);
     setError(null);
     const res = await onSendMagicLink(email);
+    setSending(false);
     if (res.ok) {
-      setStatus('sent');
+      setStep('code');
+      // Focus sur la première case
+      window.setTimeout(() => inputsRef.current[0]?.focus(), 100);
     } else {
-      setStatus('error');
-      setError(res.error ?? 'Une erreur est survenue');
+      setError(res.error ?? 'Erreur lors de l\'envoi');
+    }
+  }
+
+  async function handleVerifyCode(fullCode?: string) {
+    const finalCode = fullCode ?? code.join('');
+    if (finalCode.length !== 6) return;
+    setStep('verifying');
+    setError(null);
+    const res = await onVerifyOtp(email, finalCode);
+    if (res.ok) {
+      // Le onAuthStateChange va trigger la mise à jour, on ferme
+      handleClose();
+    } else {
+      setStep('code');
+      setError(res.error ?? 'Code incorrect');
+      setCode(['', '', '', '', '', '']);
+      window.setTimeout(() => inputsRef.current[0]?.focus(), 50);
+    }
+  }
+
+  function handleCodeChange(index: number, value: string) {
+    const digit = value.replace(/\D/g, '').slice(0, 1);
+    const next = [...code];
+    next[index] = digit;
+    setCode(next);
+    if (digit && index < 5) {
+      inputsRef.current[index + 1]?.focus();
+    }
+    // Auto-submit si toutes les cases pleines
+    if (digit && index === 5 && next.every((d) => d !== '')) {
+      handleVerifyCode(next.join(''));
+    }
+  }
+
+  function handleCodeKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  }
+
+  function handleCodePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) {
+      const next = pasted.split('');
+      setCode(next);
+      handleVerifyCode(pasted);
     }
   }
 
   function handleClose() {
     setEmail('');
-    setStatus('idle');
+    setCode(['', '', '', '', '', '']);
+    setStep('email');
     setError(null);
+    setSending(false);
     onClose();
+  }
+
+  function handleBackToEmail() {
+    setStep('email');
+    setCode(['', '', '', '', '', '']);
+    setError(null);
   }
 
   return (
@@ -67,7 +131,6 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
           fontFamily: 'Inter, sans-serif',
         }}
       >
-        {/* Drag handle */}
         <div
           style={{
             width: 40,
@@ -78,7 +141,6 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
           }}
         />
 
-        {/* Header avec mascotte */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
           <Mascotte palette={palette} mood="wave" size={48} level="apprenti" />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -90,12 +152,12 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
                 lineHeight: 1.1,
               }}
             >
-              {status === 'sent' ? 'Vérifie ta boîte mail 💌' : 'Salut !'}
+              {step === 'email' ? 'Salut !' : 'Code reçu ?'}
             </div>
             <div style={{ fontSize: 13, color: palette.textDim, marginTop: 4 }}>
-              {status === 'sent'
-                ? 'Un lien magique est en route'
-                : 'Connecte-toi pour cumuler des XP'}
+              {step === 'email'
+                ? 'Connecte-toi pour cumuler des XP'
+                : `Tape les 6 chiffres reçus par mail`}
             </div>
           </div>
           <button
@@ -117,45 +179,8 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
           </button>
         </div>
 
-        {status === 'sent' ? (
-          <div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 14,
-                background: palette.primary + '15',
-                border: `1px solid ${palette.primary}33`,
-                fontSize: 14,
-                color: palette.text,
-                lineHeight: 1.5,
-              }}
-            >
-              On vient d'envoyer un lien à <b>{email}</b>.
-              <br />
-              <br />
-              Clique dessus pour finaliser ta connexion. Tu peux fermer cette fenêtre, le lien marche aussi sur un autre appareil.
-            </div>
-            <button
-              onClick={handleClose}
-              style={{
-                width: '100%',
-                marginTop: 16,
-                padding: '14px',
-                background: palette.cta,
-                color: palette.ctaText,
-                border: 0,
-                borderRadius: 14,
-                fontFamily: 'Outfit, sans-serif',
-                fontWeight: 800,
-                fontSize: 15,
-                cursor: 'pointer',
-              }}
-            >
-              Compris
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
+        {step === 'email' && (
+          <form onSubmit={handleSendCode}>
             <label
               style={{
                 display: 'block',
@@ -175,7 +200,7 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="ton@email.com"
-              disabled={status === 'sending'}
+              disabled={sending}
               autoComplete="email"
               autoFocus
               style={{
@@ -192,38 +217,30 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
             />
 
             {error && (
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 12,
-                  color: palette.emotion,
-                  fontWeight: 600,
-                }}
-              >
+              <div style={{ marginTop: 10, fontSize: 12, color: palette.emotion, fontWeight: 600 }}>
                 ⚠️ {error}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={status === 'sending' || !email}
+              disabled={sending || !email}
               style={{
                 width: '100%',
                 marginTop: 16,
                 padding: '14px',
-                background: status === 'sending' ? palette.line : palette.cta,
+                background: sending ? palette.line : palette.cta,
                 color: palette.ctaText,
                 border: 0,
                 borderRadius: 14,
                 fontFamily: 'Outfit, sans-serif',
                 fontWeight: 800,
                 fontSize: 15,
-                cursor: status === 'sending' ? 'wait' : 'pointer',
-                transition: 'opacity .15s',
+                cursor: sending ? 'wait' : 'pointer',
                 opacity: !email ? 0.5 : 1,
               }}
             >
-              {status === 'sending' ? 'Envoi…' : 'Recevoir le lien magique ✨'}
+              {sending ? 'Envoi…' : 'Recevoir le code ✨'}
             </button>
 
             <div
@@ -237,9 +254,119 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink }: AuthModal
             >
               Pas de mot de passe à retenir.
               <br />
-              Tes données sont privées et jamais partagées.
+              Un code à 6 chiffres arrive dans ton mail.
             </div>
           </form>
+        )}
+
+        {(step === 'code' || step === 'verifying') && (
+          <div>
+            <div
+              style={{
+                padding: 12,
+                borderRadius: 12,
+                background: palette.primary + '15',
+                border: `1px solid ${palette.primary}33`,
+                fontSize: 13,
+                color: palette.text,
+                lineHeight: 1.45,
+                marginBottom: 16,
+                textAlign: 'center',
+              }}
+            >
+              Code envoyé à <b>{email}</b>
+            </div>
+
+            {/* 6 cases */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, 1fr)',
+                gap: 8,
+                marginBottom: 12,
+              }}
+            >
+              {code.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={(el) => {
+                    inputsRef.current[i] = el;
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d*"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(i, e.target.value)}
+                  onKeyDown={(e) => handleCodeKeyDown(i, e)}
+                  onPaste={handleCodePaste}
+                  disabled={step === 'verifying'}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1.2',
+                    padding: 0,
+                    background: palette.bg,
+                    border: `1.5px solid ${digit ? palette.primary : palette.line}`,
+                    borderRadius: 12,
+                    color: palette.text,
+                    fontSize: 24,
+                    fontWeight: 800,
+                    fontFamily: 'Outfit, sans-serif',
+                    textAlign: 'center',
+                    outline: 'none',
+                    transition: 'border-color .15s',
+                  }}
+                />
+              ))}
+            </div>
+
+            {error && (
+              <div
+                style={{
+                  marginTop: 4,
+                  marginBottom: 12,
+                  fontSize: 12,
+                  color: palette.emotion,
+                  fontWeight: 600,
+                  textAlign: 'center',
+                }}
+              >
+                ⚠️ {error}
+              </div>
+            )}
+
+            {step === 'verifying' && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  fontSize: 13,
+                  color: palette.textDim,
+                  marginBottom: 12,
+                }}
+              >
+                Vérification…
+              </div>
+            )}
+
+            <button
+              onClick={handleBackToEmail}
+              disabled={step === 'verifying'}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: 'transparent',
+                color: palette.textDim,
+                border: `1px solid ${palette.line}`,
+                borderRadius: 12,
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              ← Changer d'email / renvoyer
+            </button>
+          </div>
         )}
       </div>
     </div>

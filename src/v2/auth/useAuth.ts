@@ -120,6 +120,30 @@ export function useAuth() {
     return { ok: true };
   }, []);
 
+  // Vérification du code OTP à 6 chiffres reçu par mail
+  const verifyOtp = useCallback(
+    async (email: string, token: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
+
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanToken = token.trim().replace(/\s+/g, '');
+      if (cleanToken.length !== 6) {
+        return { ok: false, error: 'Le code doit faire 6 chiffres' };
+      }
+
+      const { error } = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token: cleanToken,
+        type: 'email',
+      });
+
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    },
+    [],
+  );
+
   // Déconnexion
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
@@ -148,6 +172,7 @@ export function useAuth() {
   return {
     ...state,
     sendMagicLink,
+    verifyOtp,
     signOut,
     updateProfile,
   };
