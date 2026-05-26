@@ -11,8 +11,13 @@ ALTER TABLE public.orders
   CHECK (status IN ('pending', 'paid', 'preparing', 'ready', 'cancelled', 'refunded'));
 
 -- Réactiver Realtime sur orders pour permettre au client de subscribe
--- aux changements de status en temps réel
-ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+-- aux changements de status en temps réel.
+-- Géré dans un DO block car ALTER PUBLICATION rejette les doublons (42710).
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ════════════════════════════════════════════════════════════════════
 -- Done ✅
