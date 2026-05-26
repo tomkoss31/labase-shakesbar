@@ -1,9 +1,11 @@
 // Drawer panier V2 — palette Teal × Ambre, bouton sticky checkout
 // + quick-adds intelligents basés sur le contenu du panier
+// + sélection code promo roue cadeau
 import React, { useMemo } from 'react';
 import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
+import type { UserReward } from './rewards/useUserRewards';
 
 interface CartItem {
   key: string;
@@ -36,6 +38,9 @@ interface CartDrawerV2Props {
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
   onAddSuggestion?: (product: V2Product) => void;
+  rewards?: UserReward[];
+  selectedRewardCode?: string | null;
+  setSelectedRewardCode?: (code: string | null) => void;
 }
 
 // Calcule les suggestions intelligentes d'après le panier
@@ -118,8 +123,29 @@ export function CartDrawerV2({
   isCreatingPayment,
   hasRequiredPickupInfo,
   onAddSuggestion,
+  rewards,
+  selectedRewardCode,
+  setSelectedRewardCode,
 }: CartDrawerV2Props) {
   const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
+
+  // Calcule la réduction selon le reward sélectionné
+  const selectedReward = useMemo(() => {
+    if (!selectedRewardCode || !rewards) return null;
+    return rewards.find((r) => r.reward_code === selectedRewardCode) ?? null;
+  }, [selectedRewardCode, rewards]);
+
+  const discountCents = useMemo(() => {
+    if (!selectedReward) return 0;
+    if (selectedReward.reward_type === 'discount_percent') {
+      const pct = parseInt(selectedReward.reward_value ?? '0', 10);
+      return Math.round((totalCents * pct) / 100);
+    }
+    // free_product : pas géré ici (à implémenter via ajout d'article 0€ avant checkout)
+    return 0;
+  }, [selectedReward, totalCents]);
+
+  const finalTotalCents = Math.max(0, totalCents - discountCents);
   if (!open) return null;
 
   const empty = cart.length === 0;
@@ -350,6 +376,95 @@ export function CartDrawerV2({
             </div>
           )}
 
+          {/* Récompenses actives (codes roue cadeau) */}
+          {!empty && rewards && rewards.length > 0 && setSelectedRewardCode && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: palette.accent,
+                  letterSpacing: '.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                🎁 Tes récompenses
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {rewards.map((r) => {
+                  const active = selectedRewardCode === r.reward_code;
+                  const applicable = r.reward_type === 'discount_percent';
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => setSelectedRewardCode(active ? null : r.reward_code)}
+                      disabled={!applicable}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: 12,
+                        background: active ? palette.accent + '18' : palette.bg,
+                        border: `1.5px solid ${active ? palette.accent : palette.line}`,
+                        borderRadius: 12,
+                        color: palette.text,
+                        cursor: applicable ? 'pointer' : 'default',
+                        opacity: applicable ? 1 : 0.6,
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                        transition: 'all .15s',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: 4,
+                          border: `2px solid ${active ? palette.accent : palette.line}`,
+                          background: active ? palette.accent : 'transparent',
+                          color: palette.ctaText,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {active ? '✓' : ''}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: 'Outfit, sans-serif',
+                            fontWeight: 800,
+                            fontSize: 13,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {r.reward_label}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: palette.textDim,
+                            marginTop: 2,
+                            fontFamily: 'ui-monospace, monospace',
+                          }}
+                        >
+                          {r.reward_code} {!applicable && '• à présenter au comptoir'}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Quick-adds intelligents */}
           {!empty && suggestions.length > 0 && onAddSuggestion && (
             <div style={{ marginTop: 20 }}>
@@ -495,6 +610,22 @@ export function CartDrawerV2({
               />
             </div>
 
+            {/* Récap réduction si appliquée */}
+            {discountCents > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: palette.accent,
+                  marginBottom: 4,
+                  fontWeight: 700,
+                }}
+              >
+                <span>🎁 Réduction code roue</span>
+                <span>−{fmtEuro(discountCents)}</span>
+              </div>
+            )}
             {/* Total + boutons */}
             <div
               style={{
@@ -507,13 +638,32 @@ export function CartDrawerV2({
               <div style={{ fontSize: 13, color: palette.textDim }}>Total</div>
               <div
                 style={{
-                  fontFamily: 'Outfit, sans-serif',
-                  fontWeight: 900,
-                  fontSize: 22,
-                  color: palette.text,
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 8,
                 }}
               >
-                {fmtEuro(totalCents)}
+                {discountCents > 0 && (
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: palette.textDim,
+                      textDecoration: 'line-through',
+                    }}
+                  >
+                    {fmtEuro(totalCents)}
+                  </span>
+                )}
+                <span
+                  style={{
+                    fontFamily: 'Outfit, sans-serif',
+                    fontWeight: 900,
+                    fontSize: 22,
+                    color: discountCents > 0 ? palette.accent : palette.text,
+                  }}
+                >
+                  {fmtEuro(finalTotalCents)}
+                </span>
               </div>
             </div>
 

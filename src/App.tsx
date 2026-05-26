@@ -31,6 +31,7 @@ import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { OrderTracking } from './v2/OrderTracking';
 import { PALETTE_E } from './v2/palette';
+import { useUserRewards } from './v2/rewards/useUserRewards';
 import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
@@ -247,6 +248,8 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedProduct | null>(null);
   const [customerName, setCustomerName] = useState('');
+  const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
+  const { rewards: userRewards, refetch: refetchRewards } = useUserRewards();
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
@@ -866,7 +869,13 @@ function App() {
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
+        body: JSON.stringify({
+          cart,
+          customerName,
+          pickupTime,
+          userEmail,
+          rewardCode: selectedRewardCode,
+        }),
       });
 
       const raw = await response.text();
@@ -2438,6 +2447,9 @@ function App() {
               setDrawerOpen(false);
               openProductFromCategory(v2p.category, v2p.raw);
             }}
+            rewards={userRewards}
+            selectedRewardCode={selectedRewardCode}
+            setSelectedRewardCode={setSelectedRewardCode}
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking

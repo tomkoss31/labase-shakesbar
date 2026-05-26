@@ -239,12 +239,86 @@ export default async function handler(req: any, res: any) {
       typeof bodyPayload?.customerName === 'string'
         ? bodyPayload.customerName.trim()
         : undefined;
+    const rewardCode =
+      typeof bodyPayload?.rewardCode === 'string' && bodyPayload.rewardCode.trim().length > 0
+        ? bodyPayload.rewardCode.trim()
+        : null;
+
+    // Application du reward code roue (discount_percent uniquement pour l'instant)
+    // - Vérifie en DB que le code existe, n'est pas utilisé, n'est pas expiré
+    // - Calcule la réduction
+    // - Ajoute une line négative dans la commande Square
+    // - Marque le code comme utilisé (used_at = now)
+    let discountCents = 0;
+    let rewardLineItem: any = null;
+    let rewardSpinId: string | null = null;
+
+    if (rewardCode && userEmail) {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && serviceKey) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+
+          // Trouver le user_id depuis l'email
+          const { data: profile } = await admin
+            .from('profiles')
+            .select('id')
+            .eq('email', userEmail)
+            .maybeSingle();
+
+          if (profile?.id) {
+            // Récupérer le spin
+            const { data: spin } = await admin
+              .from('wheel_spins')
+              .select('id, reward_type, reward_value, used_at, expires_at, reward_label')
+              .eq('reward_code', rewardCode)
+              .eq('user_id', profile.id)
+              .maybeSingle();
+
+            if (
+              spin &&
+              !spin.used_at &&
+              new Date(spin.expires_at).getTime() > Date.now() &&
+              spin.reward_type === 'discount_percent'
+            ) {
+              const pct = parseInt(spin.reward_value ?? '0', 10);
+              const subtotal = lineItems.reduce(
+                (s: number, li: any) => s + Number(li.base_price_money?.amount ?? 0) * Number(li.quantity ?? 1),
+                0,
+              );
+              discountCents = Math.round((subtotal * pct) / 100);
+
+              if (discountCents > 0) {
+                rewardLineItem = {
+                  name: `🎁 Réduction ${pct}% (code ${rewardCode})`,
+                  quantity: '1',
+                  base_price_money: {
+                    amount: -discountCents,
+                    currency: 'EUR',
+                  },
+                };
+                rewardSpinId = spin.id;
+              }
+            }
+          }
+        } catch (err: any) {
+          console.warn('[create-payment-link] reward fetch failed:', err?.message);
+        }
+      }
+    }
+
+    // Ajouter la ligne de réduction si applicable
+    const finalLineItems = rewardLineItem ? [...lineItems, rewardLineItem] : lineItems;
 
     const squarePayload: any = {
       idempotency_key: randomUUID(),
       order: {
         location_id: locationId,
-        line_items: lineItems,
+        line_items: finalLineItems,
       },
       checkout_options: {
         redirect_url: `${getRequestOrigin(req)}/?payment=success`,
@@ -282,6 +356,26 @@ export default async function handler(req: any, res: any) {
     if (!squareResponse.ok) {
       console.error('Square API error', data);
       return res.status(500).json({ error: 'Erreur Square', details: data });
+    }
+
+    // Marquer le reward comme utilisé (best-effort, non-bloquant)
+    if (rewardSpinId) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          await admin
+            .from('wheel_spins')
+            .update({ used_at: new Date().toISOString() })
+            .eq('id', rewardSpinId);
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] mark used failed:', err?.message);
+      }
     }
 
     return res.status(200).json({
