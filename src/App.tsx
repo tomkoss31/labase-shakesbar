@@ -915,10 +915,19 @@ function App() {
 
   return (
     <div className="delivery-luxe min-h-screen bg-[#050505] text-white">
-      <div className="delivery-luxe__glow pointer-events-none fixed inset-0" />
-      <div className="delivery-luxe__grid pointer-events-none fixed inset-0" />
+      <div
+        className="delivery-luxe__glow pointer-events-none fixed inset-0"
+        style={isV2 ? { display: 'none' } : undefined}
+      />
+      <div
+        className="delivery-luxe__grid pointer-events-none fixed inset-0"
+        style={isV2 ? { display: 'none' } : undefined}
+      />
 
-      <header className="dlx-header sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
+      <header
+        className="dlx-header sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl"
+        style={isV2 ? { display: 'none' } : undefined}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5">
           <div className="dlx-brand">
             <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/40">
@@ -983,7 +992,10 @@ function App() {
         </div>
       </header>
 
-      <main className="dlx-main mx-auto max-w-7xl px-4 pb-32">
+      <main
+        className="dlx-main mx-auto max-w-7xl px-4 pb-32"
+        style={isV2 ? { display: 'none' } : undefined}
+      >
         {showThankYou && !isV2 && (
           <section className="pt-6">
             <div className="dlx-panel rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
@@ -1529,7 +1541,7 @@ function App() {
         </footer>
       </main>
 
-      {cartCount > 0 && !drawerOpen && (
+      {cartCount > 0 && !drawerOpen && !isV2 && (
         <div className="dlx-mobile-cart fixed bottom-4 left-4 right-4 z-30 md:hidden">
           <button
             type="button"
@@ -2296,7 +2308,7 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showInstallBanner && (
+        {showInstallBanner && !isV2 && (
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
