@@ -11,6 +11,7 @@ import {
   WHEEL_COOLDOWN_DAYS,
   type WheelSegment,
 } from './segments';
+import { getSupabase } from '../../lib/supabase';
 
 interface WheelModalProps {
   palette: Palette;
@@ -45,29 +46,66 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
 
   if (!open) return null;
 
-  function handleSpin() {
+  async function handleSpin() {
     if (phase !== 'idle' || !cooldown.canSpin) return;
-    const winIdx = pickWheelSegment();
-    const winSegment = WHEEL_SEGMENTS[winIdx];
-    const code = generateRewardCode();
 
-    // La flèche est en haut (12h). Le segment 0 commence en haut centré.
-    // On veut que le centre du segment gagnant arrive sous la flèche.
-    // Centre du segment i = i * SEGMENT_ANGLE
-    // Rotation = N tours + (360 - segmentCenter) pour ramener sous la flèche.
+    // Tentative API serveur si user authentifié — sinon fallback simulation locale
+    let winIdx = pickWheelSegment(); // valeur par défaut (fallback)
+    let winSegment: WheelSegment = WHEEL_SEGMENTS[winIdx];
+    let code: string | null = generateRewardCode();
+    let usedServerSide = false;
+
+    const supabase = getSupabase();
+    if (supabase) {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (token) {
+          const resp = await fetch('/api/wheel/spin', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            const idx = WHEEL_SEGMENTS.findIndex((s) => s.id === data.segment?.id);
+            if (idx >= 0) {
+              winIdx = idx;
+              winSegment = WHEEL_SEGMENTS[idx];
+              code = data.code;
+              usedServerSide = true;
+            }
+          } else if (resp.status === 429) {
+            // Cooldown serveur — on resync localStorage et on stop
+            const data = await resp.json();
+            if (data.nextSpinAt) {
+              const nextTs = new Date(data.nextSpinAt).getTime();
+              const lastTs = nextTs - 7 * 24 * 60 * 60 * 1000;
+              window.localStorage.setItem('labase-wheel-last-spin', String(lastTs));
+            }
+            return; // pas de spin
+          }
+          // Si erreur autre, fallback simulation locale ci-dessous
+        }
+      } catch (err) {
+        console.warn('[wheel] API failed, fallback to local:', err);
+      }
+    }
+
+    // Animation rotation
     const segmentCenter = winIdx * SEGMENT_ANGLE;
-    const fullTurns = 6; // 6 tours pour l'effet
-    const wobble = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.6); // petite variation pour pas tomber au centre exact
+    const fullTurns = 6;
+    const wobble = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.6);
     const target = fullTurns * 360 + (360 - segmentCenter) + wobble;
     setRotation(target);
     setPhase('spinning');
 
-    // Calculer la durée précise pour pouvoir afficher le résultat
-    const duration = 4200; // ms (cohérent avec la transition CSS)
+    const duration = 4200;
     audioRef.current = window.setTimeout(() => {
-      setResult({ segment: winSegment, code });
+      setResult({ segment: winSegment, code: code ?? '' });
       setPhase('result');
-      markWheelSpun();
+      // Si on a utilisé le serveur, la persistence est faite ; sinon on note local
+      if (!usedServerSide) markWheelSpun();
+      else markWheelSpun(); // par sécurité, on marque aussi local
     }, duration);
   }
 
@@ -303,7 +341,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
             >
               {result.segment.label}
             </div>
-            {result.segment.rewardType !== 'retry' && (
+            {result.segment.rewardType !== 'retry' && result.code && (
               <>
                 <div
                   style={{

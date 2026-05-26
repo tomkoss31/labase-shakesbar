@@ -5,6 +5,7 @@ import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
 import type { Product, ProductExtra, ComboOffer } from '../data/menu';
 import { EXTRAS, CATEGORIES_WITH_EXTRAS, comboOffers } from '../data/menu';
+import { colorForProduct } from './FlyAnimation';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -76,6 +77,7 @@ export function ProductModalV2({
   const totalCents = basePriceCents + extrasTotal;
 
   const relevantCombos = getRelevantCombos(product.categoryId);
+  const productColor = colorForProduct(product.name, product.categoryId, palette);
 
   function toggleExtra(label: string) {
     setSelectedExtras((prev) =>
@@ -164,7 +166,7 @@ export function ProductModalV2({
             style={{
               marginTop: -40,
               height: 240,
-              background: `radial-gradient(circle at 50% 50%, ${palette.primary}22, transparent 70%)`,
+              background: `radial-gradient(circle at 50% 50%, ${productColor}44, ${productColor}11 45%, transparent 75%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

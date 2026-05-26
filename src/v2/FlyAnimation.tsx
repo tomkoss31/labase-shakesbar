@@ -168,7 +168,70 @@ export function colorForCategory(categoryId: string, palette: Palette): string {
       return '#22c55e'; // vert santé
     case 'waffles':
       return '#f97316'; // orange gaufre
+    case 'kids':
+      return '#d946ef'; // fuchsia ludique
+    case 'sports':
+      return '#10b981'; // emerald sport
     default:
       return palette.primary; // teal par défaut (combos, etc.)
   }
+}
+
+// Couleur signature par produit (sinon fallback sur la catégorie)
+// Inspirée du designer Claude : chaque produit a son halo iconique.
+const PRODUCT_COLORS: Record<string, string> = {
+  // Smoothies
+  'Casse Noisette': '#92400e',
+  Cappuccino: '#7c2d12',
+  'Pina Colada': '#fbbf24',
+  'Fraise bonbon': '#ec4899',
+  "Pim's": '#be123c',
+  'Tarte à la pomme': '#84cc16',
+  Snickers: '#a16207',
+  'Full Oréo': '#1f2937',
+  Speculoos: '#b45309',
+  'Banana Split': '#fde047',
+  'Banana Noisette': '#ca8a04',
+  Cookies: '#52525b',
+  Tropical: '#f97316',
+  // Drinks énergisants
+  'Electric Blue': '#0ea5e9',
+  Pomelon: '#84cc16',
+  'Tonic Mandarine': '#f97316',
+  'Apple Kiss': '#22c55e',
+  Soleil: '#facc15',
+  'Black Panther': '#1e3a8a',
+  "L'Exotic": '#ec4899',
+  "T'Coco": '#f59e0b',
+  Elf: '#22d3ee',
+  Perroquet: '#fb7185',
+  'La vie en Rose': '#ec4899',
+  'Sortilège noir': '#581c87',
+  // Santé
+  "Hydrat'Max": '#f97316',
+  'Casse Grippe': '#dc2626',
+  'Limonade Rose': '#ec4899',
+  "Di'geste": '#22c55e',
+  // Enfants
+  'Bulle de Fée': '#fb7185',
+  Spiderman: '#dc2626',
+  Stitch: '#06b6d4',
+  Licorne: '#a855f7',
+  Hulk: '#84cc16',
+  Tropicool: '#22c55e',
+  // Hot
+  'Café chaud': '#78350f',
+  'Thé Aloé Vera chaud': '#65a30d',
+  'Chocolat chaud protéiné': '#7c2d12',
+  'Café gourmet glacé': '#a16207',
+  'Café glacé simple': '#92400e',
+  // Sportifs
+  "Electro'Lyte": '#06b6d4',
+  'Post Workout': '#7c2d12',
+  // Gaufre
+  'Gaufre healthy': '#f97316',
+};
+
+export function colorForProduct(name: string, categoryId: string, palette: Palette): string {
+  return PRODUCT_COLORS[name] ?? colorForCategory(categoryId, palette);
 }
