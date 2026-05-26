@@ -4,7 +4,7 @@ import {
   normalizedOptionPrices,
   normalizedProductPrices,
   normalizeCatalogKey,
-} from '../src/data/pricing';
+} from '../src/data/pricing-catalog';
 
 type CartItemPayload = {
   name?: string;
