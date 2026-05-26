@@ -23,8 +23,21 @@ export function getSupabase(): SupabaseClient | null {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true, // pour le magic link
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     },
   });
+
+  // Diagnostic visible dans la console pour traquer les sessions perdues
+  if (typeof window !== 'undefined') {
+    _client.auth.onAuthStateChange((event, session) => {
+      console.log('[supabase auth]', event, session ? `user=${session.user.email}` : 'no session');
+    });
+    // Log d'erreur si le hash de magic link contient une erreur
+    const hash = window.location.hash;
+    if (hash.includes('error=')) {
+      console.error('[supabase auth] Magic link error in URL:', hash);
+    }
+  }
 
   return _client;
 }
