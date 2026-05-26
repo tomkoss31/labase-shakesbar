@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   X,
   Flame,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import {
   BRAND,
@@ -43,6 +45,9 @@ type CartItem = {
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
+const VIEW_MODE_KEY = 'labase-menu-view-mode';
+
+type MenuViewMode = 'magazine' | 'list';
 
 type DeferredInstallPrompt = Event & {
   prompt: () => Promise<void>;
@@ -250,6 +255,22 @@ function App() {
   const [selectedComboSecondaryName, setSelectedComboSecondaryName] = useState('');
   const [selectedComboPrimaryOption, setSelectedComboPrimaryOption] = useState('');
   const [selectedComboSecondaryOption, setSelectedComboSecondaryOption] = useState('');
+  const [viewMode, setViewMode] = useState<MenuViewMode>('magazine');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(VIEW_MODE_KEY);
+    if (stored === 'magazine' || stored === 'list') {
+      setViewMode(stored);
+    }
+  }, []);
+
+  function changeViewMode(mode: MenuViewMode) {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_KEY, mode);
+    }
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1122,7 +1143,7 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-7">
+        <section className="mb-4">
           <div className="dlx-panel rounded-[30px] p-4 md:p-5">
             <div className="mb-4">
               <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
@@ -1145,8 +1166,12 @@ function App() {
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-4 pl-11 pr-4 text-white outline-none backdrop-blur focus:border-yellow-400/50"
               />
             </div>
+          </div>
+        </section>
 
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+        <div className="dlx-sticky-filters sticky top-[68px] z-20 -mx-4 mb-6 border-b border-white/5 bg-black/85 px-4 py-3 backdrop-blur-2xl">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 gap-2 overflow-x-auto pb-1">
               <FilterPill
                 active={activeCategory === 'all'}
                 onClick={() => setActiveCategory('all')}
@@ -1161,12 +1186,49 @@ function App() {
                 />
               ))}
             </div>
+
+            <div className="flex shrink-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+              <button
+                type="button"
+                onClick={() => changeViewMode('magazine')}
+                aria-label="Vue magazine"
+                className={`rounded-full p-2 transition ${
+                  viewMode === 'magazine'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <LayoutGrid size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => changeViewMode('list')}
+                aria-label="Vue liste compacte"
+                className={`rounded-full p-2 transition ${
+                  viewMode === 'list'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <List size={16} />
+              </button>
+            </div>
           </div>
-        </section>
+        </div>
 
         <section className="mb-8 space-y-9">
           {filteredCategories.map((category) => {
             const Icon = category.icon;
+            const sortedItems = [...category.items].sort((a, b) => {
+              const rank = (item: Product) => {
+                if (item.badge === 'Produit du mois') return 4;
+                if (item.badge === 'Nouveau') return 3;
+                if (item.badge === 'Best-seller') return 2;
+                if (item.badge === 'Iconique') return 1;
+                return 0;
+              };
+              return rank(b) - rank(a);
+            });
 
             return (
               <div key={category.id} className="space-y-4">
@@ -1176,6 +1238,9 @@ function App() {
                       className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-black text-black shadow-lg`}
                     >
                       <Icon size={16} /> {category.name}
+                      <span className="ml-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold">
+                        {sortedItems.length}
+                      </span>
                     </div>
 
                     <h2 className="text-2xl font-black md:text-3xl">{category.price}</h2>
@@ -1183,19 +1248,9 @@ function App() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {[...category.items]
-                    .sort((a, b) => {
-                      const rank = (item: Product) => {
-                        if (item.badge === 'Produit du mois') return 4;
-                        if (item.badge === 'Nouveau') return 3;
-                        if (item.badge === 'Best-seller') return 2;
-                        if (item.badge === 'Iconique') return 1;
-                        return 0;
-                      };
-                      return rank(b) - rank(a);
-                    })
-                    .map((item) => (
+                {viewMode === 'magazine' ? (
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {sortedItems.map((item) => (
                       <motion.button
                         key={`${category.id}-${item.name}`}
                         whileHover={{ y: -4 }}
@@ -1256,7 +1311,48 @@ function App() {
                         </div>
                       </motion.button>
                     ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {sortedItems.map((item) => (
+                      <motion.button
+                        key={`${category.id}-${item.name}-list`}
+                        whileTap={{ scale: 0.985 }}
+                        onClick={() => openProductFromCategory(category, item)}
+                        className="dlx-product-row group flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-left transition hover:border-yellow-400/30 hover:bg-white/[0.07]"
+                      >
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+                          <ProductCardBackground image={item.image} name={item.name} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate font-black text-white">{item.name}</p>
+                            {item.badge && (
+                              <span
+                                className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${getBadgeClassName(
+                                  item.badge,
+                                )}`}
+                              >
+                                {getBadgeLabel(item.badge)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-0.5 truncate text-xs text-white/55">{item.flavors}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          {getStartingPriceLabel(item) && (
+                            <p className="text-sm font-black text-white">
+                              {getStartingPriceLabel(item)}
+                            </p>
+                          )}
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-yellow-300 to-amber-500 text-black shadow-md">
+                            <Plus size={16} />
+                          </span>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
