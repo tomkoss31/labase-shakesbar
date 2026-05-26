@@ -9,6 +9,8 @@ import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
+import { SideAddressCard } from './SideAddressCard';
+import type { HeaderTab } from './Header';
 import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import { useAuth } from './auth/useAuth';
 import { AuthModal } from './auth/AuthModal';
@@ -46,6 +48,7 @@ export function HomeV2({
 }: HomeV2Props) {
   const palette = PALETTE_E;
   const [tab, setTab] = useState<NavTab>('home');
+  const [headerTab, setHeaderTab] = useState<HeaderTab>('home');
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
   const [authOpen, setAuthOpen] = useState(false);
@@ -56,6 +59,32 @@ export function HomeV2({
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);
   const mascotteLevel = computeMascotteLevel(xp);
+
+  function handleHeaderTab(t: HeaderTab) {
+    setHeaderTab(t);
+    if (t === 'combos') {
+      setActiveChip('combos');
+      // Scroll vers section combos
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('[data-v2-section="combos"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    } else if (t === 'menu') {
+      setActiveChip('all');
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('[data-v2-section="menu"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    } else if (t === 'rewards') {
+      if (isAuthed) setProfileOpen(true);
+      else setAuthOpen(true);
+    } else {
+      // home
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   // Filtrage par recherche (sur tous les produits)
   const filteredQuery = query.trim().toLowerCase();
@@ -121,17 +150,61 @@ export function HomeV2({
         cartCount={cartCount}
         onCart={onOpenCart}
         onProfile={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
+        activeTab={headerTab}
+        onTabChange={handleHeaderTab}
+        isAuthed={isAuthed}
       />
-      <XpCard
-        palette={palette}
-        connected={isAuthed}
-        firstName={auth.profile?.first_name ?? undefined}
-        level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
-        xp={xp}
-        xpNext={next.xp}
-        onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
-      />
-      <HeroCarousel palette={palette} onSlideClick={handleSlideClick} />
+
+      {/* Hero grid : carousel à gauche (col 1), XP + adresse à droite (col 2) en desktop */}
+      <div
+        className="v2-hero-grid"
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+          padding: '4px 0 0',
+        }}
+      >
+        <div className="v2-hero-main">
+          <HeroCarousel palette={palette} onSlideClick={handleSlideClick} />
+        </div>
+        <div className="v2-hero-aside">
+          <XpCard
+            palette={palette}
+            connected={isAuthed}
+            firstName={auth.profile?.first_name ?? undefined}
+            level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
+            xp={xp}
+            xpNext={next.xp}
+            onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
+          />
+          <div style={{ padding: '0 16px 16px' }}>
+            <SideAddressCard palette={palette} />
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        .v2-hero-grid {
+          display: flex;
+          flex-direction: column;
+        }
+        @media (min-width: 960px) {
+          .v2-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+            gap: 8px;
+            align-items: start;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+          }
+          .v2-hero-aside {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+          }
+        }
+      `}</style>
+      <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
       <CategoryChips palette={palette} active={activeChip} onChange={setActiveChip} />
 
@@ -157,6 +230,7 @@ export function HomeV2({
       {/* Combos */}
       {shouldShowSection('combos') && V2_COMBOS.length > 0 && (
         <>
+          <div data-v2-section="combos" />
           <SectionHead palette={palette} icon="⚡" title="Formules combo" sub="Économise jusqu'à 1,90€" />
           <Carousel>
             {V2_COMBOS.map((c) => (

@@ -1,19 +1,22 @@
-// Header v2 — logo + 3 icônes circulaires (notif / profil / panier)
+// Header v2 — logo + nav tabs desktop + icônes circulaires (notif/profil/panier)
 import React from 'react';
 import type { Palette } from './palette';
 import { IconBell, IconUser, IconCart } from './icons';
 
-interface LaBaseLogoProps { palette: Palette; size?: 'sm' | 'md' | 'lg' }
+interface LaBaseLogoProps {
+  palette: Palette;
+  size?: 'sm' | 'md' | 'lg';
+}
 
 export function LaBaseLogo({ palette, size = 'md' }: LaBaseLogoProps) {
   const fs = size === 'lg' ? 22 : size === 'sm' ? 14 : 18;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <div
         style={{
-          width: fs * 1.5,
-          height: fs * 1.5,
-          borderRadius: 8,
+          width: fs * 1.6,
+          height: fs * 1.6,
+          borderRadius: 10,
           background: `linear-gradient(135deg, ${palette.glow1}, ${palette.glow2}, ${palette.accent})`,
           display: 'flex',
           alignItems: 'center',
@@ -21,19 +24,42 @@ export function LaBaseLogo({ palette, size = 'md' }: LaBaseLogoProps) {
           fontWeight: 900,
           fontFamily: 'Outfit, sans-serif',
           color: palette.bg,
-          fontSize: fs * 0.85,
-          boxShadow: `0 0 20px ${palette.primary}55`,
+          fontSize: fs * 0.95,
+          boxShadow: `0 0 24px ${palette.primary}55, inset 0 1px 0 rgba(255,255,255,.3)`,
+          flexShrink: 0,
         }}
       >
         B
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: fs, color: palette.text, letterSpacing: '-.02em' }}>LA BASE</div>
-        <div style={{ fontSize: fs * 0.42, color: palette.textDim, letterSpacing: '.2em', fontWeight: 600, marginTop: 2 }}>SHAKES&nbsp;·&nbsp;VERDUN</div>
+        <div
+          style={{
+            fontFamily: 'Outfit, sans-serif',
+            fontWeight: 900,
+            fontSize: fs,
+            color: palette.text,
+            letterSpacing: '-.02em',
+          }}
+        >
+          LA BASE
+        </div>
+        <div
+          style={{
+            fontSize: fs * 0.42,
+            color: palette.textDim,
+            letterSpacing: '.22em',
+            fontWeight: 600,
+            marginTop: 3,
+          }}
+        >
+          SHAKES&nbsp;·&nbsp;VERDUN
+        </div>
       </div>
     </div>
   );
 }
+
+export type HeaderTab = 'home' | 'menu' | 'combos' | 'rewards';
 
 interface IconBtnProps {
   palette: Palette;
@@ -64,6 +90,7 @@ export function IconBtn({ palette, children, badge, onClick, ariaLabel, dataAttr
         position: 'relative',
         cursor: 'pointer',
         padding: 0,
+        flexShrink: 0,
       }}
     >
       {children}
@@ -101,34 +128,146 @@ interface HeaderProps {
   onCart: () => void;
   onProfile?: () => void;
   onNotifications?: () => void;
+  activeTab?: HeaderTab;
+  onTabChange?: (tab: HeaderTab) => void;
+  isAuthed?: boolean;
 }
 
-export function Header({ palette, cartCount, onCart, onProfile, onNotifications }: HeaderProps) {
+const TABS: Array<{ id: HeaderTab; label: string }> = [
+  { id: 'home', label: 'Accueil' },
+  { id: 'menu', label: 'Menu' },
+  { id: 'combos', label: 'Combos' },
+  { id: 'rewards', label: 'Récompenses' },
+];
+
+export function Header({
+  palette,
+  cartCount,
+  onCart,
+  onProfile,
+  onNotifications,
+  activeTab = 'home',
+  onTabChange,
+  isAuthed = false,
+}: HeaderProps) {
   return (
     <div
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 30,
-        padding: '14px 16px 10px',
+        padding: '14px 16px 12px',
         background: `linear-gradient(180deg, ${palette.bg} 70%, ${palette.bg}00)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
       }}
     >
-      <LaBaseLogo palette={palette} />
-      <div style={{ display: 'flex', gap: 6 }}>
-        <IconBtn palette={palette} onClick={onNotifications} ariaLabel="Notifications">
-          <IconBell color={palette.text} />
-        </IconBtn>
-        <IconBtn palette={palette} onClick={onProfile} ariaLabel="Compte">
-          <IconUser color={palette.text} />
-        </IconBtn>
-        <IconBtn palette={palette} onClick={onCart} badge={cartCount} ariaLabel="Panier" dataAttr="data-v2-cart-icon">
-          <IconCart color={palette.text} />
-        </IconBtn>
+      <div
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+        }}
+      >
+        <LaBaseLogo palette={palette} />
+
+        {/* Tabs desktop only */}
+        <nav className="v2-header-tabs">
+          {TABS.map((tab) => {
+            const active = tab.id === activeTab;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange?.(tab.id)}
+                style={{
+                  background: 'transparent',
+                  border: 0,
+                  cursor: 'pointer',
+                  padding: '8px 14px',
+                  fontFamily: 'Outfit, sans-serif',
+                  fontWeight: active ? 800 : 600,
+                  fontSize: 14,
+                  letterSpacing: '-.01em',
+                  color: active ? palette.text : palette.textDim,
+                  position: 'relative',
+                  transition: 'color .2s',
+                }}
+              >
+                {tab.label}
+                {active && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: -4,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 22,
+                      height: 3,
+                      borderRadius: 999,
+                      background: palette.primary,
+                      boxShadow: `0 0 12px ${palette.primary}`,
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <IconBtn palette={palette} onClick={onNotifications} ariaLabel="Notifications">
+            <IconBell color={palette.text} />
+          </IconBtn>
+          <IconBtn palette={palette} onClick={onCart} badge={cartCount} ariaLabel="Panier" dataAttr="data-v2-cart-icon">
+            <IconCart color={palette.text} />
+          </IconBtn>
+          {/* CTA Mon compte */}
+          <button
+            onClick={onProfile}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 12,
+              background: palette.cta,
+              color: palette.ctaText,
+              border: 0,
+              fontFamily: 'Outfit, sans-serif',
+              fontWeight: 800,
+              fontSize: 13,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: `0 6px 20px ${palette.cta}55`,
+              flexShrink: 0,
+            }}
+            aria-label={isAuthed ? 'Mon compte' : 'Connecter'}
+          >
+            <IconUser color={palette.ctaText} size={16} />
+            <span className="v2-header-cta-label">
+              {isAuthed ? 'Mon compte' : 'Connecter'}
+            </span>
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        .v2-header-tabs {
+          display: none;
+          gap: 4px;
+          align-items: center;
+          margin-left: 16px;
+        }
+        .v2-header-cta-label {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .v2-header-tabs { display: flex; }
+          .v2-header-cta-label { display: inline; }
+        }
+      `}</style>
     </div>
   );
 }
