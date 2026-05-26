@@ -111,7 +111,7 @@ export function useAuth() {
     const { error } = await supabase.auth.signInWithOtp({
       email: cleanEmail,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin + window.location.pathname + '?v2' : undefined,
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin + window.location.pathname : undefined,
         shouldCreateUser: true,
       },
     });

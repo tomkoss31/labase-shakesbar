@@ -891,13 +891,12 @@ function App() {
     }
   }
 
-  // Mode V2 (test) — activable via ?v2 dans l'URL
-  // L'ancienne app reste 100% fonctionnelle, le V2 est rendu en overlay
-  // par-dessus le legacy, ce qui permet de réutiliser les modales / drawer /
-  // toast / install banner existants sans dupliquer leur code.
+  // Mode V2 — devenu défaut depuis la bascule du 2026-05-26
+  // ?legacy dans l'URL permet de revenir temporairement à l'ancien design
+  // pour comparaison ou en cas de souci.
   const isV2 =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).has('v2');
+    typeof window === 'undefined' ||
+    !new URLSearchParams(window.location.search).has('legacy');
 
   const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
   const selectedComboPrimaryCandidates = selectedCombo
@@ -2374,7 +2373,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Overlay V2 — rendu par-dessus le legacy quand ?v2 est dans l'URL */}
+      {/* Overlay V2 (mode par défaut depuis 2026-05-26) — ?legacy pour l'ancien */}
       {isV2 && (
         <>
           <HomeV2
