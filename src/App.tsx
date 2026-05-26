@@ -33,6 +33,7 @@ import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
 import { useUserRewards } from './v2/rewards/useUserRewards';
+import { useAuth } from './v2/auth/useAuth';
 import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
@@ -251,6 +252,9 @@ function App() {
   const [customerName, setCustomerName] = useState('');
   const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
   const { rewards: userRewards, refetch: refetchRewards } = useUserRewards();
+  const [xpToSpend, setXpToSpend] = useState(0);
+  const appAuth = useAuth();
+  const userXp = appAuth.profile?.xp ?? 0;
   const [pendingCashCode, setPendingCashCode] = useState<string | null>(null);
   const [pendingCashTotal, setPendingCashTotal] = useState(0);
   const [isCreatingPendingCash, setIsCreatingPendingCash] = useState(false);
@@ -918,6 +922,7 @@ function App() {
           pickupTime,
           userEmail,
           rewardCode: selectedRewardCode,
+          xpToSpend,
         }),
       });
 
@@ -2493,6 +2498,9 @@ function App() {
             rewards={userRewards}
             selectedRewardCode={selectedRewardCode}
             setSelectedRewardCode={setSelectedRewardCode}
+            userXp={userXp}
+            xpToSpend={xpToSpend}
+            setXpToSpend={setXpToSpend}
           />
           <PendingCashModal
             palette={PALETTE_E}

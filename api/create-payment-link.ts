@@ -243,6 +243,10 @@ export default async function handler(req: any, res: any) {
       typeof bodyPayload?.rewardCode === 'string' && bodyPayload.rewardCode.trim().length > 0
         ? bodyPayload.rewardCode.trim()
         : null;
+    const requestedXpToSpend =
+      Number.isFinite(Number(bodyPayload?.xpToSpend)) && Number(bodyPayload.xpToSpend) > 0
+        ? Math.floor(Number(bodyPayload.xpToSpend) / 100) * 100 // arrondi à 100
+        : 0;
 
     // Application du reward code roue (discount_percent uniquement pour l'instant)
     // - Vérifie en DB que le code existe, n'est pas utilisé, n'est pas expiré
@@ -311,8 +315,66 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Ajouter la ligne de réduction si applicable
-    const finalLineItems = rewardLineItem ? [...lineItems, rewardLineItem] : lineItems;
+    // Application XP utilisables (100 XP = 1€, plafond 30% du total après reward)
+    // Vérifications côté serveur pour éviter triche.
+    let xpSpent = 0;
+    let xpDiscountCents = 0;
+    let xpUserIdToDebit: string | null = null;
+    let xpLineItem: any = null;
+
+    if (requestedXpToSpend > 0 && userEmail) {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && serviceKey) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+
+          const { data: profile } = await admin
+            .from('profiles')
+            .select('id, xp')
+            .eq('email', userEmail)
+            .maybeSingle();
+
+          if (profile?.id) {
+            const subtotal = lineItems.reduce(
+              (s: number, li: any) => s + Number(li.base_price_money?.amount ?? 0) * Number(li.quantity ?? 1),
+              0,
+            );
+            const subtotalAfterReward = Math.max(0, subtotal - discountCents);
+            const capCents = Math.floor((subtotalAfterReward * 30) / 100);
+            const capInXp = capCents; // 100 XP = 100 cents = 1€
+            const safeXp = Math.min(requestedXpToSpend, profile.xp, capInXp);
+            const roundedXp = Math.floor(safeXp / 100) * 100;
+
+            if (roundedXp > 0) {
+              xpSpent = roundedXp;
+              xpDiscountCents = roundedXp; // 100 XP = 100 cents
+              xpUserIdToDebit = profile.id;
+              xpLineItem = {
+                name: `⚡ Utilisation de ${roundedXp} XP`,
+                quantity: '1',
+                base_price_money: {
+                  amount: -xpDiscountCents,
+                  currency: 'EUR',
+                },
+              };
+            }
+          }
+        } catch (err: any) {
+          console.warn('[create-payment-link] xp spend failed:', err?.message);
+        }
+      }
+    }
+
+    // Construire la liste finale (line items + reward discount + xp discount)
+    const finalLineItems = [
+      ...lineItems,
+      ...(rewardLineItem ? [rewardLineItem] : []),
+      ...(xpLineItem ? [xpLineItem] : []),
+    ];
 
     const squarePayload: any = {
       idempotency_key: randomUUID(),
@@ -356,6 +418,32 @@ export default async function handler(req: any, res: any) {
     if (!squareResponse.ok) {
       console.error('Square API error', data);
       return res.status(500).json({ error: 'Erreur Square', details: data });
+    }
+
+    // Débiter les XP du profil (best-effort, non-bloquant)
+    if (xpUserIdToDebit && xpSpent > 0) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          // Refetch puis update (évite race condition)
+          const { data: prof } = await admin
+            .from('profiles')
+            .select('xp')
+            .eq('id', xpUserIdToDebit)
+            .single();
+          if (prof) {
+            const newXp = Math.max(0, prof.xp - xpSpent);
+            await admin.from('profiles').update({ xp: newXp }).eq('id', xpUserIdToDebit);
+          }
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] xp debit failed:', err?.message);
+      }
     }
 
     // Marquer le reward comme utilisé (best-effort, non-bloquant)

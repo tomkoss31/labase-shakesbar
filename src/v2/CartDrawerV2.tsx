@@ -6,6 +6,7 @@ import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
+import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 
 interface CartItem {
   key: string;
@@ -42,6 +43,9 @@ interface CartDrawerV2Props {
   rewards?: UserReward[];
   selectedRewardCode?: string | null;
   setSelectedRewardCode?: (code: string | null) => void;
+  userXp?: number;
+  xpToSpend?: number;
+  setXpToSpend?: (xp: number) => void;
 }
 
 // Calcule les suggestions intelligentes d'après le panier
@@ -128,6 +132,9 @@ export function CartDrawerV2({
   rewards,
   selectedRewardCode,
   setSelectedRewardCode,
+  userXp = 0,
+  xpToSpend = 0,
+  setXpToSpend,
 }: CartDrawerV2Props) {
   const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
 
@@ -137,16 +144,22 @@ export function CartDrawerV2({
     return rewards.find((r) => r.reward_code === selectedRewardCode) ?? null;
   }, [selectedRewardCode, rewards]);
 
-  const discountCents = useMemo(() => {
+  const rewardDiscountCents = useMemo(() => {
     if (!selectedReward) return 0;
     if (selectedReward.reward_type === 'discount_percent') {
       const pct = parseInt(selectedReward.reward_value ?? '0', 10);
       return Math.round((totalCents * pct) / 100);
     }
-    // free_product : pas géré ici (à implémenter via ajout d'article 0€ avant checkout)
     return 0;
   }, [selectedReward, totalCents]);
 
+  // Calcul max XP utilisables sur ce panier (après réduction reward)
+  const cartAfterReward = Math.max(0, totalCents - rewardDiscountCents);
+  const maxXp = useMemo(() => maxSpendableXp(userXp, cartAfterReward), [userXp, cartAfterReward]);
+  const safeXpToSpend = Math.min(xpToSpend, maxXp);
+  const xpDiscountCents = xpToCents(safeXpToSpend);
+
+  const discountCents = rewardDiscountCents + xpDiscountCents;
   const finalTotalCents = Math.max(0, totalCents - discountCents);
   if (!open) return null;
 
@@ -467,6 +480,74 @@ export function CartDrawerV2({
             </div>
           )}
 
+          {/* XP utilisables (100 XP = 1€, plafond 30%) */}
+          {!empty && userXp > 0 && maxXp > 0 && setXpToSpend && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: palette.primary,
+                    letterSpacing: '.1em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  ⚡ Utiliser mes XP
+                </div>
+                <div style={{ fontSize: 11, color: palette.textDim }}>
+                  {userXp} dispo · 100 XP = 1€
+                </div>
+              </div>
+              <div
+                style={{
+                  background: palette.bg,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 14,
+                  padding: 14,
+                }}
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={maxXp}
+                  step={XP_SPEND_STEP}
+                  value={safeXpToSpend}
+                  onChange={(e) => setXpToSpend(parseInt(e.target.value, 10))}
+                  style={{
+                    width: '100%',
+                    accentColor: palette.primary,
+                  }}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    marginTop: 8,
+                  }}
+                >
+                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: palette.primary }}>
+                    {safeXpToSpend} XP
+                  </div>
+                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 18, color: palette.accent }}>
+                    −{(xpDiscountCents / 100).toFixed(2).replace('.', ',')}€
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: palette.textDim, marginTop: 4, lineHeight: 1.4 }}>
+                  Max {maxXp} XP utilisables (plafond 30% du total).
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quick-adds intelligents */}
           {!empty && suggestions.length > 0 && onAddSuggestion && (
             <div style={{ marginTop: 20 }}>
@@ -612,20 +693,35 @@ export function CartDrawerV2({
               />
             </div>
 
-            {/* Récap réduction si appliquée */}
-            {discountCents > 0 && (
+            {/* Récap réductions si appliquées */}
+            {rewardDiscountCents > 0 && (
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   fontSize: 12,
                   color: palette.accent,
+                  marginBottom: 2,
+                  fontWeight: 700,
+                }}
+              >
+                <span>🎁 Code roue</span>
+                <span>−{fmtEuro(rewardDiscountCents)}</span>
+              </div>
+            )}
+            {xpDiscountCents > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: palette.primary,
                   marginBottom: 4,
                   fontWeight: 700,
                 }}
               >
-                <span>🎁 Réduction code roue</span>
-                <span>−{fmtEuro(discountCents)}</span>
+                <span>⚡ {safeXpToSpend} XP utilisés</span>
+                <span>−{fmtEuro(xpDiscountCents)}</span>
               </div>
             )}
             {/* Total + boutons */}
