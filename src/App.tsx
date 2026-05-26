@@ -14,20 +14,24 @@ import {
   CheckCircle2,
   X,
   Flame,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import {
   BRAND,
-  accompagnementCards,
   categories,
   comboOffers,
-  featuredSelections,
   googleReviewUrl,
   instagramUrl,
-  productStories,
   socialProofStats,
-  testimonials,
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
+import { HomeV2 } from './v2/HomeV2';
+import { ProductModalV2 } from './v2/ProductModalV2';
+import { CartDrawerV2 } from './v2/CartDrawerV2';
+import { OrderTracking } from './v2/OrderTracking';
+import { PALETTE_E } from './v2/palette';
+import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -47,6 +51,9 @@ type CartItem = {
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
+const VIEW_MODE_KEY = 'labase-menu-view-mode';
+
+type MenuViewMode = 'magazine' | 'list';
 
 type DeferredInstallPrompt = Event & {
   prompt: () => Promise<void>;
@@ -254,6 +261,23 @@ function App() {
   const [selectedComboSecondaryName, setSelectedComboSecondaryName] = useState('');
   const [selectedComboPrimaryOption, setSelectedComboPrimaryOption] = useState('');
   const [selectedComboSecondaryOption, setSelectedComboSecondaryOption] = useState('');
+  const [viewMode, setViewMode] = useState<MenuViewMode>('magazine');
+  const [cartBumpKey, setCartBumpKey] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(VIEW_MODE_KEY);
+    if (stored === 'magazine' || stored === 'list') {
+      setViewMode(stored);
+    }
+  }, []);
+
+  function changeViewMode(mode: MenuViewMode) {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_KEY, mode);
+    }
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -276,9 +300,18 @@ function App() {
 
   useEffect(() => {
     if (!toastMessage) return;
-    const timer = window.setTimeout(() => setToastMessage(null), 1800);
+    const timer = window.setTimeout(() => setToastMessage(null), 2400);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
+
+  const previousCartCountRef = React.useRef(0);
+  useEffect(() => {
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (total > previousCartCountRef.current) {
+      setCartBumpKey((k) => k + 1);
+    }
+    previousCartCountRef.current = total;
+  }, [cart]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -814,10 +847,19 @@ function App() {
 
       setIsCreatingPayment(true);
 
+      // Récupère email du user authentifié pour permettre au webhook Square
+      // d'associer le paiement à un compte (XP, VIP, historique)
+      let userEmail: string | undefined;
+      const supabase = getSupabase();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        userEmail = data.session?.user?.email ?? undefined;
+      }
+
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, customerName, pickupTime }),
+        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
       });
 
       const raw = await response.text();
@@ -848,6 +890,13 @@ function App() {
       setIsCreatingPayment(false);
     }
   }
+
+  // Mode V2 — devenu défaut depuis la bascule du 2026-05-26
+  // ?legacy dans l'URL permet de revenir temporairement à l'ancien design
+  // pour comparaison ou en cas de souci.
+  const isV2 =
+    typeof window === 'undefined' ||
+    !new URLSearchParams(window.location.search).has('legacy');
 
   const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
   const selectedComboPrimaryCandidates = selectedCombo
@@ -897,22 +946,45 @@ function App() {
                 ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
                 : { duration: 0.2 }
             }
-            className="dlx-cart-button relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
+            className={
+              cartCount > 0
+                ? 'dlx-cart-button relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]'
+                : 'dlx-cart-button relative grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/[0.06] text-white transition hover:bg-white/[0.10]'
+            }
+            aria-label={cartCount > 0 ? 'Ouvrir le panier' : 'Panier vide'}
           >
-            <span className="inline-flex items-center gap-2">
-              <ShoppingCart size={18} /> Panier
-            </span>
+            {cartCount > 0 ? (
+              <span className="inline-flex items-center gap-2">
+                <ShoppingCart size={18} /> Panier
+              </span>
+            ) : (
+              <ShoppingCart size={18} />
+            )}
             {cartCount > 0 && (
               <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs font-bold text-white">
                 {cartCount}
               </span>
             )}
+            <AnimatePresence>
+              {cartBumpKey > 0 && (
+                <motion.span
+                  key={cartBumpKey}
+                  initial={{ opacity: 0, y: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, y: -28, scale: 1 }}
+                  exit={{ opacity: 0, y: -40 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="pointer-events-none absolute -top-1 right-0 rounded-full bg-emerald-500 px-2 py-0.5 text-[11px] font-black text-white shadow-lg"
+                >
+                  +1
+                </motion.span>
+              )}
+            </AnimatePresence>
           </motion.button>
         </div>
       </header>
 
       <main className="dlx-main mx-auto max-w-7xl px-4 pb-32">
-        {showThankYou && (
+        {showThankYou && !isV2 && (
           <section className="pt-6">
             <div className="dlx-panel rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -960,34 +1032,18 @@ function App() {
                     Healthy drinks, pauses gourmandes & good vibes
                   </div>
 
-                  <h1 className="dlx-display text-3xl font-black leading-none tracking-tight md:text-5xl">
-                    Le shake bar healthy de Verdun
+                  <h1 className="dlx-display text-3xl font-black leading-tight tracking-tight md:text-5xl">
+                    Le shake bar healthy de Verdun{' '}
                     <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                      qui fait du bien autant qu’il régale
-                    </span>{' '}
-                    dans une ambiance simple et chaleureuse.
+                      qui régale et fait du bien.
+                    </span>
                   </h1>
 
-                  <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
-                    À La Base, on vient pour boire bon, boire beau et repartir bien.
-                    Shakes gourmands, healthy drinks, pauses chaudes et petites envies
-                    sucrées se retrouvent dans un même esprit: plaisir, énergie et
-                    accompagnement autour du bien-être, de la remise en forme, de la
-                    perte de poids et de la nutrition sportive.
+                  <p className="mt-3 max-w-xl text-sm text-white/70 md:text-base">
+                    Shakes, drinks, pauses chaudes & gaufre — commande en 1 min, retrait au club en 5 à 10 min.
                   </p>
 
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {['Healthy drinks', 'Shakes gourmands', 'Pauses chaudes', 'Accompagnement'].map((item) => (
-                      <span
-                        key={item}
-                        className="dlx-chip rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/85"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex flex-wrap gap-3 text-sm">
+                  <div className="mt-5 flex flex-wrap gap-3 text-sm">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <MapPin size={16} className="text-yellow-400" /> {BRAND.address}
                     </div>
@@ -1017,45 +1073,6 @@ function App() {
                     >
                       <Star size={16} /> Laisser un avis
                     </a>
-
-                    <a
-                      href={BRAND.discoveryUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="dlx-accent-btn inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
-                    >
-                      <ChevronRight size={16} /> Découvrir l’accompagnement
-                    </a>
-                  </div>
-
-                  <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Signature du moment
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">Choco Buenos</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        La recette qu’on recommande souvent pour découvrir La Base.
-                      </p>
-                    </div>
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Retrait express
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">5 à 10 min</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        Tu commandes, on prépare, tu passes récupérer au club.
-                      </p>
-                    </div>
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Bien plus qu’un menu
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">Bien-être & énergie</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        Des produits pensés pour le plaisir, avec un accompagnement si tu veux aller plus loin.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -1128,102 +1145,6 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-9 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                  Signatures du moment
-                </p>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                  Les recettes qui donnent envie d’ouvrir la fiche
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Deux recettes qui donnent le ton dès l’arrivée: visuelles, gourmandes et très faciles à aimer.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
-                    Édition du moment
-                  </span>
-                  <span className="rounded-full border border-pink-400/20 bg-pink-400/10 px-3 py-1 text-xs font-semibold text-pink-200">
-                    Très demandé au club
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {productStories.map((item) => {
-                const product = allProducts.find((p) => p.name === item.name);
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => openProduct(item.name)}
-                    className="dlx-feature-card group relative overflow-hidden rounded-[28px] border border-white/10 text-left shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
-                  >
-                    <div className="relative h-[300px] md:h-[340px]">
-                      <ProductCardBackground image={product?.image} name={item.name} />
-                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
-                        {product ? `Dès ${getStartingPriceLabel(product)}` : item.subtitle}
-                      </div>
-                      <div className="absolute inset-x-0 bottom-0 p-5">
-                        <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                          {item.subtitle}
-                        </p>
-                        <p className="mt-2 text-3xl font-black text-white">
-                          {item.name}
-                        </p>
-                        <p className="mt-2 max-w-md text-sm leading-relaxed text-white/72">
-                          {item.description}
-                        </p>
-                        <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 backdrop-blur">
-                          Découvrir la recette <ChevronRight size={15} />
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-              Découvrir l’accompagnement
-            </p>
-            <h2 className="mt-1 text-2xl font-black">
-              Bien plus qu’une simple commande
-            </h2>
-            <p className="mt-2 text-sm text-white/65">
-              La Base peut aussi t’aider à avancer avec un accompagnement concret, simple à comprendre et motivant.
-            </p>
-
-            <div className="mt-4 space-y-3">
-              {accompagnementCards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div key={card.title} className="dlx-info-card rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                    <p className="inline-flex items-center gap-2 font-black">
-                      <Icon size={16} className="text-yellow-300" /> {card.title}
-                    </p>
-                    <p className="mt-1 text-sm text-white/65">{card.text}</p>
-                  </div>
-                );
-              })}
-
-              <a
-                href={BRAND.discoveryUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="dlx-primary-btn inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
-              >
-                <ChevronRight size={18} /> Découvrir l’accompagnement
-              </a>
-            </div>
-          </div>
-        </section>
-
         <section className="mb-10">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
@@ -1236,42 +1157,6 @@ function App() {
               <p className="mt-2 max-w-3xl text-sm text-white/65">
                 Des formules simples à composer pour associer un drink, une pause gourmande ou un duo plus complet en quelques clics.
               </p>
-            </div>
-          </div>
-
-          <div className="dlx-hero-shell mb-5 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.10),rgba(236,72,153,0.08),rgba(250,204,21,0.10))] p-[1px] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="dlx-panel-soft grid gap-5 rounded-[29px] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.96))] p-5 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
-              <div>
-                <p className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
-                  <Flame size={14} /> Combo signature
-                </p>
-                <h3 className="mt-3 text-2xl font-black text-white md:text-3xl">
-                  {bestCombo.name}
-                </h3>
-                <p className="mt-2 text-white/70">
-                  {bestCombo.subtitle} — une formule facile à choisir, gourmande et bien pensée.
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
-                    Prix : {euroFromCents(bestCombo.priceCents)}
-                  </span>
-                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-200">
-                    Économie : {euroFromCents(bestCombo.normalPriceCents - bestCombo.priceCents)}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => openCombo(bestCombo.id)}
-                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
-                >
-                  Composer ce combo <ChevronRight size={18} />
-                </button>
-              </div>
-
-              <div className="relative h-[220px] overflow-hidden rounded-[24px] border border-white/10">
-                <ComboCardImage image={bestCombo.image} name={bestCombo.name} />
-              </div>
             </div>
           </div>
 
@@ -1313,25 +1198,15 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-7">
+        <section className="mb-4">
           <div className="dlx-panel rounded-[30px] p-4 md:p-5">
-            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
-                  Le menu
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-                  Choisis ce qui te fait envie
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/68">
-                  Shakes, drinks, pauses chaudes, gaufres et formules: tout le menu du club est ici, simple à parcourir et facile à commander.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs font-semibold text-white/70">
-                <span className="dlx-chip rounded-full px-3 py-2">Retrait rapide</span>
-                <span className="dlx-chip rounded-full px-3 py-2">Formules signature</span>
-                <span className="dlx-chip rounded-full px-3 py-2">Pause healthy</span>
-              </div>
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
+                Le menu
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
+                Choisis ce qui te fait envie
+              </h2>
             </div>
 
             <div className="dlx-search relative">
@@ -1346,8 +1221,12 @@ function App() {
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-4 pl-11 pr-4 text-white outline-none backdrop-blur focus:border-yellow-400/50"
               />
             </div>
+          </div>
+        </section>
 
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+        <div className="dlx-sticky-filters sticky top-[68px] z-20 -mx-4 mb-6 border-b border-white/5 bg-black/85 px-4 py-3 backdrop-blur-2xl">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 gap-2 overflow-x-auto pb-1">
               <FilterPill
                 active={activeCategory === 'all'}
                 onClick={() => setActiveCategory('all')}
@@ -1362,12 +1241,49 @@ function App() {
                 />
               ))}
             </div>
+
+            <div className="flex shrink-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+              <button
+                type="button"
+                onClick={() => changeViewMode('magazine')}
+                aria-label="Vue magazine"
+                className={`rounded-full p-2 transition ${
+                  viewMode === 'magazine'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <LayoutGrid size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => changeViewMode('list')}
+                aria-label="Vue liste compacte"
+                className={`rounded-full p-2 transition ${
+                  viewMode === 'list'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <List size={16} />
+              </button>
+            </div>
           </div>
-        </section>
+        </div>
 
         <section className="mb-8 space-y-9">
           {filteredCategories.map((category) => {
             const Icon = category.icon;
+            const sortedItems = [...category.items].sort((a, b) => {
+              const rank = (item: Product) => {
+                if (item.badge === 'Produit du mois') return 4;
+                if (item.badge === 'Nouveau') return 3;
+                if (item.badge === 'Best-seller') return 2;
+                if (item.badge === 'Iconique') return 1;
+                return 0;
+              };
+              return rank(b) - rank(a);
+            });
 
             return (
               <div key={category.id} className="space-y-4">
@@ -1377,6 +1293,9 @@ function App() {
                       className={`mb-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${category.accent} px-3 py-1 text-sm font-black text-black shadow-lg`}
                     >
                       <Icon size={16} /> {category.name}
+                      <span className="ml-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold">
+                        {sortedItems.length}
+                      </span>
                     </div>
 
                     <h2 className="text-2xl font-black md:text-3xl">{category.price}</h2>
@@ -1384,19 +1303,9 @@ function App() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {[...category.items]
-                    .sort((a, b) => {
-                      const rank = (item: Product) => {
-                        if (item.badge === 'Produit du mois') return 4;
-                        if (item.badge === 'Nouveau') return 3;
-                        if (item.badge === 'Best-seller') return 2;
-                        if (item.badge === 'Iconique') return 1;
-                        return 0;
-                      };
-                      return rank(b) - rank(a);
-                    })
-                    .map((item) => (
+                {viewMode === 'magazine' ? (
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {sortedItems.map((item) => (
                       <motion.button
                         key={`${category.id}-${item.name}`}
                         whileHover={{ y: -4 }}
@@ -1457,59 +1366,54 @@ function App() {
                         </div>
                       </motion.button>
                     ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {sortedItems.map((item) => (
+                      <motion.button
+                        key={`${category.id}-${item.name}-list`}
+                        whileTap={{ scale: 0.985 }}
+                        onClick={() => openProductFromCategory(category, item)}
+                        className="dlx-product-row group flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-left transition hover:border-yellow-400/30 hover:bg-white/[0.07]"
+                      >
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+                          <ProductCardBackground image={item.image} name={item.name} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate font-black text-white">{item.name}</p>
+                            {item.badge && (
+                              <span
+                                className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${getBadgeClassName(
+                                  item.badge,
+                                )}`}
+                              >
+                                {getBadgeLabel(item.badge)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-0.5 truncate text-xs text-white/55">{item.flavors}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          {getStartingPriceLabel(item) && (
+                            <p className="text-sm font-black text-white">
+                              {getStartingPriceLabel(item)}
+                            </p>
+                          )}
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-yellow-300 to-amber-500 text-black shadow-md">
+                            <Plus size={16} />
+                          </span>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
         </section>
 
-        <section className="mb-8 grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Incontournables
-                </p>
-                <h2 className="text-2xl font-black md:text-3xl">
-                  Les produits qu’on repère en premier
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Une sélection de recettes qui représentent bien le club: visuelles, gourmandes et efficaces dès la première commande.
-                </p>
-              </div>
-              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
-                Déjà testé & approuvé au club
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              {featuredSelections.map((item) => {
-                const product = allProducts.find((p) => p.name === item.name);
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => openProduct(item.name)}
-                    className="dlx-feature-card group relative overflow-hidden rounded-[24px] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
-                  >
-                    <div className="relative h-[220px] md:h-[250px]">
-                      <ProductCardBackground image={product?.image} name={item.name} />
-                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
-                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
-                        {product ? getStartingPriceLabel(product) : item.subtitle}
-                      </div>
-                      <div className="absolute inset-x-0 bottom-0 p-4 text-left">
-                        <p className="text-lg font-black text-white">{item.name}</p>
-                        <p className="mt-1 text-sm text-white/68">{item.subtitle}</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-4">
+        <section className="mb-8 grid gap-4 md:grid-cols-2">
             <a
               href={googleReviewUrl}
               target="_blank"
@@ -1551,23 +1455,18 @@ function App() {
                 Voir Instagram <ChevronRight size={15} />
               </span>
             </a>
-          </div>
         </section>
 
-        <section className="mb-8 grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
+        <section className="mb-8">
           <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
             <p className="text-xs uppercase tracking-[0.22em] text-[#f6dfb5]">
               Pourquoi on revient
             </p>
             <h2 className="mt-2 text-2xl font-black md:text-3xl">
-              Une adresse qui vit bien au-delà du visuel
+              Une adresse simple, gourmande et bien notée
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-white/65">
-              La Base fonctionne parce que l’expérience reste simple, chaleureuse et régulière:
-              de bons produits, une vraie ambiance club et une commande facile à refaire.
-            </p>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
               {socialProofStats.map((stat) => (
                 <div
                   key={stat.label}
@@ -1578,44 +1477,6 @@ function App() {
                   </p>
                   <p className="mt-2 text-2xl font-black text-white">{stat.value}</p>
                   <p className="mt-1 text-sm text-white/62">{stat.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Ce qu’on retient du club
-                </p>
-                <h2 className="mt-2 text-2xl font-black md:text-3xl">
-                  Des retours qui parlent de goût, d’ambiance et de régularité
-                </h2>
-              </div>
-              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
-                Avis & ressenti
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {testimonials.map((testimonial) => (
-                <div
-                  key={testimonial.title}
-                  className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4"
-                >
-                  <div className="flex items-center gap-1 text-yellow-300">
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                  </div>
-                  <p className="mt-3 text-lg font-black text-white">{testimonial.title}</p>
-                  <p className="mt-2 text-sm text-white/68">{testimonial.text}</p>
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
-                    {testimonial.author}
-                  </p>
                 </div>
               ))}
             </div>
@@ -1691,7 +1552,7 @@ function App() {
       )}
 
       <AnimatePresence>
-        {selected && (
+        {selected && !isV2 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -2053,7 +1914,7 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {drawerOpen && (
+        {drawerOpen && !isV2 && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -2511,6 +2372,54 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Overlay V2 (mode par défaut depuis 2026-05-26) — ?legacy pour l'ancien */}
+      {isV2 && (
+        <>
+          <HomeV2
+            cartCount={cartCount}
+            onOpenCart={() => setDrawerOpen(true)}
+            onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+            onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
+            onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+            onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
+          />
+          <ProductModalV2
+            palette={PALETTE_E}
+            open={Boolean(selected)}
+            product={selected}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            onClose={() => setSelected(null)}
+            onAdd={() => selected && addToCart(selected)}
+            getPrice={(p) => getConfiguredBasePrice(p, selectedOption)}
+            optionSectionLabel={(p) => getOptionSectionLabel(p)}
+          />
+          <CartDrawerV2
+            palette={PALETTE_E}
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            cart={cart}
+            totalCents={cartTotalCents}
+            customerName={customerName}
+            setCustomerName={setCustomerName}
+            pickupTime={pickupTime}
+            setPickupTime={setPickupTime}
+            onUpdateQty={updateQuantity}
+            onSquareCheckout={handleSquareCheckout}
+            onWhatsAppOrder={handleWhatsAppOrder}
+            isCreatingPayment={isCreatingPayment}
+            hasRequiredPickupInfo={hasRequiredPickupInfo}
+          />
+          {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
+          <OrderTracking
+            palette={PALETTE_E}
+            open={showThankYou}
+            customerName={customerName || 'toi'}
+            onClose={() => setShowThankYou(false)}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>La Base — Maquette nouvelle structure</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #050505;
+    color: white;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .glass {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .scroll-x {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-x::-webkit-scrollbar { display: none; }
+
+  .snap-x { scroll-snap-type: x mandatory; }
+  .snap-start { scroll-snap-align: start; }
+
+  .hero-slide {
+    transition: opacity .6s ease;
+  }
+
+  .pulse-glow {
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(250, 204, 21, 0); }
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #fde047, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+</style>
+</head>
+<body class="pb-24">
+
+<!-- ============================================ -->
+<!-- HEADER -->
+<!-- ============================================ -->
+<header class="sticky top-0 z-40 glass bg-black/75 border-b border-white/10">
+  <div class="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
+    <div>
+      <p class="text-[10px] uppercase tracking-[0.22em] text-white/40 font-bold">Verdun</p>
+      <p class="text-xl font-black leading-none">La Base <span class="gradient-text">✦</span></p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="relative h-10 w-10 grid place-items-center rounded-full border border-white/10 bg-white/[0.05] hover:bg-white/[0.10] transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-pink-500"></span>
+      </button>
+      <button class="h-10 w-10 grid place-items-center rounded-full border border-white/10 bg-white/[0.05] hover:bg-white/[0.10] transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      </button>
+      <button class="h-10 w-10 grid place-items-center rounded-full border border-white/10 bg-white/[0.05] hover:bg-white/[0.10] transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl">
+
+  <!-- ============================================ -->
+  <!-- SALUTATION + XP CARD -->
+  <!-- ============================================ -->
+  <section class="px-4 pt-5">
+    <p class="text-2xl font-black">Salut 👋</p>
+    <p class="text-white/60 text-sm mt-0.5">Ton shake t'attend à Verdun</p>
+
+    <div class="mt-3 rounded-2xl border border-yellow-400/20 bg-gradient-to-br from-yellow-400/10 via-amber-400/5 to-transparent p-4 flex items-center gap-3">
+      <div class="h-12 w-12 rounded-full bg-gradient-to-br from-yellow-300 to-amber-500 grid place-items-center text-2xl">🌱</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold uppercase tracking-wider text-yellow-300">Niveau Apprenti</p>
+        <p class="text-sm text-white/70">Connecte-toi pour gagner des XP à chaque commande</p>
+      </div>
+      <button class="shrink-0 px-3 py-2 rounded-full bg-yellow-400 text-black text-xs font-black">Connecter</button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- HERO CAROUSEL ROTATIF -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="relative h-[280px] rounded-3xl overflow-hidden border border-white/10">
+
+      <!-- Slide 1 : Combo Power -->
+      <div class="hero-slide absolute inset-0" id="slide-0">
+        <img src="/images/combo/combo-power.png" alt="Combo Power" class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+          <span class="inline-flex w-fit items-center gap-1 px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-200 text-xs font-bold uppercase tracking-wider">🔥 Combo signature</span>
+          <h2 class="mt-2 text-3xl font-black">Combo Power</h2>
+          <p class="text-white/80 text-sm mt-1">Smoothie + boisson Large</p>
+          <div class="flex items-center gap-3 mt-3">
+            <span class="text-2xl font-black gradient-text">15,90€</span>
+            <span class="text-sm text-white/50 line-through">17,80€</span>
+            <button class="ml-auto px-4 py-2 rounded-full bg-yellow-400 text-black font-black text-sm">Composer →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 : Choco Buenos -->
+      <div class="hero-slide absolute inset-0 opacity-0" id="slide-1">
+        <img src="/images/shake/bueno.png" alt="Choco Buenos" class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+          <span class="inline-flex w-fit items-center gap-1 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 text-xs font-bold uppercase tracking-wider">Nouveau</span>
+          <h2 class="mt-2 text-3xl font-black">Choco Buenos</h2>
+          <p class="text-white/80 text-sm mt-1">Signature ultra gourmande, 24g protéines</p>
+          <div class="flex items-center gap-3 mt-3">
+            <span class="text-2xl font-black gradient-text">8,90€</span>
+            <button class="ml-auto px-4 py-2 rounded-full bg-yellow-400 text-black font-black text-sm">Découvrir →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 : Avis Google -->
+      <div class="hero-slide absolute inset-0 opacity-0" id="slide-2">
+        <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-orange-500/15"></div>
+        <div class="absolute inset-0 p-6 flex flex-col justify-center items-center text-center">
+          <div class="text-6xl">⭐</div>
+          <p class="text-5xl font-black mt-2 gradient-text">4,9 / 5</p>
+          <p class="text-white/80 mt-2">Une adresse qui se recommande</p>
+          <button class="mt-4 px-6 py-3 rounded-full bg-yellow-400 text-black font-black text-sm">Laisser un avis →</button>
+        </div>
+      </div>
+
+      <!-- Indicators -->
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        <span class="h-1.5 w-6 rounded-full bg-white" id="dot-0"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/40" id="dot-1"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white/40" id="dot-2"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- BARRE RECHERCHE -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-5">
+    <div class="relative">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" placeholder="Rechercher une saveur..." class="w-full pl-12 pr-4 py-3.5 rounded-full bg-white/[0.06] border border-white/10 placeholder-white/40 text-sm focus:outline-none focus:border-yellow-400/40" />
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- CATÉGORIES STICKY -->
+  <!-- ============================================ -->
+  <section class="sticky top-[65px] z-30 glass bg-black/80 border-b border-white/5 px-4 py-3 mt-4">
+    <div class="flex gap-2 overflow-x-auto scroll-x">
+      <button class="shrink-0 px-4 py-2 rounded-full bg-yellow-400 text-black text-sm font-black">Tout</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">🔥 Populaires</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Smoothies</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Drinks</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Hot</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Gaufre</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Santé</button>
+      <button class="shrink-0 px-4 py-2 rounded-full bg-white/[0.06] border border-white/10 text-sm font-semibold">Combos</button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION POPULAIRES (carousel horizontal) -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h3 class="text-xl font-black flex items-center gap-2">🔥 Populaires au club</h3>
+        <p class="text-xs text-white/55 mt-0.5">Ce qu'on commande le plus cette semaine</p>
+      </div>
+      <button class="text-xs font-bold text-yellow-300">Voir tout →</button>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto scroll-x snap-x -mx-4 px-4 pb-2">
+      <!-- Card Uber Eats style -->
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/bueno.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-cyan-500/90 text-white text-[10px] font-black uppercase tracking-wide">Nouveau</span>
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Choco Buenos</p>
+        <p class="text-white/55 text-xs mt-0.5">Smoothie • 24g protéines</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/drinks/electric-blue.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-emerald-500/90 text-white text-[10px] font-black uppercase tracking-wide">Iconique</span>
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Electric Blue</p>
+        <p class="text-white/55 text-xs mt-0.5">Drink • 0 sucre</p>
+        <p class="font-black text-sm mt-1">Dès 6,90€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/snikers.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-pink-500/90 text-white text-[10px] font-black uppercase tracking-wide">Gourmand</span>
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Snickers</p>
+        <p class="text-white/55 text-xs mt-0.5">Smoothie chocolat-cacahuète</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/hot/cafe-gourmet.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-orange-500/90 text-white text-[10px] font-black uppercase tracking-wide">Gourmet</span>
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Café gourmet</p>
+        <p class="text-white/55 text-xs mt-0.5">4 recettes au choix</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/waffle/gaufre-healthy.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Gaufre healthy</p>
+        <p class="text-white/55 text-xs mt-0.5">5 toppings au choix</p>
+        <p class="font-black text-sm mt-1">6,90€</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION COMBOS -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h3 class="text-xl font-black flex items-center gap-2">⚡ Formules combo</h3>
+        <p class="text-xs text-white/55 mt-0.5">Économise jusqu'à 1,90€</p>
+      </div>
+      <button class="text-xs font-bold text-yellow-300">Voir tout →</button>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto scroll-x snap-x -mx-4 px-4 pb-2">
+      <button class="snap-start shrink-0 w-[260px] text-left">
+        <div class="relative h-[170px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/combo/combo-power.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide">-1,90€</span>
+        </div>
+        <p class="font-black text-sm">Combo Power</p>
+        <p class="text-white/55 text-xs mt-0.5">Smoothie + drink Large</p>
+        <div class="flex items-center gap-2 mt-1">
+          <p class="font-black text-sm">15,90€</p>
+          <p class="text-white/40 text-xs line-through">17,80€</p>
+        </div>
+      </button>
+
+      <button class="snap-start shrink-0 w-[260px] text-left">
+        <div class="relative h-[170px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/combo/combo-medium.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide">-1,00€</span>
+        </div>
+        <p class="font-black text-sm">Combo Medium</p>
+        <p class="text-white/55 text-xs mt-0.5">Smoothie + drink Medium</p>
+        <p class="font-black text-sm mt-1">14,80€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[260px] text-left">
+        <div class="relative h-[170px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/combo/combo-tea-time.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide">-1,90€</span>
+        </div>
+        <p class="font-black text-sm">Tea Time</p>
+        <p class="text-white/55 text-xs mt-0.5">Thé + gaufre topping</p>
+        <p class="font-black text-sm mt-1">10,90€</p>
+      </button>
+
+      <button class="snap-start shrink-0 w-[260px] text-left">
+        <div class="relative h-[170px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/combo/combo-gourmet-break.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide">-1,90€</span>
+        </div>
+        <p class="font-black text-sm">Gourmet Break</p>
+        <p class="text-white/55 text-xs mt-0.5">Café gourmet + gaufre</p>
+        <p class="font-black text-sm mt-1">13,90€</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION SMOOTHIES -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h3 class="text-xl font-black flex items-center gap-2">🥤 Smoothies nutritionnels</h3>
+        <p class="text-xs text-white/55 mt-0.5">15 recettes • 24g protéines • 250 kcal</p>
+      </div>
+      <button class="text-xs font-bold text-yellow-300">Voir tout →</button>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto scroll-x snap-x -mx-4 px-4 pb-2">
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/bueno.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Choco Buenos</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/m&m.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">M&M</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/casse-noisette.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Casse Noisette</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/snikers.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Snickers</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/full-oreo.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Full Oréo</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/shake/cookies-cream.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Cookies</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION DRINKS -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h3 class="text-xl font-black flex items-center gap-2">💧 Boissons énergisantes</h3>
+        <p class="text-xs text-white/55 mt-0.5">14 recettes • 0 sucre • Medium ou Large</p>
+      </div>
+      <button class="text-xs font-bold text-yellow-300">Voir tout →</button>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto scroll-x snap-x -mx-4 px-4 pb-2">
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/drinks/electric-blue.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Electric Blue</p>
+        <p class="font-black text-sm mt-1">Dès 6,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/drinks/black-panther.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Black Panther</p>
+        <p class="font-black text-sm mt-1">Dès 6,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/drinks/la-vie-en-rose.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">La Vie en Rose</p>
+        <p class="font-black text-sm mt-1">Dès 6,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/drinks/red-paradize.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Red Paradize</p>
+        <p class="font-black text-sm mt-1">Dès 6,90€</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION HOT / GAUFRE / SANTÉ -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-6">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h3 class="text-xl font-black flex items-center gap-2">☕ Pauses chaudes</h3>
+        <p class="text-xs text-white/55 mt-0.5">Café, thé, chocolat & café gourmet</p>
+      </div>
+      <button class="text-xs font-bold text-yellow-300">Voir tout →</button>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto scroll-x snap-x -mx-4 px-4 pb-2">
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/hot/cafe-gourmet.png" class="absolute inset-0 w-full h-full object-cover" />
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-orange-500/90 text-white text-[10px] font-black uppercase tracking-wide">Gourmet</span>
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Café gourmet</p>
+        <p class="font-black text-sm mt-1">8,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/hot/chocolat-chaud.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Chocolat chaud protéiné</p>
+        <p class="font-black text-sm mt-1">Dès 5,90€</p>
+      </button>
+      <button class="snap-start shrink-0 w-[200px] text-left">
+        <div class="relative h-[150px] rounded-2xl overflow-hidden mb-2">
+          <img src="/images/hot/cafe-classique.png" class="absolute inset-0 w-full h-full object-cover" />
+          <button class="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-black grid place-items-center shadow-lg font-black text-xl">+</button>
+        </div>
+        <p class="font-black text-sm">Café</p>
+        <p class="font-black text-sm mt-1">Dès 3,90€</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- BLOC INFO PRATIQUE -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-8">
+    <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+      <h3 class="text-xl font-black">Viens nous voir au club</h3>
+      <p class="text-sm text-white/60 mt-1">11 rue Saint Pierre, Verdun • Préparation 5-10 min</p>
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button class="py-3 rounded-2xl bg-gradient-to-r from-yellow-300 to-amber-500 text-black font-black text-sm">📍 Itinéraire</button>
+        <button class="py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-white font-bold text-sm">⭐ Avis Google</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- INSTAGRAM CARD -->
+  <!-- ============================================ -->
+  <section class="px-4 mt-4">
+    <div class="rounded-3xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/15 via-pink-500/10 to-transparent p-5">
+      <p class="text-xs uppercase tracking-wider text-fuchsia-300 font-bold">@labase_verdun</p>
+      <h3 class="text-xl font-black mt-1">L'univers du club sur Instagram</h3>
+      <p class="text-sm text-white/70 mt-1">Nouveautés, saveurs du moment, ambiance</p>
+      <button class="mt-3 px-4 py-2 rounded-full bg-white/10 text-sm font-bold">Voir Instagram →</button>
+    </div>
+  </section>
+
+  <div class="h-8"></div>
+
+</main>
+
+<!-- ============================================ -->
+<!-- BOTTOM NAVIGATION MOBILE -->
+<!-- ============================================ -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 glass bg-black/85 border-t border-white/10">
+  <div class="mx-auto max-w-3xl grid grid-cols-4 gap-1 px-2 pt-2 pb-3">
+    <button class="flex flex-col items-center gap-0.5 py-1.5 text-yellow-400">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-10 9h3v9h6v-6h2v6h6v-9h3z"/></svg>
+      <span class="text-[10px] font-black uppercase tracking-wider">Accueil</span>
+    </button>
+    <button class="flex flex-col items-center gap-0.5 py-1.5 text-white/50">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Menu</span>
+    </button>
+    <button class="flex flex-col items-center gap-0.5 py-1.5 text-white/50">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Combos</span>
+    </button>
+    <button class="flex flex-col items-center gap-0.5 py-1.5 text-white/50">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Compte</span>
+    </button>
+  </div>
+</nav>
+
+<script>
+  // Rotation auto du hero carousel
+  let current = 0;
+  const total = 3;
+  setInterval(() => {
+    document.getElementById('slide-' + current).style.opacity = '0';
+    document.getElementById('dot-' + current).className = 'h-1.5 w-1.5 rounded-full bg-white/40';
+    current = (current + 1) % total;
+    document.getElementById('slide-' + current).style.opacity = '1';
+    document.getElementById('dot-' + current).className = 'h-1.5 w-6 rounded-full bg-white';
+  }, 4500);
+</script>
+
+</body>
+</html>
