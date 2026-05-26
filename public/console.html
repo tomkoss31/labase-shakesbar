@@ -38,6 +38,20 @@
     gap: 12px;
     flex-wrap: wrap;
   }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    color: #e6f4f1;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .15s ease;
+  }
+  .back-btn:hover { background: rgba(255,255,255,.12); }
   .brand {
     display: flex;
     align-items: center;
@@ -279,6 +293,7 @@
 
 <div class="topbar">
   <div class="topbar-inner">
+    <a href="/" class="back-btn" title="Retour à l'app">← Retour app</a>
     <div class="brand">
       <div class="logo-b">B</div>
       <div>
