@@ -132,11 +132,30 @@ export function useAuth() {
         return { ok: false, error: 'Le code doit faire 6 chiffres' };
       }
 
-      const { error } = await supabase.auth.verifyOtp({
+      console.log('[useAuth] verifyOtp start', { email: cleanEmail, tokenLength: cleanToken.length });
+
+      // Timeout 15s pour éviter le "tourne en rond" indéfini
+      const timeout = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+        setTimeout(
+          () =>
+            resolve({
+              data: null,
+              error: { message: 'Délai dépassé — réseau lent ou code expiré. Redemande un code.' },
+            }),
+          15000,
+        ),
+      );
+
+      const verify = supabase.auth.verifyOtp({
         email: cleanEmail,
         token: cleanToken,
         type: 'email',
       });
+
+      const result = await Promise.race([verify, timeout]);
+      const { error } = result as { error: { message: string } | null };
+
+      console.log('[useAuth] verifyOtp result', error ? `ERROR: ${error.message}` : 'OK');
 
       if (error) return { ok: false, error: error.message };
       return { ok: true };
