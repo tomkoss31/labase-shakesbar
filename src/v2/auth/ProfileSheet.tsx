@@ -5,6 +5,8 @@ import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { VIP_TIERS, computeMascotteLevel, nextLevelThreshold } from './types';
 import { usePushNotifications } from '../notifications/usePushNotifications';
+import { WheelModal } from '../wheel/WheelModal';
+import { getWheelCooldown } from '../wheel/segments';
 
 interface ProfileSheetProps {
   palette: Palette;
@@ -35,7 +37,9 @@ export function ProfileSheet({
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [wheelOpen, setWheelOpen] = useState(false);
   const push = usePushNotifications();
+  const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
 
   // Sync local state quand le profil change
   React.useEffect(() => {
@@ -339,6 +343,51 @@ export function ProfileSheet({
           )}
         </div>
 
+        {/* Roue cadeau hebdomadaire */}
+        <button
+          onClick={() => setWheelOpen(true)}
+          style={{
+            width: '100%',
+            marginBottom: 10,
+            padding: '14px 16px',
+            background: wheelCooldown.canSpin
+              ? `linear-gradient(135deg, ${palette.accent}, ${palette.primary})`
+              : palette.bg,
+            border: `1px solid ${wheelCooldown.canSpin ? palette.accent : palette.line}`,
+            borderRadius: 14,
+            color: wheelCooldown.canSpin ? palette.ctaText : palette.text,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: wheelCooldown.canSpin ? `0 8px 24px ${palette.accent}44` : 'none',
+          }}
+        >
+          <div style={{ fontSize: 28, lineHeight: 1 }}>🎁</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
+              {wheelCooldown.canSpin ? 'Roue cadeau dispo !' : 'Roue cadeau'}
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                marginTop: 2,
+                opacity: wheelCooldown.canSpin ? 0.95 : 0.7,
+              }}
+            >
+              {wheelCooldown.canSpin
+                ? '1 tentative gratuite cette semaine'
+                : `Reviens dans ${wheelCooldown.daysRemaining}j`}
+            </div>
+          </div>
+          <div style={{ fontSize: 18 }}>→</div>
+        </button>
+
         {/* Push notifications */}
         {push.supported && (
           <button
@@ -445,6 +494,9 @@ export function ProfileSheet({
           Tes données restent privées et ne sont jamais partagées.
         </div>
       </div>
+
+      {/* Modale roue cadeau */}
+      <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} />
     </div>
   );
 }
