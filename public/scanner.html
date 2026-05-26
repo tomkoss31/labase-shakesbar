@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>La Base — Scanner comptoir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    margin: 4px 0 4px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sub { color: #94b8b1; font-size: 13px; margin-bottom: 16px; }
+  .container { max-width: 540px; margin: 0 auto; }
+  .card {
+    background: linear-gradient(135deg, #13302c, #0e1f1d);
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 10px;
+    color: #ecfdf5;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #94b8b1;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: #f59e0b;
+    color: #1a0f00;
+    border: 0;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-teal { background: #14b8a6; color: #02100e; }
+  .btn-secondary { background: transparent; color: #ecfdf5; border: 1px solid rgba(94,234,212,.20); }
+  video {
+    width: 100%;
+    max-height: 360px;
+    border-radius: 12px;
+    background: #000;
+  }
+  .scanner-zone {
+    position: relative;
+    border: 2px dashed rgba(94,234,212,.30);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+  .stat { background: #04100f; padding: 12px; border-radius: 10px; border: 1px solid rgba(94,234,212,.10); }
+  .stat-label { font-size: 10px; color: #94b8b1; text-transform: uppercase; letter-spacing: .08em; }
+  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: #f59e0b; margin-top: 2px; }
+  .reward-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #fb718522;
+    color: #fb7185;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 2px 4px 2px 0;
+  }
+  .ok { background: rgba(20,184,166,.15); color: #5eead4; padding: 10px 14px; border-radius: 10px; border: 1px solid #14b8a6; font-size: 13px; }
+  .err { background: rgba(251,113,133,.15); color: #fb7185; padding: 10px 14px; border-radius: 10px; border: 1px solid #fb7185; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📷 Scanner comptoir</h1>
+  <div class="sub">Scanne le QR du client pour voir ses XP et créditer une commande Square en caisse.</div>
+
+  <div class="card">
+    <label>Mot de passe admin</label>
+    <input type="password" id="password" placeholder="ADMIN_PUSH_PASSWORD" autocomplete="current-password" />
+  </div>
+
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <label style="margin-bottom: 0;">📷 Caméra arrière</label>
+      <button class="btn-secondary" id="toggleCam" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Démarrer</button>
+    </div>
+    <div class="scanner-zone" id="scannerZone" style="display: none;">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas" style="display: none;"></canvas>
+    </div>
+    <div style="margin-top: 10px;">
+      <label>Ou colle un ID manuellement</label>
+      <input type="text" id="manualId" placeholder="UUID utilisateur ou code CASH-XXXX" />
+      <button class="btn" id="manualLookup" style="margin-top: 8px;">Rechercher</button>
+    </div>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = 'labase-scanner-token';
+
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) $('password').value = saved;
+  } catch {}
+
+  let stream = null;
+  let scanning = false;
+  let lastScanned = '';
+  let lastScannedAt = 0;
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      });
+      const video = $('video');
+      video.srcObject = stream;
+      $('scannerZone').style.display = 'block';
+      $('toggleCam').textContent = 'Arrêter';
+      scanning = true;
+      scanLoop();
+    } catch (err) {
+      showResult('err', '❌ Accès caméra refusé : ' + err.message);
+    }
+  }
+
+  function stopCamera() {
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    stream = null;
+    scanning = false;
+    $('scannerZone').style.display = 'none';
+    $('toggleCam').textContent = 'Démarrer';
+  }
+
+  $('toggleCam').addEventListener('click', () => {
+    if (stream) stopCamera();
+    else startCamera();
+  });
+
+  function scanLoop() {
+    if (!scanning) return;
+    const video = $('video');
+    const canvas = $('canvas');
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = window.jsQR(imageData.data, canvas.width, canvas.height);
+      if (code && code.data) {
+        const now = Date.now();
+        if (code.data !== lastScanned || now - lastScannedAt > 3000) {
+          lastScanned = code.data;
+          lastScannedAt = now;
+          handleScanned(code.data);
+        }
+      }
+    }
+    requestAnimationFrame(scanLoop);
+  }
+
+  function handleScanned(text) {
+    if (text.startsWith('LABASE-USER:')) {
+      const userId = text.replace('LABASE-USER:', '');
+      lookupUser(userId);
+    } else if (text.startsWith('LABASE-CASH:')) {
+      const code = text.replace('LABASE-CASH:', '');
+      showResult('ok', '💵 Code commande espèces : <b>' + code + '</b> — va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a> pour encaisser.');
+    } else {
+      showResult('err', 'QR non reconnu : ' + text.slice(0, 40));
+    }
+  }
+
+  $('manualLookup').addEventListener('click', () => {
+    const id = $('manualId').value.trim();
+    if (!id) return;
+    if (id.startsWith('CASH-')) {
+      showResult('ok', '💵 Code commande espèces. Va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a>.');
+    } else {
+      lookupUser(id);
+    }
+  });
+
+  async function lookupUser(userId) {
+    const password = $('password').value.trim();
+    if (!password) {
+      showResult('err', 'Mot de passe requis');
+      return;
+    }
+    sessionStorage.setItem(STORAGE_KEY, password);
+    try {
+      const resp = await fetch('/api/profile?action=lookup&id=' + encodeURIComponent(userId), {
+        headers: { 'Authorization': 'Bearer ' + password },
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        return;
+      }
+      renderProfile(data.profile, data.rewards);
+    } catch (err) {
+      showResult('err', '❌ ' + err.message);
+    }
+  }
+
+  function renderProfile(p, rewards) {
+    const name = p.first_name || '(prénom non renseigné)';
+    const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
+    const rewardsHtml = (rewards || []).map(r =>
+      '<span class="reward-pill">🎁 ' + r.reward_label + ' · ' + r.reward_code + '</span>'
+    ).join('');
+
+    $('result').innerHTML =
+      '<div class="card" style="border-color: #14b8a6;">' +
+        '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
+        '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
+        '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+        '<div class="stats">' +
+          '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + p.xp + '</div></div>' +
+          '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + p.vip_tier + '</div></div>' +
+          '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
+          '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
+        '</div>' +
+        (rewardsHtml ? '<div style="margin-top: 12px;"><div class="stat-label" style="margin-bottom: 6px;">CODES ACTIFS</div>' + rewardsHtml + '</div>' : '') +
+      '</div>' +
+      '<div class="card">' +
+        '<label>💳 Crédit XP après paiement Square caisse</label>' +
+        '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
+        '<button class="btn btn-teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
+        '<div style="font-size: 11px; color: #94b8b1; margin-top: 8px; line-height: 1.5;">' +
+          'Saisis le montant total que tu viens d\'encaisser sur Square en caisse pour ce client.' +
+          ' Ses XP seront crédités automatiquement (10 XP / € + 50 XP / cmd).' +
+        '</div>' +
+      '</div>';
+
+    $('creditBtn').addEventListener('click', () => creditXP(p.id));
+  }
+
+  async function creditXP(userId) {
+    const password = $('password').value.trim();
+    const eurosRaw = $('amount').value.trim().replace(',', '.');
+    const euros = parseFloat(eurosRaw);
+    if (!Number.isFinite(euros) || euros <= 0) {
+      alert('Montant invalide');
+      return;
+    }
+    const amountCents = Math.round(euros * 100);
+
+    const btn = $('creditBtn');
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const resp = await fetch('/api/profile?action=credit-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+        body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos' }),
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        showResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.');
+        lookupUser(userId); // refresh
+      } else {
+        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        btn.disabled = false;
+        btn.textContent = '✓ Encaisser & créditer XP';
+      }
+    } catch (err) {
+      showResult('err', '❌ ' + err.message);
+      btn.disabled = false;
+      btn.textContent = '✓ Encaisser & créditer XP';
+    }
+  }
+
+  function showResult(kind, msg) {
+    $('result').innerHTML = '<div class="' + kind + '">' + msg + '</div>';
+  }
+</script>
+</body>
+</html>

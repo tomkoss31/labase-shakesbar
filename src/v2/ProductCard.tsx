@@ -4,6 +4,7 @@ import type { Palette } from './palette';
 import type { V2Product, V2Combo } from './products-adapter';
 import { ProductImage } from './ProductImage';
 import { IconPlus, IconArrow } from './icons';
+import { colorForProduct } from './FlyAnimation';
 
 function fmtEuro(amount: number): string {
   return `${amount.toFixed(2).replace('.', ',')}€`;
@@ -31,6 +32,7 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
   const badge = badgeColor(palette, product.badge);
   const cardHeight = 234;
   const imageZone = cardHeight - 96;
+  const productColor = colorForProduct(product.name, product.categoryId, palette);
 
   return (
     <div
@@ -46,14 +48,14 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
         position: 'relative',
         transition: 'transform .2s ease, border-color .2s ease',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = palette.primary + '55')}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = productColor + '88')}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = palette.line)}
     >
       <div
         style={{
           height: imageZone,
           position: 'relative',
-          background: `radial-gradient(circle at 50% 60%, ${palette.primary}22, transparent 65%)`,
+          background: `radial-gradient(circle at 50% 60%, ${productColor}44, ${productColor}11 40%, transparent 70%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -128,8 +130,8 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
             }}
             aria-label={`Ajouter ${product.name} au panier`}
             style={{
-              width: 32,
-              height: 32,
+              width: 34,
+              height: 34,
               borderRadius: '50%',
               background: palette.cta,
               color: palette.ctaText,
@@ -138,7 +140,7 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: `0 4px 12px ${palette.cta}66`,
+              boxShadow: `0 6px 16px ${palette.cta}99, 0 0 0 2px ${productColor}33`,
               transition: 'transform .15s ease',
             }}
             onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
@@ -160,6 +162,17 @@ interface ComboCardProps {
 }
 
 export function ComboCard({ palette, combo, onClick }: ComboCardProps) {
+  // Couleur signature combo basée sur l'ID
+  const COMBO_COLORS: Record<string, string> = {
+    'combo-power': palette.accent,
+    'combo-medium': palette.glow3,
+    'combo-tea-time': '#65a30d',
+    'combo-coffee-break': '#a16207',
+    'combo-choco-cocoon': '#7c2d12',
+    'combo-gourmet-break': '#a855f7',
+  };
+  const comboColor = COMBO_COLORS[combo.id] ?? palette.primary;
+
   return (
     <div
       onClick={onClick}
@@ -178,7 +191,7 @@ export function ComboCard({ palette, combo, onClick }: ComboCardProps) {
         style={{
           height: 140,
           position: 'relative',
-          background: `radial-gradient(circle at 60% 60%, ${palette.primary}44, transparent 70%)`,
+          background: `radial-gradient(circle at 60% 60%, ${comboColor}55, ${comboColor}11 45%, transparent 75%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

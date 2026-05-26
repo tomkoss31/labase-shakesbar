@@ -1,6 +1,12 @@
 // Drawer panier V2 — palette Teal × Ambre, bouton sticky checkout
-import React from 'react';
+// + quick-adds intelligents basés sur le contenu du panier
+// + sélection code promo roue cadeau
+import React, { useMemo } from 'react';
 import type { Palette } from './palette';
+import { ProductImage } from './ProductImage';
+import { findV2ProductByName, type V2Product } from './products-adapter';
+import type { UserReward } from './rewards/useUserRewards';
+import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 
 interface CartItem {
   key: string;
@@ -9,6 +15,12 @@ interface CartItem {
   quantity: number;
   option: string;
   unitPriceCents: number;
+  extras?: string[];
+}
+
+interface QuickAddSuggestion {
+  product: V2Product;
+  reason: string;
 }
 
 interface CartDrawerV2Props {
@@ -24,8 +36,76 @@ interface CartDrawerV2Props {
   onUpdateQty: (key: string, delta: number) => void;
   onSquareCheckout: () => void;
   onWhatsAppOrder: () => void;
+  onPayOnSite?: () => void;
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
+  onAddSuggestion?: (product: V2Product) => void;
+  rewards?: UserReward[];
+  selectedRewardCode?: string | null;
+  setSelectedRewardCode?: (code: string | null) => void;
+  userXp?: number;
+  xpToSpend?: number;
+  setXpToSpend?: (xp: number) => void;
+}
+
+// Calcule les suggestions intelligentes d'après le panier
+function computeSuggestions(cart: CartItem[]): QuickAddSuggestion[] {
+  if (cart.length === 0) return [];
+
+  const categories = new Set(cart.map((i) => i.categoryName));
+  const hasSmoothie = categories.has('Smoothies nutritionnels');
+  const hasDrink = categories.has('Boissons énergisantes');
+  const hasHot = categories.has('Cafés / Chocolats / Thés');
+  const hasGaufre = categories.has('Gaufre');
+  const hasHealth = categories.has('Boissons santé');
+
+  const suggestions: QuickAddSuggestion[] = [];
+
+  // 1. Pas de gaufre + a quelque chose → propose gaufre healthy
+  if (!hasGaufre && (hasSmoothie || hasHot || hasDrink)) {
+    const p = findV2ProductByName('Gaufre healthy');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Une pause gourmande à 6,90€ pour compléter ta commande',
+      });
+    }
+  }
+
+  // 2. Smoothie seul → propose un drink
+  if (hasSmoothie && !hasDrink && !hasHealth) {
+    const p = findV2ProductByName('Electric Blue');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Ajoute un drink énergisant pour un combo parfait',
+      });
+    }
+  }
+
+  // 3. Drink seul → propose un smoothie
+  if (hasDrink && !hasSmoothie && !hasHot) {
+    const p = findV2ProductByName('Snickers');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Un smoothie nutritionnel pour la satiété + 24g protéines',
+      });
+    }
+  }
+
+  // 4. Pas de santé → propose une Limonade Rose ou Hydrat'Max
+  if (!hasHealth && cart.length === 1) {
+    const p = findV2ProductByName('Limonade Rose');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Beauté de la peau, collagène + aloé vera',
+      });
+    }
+  }
+
+  return suggestions.slice(0, 2); // Max 2 suggestions
 }
 
 function fmtEuro(cents: number) {
@@ -45,9 +125,42 @@ export function CartDrawerV2({
   onUpdateQty,
   onSquareCheckout,
   onWhatsAppOrder,
+  onPayOnSite,
   isCreatingPayment,
   hasRequiredPickupInfo,
+  onAddSuggestion,
+  rewards,
+  selectedRewardCode,
+  setSelectedRewardCode,
+  userXp = 0,
+  xpToSpend = 0,
+  setXpToSpend,
 }: CartDrawerV2Props) {
+  const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
+
+  // Calcule la réduction selon le reward sélectionné
+  const selectedReward = useMemo(() => {
+    if (!selectedRewardCode || !rewards) return null;
+    return rewards.find((r) => r.reward_code === selectedRewardCode) ?? null;
+  }, [selectedRewardCode, rewards]);
+
+  const rewardDiscountCents = useMemo(() => {
+    if (!selectedReward) return 0;
+    if (selectedReward.reward_type === 'discount_percent') {
+      const pct = parseInt(selectedReward.reward_value ?? '0', 10);
+      return Math.round((totalCents * pct) / 100);
+    }
+    return 0;
+  }, [selectedReward, totalCents]);
+
+  // Calcul max XP utilisables sur ce panier (après réduction reward)
+  const cartAfterReward = Math.max(0, totalCents - rewardDiscountCents);
+  const maxXp = useMemo(() => maxSpendableXp(userXp, cartAfterReward), [userXp, cartAfterReward]);
+  const safeXpToSpend = Math.min(xpToSpend, maxXp);
+  const xpDiscountCents = xpToCents(safeXpToSpend);
+
+  const discountCents = rewardDiscountCents + xpDiscountCents;
+  const finalTotalCents = Math.max(0, totalCents - discountCents);
   if (!open) return null;
 
   const empty = cart.length === 0;
@@ -195,6 +308,21 @@ export function CartDrawerV2({
                         {item.option}
                       </div>
                     )}
+                    {item.extras && item.extras.length > 0 && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: palette.accent,
+                          marginTop: 2,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        + {item.extras.join(', ')}
+                      </div>
+                    )}
                     <div style={{ fontSize: 12, color: palette.primary, fontWeight: 700, marginTop: 4 }}>
                       {fmtEuro(item.unitPriceCents * item.quantity)}
                     </div>
@@ -262,6 +390,258 @@ export function CartDrawerV2({
               ))}
             </div>
           )}
+
+          {/* Récompenses actives (codes roue cadeau) */}
+          {!empty && rewards && rewards.length > 0 && setSelectedRewardCode && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: palette.accent,
+                  letterSpacing: '.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                🎁 Tes récompenses
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {rewards.map((r) => {
+                  const active = selectedRewardCode === r.reward_code;
+                  const applicable = r.reward_type === 'discount_percent';
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => setSelectedRewardCode(active ? null : r.reward_code)}
+                      disabled={!applicable}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: 12,
+                        background: active ? palette.accent + '18' : palette.bg,
+                        border: `1.5px solid ${active ? palette.accent : palette.line}`,
+                        borderRadius: 12,
+                        color: palette.text,
+                        cursor: applicable ? 'pointer' : 'default',
+                        opacity: applicable ? 1 : 0.6,
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                        transition: 'all .15s',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: 4,
+                          border: `2px solid ${active ? palette.accent : palette.line}`,
+                          background: active ? palette.accent : 'transparent',
+                          color: palette.ctaText,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {active ? '✓' : ''}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: 'Outfit, sans-serif',
+                            fontWeight: 800,
+                            fontSize: 13,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {r.reward_label}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: palette.textDim,
+                            marginTop: 2,
+                            fontFamily: 'ui-monospace, monospace',
+                          }}
+                        >
+                          {r.reward_code} {!applicable && '• à présenter au comptoir'}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* XP utilisables (100 XP = 1€, plafond 30%) */}
+          {!empty && userXp > 0 && maxXp > 0 && setXpToSpend && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: palette.primary,
+                    letterSpacing: '.1em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  ⚡ Utiliser mes XP
+                </div>
+                <div style={{ fontSize: 11, color: palette.textDim }}>
+                  {userXp} dispo · 100 XP = 1€
+                </div>
+              </div>
+              <div
+                style={{
+                  background: palette.bg,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 14,
+                  padding: 14,
+                }}
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={maxXp}
+                  step={XP_SPEND_STEP}
+                  value={safeXpToSpend}
+                  onChange={(e) => setXpToSpend(parseInt(e.target.value, 10))}
+                  style={{
+                    width: '100%',
+                    accentColor: palette.primary,
+                  }}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    marginTop: 8,
+                  }}
+                >
+                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: palette.primary }}>
+                    {safeXpToSpend} XP
+                  </div>
+                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 18, color: palette.accent }}>
+                    −{(xpDiscountCents / 100).toFixed(2).replace('.', ',')}€
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: palette.textDim, marginTop: 4, lineHeight: 1.4 }}>
+                  Max {maxXp} XP utilisables (plafond 30% du total).
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick-adds intelligents */}
+          {!empty && suggestions.length > 0 && onAddSuggestion && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: palette.primary,
+                  letterSpacing: '.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                ⚡ Pour compléter ta commande
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {suggestions.map((s) => (
+                  <button
+                    key={s.product.id}
+                    onClick={() => onAddSuggestion(s.product)}
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.card}, ${palette.cardHi})`,
+                      border: `1px solid ${palette.primary}33`,
+                      borderRadius: 14,
+                      padding: 12,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: 'inherit',
+                      color: palette.text,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 12,
+                        background: `radial-gradient(circle at 50% 50%, ${palette.primary}22, transparent 70%)`,
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        padding: 4,
+                      }}
+                    >
+                      <ProductImage src={s.product.image} alt={s.product.name} palette={palette} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'Outfit, sans-serif',
+                          fontWeight: 800,
+                          fontSize: 14,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {s.product.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: palette.textDim,
+                          marginTop: 2,
+                          lineHeight: 1.35,
+                        }}
+                      >
+                        {s.reason}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: palette.cta,
+                        color: palette.ctaText,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 20,
+                        fontWeight: 900,
+                        flexShrink: 0,
+                        boxShadow: `0 4px 12px ${palette.cta}66`,
+                      }}
+                    >
+                      +
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer sticky : infos retrait + checkout */}
@@ -313,6 +693,37 @@ export function CartDrawerV2({
               />
             </div>
 
+            {/* Récap réductions si appliquées */}
+            {rewardDiscountCents > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: palette.accent,
+                  marginBottom: 2,
+                  fontWeight: 700,
+                }}
+              >
+                <span>🎁 Code roue</span>
+                <span>−{fmtEuro(rewardDiscountCents)}</span>
+              </div>
+            )}
+            {xpDiscountCents > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: palette.primary,
+                  marginBottom: 4,
+                  fontWeight: 700,
+                }}
+              >
+                <span>⚡ {safeXpToSpend} XP utilisés</span>
+                <span>−{fmtEuro(xpDiscountCents)}</span>
+              </div>
+            )}
             {/* Total + boutons */}
             <div
               style={{
@@ -325,13 +736,32 @@ export function CartDrawerV2({
               <div style={{ fontSize: 13, color: palette.textDim }}>Total</div>
               <div
                 style={{
-                  fontFamily: 'Outfit, sans-serif',
-                  fontWeight: 900,
-                  fontSize: 22,
-                  color: palette.text,
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 8,
                 }}
               >
-                {fmtEuro(totalCents)}
+                {discountCents > 0 && (
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: palette.textDim,
+                      textDecoration: 'line-through',
+                    }}
+                  >
+                    {fmtEuro(totalCents)}
+                  </span>
+                )}
+                <span
+                  style={{
+                    fontFamily: 'Outfit, sans-serif',
+                    fontWeight: 900,
+                    fontSize: 22,
+                    color: discountCents > 0 ? palette.accent : palette.text,
+                  }}
+                >
+                  {fmtEuro(finalTotalCents)}
+                </span>
               </div>
             </div>
 
@@ -377,6 +807,33 @@ export function CartDrawerV2({
             >
               Commander par WhatsApp
             </button>
+
+            {onPayOnSite && (
+              <button
+                onClick={onPayOnSite}
+                disabled={!hasRequiredPickupInfo}
+                style={{
+                  width: '100%',
+                  marginTop: 8,
+                  padding: '12px',
+                  background: 'transparent',
+                  color: palette.text,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  opacity: !hasRequiredPickupInfo ? 0.4 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                }}
+              >
+                💵 Payer en espèces sur place
+              </button>
+            )}
 
             {!hasRequiredPickupInfo && (
               <div

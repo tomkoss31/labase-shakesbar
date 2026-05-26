@@ -105,7 +105,7 @@ export function usePushNotifications() {
 
       // 4. Envoie au backend
       const payload = subscription.toJSON();
-      const response = await fetch('/api/push/subscribe', {
+      const response = await fetch('/api/push?action=subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -148,7 +148,7 @@ export function usePushNotifications() {
         await subscription.unsubscribe();
         // Notifie le backend pour cleanup
         try {
-          await fetch('/api/push/subscribe', {
+          await fetch('/api/push?action=subscribe', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ endpoint }),

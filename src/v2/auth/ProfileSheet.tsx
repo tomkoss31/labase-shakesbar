@@ -5,6 +5,10 @@ import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { VIP_TIERS, computeMascotteLevel, nextLevelThreshold } from './types';
 import { usePushNotifications } from '../notifications/usePushNotifications';
+import { WheelModal } from '../wheel/WheelModal';
+import { getWheelCooldown } from '../wheel/segments';
+import { useUserOrders } from '../orders/useUserOrders';
+import { MyCodeModal } from './MyCodeModal';
 
 interface ProfileSheetProps {
   palette: Palette;
@@ -35,7 +39,11 @@ export function ProfileSheet({
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [wheelOpen, setWheelOpen] = useState(false);
+  const [myCodeOpen, setMyCodeOpen] = useState(false);
   const push = usePushNotifications();
+  const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
+  const { orders } = useUserOrders();
 
   // Sync local state quand le profil change
   React.useEffect(() => {
@@ -339,6 +347,87 @@ export function ProfileSheet({
           )}
         </div>
 
+        {/* Mon code QR à scanner au comptoir */}
+        {profile && (
+          <button
+            onClick={() => setMyCodeOpen(true)}
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              padding: '14px 16px',
+              background: `linear-gradient(135deg, ${palette.primary}, ${palette.glow3})`,
+              border: `1px solid ${palette.primary}`,
+              borderRadius: 14,
+              color: '#02100e',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              boxShadow: `0 8px 24px ${palette.primary}44`,
+            }}
+          >
+            <div style={{ fontSize: 22, lineHeight: 1 }}>📱</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
+                Mon code à scanner
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 500, marginTop: 2, opacity: 0.85 }}>
+                Au comptoir pour cumuler tes XP
+              </div>
+            </div>
+            <div style={{ fontSize: 18 }}>→</div>
+          </button>
+        )}
+
+        {/* Roue cadeau hebdomadaire */}
+        <button
+          onClick={() => setWheelOpen(true)}
+          style={{
+            width: '100%',
+            marginBottom: 10,
+            padding: '14px 16px',
+            background: wheelCooldown.canSpin
+              ? `linear-gradient(135deg, ${palette.accent}, ${palette.primary})`
+              : palette.bg,
+            border: `1px solid ${wheelCooldown.canSpin ? palette.accent : palette.line}`,
+            borderRadius: 14,
+            color: wheelCooldown.canSpin ? palette.ctaText : palette.text,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: wheelCooldown.canSpin ? `0 8px 24px ${palette.accent}44` : 'none',
+          }}
+        >
+          <div style={{ fontSize: 28, lineHeight: 1 }}>🎁</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
+              {wheelCooldown.canSpin ? 'Roue cadeau dispo !' : 'Roue cadeau'}
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                marginTop: 2,
+                opacity: wheelCooldown.canSpin ? 0.95 : 0.7,
+              }}
+            >
+              {wheelCooldown.canSpin
+                ? '1 tentative gratuite cette semaine'
+                : `Reviens dans ${wheelCooldown.daysRemaining}j`}
+            </div>
+          </div>
+          <div style={{ fontSize: 18 }}>→</div>
+        </button>
+
         {/* Push notifications */}
         {push.supported && (
           <button
@@ -413,6 +502,91 @@ export function ProfileSheet({
           </div>
         )}
 
+        {/* Historique commandes */}
+        {orders.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: palette.primary,
+                letterSpacing: '.1em',
+                textTransform: 'uppercase',
+                marginBottom: 10,
+              }}
+            >
+              📋 Mes dernières commandes
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {orders.slice(0, 5).map((order) => {
+                const dt = new Date(order.created_at);
+                const isPaid = order.status === 'paid';
+                return (
+                  <div
+                    key={order.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 12px',
+                      background: palette.bg,
+                      border: `1px solid ${palette.line}`,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: isPaid ? palette.primary + '22' : palette.line,
+                        color: isPaid ? palette.primary : palette.textDim,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 16,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isPaid ? '✓' : '⌛'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'Outfit, sans-serif',
+                          fontWeight: 700,
+                          fontSize: 13,
+                        }}
+                      >
+                        {dt.toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
+                      <div style={{ fontSize: 10, color: palette.textDim }}>
+                        {isPaid ? 'Payée' : order.status === 'pending' ? 'En attente' : order.status}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: 'Outfit, sans-serif',
+                        fontWeight: 800,
+                        fontSize: 14,
+                        color: palette.text,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {fmtEuro(order.total_cents)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Footer actions */}
         <button
           onClick={handleSignOut}
@@ -445,6 +619,20 @@ export function ProfileSheet({
           Tes données restent privées et ne sont jamais partagées.
         </div>
       </div>
+
+      {/* Modale roue cadeau */}
+      <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} />
+
+      {/* Modale Mon Code QR */}
+      {profile && (
+        <MyCodeModal
+          palette={palette}
+          open={myCodeOpen}
+          onClose={() => setMyCodeOpen(false)}
+          userId={profile.id}
+          profile={profile}
+        />
+      )}
     </div>
   );
 }

@@ -30,7 +30,10 @@ import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { OrderTracking } from './v2/OrderTracking';
+import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
+import { useUserRewards } from './v2/rewards/useUserRewards';
+import { useAuth } from './v2/auth/useAuth';
 import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
@@ -47,6 +50,7 @@ type CartItem = {
   quantity: number;
   option: string;
   unitPriceCents: number;
+  extras?: string[];
 };
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
@@ -246,6 +250,14 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedProduct | null>(null);
   const [customerName, setCustomerName] = useState('');
+  const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
+  const { rewards: userRewards, refetch: refetchRewards } = useUserRewards();
+  const [xpToSpend, setXpToSpend] = useState(0);
+  const appAuth = useAuth();
+  const userXp = appAuth.profile?.xp ?? 0;
+  const [pendingCashCode, setPendingCashCode] = useState<string | null>(null);
+  const [pendingCashTotal, setPendingCashTotal] = useState(0);
+  const [isCreatingPendingCash, setIsCreatingPendingCash] = useState(false);
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
@@ -486,9 +498,14 @@ function App() {
     product: SelectedProduct,
     optionLabel = '',
     toastLabel = product.name,
+    extras: string[] = [],
   ) {
-    const unitPriceCents = getConfiguredBasePrice(product, optionLabel);
-    const key = `${product.categoryId}-${product.name}-${optionLabel}`;
+    const basePriceCents = getConfiguredBasePrice(product, optionLabel);
+    // Chaque extra coûte 250 (2,50€) — synchrone avec api/create-payment-link.ts
+    const extrasTotal = extras.length * 250;
+    const unitPriceCents = basePriceCents + extrasTotal;
+    const extrasKey = extras.length > 0 ? extras.slice().sort().join('|') : '';
+    const key = `${product.categoryId}-${product.name}-${optionLabel}-${extrasKey}`;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
@@ -508,6 +525,7 @@ function App() {
           quantity: 1,
           option: optionLabel,
           unitPriceCents,
+          extras: extras.length > 0 ? extras : undefined,
         },
       ];
     });
@@ -651,8 +669,8 @@ function App() {
     );
   }
 
-  function addToCart(product: SelectedProduct) {
-    addPreparedProductToCart(product, selectedOption);
+  function addToCart(product: SelectedProduct, extras: string[] = []) {
+    addPreparedProductToCart(product, selectedOption, product.name, extras);
     setSelected(null);
     setSelectedOption('');
   }
@@ -833,6 +851,45 @@ function App() {
     window.open(whatsappLink, '_blank', 'noopener,noreferrer');
   }
 
+  async function handlePayOnSite() {
+    if (cart.length === 0) {
+      window.alert('Ton panier est vide.');
+      return;
+    }
+    if (!hasRequiredPickupInfo) {
+      window.alert('Merci de renseigner ton prénom et l\'heure de retrait.');
+      return;
+    }
+    setIsCreatingPendingCash(true);
+    try {
+      let userEmail: string | undefined;
+      const supabase = getSupabase();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        userEmail = data.session?.user?.email ?? undefined;
+      }
+
+      const response = await fetch('/api/orders?action=create-pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        window.alert(data?.error || 'Erreur création commande');
+        return;
+      }
+      setPendingCashCode(data.code);
+      setPendingCashTotal(data.totalCents);
+      setCart([]); // vide le panier puisque la commande est créée côté serveur
+      setDrawerOpen(false);
+    } catch (err: any) {
+      window.alert('Erreur : ' + err.message);
+    } finally {
+      setIsCreatingPendingCash(false);
+    }
+  }
+
   async function handleSquareCheckout() {
     try {
       if (cart.length === 0) {
@@ -859,7 +916,14 @@ function App() {
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
+        body: JSON.stringify({
+          cart,
+          customerName,
+          pickupTime,
+          userEmail,
+          rewardCode: selectedRewardCode,
+          xpToSpend,
+        }),
       });
 
       const raw = await response.text();
@@ -915,10 +979,19 @@ function App() {
 
   return (
     <div className="delivery-luxe min-h-screen bg-[#050505] text-white">
-      <div className="delivery-luxe__glow pointer-events-none fixed inset-0" />
-      <div className="delivery-luxe__grid pointer-events-none fixed inset-0" />
+      <div
+        className="delivery-luxe__glow pointer-events-none fixed inset-0"
+        style={isV2 ? { display: 'none' } : undefined}
+      />
+      <div
+        className="delivery-luxe__grid pointer-events-none fixed inset-0"
+        style={isV2 ? { display: 'none' } : undefined}
+      />
 
-      <header className="dlx-header sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl">
+      <header
+        className="dlx-header sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-2xl"
+        style={isV2 ? { display: 'none' } : undefined}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5">
           <div className="dlx-brand">
             <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/40">
@@ -983,7 +1056,10 @@ function App() {
         </div>
       </header>
 
-      <main className="dlx-main mx-auto max-w-7xl px-4 pb-32">
+      <main
+        className="dlx-main mx-auto max-w-7xl px-4 pb-32"
+        style={isV2 ? { display: 'none' } : undefined}
+      >
         {showThankYou && !isV2 && (
           <section className="pt-6">
             <div className="dlx-panel rounded-[32px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-400/8 to-transparent p-6 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
@@ -1529,7 +1605,7 @@ function App() {
         </footer>
       </main>
 
-      {cartCount > 0 && !drawerOpen && (
+      {cartCount > 0 && !drawerOpen && !isV2 && (
         <div className="dlx-mobile-cart fixed bottom-4 left-4 right-4 z-30 md:hidden">
           <button
             type="button"
@@ -2296,7 +2372,7 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showInstallBanner && (
+        {showInstallBanner && !isV2 && (
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2391,9 +2467,13 @@ function App() {
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
             onClose={() => setSelected(null)}
-            onAdd={() => selected && addToCart(selected)}
+            onAdd={(extras) => selected && addToCart(selected, extras)}
             getPrice={(p) => getConfiguredBasePrice(p, selectedOption)}
             optionSectionLabel={(p) => getOptionSectionLabel(p)}
+            onOpenCombo={(combo, presetProductName) => {
+              setSelected(null);
+              openCombo(combo.id, presetProductName ? { primaryName: presetProductName } : undefined);
+            }}
           />
           <CartDrawerV2
             palette={PALETTE_E}
@@ -2410,6 +2490,25 @@ function App() {
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
+            onAddSuggestion={(v2p) => {
+              setDrawerOpen(false);
+              openProductFromCategory(v2p.category, v2p.raw);
+            }}
+            onPayOnSite={handlePayOnSite}
+            rewards={userRewards}
+            selectedRewardCode={selectedRewardCode}
+            setSelectedRewardCode={setSelectedRewardCode}
+            userXp={userXp}
+            xpToSpend={xpToSpend}
+            setXpToSpend={setXpToSpend}
+          />
+          <PendingCashModal
+            palette={PALETTE_E}
+            open={Boolean(pendingCashCode)}
+            code={pendingCashCode}
+            totalCents={pendingCashTotal}
+            customerName={customerName}
+            onClose={() => setPendingCashCode(null)}
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking

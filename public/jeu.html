@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>La Base — Tente ta chance & gagne un cadeau 🎁</title>
+<meta name="description" content="Fais tourner la roue de La Base Shakes & Drinks à Verdun et gagne une réduction, une gaufre offerte ou un smoothie !" />
+<meta property="og:title" content="🎁 Roue cadeau La Base Shakes & Drinks" />
+<meta property="og:description" content="Tente ta chance et gagne ton cadeau au shake bar de Verdun !" />
+<meta property="og:image" content="/icon-512.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+  .brand {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-b {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f;
+    font-family: 'Outfit'; font-weight: 900; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 24px rgba(20,184,166,.55);
+  }
+  .logo-wm {
+    font-family: 'Outfit'; font-weight: 900; font-size: 18px; letter-spacing: -.02em;
+  }
+  .logo-tag {
+    font-size: 9px; color: #94b8b1; letter-spacing: .2em; font-weight: 600; margin-top: 2px;
+  }
+  h1 {
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -.02em;
+    margin: 20px 0 6px;
+    background: linear-gradient(135deg, #fde047, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .lead { text-align: center; color: #94b8b1; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+  .form-card, .result-card {
+    background: linear-gradient(180deg, #13302c, #0e1f1d);
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #94b8b1; margin-bottom: 6px; text-transform: uppercase; margin-top: 12px; }
+  label:first-child { margin-top: 0; }
+  input {
+    width: 100%;
+    padding: 13px 14px;
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 12px;
+    color: #ecfdf5;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+  }
+  input:focus { border-color: #14b8a6; }
+  .cta {
+    width: 100%;
+    margin-top: 18px;
+    padding: 16px;
+    background: #f59e0b;
+    color: #1a0f00;
+    border: 0;
+    border-radius: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 14px 36px rgba(245,158,11,.4);
+  }
+  .cta:disabled { opacity: 0.6; cursor: wait; }
+  .legal { font-size: 10px; color: #94b8b1; text-align: center; margin-top: 12px; line-height: 1.5; }
+
+  /* Wheel */
+  .wheel-zone {
+    position: relative;
+    width: 320px;
+    height: 348px;
+    margin: 0 auto 16px;
+  }
+  .pointer {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 22px solid #f59e0b;
+    filter: drop-shadow(0 4px 8px rgba(245,158,11,.6));
+    z-index: 3;
+  }
+  .wheel-svg {
+    position: absolute;
+    top: 28px;
+    transition: transform 4200ms cubic-bezier(.17,.67,.18,1);
+    filter: drop-shadow(0 12px 40px rgba(0,0,0,.6));
+  }
+  .err {
+    background: rgba(251,113,133,.15);
+    color: #fb7185;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #fb7185;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .code-box {
+    margin-top: 14px;
+    padding: 16px;
+    background: #04100f;
+    border: 2px dashed #f59e0b;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .code-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #94b8b1; text-transform: uppercase; }
+  .code-val { font-family: ui-monospace, monospace; font-weight: 800; font-size: 22px; color: #f59e0b; margin-top: 4px; letter-spacing: .1em; }
+  .footer-note { text-align: center; font-size: 11px; color: #94b8b1; margin-top: 16px; line-height: 1.6; }
+  .footer-note a { color: #5eead4; text-decoration: none; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="logo">
+      <div class="logo-b">B</div>
+      <div style="text-align: left;">
+        <div class="logo-wm">LA BASE</div>
+        <div class="logo-tag">SHAKES&nbsp;·&nbsp;VERDUN</div>
+      </div>
+    </div>
+  </div>
+
+  <h1>🎁 Tente ta chance</h1>
+  <div class="lead">
+    Fais tourner la roue et gagne un cadeau à utiliser au club.<br>
+    <b style="color: #ecfdf5;">1 seule chance par personne.</b>
+  </div>
+
+  <!-- Form initial -->
+  <div class="form-card" id="formCard">
+    <label>Ton prénom</label>
+    <input type="text" id="firstName" placeholder="Léa" maxlength="40" autocomplete="given-name" />
+
+    <label>Ton email</label>
+    <input type="email" id="email" placeholder="ton@email.com" autocomplete="email" />
+
+    <button class="cta" id="playBtn">🎰 Faire tourner la roue</button>
+
+    <div class="legal">
+      En jouant tu acceptes de recevoir ton code par email et d'être inscrit·e
+      au club La Base. Tu peux te désinscrire à tout moment.
+    </div>
+
+    <div id="formError"></div>
+  </div>
+
+  <!-- Wheel + result -->
+  <div id="wheelArea" style="display: none;">
+    <div class="wheel-zone">
+      <div class="pointer"></div>
+      <svg class="wheel-svg" id="wheel" width="320" height="320" viewBox="0 0 320 320"></svg>
+    </div>
+    <div id="resultArea"></div>
+  </div>
+
+  <div class="footer-note">
+    📍 La Base · 11 rue Saint Pierre, Verdun<br>
+    <a href="/">Découvrir le menu →</a>
+  </div>
+</div>
+
+<script>
+  const SEGMENTS = [
+    { id: 'public-discount-10', label: '−10%', short: '−10%', color: '#14b8a6', emoji: '💸' },
+    { id: 'public-discount-5',  label: '−5%',  short: '−5%',  color: '#5eead4', emoji: '🎟' },
+    { id: 'public-gaufre',      label: 'Gaufre offerte', short: 'Gaufre', color: '#f97316', emoji: '🧇' },
+    { id: 'public-discount-15', label: '−15%', short: '−15%', color: '#fb7185', emoji: '🔥' },
+    { id: 'public-smoothie',    label: 'Smoothie offert', short: 'Smoothie', color: '#a855f7', emoji: '🥤' },
+    { id: 'public-goodies',     label: 'Goodies', short: 'Goodies', color: '#facc15', emoji: '🎁' },
+  ];
+  const SEG_COUNT = SEGMENTS.length;
+  const SEG_ANGLE = 360 / SEG_COUNT;
+  const RADIUS = 160;
+
+  function polar(angleDeg, r) {
+    const a = (angleDeg * Math.PI) / 180;
+    return { x: RADIUS + r * Math.cos(a), y: RADIUS + r * Math.sin(a) };
+  }
+  function arcPath(start, end) {
+    const a = polar(start, RADIUS - 4);
+    const b = polar(end, RADIUS - 4);
+    const large = end - start > 180 ? 1 : 0;
+    return `M ${RADIUS} ${RADIUS} L ${a.x} ${a.y} A ${RADIUS - 4} ${RADIUS - 4} 0 ${large} 1 ${b.x} ${b.y} Z`;
+  }
+  function shade(hex, amt) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return hex;
+    const n = parseInt(m[1], 16);
+    let r = (n >> 16) + amt, g = ((n >> 8) & 0xff) + amt, b = (n & 0xff) + amt;
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  }
+
+  function renderWheel() {
+    const svg = document.getElementById('wheel');
+    let html = '<defs>';
+    SEGMENTS.forEach((s, i) => {
+      html += `<linearGradient id="pg${i}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${s.color}"/><stop offset="100%" stop-color="${shade(s.color, -28)}"/></linearGradient>`;
+    });
+    html += '</defs>';
+    SEGMENTS.forEach((s, i) => {
+      const sa = i * SEG_ANGLE - SEG_ANGLE / 2 - 90;
+      const ea = sa + SEG_ANGLE;
+      const mid = (sa + ea) / 2;
+      const lp = polar(mid, RADIUS - 56);
+      html += `<path d="${arcPath(sa, ea)}" fill="url(#pg${i})" stroke="rgba(0,0,0,.3)" stroke-width="2"/>`;
+      html += `<g transform="translate(${lp.x},${lp.y}) rotate(${mid + 90})">`;
+      html += `<text text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="Outfit" font-weight="900" font-size="22" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,.55))">${s.emoji}</text>`;
+      html += `<text y="22" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="Outfit" font-weight="800" font-size="12" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,.7))">${s.short}</text>`;
+      html += '</g>';
+    });
+    html += `<circle cx="${RADIUS}" cy="${RADIUS}" r="28" fill="#04100f" stroke="#f59e0b" stroke-width="3"/>`;
+    html += `<text x="${RADIUS}" y="${RADIUS}" text-anchor="middle" dominant-baseline="middle" fill="#f59e0b" font-family="Outfit" font-weight="900" font-size="24">B</text>`;
+    svg.innerHTML = html;
+  }
+  renderWheel();
+
+  const $ = (id) => document.getElementById(id);
+  $('playBtn').addEventListener('click', play);
+
+  async function play() {
+    const firstName = $('firstName').value.trim();
+    const email = $('email').value.trim();
+    if (!email || !email.includes('@')) {
+      $('formError').innerHTML = '<div class="err">⚠️ Email invalide</div>';
+      return;
+    }
+    $('playBtn').disabled = true;
+    $('playBtn').textContent = 'Tirage…';
+    $('formError').innerHTML = '';
+    try {
+      const resp = await fetch('/api/wheel?action=public-spin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, firstName, source: location.search.includes('utm_source=') ? new URLSearchParams(location.search).get('utm_source') : 'public_wheel' }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        if (data.alreadyPlayed) {
+          // Affiche le code déjà gagné précédemment
+          $('formCard').style.display = 'none';
+          $('wheelArea').style.display = 'block';
+          showResult({ label: data.reward, code: data.code, alreadyPlayed: true });
+          return;
+        }
+        $('formError').innerHTML = '<div class="err">⚠️ ' + (data.error || 'Erreur') + '</div>';
+        $('playBtn').disabled = false;
+        $('playBtn').textContent = '🎰 Faire tourner la roue';
+        return;
+      }
+
+      // Animation
+      const winIdx = SEGMENTS.findIndex(s => s.id === data.segment.id);
+      const segmentCenter = (winIdx >= 0 ? winIdx : 0) * SEG_ANGLE;
+      const fullTurns = 6;
+      const wobble = (Math.random() - 0.5) * SEG_ANGLE * 0.5;
+      const target = fullTurns * 360 + (360 - segmentCenter) + wobble;
+
+      $('formCard').style.display = 'none';
+      $('wheelArea').style.display = 'block';
+      $('wheel').style.transform = `rotate(${target}deg)`;
+
+      window.setTimeout(() => {
+        showResult({ label: data.segment.label, code: data.code });
+      }, 4300);
+    } catch (err) {
+      $('formError').innerHTML = '<div class="err">⚠️ ' + err.message + '</div>';
+      $('playBtn').disabled = false;
+      $('playBtn').textContent = '🎰 Faire tourner la roue';
+    }
+  }
+
+  function showResult(r) {
+    const html =
+      '<div class="result-card" style="border-color: #f59e0b;">' +
+        '<div style="text-align: center;">' +
+          '<div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #f59e0b; text-transform: uppercase;">' +
+            (r.alreadyPlayed ? 'TU AS DÉJÀ JOUÉ' : '🎉 BRAVO') + '</div>' +
+          '<div style="font-family: Outfit; font-weight: 900; font-size: 28px; margin-top: 6px; line-height: 1.1;">' + r.label + '</div>' +
+        '</div>' +
+        '<div class="code-box">' +
+          '<div class="code-label">TON CODE</div>' +
+          '<div class="code-val">' + r.code + '</div>' +
+        '</div>' +
+        '<div style="margin-top: 14px; font-size: 12px; color: #94b8b1; text-align: center; line-height: 1.5;">' +
+          'Présente ce code au comptoir de La Base à Verdun.<br>Valable 30 jours.' +
+        '</div>' +
+        '<a href="/" style="display: block; margin-top: 16px; padding: 14px; background: #14b8a6; color: #02100e; border-radius: 14px; font-family: Outfit; font-weight: 900; text-align: center; text-decoration: none; font-size: 14px;">Découvrir le menu →</a>' +
+      '</div>';
+    $('resultArea').innerHTML = html;
+  }
+</script>
+</body>
+</html>

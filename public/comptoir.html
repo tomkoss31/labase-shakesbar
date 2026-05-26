@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>La Base — Comptoir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    margin: 4px 0 4px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sub { color: #94b8b1; font-size: 13px; margin-bottom: 18px; }
+  .container { max-width: 920px; margin: 0 auto; }
+  .auth-card {
+    background: #0e1f1d;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .auth-card input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 10px;
+    color: #ecfdf5;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 100px auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid rgba(94,234,212,.10);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #0e1f1d, #13302c);
+  }
+  .row[data-status="ready"] {
+    border-color: #14b8a6;
+    background: linear-gradient(135deg, #14302c, #1a4a3e);
+  }
+  .row[data-status="preparing"] {
+    border-color: #f59e0b;
+  }
+  .row[data-status="pending_cash"] {
+    border-color: #fb7185;
+    background: linear-gradient(135deg, #2d1620, #1a0908);
+  }
+  .status-pending_cash { background: #fb718522; color: #fb7185; }
+  .meta { font-family: 'Outfit', sans-serif; font-weight: 800; }
+  .meta-sub { font-size: 11px; color: #94b8b1; margin-top: 2px; }
+  .total { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 18px; text-align: right; }
+  .actions { display: flex; gap: 6px; }
+  .btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 0;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    color: #1a0f00;
+    background: #f59e0b;
+  }
+  .btn-teal { background: #14b8a6; color: #02100e; }
+  .btn-secondary { background: transparent; color: #ecfdf5; border: 1px solid rgba(94,234,212,.20); }
+  .empty { padding: 32px; text-align: center; color: #94b8b1; font-size: 13px; }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: 4px;
+  }
+  .status-paid { background: #14b8a622; color: #14b8a6; }
+  .status-preparing { background: #f59e0b22; color: #f59e0b; }
+  .status-ready { background: #22c55e22; color: #22c55e; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🏪 Comptoir</h1>
+  <div class="sub">Gère les commandes du jour. Refresh auto toutes les 15s.</div>
+
+  <div class="auth-card">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #94b8b1; margin-bottom: 6px;">MOT DE PASSE ADMIN</div>
+    <input type="password" id="password" placeholder="ADMIN_PUSH_PASSWORD" autocomplete="current-password" />
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = 'labase-comptoir-token';
+
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) $('password').value = saved;
+  } catch {}
+
+  async function loadOrders() {
+    const password = $('password').value.trim();
+    if (!password) {
+      $('list').innerHTML = '<div class="empty">Renseigne le mot de passe pour voir les commandes.</div>';
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/orders?action=today', {
+        headers: { 'Authorization': 'Bearer ' + password },
+      });
+      if (!resp.ok) {
+        const data = await resp.json();
+        $('list').innerHTML = '<div class="empty">❌ ' + (data.error || 'Erreur') + '</div>';
+        return;
+      }
+      sessionStorage.setItem(STORAGE_KEY, password);
+      const data = await resp.json();
+      renderList(data.orders);
+    } catch (err) {
+      $('list').innerHTML = '<div class="empty">❌ ' + err.message + '</div>';
+    }
+  }
+
+  function renderList(orders) {
+    if (!orders || orders.length === 0) {
+      $('list').innerHTML = '<div class="empty">Aucune commande des 12 dernières heures.</div>';
+      return;
+    }
+    $('list').innerHTML = orders.map(o => {
+      const dt = new Date(o.paid_at || o.created_at);
+      const time = dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const total = (o.total_cents / 100).toFixed(2).replace('.', ',');
+      const name = o.customer_name || 'Client';
+      const pickup = o.pickup_time ? ' • retrait ' + o.pickup_time : '';
+      const statusLabel = {
+        pending_cash: '💵 ESPÈCES',
+        paid: 'Payée',
+        preparing: 'En prépa',
+        ready: 'Prête',
+        cancelled: 'Annulée',
+      }[o.status] || o.status;
+
+      const buttons = [];
+      if (o.status === 'pending_cash') {
+        const code = (o.square_order_id || '').replace('CASH-', '');
+        buttons.push('<button class="btn" data-action="cash" data-id="' + o.id + '" title="Code: ' + code + '">💵 Encaisser <b style="margin-left:4px">' + code + '</b></button>');
+      }
+      if (o.status === 'paid') {
+        buttons.push('<button class="btn" data-action="preparing" data-id="' + o.id + '">▶ En prépa</button>');
+      }
+      if (o.status === 'preparing') {
+        buttons.push('<button class="btn btn-teal" data-action="ready" data-id="' + o.id + '">✓ Prête</button>');
+      }
+      if (o.status === 'ready') {
+        buttons.push('<span style="font-size: 11px; color: #22c55e; font-weight: 700;">À retirer</span>');
+      }
+
+      return '<div class="row" data-status="' + o.status + '">' +
+        '<div>' +
+          '<div class="meta">' + name + '</div>' +
+          '<div class="meta-sub">' + time + pickup + '</div>' +
+          '<span class="status-pill status-' + o.status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="total">' + total + '€</div>' +
+        '<div class="actions">' + buttons.join('') + '</div>' +
+      '</div>';
+    }).join('');
+
+    // Bind actions
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => updateStatus(btn.dataset.id, btn.dataset.action, btn));
+    });
+  }
+
+  async function updateStatus(orderId, action, btn) {
+    const password = $('password').value.trim();
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      // Action "cash" = encaisser espèces via /api/orders?action=mark-paid (crédite XP)
+      const endpoint = action === 'cash' ? '/api/orders?action=mark-paid' : '/api/orders?action=update-status';
+      const body = action === 'cash' ? { orderId } : { orderId, status: action };
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+        body: JSON.stringify(body),
+      });
+      if (resp.ok) {
+        loadOrders();
+      } else {
+        const data = await resp.json();
+        alert('Erreur: ' + (data.error || 'inconnu'));
+        btn.disabled = false;
+      }
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+      btn.disabled = false;
+    }
+  }
+
+  $('password').addEventListener('change', loadOrders);
+  $('password').addEventListener('blur', loadOrders);
+
+  // Auto-reload toutes les 15s si auth saisie
+  setInterval(() => {
+    if ($('password').value.trim()) loadOrders();
+  }, 15000);
+
+  loadOrders();
+</script>
+</body>
+</html>

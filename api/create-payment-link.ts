@@ -34,27 +34,37 @@ function normalizeKey(value: string = ''): string {
     .trim();
 }
 
-// Produits avec basePriceCents (smoothies 890, santé 690)
+// Smoothies (890), enfants (590), café glacé simple (690), post workout (590)
 const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
-  ['Choco Buenos', 890], ['M&M', 890], ['Casse Noisette', 890], ['Cappuccino', 890],
-  ['Pina Colada', 890], ['Fraise Bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
-  ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890], ['Banana Split', 890],
-  ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
-  ['Hydrat’Max', 690], ['Casse Grippe', 690], ['Limonade Rose', 690], ['Digest', 690],
+  ['Casse Noisette', 890], ['Cappuccino', 890], ['Pina Colada', 890],
+  ['Fraise bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
+  ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890],
+  ['Banana Split', 890], ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
+  // Enfants
+  ['Bulle de Fée', 590], ['Spiderman', 590], ['Stitch', 590],
+  ['Licorne', 590], ['Hulk', 590], ['Tropicool', 590],
+  // Cafés / sportifs uniques
+  ['Café glacé simple', 690],
+  ['Post Workout', 590],
 ];
 
-// Options : drinks 2 formats, café/thé, café gourmet, gaufre toppings
+// Options : Start/Boost drinks/santé/sportifs, café/thé Petit/Grand,
+// chocolat chaud saveurs, café gourmet glacé recettes, gaufre toppings
 const OPTION_PRICE_ENTRIES: Array<[string, number]> = [
-  ['Medium 550ml — 6,90€', 690],
-  ['Large 950ml — 8,90€', 890],
+  ['Start 550ml — 6,90€', 690],
+  ['Boost 950ml — 8,90€', 890],
   ['Petit 250ml — 3,90€', 390],
   ['Grand 450ml — 5,90€', 590],
-  ['Petit 250ml — 5,90€', 590],
-  ['Grand 450ml — 6,90€', 690],
+  ['Nature — 5,90€', 590],
+  ['Saveur Noisette — 6,40€', 640],
+  ['Saveur Spéculoos — 6,40€', 640],
+  ['Saveur Caramel — 6,40€', 640],
+  ['Saveur Vanille — 6,40€', 640],
+  ['Saveur Cookie — 6,40€', 640],
   ['Macchiato — 650ml — 8,90€', 890],
-  ['Choco mocha — 650ml — 8,90€', 890],
-  ['Latte noisette — 650ml — 8,90€', 890],
-  ['Vanille latte — 650ml — 8,90€', 890],
+  ['Choco Mocha — 650ml — 8,90€', 890],
+  ['Latte aux Noisettes — 650ml — 8,90€', 890],
+  ['Vanille Latte — 650ml — 8,90€', 890],
   ['Miel — 6,90€', 690],
   ['Chocolat — 6,90€', 690],
   ['Chocolat blanc — 6,90€', 690],
@@ -73,7 +83,7 @@ const COMBO_PRICE_ENTRIES: Array<[string, number]> = [
 
 const EXTRA_PRICE_ENTRIES: Array<[string, number]> = [
   ['Collagène', 250],
-  ['Booster immunité', 250],
+  ['Booster Immunité', 250],
   ['Fibres à la pomme', 250],
   ['Probiotiques', 250],
   ['Électrolytes', 250],
@@ -229,12 +239,148 @@ export default async function handler(req: any, res: any) {
       typeof bodyPayload?.customerName === 'string'
         ? bodyPayload.customerName.trim()
         : undefined;
+    const rewardCode =
+      typeof bodyPayload?.rewardCode === 'string' && bodyPayload.rewardCode.trim().length > 0
+        ? bodyPayload.rewardCode.trim()
+        : null;
+    const requestedXpToSpend =
+      Number.isFinite(Number(bodyPayload?.xpToSpend)) && Number(bodyPayload.xpToSpend) > 0
+        ? Math.floor(Number(bodyPayload.xpToSpend) / 100) * 100 // arrondi à 100
+        : 0;
+
+    // Application du reward code roue (discount_percent uniquement pour l'instant)
+    // - Vérifie en DB que le code existe, n'est pas utilisé, n'est pas expiré
+    // - Calcule la réduction
+    // - Ajoute une line négative dans la commande Square
+    // - Marque le code comme utilisé (used_at = now)
+    let discountCents = 0;
+    let rewardLineItem: any = null;
+    let rewardSpinId: string | null = null;
+
+    if (rewardCode && userEmail) {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && serviceKey) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+
+          // Trouver le user_id depuis l'email
+          const { data: profile } = await admin
+            .from('profiles')
+            .select('id')
+            .eq('email', userEmail)
+            .maybeSingle();
+
+          if (profile?.id) {
+            // Récupérer le spin
+            const { data: spin } = await admin
+              .from('wheel_spins')
+              .select('id, reward_type, reward_value, used_at, expires_at, reward_label')
+              .eq('reward_code', rewardCode)
+              .eq('user_id', profile.id)
+              .maybeSingle();
+
+            if (
+              spin &&
+              !spin.used_at &&
+              new Date(spin.expires_at).getTime() > Date.now() &&
+              spin.reward_type === 'discount_percent'
+            ) {
+              const pct = parseInt(spin.reward_value ?? '0', 10);
+              const subtotal = lineItems.reduce(
+                (s: number, li: any) => s + Number(li.base_price_money?.amount ?? 0) * Number(li.quantity ?? 1),
+                0,
+              );
+              discountCents = Math.round((subtotal * pct) / 100);
+
+              if (discountCents > 0) {
+                rewardLineItem = {
+                  name: `🎁 Réduction ${pct}% (code ${rewardCode})`,
+                  quantity: '1',
+                  base_price_money: {
+                    amount: -discountCents,
+                    currency: 'EUR',
+                  },
+                };
+                rewardSpinId = spin.id;
+              }
+            }
+          }
+        } catch (err: any) {
+          console.warn('[create-payment-link] reward fetch failed:', err?.message);
+        }
+      }
+    }
+
+    // Application XP utilisables (100 XP = 1€, plafond 30% du total après reward)
+    // Vérifications côté serveur pour éviter triche.
+    let xpSpent = 0;
+    let xpDiscountCents = 0;
+    let xpUserIdToDebit: string | null = null;
+    let xpLineItem: any = null;
+
+    if (requestedXpToSpend > 0 && userEmail) {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && serviceKey) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+
+          const { data: profile } = await admin
+            .from('profiles')
+            .select('id, xp')
+            .eq('email', userEmail)
+            .maybeSingle();
+
+          if (profile?.id) {
+            const subtotal = lineItems.reduce(
+              (s: number, li: any) => s + Number(li.base_price_money?.amount ?? 0) * Number(li.quantity ?? 1),
+              0,
+            );
+            const subtotalAfterReward = Math.max(0, subtotal - discountCents);
+            const capCents = Math.floor((subtotalAfterReward * 30) / 100);
+            const capInXp = capCents; // 100 XP = 100 cents = 1€
+            const safeXp = Math.min(requestedXpToSpend, profile.xp, capInXp);
+            const roundedXp = Math.floor(safeXp / 100) * 100;
+
+            if (roundedXp > 0) {
+              xpSpent = roundedXp;
+              xpDiscountCents = roundedXp; // 100 XP = 100 cents
+              xpUserIdToDebit = profile.id;
+              xpLineItem = {
+                name: `⚡ Utilisation de ${roundedXp} XP`,
+                quantity: '1',
+                base_price_money: {
+                  amount: -xpDiscountCents,
+                  currency: 'EUR',
+                },
+              };
+            }
+          }
+        } catch (err: any) {
+          console.warn('[create-payment-link] xp spend failed:', err?.message);
+        }
+      }
+    }
+
+    // Construire la liste finale (line items + reward discount + xp discount)
+    const finalLineItems = [
+      ...lineItems,
+      ...(rewardLineItem ? [rewardLineItem] : []),
+      ...(xpLineItem ? [xpLineItem] : []),
+    ];
 
     const squarePayload: any = {
       idempotency_key: randomUUID(),
       order: {
         location_id: locationId,
-        line_items: lineItems,
+        line_items: finalLineItems,
       },
       checkout_options: {
         redirect_url: `${getRequestOrigin(req)}/?payment=success`,
@@ -272,6 +418,52 @@ export default async function handler(req: any, res: any) {
     if (!squareResponse.ok) {
       console.error('Square API error', data);
       return res.status(500).json({ error: 'Erreur Square', details: data });
+    }
+
+    // Débiter les XP du profil (best-effort, non-bloquant)
+    if (xpUserIdToDebit && xpSpent > 0) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          // Refetch puis update (évite race condition)
+          const { data: prof } = await admin
+            .from('profiles')
+            .select('xp')
+            .eq('id', xpUserIdToDebit)
+            .single();
+          if (prof) {
+            const newXp = Math.max(0, prof.xp - xpSpent);
+            await admin.from('profiles').update({ xp: newXp }).eq('id', xpUserIdToDebit);
+          }
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] xp debit failed:', err?.message);
+      }
+    }
+
+    // Marquer le reward comme utilisé (best-effort, non-bloquant)
+    if (rewardSpinId) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          await admin
+            .from('wheel_spins')
+            .update({ used_at: new Date().toISOString() })
+            .eq('id', rewardSpinId);
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] mark used failed:', err?.message);
+      }
     }
 
     return res.status(200).json({
