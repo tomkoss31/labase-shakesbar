@@ -1,6 +1,9 @@
 // Drawer panier V2 — palette Teal × Ambre, bouton sticky checkout
-import React from 'react';
+// + quick-adds intelligents basés sur le contenu du panier
+import React, { useMemo } from 'react';
 import type { Palette } from './palette';
+import { ProductImage } from './ProductImage';
+import { findV2ProductByName, type V2Product } from './products-adapter';
 
 interface CartItem {
   key: string;
@@ -9,6 +12,12 @@ interface CartItem {
   quantity: number;
   option: string;
   unitPriceCents: number;
+  extras?: string[];
+}
+
+interface QuickAddSuggestion {
+  product: V2Product;
+  reason: string;
 }
 
 interface CartDrawerV2Props {
@@ -26,6 +35,67 @@ interface CartDrawerV2Props {
   onWhatsAppOrder: () => void;
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
+  onAddSuggestion?: (product: V2Product) => void;
+}
+
+// Calcule les suggestions intelligentes d'après le panier
+function computeSuggestions(cart: CartItem[]): QuickAddSuggestion[] {
+  if (cart.length === 0) return [];
+
+  const categories = new Set(cart.map((i) => i.categoryName));
+  const hasSmoothie = categories.has('Smoothies nutritionnels');
+  const hasDrink = categories.has('Boissons énergisantes');
+  const hasHot = categories.has('Cafés / Chocolats / Thés');
+  const hasGaufre = categories.has('Gaufre');
+  const hasHealth = categories.has('Boissons santé');
+
+  const suggestions: QuickAddSuggestion[] = [];
+
+  // 1. Pas de gaufre + a quelque chose → propose gaufre healthy
+  if (!hasGaufre && (hasSmoothie || hasHot || hasDrink)) {
+    const p = findV2ProductByName('Gaufre healthy');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Une pause gourmande à 6,90€ pour compléter ta commande',
+      });
+    }
+  }
+
+  // 2. Smoothie seul → propose un drink
+  if (hasSmoothie && !hasDrink && !hasHealth) {
+    const p = findV2ProductByName('Electric Blue');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Ajoute un drink énergisant pour un combo parfait',
+      });
+    }
+  }
+
+  // 3. Drink seul → propose un smoothie
+  if (hasDrink && !hasSmoothie && !hasHot) {
+    const p = findV2ProductByName('Snickers');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Un smoothie nutritionnel pour la satiété + 24g protéines',
+      });
+    }
+  }
+
+  // 4. Pas de santé → propose une Limonade Rose ou Hydrat'Max
+  if (!hasHealth && cart.length === 1) {
+    const p = findV2ProductByName('Limonade Rose');
+    if (p) {
+      suggestions.push({
+        product: p,
+        reason: 'Beauté de la peau, collagène + aloé vera',
+      });
+    }
+  }
+
+  return suggestions.slice(0, 2); // Max 2 suggestions
 }
 
 function fmtEuro(cents: number) {
@@ -47,7 +117,9 @@ export function CartDrawerV2({
   onWhatsAppOrder,
   isCreatingPayment,
   hasRequiredPickupInfo,
+  onAddSuggestion,
 }: CartDrawerV2Props) {
+  const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
   if (!open) return null;
 
   const empty = cart.length === 0;
@@ -195,6 +267,21 @@ export function CartDrawerV2({
                         {item.option}
                       </div>
                     )}
+                    {item.extras && item.extras.length > 0 && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: palette.accent,
+                          marginTop: 2,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        + {item.extras.join(', ')}
+                      </div>
+                    )}
                     <div style={{ fontSize: 12, color: palette.primary, fontWeight: 700, marginTop: 4 }}>
                       {fmtEuro(item.unitPriceCents * item.quantity)}
                     </div>
@@ -260,6 +347,101 @@ export function CartDrawerV2({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Quick-adds intelligents */}
+          {!empty && suggestions.length > 0 && onAddSuggestion && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: palette.primary,
+                  letterSpacing: '.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                ⚡ Pour compléter ta commande
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {suggestions.map((s) => (
+                  <button
+                    key={s.product.id}
+                    onClick={() => onAddSuggestion(s.product)}
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.card}, ${palette.cardHi})`,
+                      border: `1px solid ${palette.primary}33`,
+                      borderRadius: 14,
+                      padding: 12,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: 'inherit',
+                      color: palette.text,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 12,
+                        background: `radial-gradient(circle at 50% 50%, ${palette.primary}22, transparent 70%)`,
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        padding: 4,
+                      }}
+                    >
+                      <ProductImage src={s.product.image} alt={s.product.name} palette={palette} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'Outfit, sans-serif',
+                          fontWeight: 800,
+                          fontSize: 14,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {s.product.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: palette.textDim,
+                          marginTop: 2,
+                          lineHeight: 1.35,
+                        }}
+                      >
+                        {s.reason}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: palette.cta,
+                        color: palette.ctaText,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 20,
+                        fontWeight: 900,
+                        flexShrink: 0,
+                        boxShadow: `0 4px 12px ${palette.cta}66`,
+                      }}
+                    >
+                      +
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

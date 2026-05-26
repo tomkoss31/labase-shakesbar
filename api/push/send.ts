@@ -8,8 +8,8 @@
 // - ADMIN_PUSH_PASSWORD : mot de passe simple pour protéger l'endpoint
 // - SUPABASE_SERVICE_ROLE_KEY
 
-import webpush from 'web-push';
-import { createClient } from '@supabase/supabase-js';
+// IMPORTANT : web-push et @supabase/supabase-js sont chargés via dynamic
+// import dans le handler pour éviter le piège ESM/CJS Vercel.
 
 interface PushBody {
   title?: string;
@@ -56,14 +56,17 @@ export default async function handler(req: any, res: any) {
   if (!vapidPublic || !vapidPrivate) {
     return res.status(500).json({ error: 'Clés VAPID manquantes' });
   }
+  const webpushMod = await import('web-push');
+  const webpush: any = (webpushMod as any).default ?? webpushMod;
   webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
-  // Supabase admin
+  // Supabase admin (dynamic import)
   const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !supabaseKey) {
     return res.status(500).json({ error: 'Supabase non configuré' });
   }
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
 
   // Payload

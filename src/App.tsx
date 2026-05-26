@@ -2433,6 +2433,11 @@ function App() {
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
+            onAddSuggestion={(v2p) => {
+              // Ferme drawer + ouvre la modale produit pour choisir option si nécessaire
+              setDrawerOpen(false);
+              openProductFromCategory(v2p.category, v2p.raw);
+            }}
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking

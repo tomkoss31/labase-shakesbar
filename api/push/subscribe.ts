@@ -1,7 +1,10 @@
 // Gère l'abonnement / désabonnement aux push notifications
 // POST   : enregistre un nouvel abonnement dans push_subscriptions
 // DELETE : supprime un abonnement (logout / désactivation client)
-import { createClient } from '@supabase/supabase-js';
+//
+// IMPORTANT : on utilise un dynamic import à l'intérieur du handler
+// pour @supabase/supabase-js (CommonJS) afin d'éviter le piège
+// FUNCTION_INVOCATION_FAILED dû au "type":"module" du package.json.
 
 interface SubscribeBody {
   endpoint?: string;
@@ -23,15 +26,16 @@ async function readBody(req: any): Promise<any> {
   return {};
 }
 
-function getSupabaseAdmin() {
+async function getSupabaseAdmin() {
   const url = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
+  const { createClient } = await import('@supabase/supabase-js');
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
 export default async function handler(req: any, res: any) {
-  const supabase = getSupabaseAdmin();
+  const supabase = await getSupabaseAdmin();
   if (!supabase) {
     return res.status(500).json({ error: 'Supabase non configuré côté serveur' });
   }

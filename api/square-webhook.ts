@@ -11,8 +11,9 @@
 // - SUPABASE_SERVICE_ROLE_KEY : Supabase → Settings → API → service_role secret
 //   (à ajouter dans Vercel env vars)
 
+// IMPORTANT : @supabase/supabase-js est chargé via dynamic import dans le
+// handler pour éviter le piège ESM/CJS de Vercel (FUNCTION_INVOCATION_FAILED).
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { createClient } from '@supabase/supabase-js';
 
 // VIP tier seuils (€ cumulés en cents)
 const VIP_TIERS: Array<{ id: string; minSpentCents: number }> = [
@@ -113,6 +114,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ ok: true, skipped: true, status: payment.status });
   }
 
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
