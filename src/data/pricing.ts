@@ -3,7 +3,24 @@ import { categories, comboOffers } from './menu';
 export function normalizeCatalogKey(value: string = '') {
   return value
     .normalize('NFKC')
-    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/â€™|â€˜/g, "'")
+    .replace(/[‘’]/g, "'")
+    .replace(/â€“|â€”/g, '-')
+    .replace(/[–—]/g, '-')
+    .replace(/Ã /g, 'à')
+    .replace(/Ã¢/g, 'â')
+    .replace(/Ã§/g, 'ç')
+    .replace(/Ã¨/g, 'è')
+    .replace(/Ã©/g, 'é')
+    .replace(/Ãª/g, 'ê')
+    .replace(/Ã«/g, 'ë')
+    .replace(/Ã®/g, 'î')
+    .replace(/Ã¯/g, 'ï')
+    .replace(/Ã´/g, 'ô')
+    .replace(/Ã¶/g, 'ö')
+    .replace(/Ã¹/g, 'ù')
+    .replace(/Ã»/g, 'û')
+    .replace(/Ã¼/g, 'ü')
     .replace(/\s+/g, ' ')
     .trim();
 }
