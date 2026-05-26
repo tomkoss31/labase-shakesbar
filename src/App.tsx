@@ -47,6 +47,7 @@ type CartItem = {
   quantity: number;
   option: string;
   unitPriceCents: number;
+  extras?: string[];
 };
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
@@ -486,9 +487,14 @@ function App() {
     product: SelectedProduct,
     optionLabel = '',
     toastLabel = product.name,
+    extras: string[] = [],
   ) {
-    const unitPriceCents = getConfiguredBasePrice(product, optionLabel);
-    const key = `${product.categoryId}-${product.name}-${optionLabel}`;
+    const basePriceCents = getConfiguredBasePrice(product, optionLabel);
+    // Chaque extra coûte 250 (2,50€) — synchrone avec api/create-payment-link.ts
+    const extrasTotal = extras.length * 250;
+    const unitPriceCents = basePriceCents + extrasTotal;
+    const extrasKey = extras.length > 0 ? extras.slice().sort().join('|') : '';
+    const key = `${product.categoryId}-${product.name}-${optionLabel}-${extrasKey}`;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.key === key);
@@ -508,6 +514,7 @@ function App() {
           quantity: 1,
           option: optionLabel,
           unitPriceCents,
+          extras: extras.length > 0 ? extras : undefined,
         },
       ];
     });
@@ -651,8 +658,8 @@ function App() {
     );
   }
 
-  function addToCart(product: SelectedProduct) {
-    addPreparedProductToCart(product, selectedOption);
+  function addToCart(product: SelectedProduct, extras: string[] = []) {
+    addPreparedProductToCart(product, selectedOption, product.name, extras);
     setSelected(null);
     setSelectedOption('');
   }
@@ -2403,9 +2410,13 @@ function App() {
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
             onClose={() => setSelected(null)}
-            onAdd={() => selected && addToCart(selected)}
+            onAdd={(extras) => selected && addToCart(selected, extras)}
             getPrice={(p) => getConfiguredBasePrice(p, selectedOption)}
             optionSectionLabel={(p) => getOptionSectionLabel(p)}
+            onOpenCombo={(combo, presetProductName) => {
+              setSelected(null);
+              openCombo(combo.id, presetProductName ? { primaryName: presetProductName } : undefined);
+            }}
           />
           <CartDrawerV2
             palette={PALETTE_E}

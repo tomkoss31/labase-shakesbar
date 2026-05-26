@@ -1,8 +1,10 @@
-// Modale produit V2 — palette Teal × Ambre, sticky CTA bas
-import React from 'react';
+// Modale produit V2 — palette Teal × Ambre
+// Sections : image hero, options, EXTRAS (+2,50€), UPSELL combo, CTA sticky bas
+import React, { useEffect, useMemo, useState } from 'react';
 import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
-import type { Product } from '../data/menu';
+import type { Product, ProductExtra, ComboOffer } from '../data/menu';
+import { EXTRAS, CATEGORIES_WITH_EXTRAS, comboOffers } from '../data/menu';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -18,13 +20,30 @@ interface ProductModalV2Props {
   selectedOption: string;
   setSelectedOption: (label: string) => void;
   onClose: () => void;
-  onAdd: () => void;
-  getPrice: (p: SelectedProduct) => number; // en centimes
+  onAdd: (selectedExtras: string[]) => void;
+  getPrice: (p: SelectedProduct) => number;
   optionSectionLabel: (p: SelectedProduct) => string;
+  onOpenCombo?: (combo: ComboOffer, presetProductName?: string) => void;
 }
 
 function fmtEuro(cents: number) {
   return `${(cents / 100).toFixed(2).replace('.', ',')}€`;
+}
+
+// Détermine quels combos suggérer comme upsell selon la catégorie du produit
+function getRelevantCombos(categoryId: string): ComboOffer[] {
+  if (categoryId === 'smoothies') {
+    return comboOffers.filter((c) => c.id === 'combo-medium' || c.id === 'combo-power');
+  }
+  if (categoryId === 'drinks') {
+    return comboOffers.filter((c) => c.id === 'combo-medium' || c.id === 'combo-power');
+  }
+  if (categoryId === 'hot') {
+    return comboOffers.filter((c) =>
+      ['combo-tea-time', 'combo-coffee-break', 'combo-choco-cocoon', 'combo-gourmet-break'].includes(c.id),
+    );
+  }
+  return [];
 }
 
 export function ProductModalV2({
@@ -37,10 +56,36 @@ export function ProductModalV2({
   onAdd,
   getPrice,
   optionSectionLabel,
+  onOpenCombo,
 }: ProductModalV2Props) {
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+
+  // Reset extras quand on change de produit
+  useEffect(() => {
+    setSelectedExtras([]);
+  }, [product?.name]);
+
   if (!open || !product) return null;
 
-  const priceCents = getPrice(product);
+  const basePriceCents = getPrice(product);
+  const acceptsExtras = CATEGORIES_WITH_EXTRAS.includes(product.categoryId);
+  const extrasTotal = selectedExtras.reduce((sum, label) => {
+    const e = EXTRAS.find((x) => x.label === label);
+    return sum + (e?.priceCents ?? 0);
+  }, 0);
+  const totalCents = basePriceCents + extrasTotal;
+
+  const relevantCombos = getRelevantCombos(product.categoryId);
+
+  function toggleExtra(label: string) {
+    setSelectedExtras((prev) =>
+      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label],
+    );
+  }
+
+  function handleAdd() {
+    onAdd(selectedExtras);
+  }
 
   return (
     <div
@@ -74,7 +119,7 @@ export function ProductModalV2({
           flexDirection: 'column',
         }}
       >
-        {/* Header sticky avec close */}
+        {/* Close header */}
         <div
           style={{
             position: 'sticky',
@@ -105,7 +150,7 @@ export function ProductModalV2({
           </button>
         </div>
 
-        {/* Scrollable content */}
+        {/* Scroll content */}
         <div
           style={{
             flex: 1,
@@ -118,7 +163,7 @@ export function ProductModalV2({
           <div
             style={{
               marginTop: -40,
-              height: 260,
+              height: 240,
               background: `radial-gradient(circle at 50% 50%, ${palette.primary}22, transparent 70%)`,
               display: 'flex',
               alignItems: 'center',
@@ -130,11 +175,10 @@ export function ProductModalV2({
             <ProductImage src={product.image} alt={product.name} palette={palette} />
           </div>
 
-          {/* Badge catégorie */}
-          <div style={{ marginTop: 10 }}>
+          {/* Badges */}
+          <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <span
               style={{
-                display: 'inline-block',
                 padding: '4px 10px',
                 background: palette.bg,
                 color: palette.primary,
@@ -151,8 +195,6 @@ export function ProductModalV2({
             {product.badge && (
               <span
                 style={{
-                  marginLeft: 6,
-                  display: 'inline-block',
                   padding: '4px 10px',
                   background: palette.accent,
                   color: palette.ctaText,
@@ -261,9 +303,167 @@ export function ProductModalV2({
             </div>
           )}
 
+          {/* EXTRAS santé +2,50€ */}
+          {acceptsExtras && (
+            <div style={{ marginTop: 24 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: palette.accent,
+                    letterSpacing: '.1em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  💪 Boost ta commande
+                </div>
+                <div style={{ fontSize: 11, color: palette.textDim }}>+2,50€ chacun</div>
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 6,
+                }}
+              >
+                {EXTRAS.map((extra) => {
+                  const active = selectedExtras.includes(extra.label);
+                  return (
+                    <button
+                      key={extra.id}
+                      onClick={() => toggleExtra(extra.label)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '10px 12px',
+                        background: active ? palette.accent + '20' : palette.bg,
+                        border: `1.5px solid ${active ? palette.accent : palette.line}`,
+                        borderRadius: 12,
+                        color: palette.text,
+                        fontSize: 12,
+                        fontWeight: active ? 700 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                        transition: 'all .15s',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: 4,
+                          border: `1.5px solid ${active ? palette.accent : palette.line}`,
+                          background: active ? palette.accent : 'transparent',
+                          color: palette.ctaText,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 900,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {active ? '✓' : ''}
+                      </span>
+                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {extra.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* UPSELL combo */}
+          {relevantCombos.length > 0 && onOpenCombo && (
+            <div style={{ marginTop: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: palette.primary,
+                  letterSpacing: '.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                ⚡ Passe en combo & économise
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {relevantCombos.map((combo) => (
+                  <button
+                    key={combo.id}
+                    onClick={() => onOpenCombo(combo, product.name)}
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.card}, ${palette.cardHi})`,
+                      border: `1px solid ${palette.primary}55`,
+                      borderRadius: 14,
+                      padding: '12px 14px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: 'inherit',
+                      color: palette.text,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'Outfit, sans-serif',
+                          fontWeight: 800,
+                          fontSize: 14,
+                        }}
+                      >
+                        {combo.name}
+                      </div>
+                      <div style={{ fontSize: 11, color: palette.textDim, marginTop: 2 }}>
+                        {combo.subtitle}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'Outfit, sans-serif',
+                          fontWeight: 900,
+                          fontSize: 14,
+                          color: palette.text,
+                        }}
+                      >
+                        {fmtEuro(combo.priceCents)}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: palette.accent,
+                          marginTop: 2,
+                        }}
+                      >
+                        −{fmtEuro(combo.normalPriceCents - combo.priceCents)}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {!product.options?.length && product.basePriceCents && (
-            <div style={{ marginTop: 16, fontSize: 14, color: palette.textDim }}>
-              Format unique
+            <div style={{ marginTop: 16, fontSize: 13, color: palette.textDim }}>
+              Format unique • {fmtEuro(product.basePriceCents)}
             </div>
           )}
         </div>
@@ -277,8 +477,21 @@ export function ProductModalV2({
             padding: '20px 20px calc(20px + env(safe-area-inset-bottom, 0px))',
           }}
         >
+          {selectedExtras.length > 0 && (
+            <div
+              style={{
+                fontSize: 11,
+                color: palette.textDim,
+                marginBottom: 8,
+                textAlign: 'right',
+              }}
+            >
+              Base {fmtEuro(basePriceCents)} + {selectedExtras.length} extra
+              {selectedExtras.length > 1 ? 's' : ''} {fmtEuro(extrasTotal)}
+            </div>
+          )}
           <button
-            onClick={onAdd}
+            onClick={handleAdd}
             disabled={product.options?.length ? !selectedOption : false}
             style={{
               width: '100%',
@@ -304,7 +517,7 @@ export function ProductModalV2({
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             <span>Ajouter au panier</span>
-            <span>{fmtEuro(priceCents)}</span>
+            <span>{fmtEuro(totalCents)}</span>
           </button>
         </div>
       </div>
