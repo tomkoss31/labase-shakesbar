@@ -140,7 +140,12 @@ export default async function handler(req: any, res: any) {
       };
     });
 
-    const squarePayload = {
+    // Récupération de l'email utilisateur (si connecté) pour que le webhook
+    // Square puisse associer le paiement à un compte et créditer XP / VIP
+    const userEmail = typeof bodyPayload?.userEmail === 'string' ? bodyPayload.userEmail.trim().toLowerCase() : undefined;
+    const customerName = typeof bodyPayload?.customerName === 'string' ? bodyPayload.customerName.trim() : undefined;
+
+    const squarePayload: any = {
       idempotency_key: randomUUID(),
       order: {
         location_id: locationId,
@@ -150,6 +155,14 @@ export default async function handler(req: any, res: any) {
         redirect_url: `${getRequestOrigin(req)}/?payment=success`,
       },
     };
+
+    // Si on a l'email du user authentifié, on l'ajoute pour le matching webhook
+    if (userEmail) {
+      squarePayload.pre_populated_data = { buyer_email: userEmail };
+    }
+    if (customerName) {
+      squarePayload.order.metadata = { customer_name: customerName };
+    }
 
     const squareResponse = await fetch(
       'https://connect.squareup.com/v2/online-checkout/payment-links',

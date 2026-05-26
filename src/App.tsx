@@ -27,6 +27,7 @@ import {
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 import { HomeV2 } from './v2/HomeV2';
+import { getSupabase } from './lib/supabase';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -842,10 +843,19 @@ function App() {
 
       setIsCreatingPayment(true);
 
+      // Récupère email du user authentifié pour permettre au webhook Square
+      // d'associer le paiement à un compte (XP, VIP, historique)
+      let userEmail: string | undefined;
+      const supabase = getSupabase();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        userEmail = data.session?.user?.email ?? undefined;
+      }
+
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart, customerName, pickupTime }),
+        body: JSON.stringify({ cart, customerName, pickupTime, userEmail }),
       });
 
       const raw = await response.text();

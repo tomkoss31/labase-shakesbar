@@ -12,6 +12,7 @@ import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard }
 import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import { useAuth } from './auth/useAuth';
 import { AuthModal } from './auth/AuthModal';
+import { ProfileSheet } from './auth/ProfileSheet';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -48,6 +49,7 @@ export function HomeV2({
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
   const [authOpen, setAuthOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
   const auth = useAuth();
   const isAuthed = auth.status === 'authenticated';
@@ -118,7 +120,7 @@ export function HomeV2({
         palette={palette}
         cartCount={cartCount}
         onCart={onOpenCart}
-        onProfile={() => setAuthOpen(true)}
+        onProfile={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
       />
       <XpCard
         palette={palette}
@@ -127,7 +129,7 @@ export function HomeV2({
         level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
         xp={xp}
         xpNext={next.xp}
-        onConnect={() => setAuthOpen(true)}
+        onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
       />
       <HeroCarousel palette={palette} onSlideClick={handleSlideClick} />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
@@ -274,6 +276,17 @@ export function HomeV2({
         open={authOpen}
         onClose={() => setAuthOpen(false)}
         onSendMagicLink={auth.sendMagicLink}
+      />
+
+      {/* Bottom sheet profil (visible uniquement si connecté) */}
+      <ProfileSheet
+        palette={palette}
+        open={profileOpen && isAuthed}
+        onClose={() => setProfileOpen(false)}
+        profile={auth.profile}
+        email={auth.email}
+        onUpdateProfile={auth.updateProfile}
+        onSignOut={auth.signOut}
       />
     </div>
   );
