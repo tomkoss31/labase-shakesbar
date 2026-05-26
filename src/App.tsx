@@ -256,6 +256,7 @@ function App() {
   const [selectedComboPrimaryOption, setSelectedComboPrimaryOption] = useState('');
   const [selectedComboSecondaryOption, setSelectedComboSecondaryOption] = useState('');
   const [viewMode, setViewMode] = useState<MenuViewMode>('magazine');
+  const [cartBumpKey, setCartBumpKey] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -293,9 +294,18 @@ function App() {
 
   useEffect(() => {
     if (!toastMessage) return;
-    const timer = window.setTimeout(() => setToastMessage(null), 1800);
+    const timer = window.setTimeout(() => setToastMessage(null), 2400);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
+
+  const previousCartCountRef = React.useRef(0);
+  useEffect(() => {
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (total > previousCartCountRef.current) {
+      setCartBumpKey((k) => k + 1);
+    }
+    previousCartCountRef.current = total;
+  }, [cart]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -914,16 +924,39 @@ function App() {
                 ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
                 : { duration: 0.2 }
             }
-            className="dlx-cart-button relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
+            className={
+              cartCount > 0
+                ? 'dlx-cart-button relative rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_10px_40px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]'
+                : 'dlx-cart-button relative grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/[0.06] text-white transition hover:bg-white/[0.10]'
+            }
+            aria-label={cartCount > 0 ? 'Ouvrir le panier' : 'Panier vide'}
           >
-            <span className="inline-flex items-center gap-2">
-              <ShoppingCart size={18} /> Panier
-            </span>
+            {cartCount > 0 ? (
+              <span className="inline-flex items-center gap-2">
+                <ShoppingCart size={18} /> Panier
+              </span>
+            ) : (
+              <ShoppingCart size={18} />
+            )}
             {cartCount > 0 && (
               <span className="absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-pink-600 px-1 text-xs font-bold text-white">
                 {cartCount}
               </span>
             )}
+            <AnimatePresence>
+              {cartBumpKey > 0 && (
+                <motion.span
+                  key={cartBumpKey}
+                  initial={{ opacity: 0, y: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, y: -28, scale: 1 }}
+                  exit={{ opacity: 0, y: -40 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="pointer-events-none absolute -top-1 right-0 rounded-full bg-emerald-500 px-2 py-0.5 text-[11px] font-black text-white shadow-lg"
+                >
+                  +1
+                </motion.span>
+              )}
+            </AnimatePresence>
           </motion.button>
         </div>
       </header>
