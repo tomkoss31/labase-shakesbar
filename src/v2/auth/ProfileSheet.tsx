@@ -8,6 +8,7 @@ import { usePushNotifications } from '../notifications/usePushNotifications';
 import { WheelModal } from '../wheel/WheelModal';
 import { getWheelCooldown } from '../wheel/segments';
 import { useUserOrders } from '../orders/useUserOrders';
+import { MyCodeModal } from './MyCodeModal';
 
 interface ProfileSheetProps {
   palette: Palette;
@@ -39,6 +40,7 @@ export function ProfileSheet({
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const [wheelOpen, setWheelOpen] = useState(false);
+  const [myCodeOpen, setMyCodeOpen] = useState(false);
   const push = usePushNotifications();
   const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
   const { orders } = useUserOrders();
@@ -345,6 +347,42 @@ export function ProfileSheet({
           )}
         </div>
 
+        {/* Mon code QR à scanner au comptoir */}
+        {profile && (
+          <button
+            onClick={() => setMyCodeOpen(true)}
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              padding: '14px 16px',
+              background: `linear-gradient(135deg, ${palette.primary}, ${palette.glow3})`,
+              border: `1px solid ${palette.primary}`,
+              borderRadius: 14,
+              color: '#02100e',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              boxShadow: `0 8px 24px ${palette.primary}44`,
+            }}
+          >
+            <div style={{ fontSize: 22, lineHeight: 1 }}>📱</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
+                Mon code à scanner
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 500, marginTop: 2, opacity: 0.85 }}>
+                Au comptoir pour cumuler tes XP
+              </div>
+            </div>
+            <div style={{ fontSize: 18 }}>→</div>
+          </button>
+        )}
+
         {/* Roue cadeau hebdomadaire */}
         <button
           onClick={() => setWheelOpen(true)}
@@ -584,6 +622,17 @@ export function ProfileSheet({
 
       {/* Modale roue cadeau */}
       <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} />
+
+      {/* Modale Mon Code QR */}
+      {profile && (
+        <MyCodeModal
+          palette={palette}
+          open={myCodeOpen}
+          onClose={() => setMyCodeOpen(false)}
+          userId={profile.id}
+          profile={profile}
+        />
+      )}
     </div>
   );
 }
