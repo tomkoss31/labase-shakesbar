@@ -17,15 +17,11 @@ import {
 } from 'lucide-react';
 import {
   BRAND,
-  accompagnementCards,
   categories,
   comboOffers,
-  featuredSelections,
   googleReviewUrl,
   instagramUrl,
-  productStories,
   socialProofStats,
-  testimonials,
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 
@@ -960,34 +956,18 @@ function App() {
                     Healthy drinks, pauses gourmandes & good vibes
                   </div>
 
-                  <h1 className="dlx-display text-3xl font-black leading-none tracking-tight md:text-5xl">
-                    Le shake bar healthy de Verdun
+                  <h1 className="dlx-display text-3xl font-black leading-tight tracking-tight md:text-5xl">
+                    Le shake bar healthy de Verdun{' '}
                     <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                      qui fait du bien autant qu’il régale
-                    </span>{' '}
-                    dans une ambiance simple et chaleureuse.
+                      qui régale et fait du bien.
+                    </span>
                   </h1>
 
-                  <p className="mt-4 max-w-2xl text-base text-white/70 md:text-lg">
-                    À La Base, on vient pour boire bon, boire beau et repartir bien.
-                    Shakes gourmands, healthy drinks, pauses chaudes et petites envies
-                    sucrées se retrouvent dans un même esprit: plaisir, énergie et
-                    accompagnement autour du bien-être, de la remise en forme, de la
-                    perte de poids et de la nutrition sportive.
+                  <p className="mt-3 max-w-xl text-sm text-white/70 md:text-base">
+                    Shakes, drinks, pauses chaudes & gaufre — commande en 1 min, retrait au club en 5 à 10 min.
                   </p>
 
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {['Healthy drinks', 'Shakes gourmands', 'Pauses chaudes', 'Accompagnement'].map((item) => (
-                      <span
-                        key={item}
-                        className="dlx-chip rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/85"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex flex-wrap gap-3 text-sm">
+                  <div className="mt-5 flex flex-wrap gap-3 text-sm">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
                       <MapPin size={16} className="text-yellow-400" /> {BRAND.address}
                     </div>
@@ -1017,45 +997,6 @@ function App() {
                     >
                       <Star size={16} /> Laisser un avis
                     </a>
-
-                    <a
-                      href={BRAND.discoveryUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="dlx-accent-btn inline-flex items-center gap-2 rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-3 font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/15"
-                    >
-                      <ChevronRight size={16} /> Découvrir l’accompagnement
-                    </a>
-                  </div>
-
-                  <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Signature du moment
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">Choco Buenos</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        La recette qu’on recommande souvent pour découvrir La Base.
-                      </p>
-                    </div>
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Retrait express
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">5 à 10 min</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        Tu commandes, on prépare, tu passes récupérer au club.
-                      </p>
-                    </div>
-                    <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                        Bien plus qu’un menu
-                      </p>
-                      <p className="mt-2 text-lg font-black text-white">Bien-être & énergie</p>
-                      <p className="mt-1 text-sm text-white/62">
-                        Des produits pensés pour le plaisir, avec un accompagnement si tu veux aller plus loin.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -1128,102 +1069,6 @@ function App() {
           </div>
         </section>
 
-        <section className="mb-9 grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.10),_transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                  Signatures du moment
-                </p>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                  Les recettes qui donnent envie d’ouvrir la fiche
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Deux recettes qui donnent le ton dès l’arrivée: visuelles, gourmandes et très faciles à aimer.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
-                    Édition du moment
-                  </span>
-                  <span className="rounded-full border border-pink-400/20 bg-pink-400/10 px-3 py-1 text-xs font-semibold text-pink-200">
-                    Très demandé au club
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {productStories.map((item) => {
-                const product = allProducts.find((p) => p.name === item.name);
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => openProduct(item.name)}
-                    className="dlx-feature-card group relative overflow-hidden rounded-[28px] border border-white/10 text-left shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-yellow-400/30"
-                  >
-                    <div className="relative h-[300px] md:h-[340px]">
-                      <ProductCardBackground image={product?.image} name={item.name} />
-                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
-                        {product ? `Dès ${getStartingPriceLabel(product)}` : item.subtitle}
-                      </div>
-                      <div className="absolute inset-x-0 bottom-0 p-5">
-                        <p className="text-xs uppercase tracking-[0.22em] text-yellow-300">
-                          {item.subtitle}
-                        </p>
-                        <p className="mt-2 text-3xl font-black text-white">
-                          {item.name}
-                        </p>
-                        <p className="mt-2 max-w-md text-sm leading-relaxed text-white/72">
-                          {item.description}
-                        </p>
-                        <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 backdrop-blur">
-                          Découvrir la recette <ChevronRight size={15} />
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-              Découvrir l’accompagnement
-            </p>
-            <h2 className="mt-1 text-2xl font-black">
-              Bien plus qu’une simple commande
-            </h2>
-            <p className="mt-2 text-sm text-white/65">
-              La Base peut aussi t’aider à avancer avec un accompagnement concret, simple à comprendre et motivant.
-            </p>
-
-            <div className="mt-4 space-y-3">
-              {accompagnementCards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div key={card.title} className="dlx-info-card rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                    <p className="inline-flex items-center gap-2 font-black">
-                      <Icon size={16} className="text-yellow-300" /> {card.title}
-                    </p>
-                    <p className="mt-1 text-sm text-white/65">{card.text}</p>
-                  </div>
-                );
-              })}
-
-              <a
-                href={BRAND.discoveryUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="dlx-primary-btn inline-flex w-full items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-4 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
-              >
-                <ChevronRight size={18} /> Découvrir l’accompagnement
-              </a>
-            </div>
-          </div>
-        </section>
-
         <section className="mb-10">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
@@ -1236,42 +1081,6 @@ function App() {
               <p className="mt-2 max-w-3xl text-sm text-white/65">
                 Des formules simples à composer pour associer un drink, une pause gourmande ou un duo plus complet en quelques clics.
               </p>
-            </div>
-          </div>
-
-          <div className="dlx-hero-shell mb-5 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.10),rgba(236,72,153,0.08),rgba(250,204,21,0.10))] p-[1px] shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="dlx-panel-soft grid gap-5 rounded-[29px] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(18,18,18,0.96))] p-5 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
-              <div>
-                <p className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
-                  <Flame size={14} /> Combo signature
-                </p>
-                <h3 className="mt-3 text-2xl font-black text-white md:text-3xl">
-                  {bestCombo.name}
-                </h3>
-                <p className="mt-2 text-white/70">
-                  {bestCombo.subtitle} — une formule facile à choisir, gourmande et bien pensée.
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
-                    Prix : {euroFromCents(bestCombo.priceCents)}
-                  </span>
-                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-200">
-                    Économie : {euroFromCents(bestCombo.normalPriceCents - bestCombo.priceCents)}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => openCombo(bestCombo.id)}
-                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 px-5 py-3 font-black text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01]"
-                >
-                  Composer ce combo <ChevronRight size={18} />
-                </button>
-              </div>
-
-              <div className="relative h-[220px] overflow-hidden rounded-[24px] border border-white/10">
-                <ComboCardImage image={bestCombo.image} name={bestCombo.name} />
-              </div>
             </div>
           </div>
 
@@ -1315,23 +1124,13 @@ function App() {
 
         <section className="mb-7">
           <div className="dlx-panel rounded-[30px] p-4 md:p-5">
-            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
-                  Le menu
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-                  Choisis ce qui te fait envie
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/68">
-                  Shakes, drinks, pauses chaudes, gaufres et formules: tout le menu du club est ici, simple à parcourir et facile à commander.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs font-semibold text-white/70">
-                <span className="dlx-chip rounded-full px-3 py-2">Retrait rapide</span>
-                <span className="dlx-chip rounded-full px-3 py-2">Formules signature</span>
-                <span className="dlx-chip rounded-full px-3 py-2">Pause healthy</span>
-              </div>
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#f6dfb5]">
+                Le menu
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
+                Choisis ce qui te fait envie
+              </h2>
             </div>
 
             <div className="dlx-search relative">
@@ -1463,53 +1262,7 @@ function App() {
           })}
         </section>
 
-        <section className="mb-8 grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
-          <div className="dlx-panel rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.08),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Incontournables
-                </p>
-                <h2 className="text-2xl font-black md:text-3xl">
-                  Les produits qu’on repère en premier
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-white/65">
-                  Une sélection de recettes qui représentent bien le club: visuelles, gourmandes et efficaces dès la première commande.
-                </p>
-              </div>
-              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
-                Déjà testé & approuvé au club
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              {featuredSelections.map((item) => {
-                const product = allProducts.find((p) => p.name === item.name);
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => openProduct(item.name)}
-                    className="dlx-feature-card group relative overflow-hidden rounded-[24px] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:border-yellow-400/25"
-                  >
-                    <div className="relative h-[220px] md:h-[250px]">
-                      <ProductCardBackground image={product?.image} name={item.name} />
-                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400" />
-                      <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-semibold text-white/85 backdrop-blur">
-                        {product ? getStartingPriceLabel(product) : item.subtitle}
-                      </div>
-                      <div className="absolute inset-x-0 bottom-0 p-4 text-left">
-                        <p className="text-lg font-black text-white">{item.name}</p>
-                        <p className="mt-1 text-sm text-white/68">{item.subtitle}</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-4">
+        <section className="mb-8 grid gap-4 md:grid-cols-2">
             <a
               href={googleReviewUrl}
               target="_blank"
@@ -1551,23 +1304,18 @@ function App() {
                 Voir Instagram <ChevronRight size={15} />
               </span>
             </a>
-          </div>
         </section>
 
-        <section className="mb-8 grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
+        <section className="mb-8">
           <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
             <p className="text-xs uppercase tracking-[0.22em] text-[#f6dfb5]">
               Pourquoi on revient
             </p>
             <h2 className="mt-2 text-2xl font-black md:text-3xl">
-              Une adresse qui vit bien au-delà du visuel
+              Une adresse simple, gourmande et bien notée
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-white/65">
-              La Base fonctionne parce que l’expérience reste simple, chaleureuse et régulière:
-              de bons produits, une vraie ambiance club et une commande facile à refaire.
-            </p>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
               {socialProofStats.map((stat) => (
                 <div
                   key={stat.label}
@@ -1578,44 +1326,6 @@ function App() {
                   </p>
                   <p className="mt-2 text-2xl font-black text-white">{stat.value}</p>
                   <p className="mt-1 text-sm text-white/62">{stat.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="dlx-panel rounded-[30px] border border-white/10 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Ce qu’on retient du club
-                </p>
-                <h2 className="mt-2 text-2xl font-black md:text-3xl">
-                  Des retours qui parlent de goût, d’ambiance et de régularité
-                </h2>
-              </div>
-              <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70 md:inline-flex">
-                Avis & ressenti
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {testimonials.map((testimonial) => (
-                <div
-                  key={testimonial.title}
-                  className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4"
-                >
-                  <div className="flex items-center gap-1 text-yellow-300">
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                    <Star size={14} fill="currentColor" />
-                  </div>
-                  <p className="mt-3 text-lg font-black text-white">{testimonial.title}</p>
-                  <p className="mt-2 text-sm text-white/68">{testimonial.text}</p>
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
-                    {testimonial.author}
-                  </p>
                 </div>
               ))}
             </div>
