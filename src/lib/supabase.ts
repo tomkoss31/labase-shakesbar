@@ -18,12 +18,18 @@ export function getSupabase(): SupabaseClient | null {
   if (_client) return _client;
   if (!url || !anonKey) return null;
 
+  // Clé de storage EXPLICITE — évite toute ambiguïté avec le default
+  // dynamique de supabase-js qui dépend du hostname.
+  const projectRef = url.replace(/^https?:\/\//, '').split('.')[0];
+  const storageKey = `sb-${projectRef}-auth-token`;
+
   _client = createClient(url, anonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // pour le magic link
+      detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey,
     },
   });
 

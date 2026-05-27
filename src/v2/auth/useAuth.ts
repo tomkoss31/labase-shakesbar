@@ -327,39 +327,30 @@ function useAuthState(): AuthContextValue {
           return { ok: false, error: msg };
         }
 
-        // Si la réponse contient une session (signup quand confirm email OFF, ou signin)
+        // Si la réponse contient une session, on écrit DIRECTEMENT en
+        // localStorage au format Supabase, puis on reload la page. Plus
+        // de setSession (cause systématique de hangs/déconnexions iOS PWA).
         if (data.access_token && data.refresh_token) {
-          // Tentative setSession (3s timeout), sinon fallback localStorage
           try {
-            const setCtrl = new AbortController();
-            const setTimeoutId = setTimeout(() => setCtrl.abort(), 3000);
-            const setPromise = supabase.auth.setSession({
+            const projectRef = url.replace('https://', '').split('.')[0];
+            const storageKey = `sb-${projectRef}-auth-token`;
+            const sessionData = {
               access_token: data.access_token,
               refresh_token: data.refresh_token,
-            });
-            const abortPromise = new Promise<never>((_, reject) => {
-              setCtrl.signal.addEventListener('abort', () => reject(new Error('setSession timeout')));
-            });
-            await Promise.race([setPromise, abortPromise]);
-            clearTimeout(setTimeoutId);
-          } catch {
-            // Fallback : write localStorage + reload
-            try {
-              const projectRef = url.replace('https://', '').split('.')[0];
-              const storageKey = `sb-${projectRef}-auth-token`;
-              const sessionData = {
-                access_token: data.access_token,
-                refresh_token: data.refresh_token,
-                token_type: data.token_type || 'bearer',
-                expires_in: data.expires_in,
-                expires_at:
-                  data.expires_at ||
-                  Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
-                user: data.user,
-              };
-              window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
-              window.setTimeout(() => window.location.reload(), 200);
-            } catch {}
+              token_type: data.token_type || 'bearer',
+              expires_in: data.expires_in,
+              expires_at:
+                data.expires_at ||
+                Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+              user: data.user,
+            };
+            window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
+            console.log('[useAuth] session écrite, reload imminent');
+            // Petit délai pour que le storage soit bien flushé avant reload
+            window.setTimeout(() => window.location.reload(), 300);
+          } catch (e) {
+            console.error('[useAuth] localStorage write failed:', e);
+            return { ok: false, error: 'Impossible de stocker la session' };
           }
         }
 
