@@ -29,6 +29,7 @@ import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data
 import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
+import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
 import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
@@ -262,6 +263,7 @@ function App() {
   const [selectedOption, setSelectedOption] = useState('');
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [showReviewPrompt, setShowReviewPrompt] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deferredInstallPrompt, setDeferredInstallPrompt] =
     useState<DeferredInstallPrompt | null>(null);
@@ -303,6 +305,12 @@ function App() {
         setShowThankYou(true);
         setCart([]);
         window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
+        // Avis Google : prompt déclenché 8s après le paiement réussi
+        // (laisse au user le temps de voir le live tracking d'abord),
+        // avec cooldown 30j pour ne pas re-demander trop souvent.
+        if (shouldShowReviewPrompt()) {
+          window.setTimeout(() => setShowReviewPrompt(true), 8000);
+        }
       }
 
       url.searchParams.delete('payment');
@@ -2516,6 +2524,15 @@ function App() {
             open={showThankYou}
             customerName={customerName || 'toi'}
             onClose={() => setShowThankYou(false)}
+          />
+          {/* Demande d'avis Google — 4 ou 5 étoiles → Google reviews,
+              1-3 étoiles → mailto direct à hello@labase360.fr */}
+          <ReviewPromptModal
+            palette={PALETTE_E}
+            open={showReviewPrompt}
+            onClose={() => setShowReviewPrompt(false)}
+            googleReviewUrl={googleReviewUrl}
+            customerName={customerName}
           />
         </>
       )}
