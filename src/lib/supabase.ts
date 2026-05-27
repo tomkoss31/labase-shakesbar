@@ -26,7 +26,11 @@ export function getSupabase(): SupabaseClient | null {
   _client = createClient(url, anonKey, {
     auth: {
       persistSession: true,
-      autoRefreshToken: true,
+      // ⚠️ DÉSACTIVÉ : autoRefreshToken déclenche un appel /token?grant_type=refresh_token
+      // au boot qui hang sur iOS PWA (même bug que setSession/verifyOtp). Tant que ce
+      // bug persiste, on garde le token statique 1h max. Le user devra se reconnecter
+      // après expiration. Acceptable vu la criticité.
+      autoRefreshToken: false,
       detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       storageKey,

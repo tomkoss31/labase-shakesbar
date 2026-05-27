@@ -84,7 +84,23 @@ function useAuthState(): AuthContextValue {
 
     let cancelled = false;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    // Diagnostic boot : que voit-on dans le localStorage ?
+    try {
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const projectRef = url?.replace(/^https?:\/\//, '').split('.')[0];
+      const key = `sb-${projectRef}-auth-token`;
+      const raw = window.localStorage.getItem(key);
+      console.log('[useAuth] BOOT — localStorage key:', key, 'present:', !!raw);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          console.log('[useAuth] BOOT — session expires_at:', parsed.expires_at, 'now:', Math.floor(Date.now() / 1000));
+        } catch {}
+      }
+    } catch {}
+
+    supabase.auth.getSession().then(async ({ data, error }) => {
+      console.log('[useAuth] BOOT — getSession result:', data.session ? 'SESSION OK' : 'NO SESSION', error?.message);
       if (cancelled) return;
       if (!data.session) {
         setState({
