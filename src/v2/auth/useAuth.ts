@@ -280,66 +280,140 @@ function useAuthState(): AuthContextValue {
     [],
   );
 
-  // ═══ AUTH PAR MOT DE PASSE (PRIMARY FLOW DEPUIS BUG OTP iOS PWA) ═══
-  // Plus rapide, plus fiable, marche partout. Le mot de passe est stocké
-  // côté Supabase (bcrypt). Pas besoin d'OTP.
+  // ═══ AUTH PAR MOT DE PASSE — REST DIRECT (bypass supabase-js iOS PWA bug) ═══
+  // Toutes les méthodes d'auth qui touchent à la session passent par fetch
+  // direct sur les endpoints REST Supabase. Cela évite les hangs internes
+  // du client supabase-js v2 sur iOS PWA standalone mode.
 
-  const signInWithPassword = useCallback(
-    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+  // Helper interne : POST sur un endpoint auth Supabase avec timeout 10s
+  // et injection de session dans le client + localStorage en cas de succès.
+  const callAuthEndpoint = useCallback(
+    async (
+      path: string,
+      body: Record<string, unknown>,
+      queryString = '',
+    ): Promise<{ ok: boolean; error?: string; data?: any }> => {
       const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
-      const cleanEmail = email.trim().toLowerCase();
-      if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
-      if (password.length < 6) return { ok: false, error: 'Mot de passe trop court (6 min)' };
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabase || !url || !anonKey)
+        return { ok: false, error: 'Supabase non configuré' };
 
-      console.log('[useAuth] signInWithPassword', cleanEmail);
-      const { error } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password,
-      });
-      if (error) {
-        console.error('[useAuth] signInWithPassword error:', error.message);
-        return { ok: false, error: error.message };
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const resp = await fetch(`${url}/auth/v1/${path}${queryString}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        const data = await resp.json().catch(() => ({}));
+        console.log('[useAuth] REST', path, resp.status, data);
+
+        if (!resp.ok) {
+          const msg =
+            data?.error_description ||
+            data?.msg ||
+            data?.error ||
+            `HTTP ${resp.status}`;
+          return { ok: false, error: msg };
+        }
+
+        // Si la réponse contient une session (signup quand confirm email OFF, ou signin)
+        if (data.access_token && data.refresh_token) {
+          // Tentative setSession (3s timeout), sinon fallback localStorage
+          try {
+            const setCtrl = new AbortController();
+            const setTimeoutId = setTimeout(() => setCtrl.abort(), 3000);
+            const setPromise = supabase.auth.setSession({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+            });
+            const abortPromise = new Promise<never>((_, reject) => {
+              setCtrl.signal.addEventListener('abort', () => reject(new Error('setSession timeout')));
+            });
+            await Promise.race([setPromise, abortPromise]);
+            clearTimeout(setTimeoutId);
+          } catch {
+            // Fallback : write localStorage + reload
+            try {
+              const projectRef = url.replace('https://', '').split('.')[0];
+              const storageKey = `sb-${projectRef}-auth-token`;
+              const sessionData = {
+                access_token: data.access_token,
+                refresh_token: data.refresh_token,
+                token_type: data.token_type || 'bearer',
+                expires_in: data.expires_in,
+                expires_at:
+                  data.expires_at ||
+                  Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+                user: data.user,
+              };
+              window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
+              window.setTimeout(() => window.location.reload(), 200);
+            } catch {}
+          }
+        }
+
+        return { ok: true, data };
+      } catch (e: any) {
+        clearTimeout(timeoutId);
+        if (e?.name === 'AbortError') {
+          return {
+            ok: false,
+            error: 'Délai dépassé — vérifie ta connexion.',
+          };
+        }
+        console.error('[useAuth] REST threw:', e?.message ?? e);
+        return { ok: false, error: e?.message ?? 'Erreur réseau' };
       }
-      return { ok: true };
     },
     [],
   );
 
+  const signInWithPassword = useCallback(
+    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
+      if (password.length < 6) return { ok: false, error: 'Mot de passe trop court (6 min)' };
+
+      return callAuthEndpoint(
+        'token',
+        { email: cleanEmail, password },
+        '?grant_type=password',
+      );
+    },
+    [callAuthEndpoint],
+  );
+
   const signUpWithPassword = useCallback(
     async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
       const cleanEmail = email.trim().toLowerCase();
       if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
       if (password.length < 6)
         return { ok: false, error: 'Mot de passe trop court (6 caractères min)' };
 
-      console.log('[useAuth] signUpWithPassword', cleanEmail);
-      const { data, error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password,
-        options: {
-          emailRedirectTo:
-            typeof window !== 'undefined' ? window.location.origin + '/' : undefined,
-        },
-      });
-      if (error) {
-        console.error('[useAuth] signUpWithPassword error:', error.message);
-        return { ok: false, error: error.message };
-      }
-      // Si Supabase est configuré pour confirmer l'email, data.session est null
-      // et le user doit cliquer le lien. Sinon, session est créée direct.
-      if (!data.session) {
+      const res = await callAuthEndpoint('signup', { email: cleanEmail, password });
+      // Si Supabase est en mode "Confirm email" ON, signup ne retourne pas
+      // de session → l'utilisateur doit cliquer un lien. Détection :
+      if (res.ok && (!res.data?.access_token || !res.data?.refresh_token)) {
         return {
           ok: false,
           error:
-            'Compte créé ! Vérifie ta boîte mail pour confirmer ton inscription (ou désactive la confirmation email dans Supabase).',
+            'Compte créé. Vérifie ta boîte mail pour confirmer (ou désactive "Confirm email" dans Supabase Auth).',
         };
       }
-      return { ok: true };
+      return res;
     },
-    [],
+    [callAuthEndpoint],
   );
 
   const resetPassword = useCallback(
