@@ -84,44 +84,105 @@ function useAuthState(): AuthContextValue {
 
     let cancelled = false;
 
-    // Diagnostic boot : que voit-on dans le localStorage ?
-    try {
-      const url = import.meta.env.VITE_SUPABASE_URL;
-      const projectRef = url?.replace(/^https?:\/\//, '').split('.')[0];
-      const key = `sb-${projectRef}-auth-token`;
-      const raw = window.localStorage.getItem(key);
-      console.log('[useAuth] BOOT — localStorage key:', key, 'present:', !!raw);
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          console.log('[useAuth] BOOT — session expires_at:', parsed.expires_at, 'now:', Math.floor(Date.now() / 1000));
-        } catch {}
-      }
-    } catch {}
+    // ⚠️ BYPASS supabase.auth.getSession() qui HANG sur iOS PWA et même
+    // sur Chrome dans certains cas (Web Lock acquise et jamais relâchée par
+    // un call refresh planté). On lit localStorage MANUELLEMENT pour
+    // déterminer si on a une session valide.
+    (async () => {
+      try {
+        const envUrl = import.meta.env.VITE_SUPABASE_URL;
+        const projectRef = envUrl?.replace(/^https?:\/\//, '').split('.')[0];
+        const key = `sb-${projectRef}-auth-token`;
+        const raw = window.localStorage.getItem(key);
+        console.log('[useAuth] BOOT — localStorage key:', key, 'present:', !!raw);
 
-    supabase.auth.getSession().then(async ({ data, error }) => {
-      console.log('[useAuth] BOOT — getSession result:', data.session ? 'SESSION OK' : 'NO SESSION', error?.message);
-      if (cancelled) return;
-      if (!data.session) {
+        if (!raw) {
+          setState({
+            status: 'anonymous',
+            session: null,
+            profile: null,
+            email: null,
+            inPasswordRecovery: false,
+          });
+          return;
+        }
+
+        let parsed: any;
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          console.warn('[useAuth] BOOT — localStorage JSON invalide, suppression');
+          window.localStorage.removeItem(key);
+          setState({
+            status: 'anonymous',
+            session: null,
+            profile: null,
+            email: null,
+            inPasswordRecovery: false,
+          });
+          return;
+        }
+
+        const expiresAt = parsed.expires_at as number | undefined;
+        const now = Math.floor(Date.now() / 1000);
+        console.log('[useAuth] BOOT — session expires_at:', expiresAt, 'now:', now);
+
+        if (!expiresAt || expiresAt <= now) {
+          console.log('[useAuth] BOOT — session expirée, suppression');
+          window.localStorage.removeItem(key);
+          setState({
+            status: 'anonymous',
+            session: null,
+            profile: null,
+            email: null,
+            inPasswordRecovery: false,
+          });
+          return;
+        }
+
+        // Session VALIDE → on set le state directement depuis localStorage
+        // sans toucher à supabase.auth.getSession()
+        console.log('[useAuth] BOOT — session valide, état authenticated');
+        const fakeSession = {
+          access_token: parsed.access_token,
+          refresh_token: parsed.refresh_token,
+          expires_in: parsed.expires_in ?? 3600,
+          expires_at: parsed.expires_at,
+          token_type: parsed.token_type ?? 'bearer',
+          user: parsed.user,
+        } as Session;
+
+        // Tentative fetchProfile en arrière-plan (peut hang, on s'en fout)
+        const userId = parsed.user?.id;
+        let profile: Profile | null = null;
+        if (userId) {
+          // Promise avec timeout 5s pour éviter de bloquer
+          const profilePromise = fetchProfile(userId);
+          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
+          profile = await Promise.race([profilePromise, timeout]);
+        }
+        if (cancelled) return;
+
         setState({
-          status: 'anonymous',
-          session: null,
-          profile: null,
-          email: null,
+          status: 'authenticated',
+          session: fakeSession,
+          profile,
+          email: parsed.user?.email ?? null,
           inPasswordRecovery: false,
         });
-        return;
+      } catch (e) {
+        console.error('[useAuth] BOOT failed:', e);
+        if (!cancelled) {
+          setState({
+            status: 'anonymous',
+            session: null,
+            profile: null,
+            email: null,
+            inPasswordRecovery: false,
+          });
+        }
       }
-      const profile = await fetchProfile(data.session.user.id);
-      if (cancelled) return;
-      setState({
-        status: 'authenticated',
-        session: data.session,
-        profile,
-        email: data.session.user.email ?? null,
-        inPasswordRecovery: false,
-      });
-    });
+    })();
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[useAuth] onAuthStateChange', event, session ? `user=${session.user.email}` : 'no session');
