@@ -12,6 +12,7 @@ import {
   type WheelSegment,
 } from './segments';
 import { getSupabase } from '../../lib/supabase';
+import { track } from '../../lib/analytics';
 
 interface WheelModalProps {
   palette: Palette;
@@ -73,6 +74,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
               winSegment = WHEEL_SEGMENTS[idx];
               code = data.code;
               usedServerSide = true;
+              track('wheel_spun', { segment_id: winSegment.id });
             }
           } else if (resp.status === 429) {
             // Cooldown serveur — on resync localStorage et on stop

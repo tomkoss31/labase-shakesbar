@@ -6,6 +6,7 @@
 // - Lien direct vers la page Google reviews (ouvre nouvel onglet)
 import React, { useEffect, useState } from 'react';
 import type { Palette } from './palette';
+import { track } from '../lib/analytics';
 
 const REVIEW_PROMPT_KEY = 'labase_review_prompt_last';
 const REVIEW_PROMPT_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
@@ -54,6 +55,10 @@ export function ReviewPromptModal({
 
   function handleStarClick(stars: number) {
     setRating(stars);
+    // Analytics : track le rating donné
+    if (stars === 5) track('review_5_stars');
+    else if (stars === 4) track('review_4_stars');
+    else track('review_low');
     // Si 4 ou 5 étoiles → on envoie sur Google review
     // Si 1-3 étoiles → on ouvre un mailto privé (feedback direct, pas public)
     window.setTimeout(() => {
@@ -72,6 +77,7 @@ export function ReviewPromptModal({
   }
 
   function handleSkip() {
+    track('review_skipped');
     markReviewPromptShown();
     onClose();
   }

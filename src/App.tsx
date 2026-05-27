@@ -30,6 +30,7 @@ import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
+import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
@@ -305,6 +306,7 @@ function App() {
         setShowThankYou(true);
         setCart([]);
         window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
+        track('order_paid_square');
         // Avis Google : prompt déclenché 8s après le paiement réussi
         // (laisse au user le temps de voir le live tracking d'abord),
         // avec cooldown 30j pour ne pas re-demander trop souvent.
@@ -856,6 +858,7 @@ function App() {
       return;
     }
 
+    track('order_whatsapp', { items_count: cart.length });
     window.open(whatsappLink, '_blank', 'noopener,noreferrer');
   }
 
@@ -888,6 +891,7 @@ function App() {
         return;
       }
       setPendingCashCode(data.code);
+      track('order_paid_cash', { total_cents: data.totalCents ?? 0, items_count: cart.length });
       setPendingCashTotal(data.totalCents);
       setCart([]); // vide le panier puisque la commande est créée côté serveur
       setDrawerOpen(false);

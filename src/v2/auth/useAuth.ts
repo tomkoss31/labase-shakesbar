@@ -6,6 +6,7 @@ import React, { useEffect, useState, useCallback, createContext, useContext } fr
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase, isSupabaseConfigured } from '../../lib/supabase';
 import type { Profile } from './types';
+import { track } from '../../lib/analytics';
 
 export type AuthStatus = 'loading' | 'unconfigured' | 'anonymous' | 'authenticated';
 
@@ -86,6 +87,7 @@ function useAuthState(): AuthContextValue {
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[useAuth] onAuthStateChange', event, session ? `user=${session.user.email}` : 'no session');
+      if (event === 'SIGNED_IN') track('auth_signed_in');
       if (cancelled) return;
       if (!session) {
         setState({ status: 'anonymous', session: null, profile: null, email: null });
