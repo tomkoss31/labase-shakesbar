@@ -15,6 +15,9 @@ interface AuthState {
   session: Session | null;
   profile: Profile | null;
   email: string | null;
+  // Vrai quand l'utilisateur clique sur un lien "reset password" :
+  // l'app doit afficher l'UI "Choisis un nouveau mot de passe".
+  inPasswordRecovery: boolean;
 }
 
 interface AuthContextValue extends AuthState {
@@ -29,6 +32,8 @@ interface AuthContextValue extends AuthState {
     password: string,
   ) => Promise<{ ok: boolean; error?: string }>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  updatePassword: (newPassword: string) => Promise<{ ok: boolean; error?: string }>;
+  dismissPasswordRecovery: () => void;
   signOut: () => Promise<void>;
   updateProfile: (
     patch: Partial<Pick<Profile, 'first_name' | 'birthday'>>,
@@ -43,6 +48,7 @@ function useAuthState(): AuthContextValue {
     session: null,
     profile: null,
     email: null,
+    inPasswordRecovery: false,
   });
 
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
@@ -66,13 +72,13 @@ function useAuthState(): AuthContextValue {
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
-      setState({ status: 'unconfigured', session: null, profile: null, email: null });
+      setState({ status: 'unconfigured', session: null, profile: null, email: null, inPasswordRecovery: false });
       return;
     }
 
     const supabase = getSupabase();
     if (!supabase) {
-      setState({ status: 'unconfigured', session: null, profile: null, email: null });
+      setState({ status: 'unconfigured', session: null, profile: null, email: null, inPasswordRecovery: false });
       return;
     }
 
@@ -81,7 +87,13 @@ function useAuthState(): AuthContextValue {
     supabase.auth.getSession().then(async ({ data }) => {
       if (cancelled) return;
       if (!data.session) {
-        setState({ status: 'anonymous', session: null, profile: null, email: null });
+        setState({
+          status: 'anonymous',
+          session: null,
+          profile: null,
+          email: null,
+          inPasswordRecovery: false,
+        });
         return;
       }
       const profile = await fetchProfile(data.session.user.id);
@@ -91,6 +103,7 @@ function useAuthState(): AuthContextValue {
         session: data.session,
         profile,
         email: data.session.user.email ?? null,
+        inPasswordRecovery: false,
       });
     });
 
@@ -99,16 +112,26 @@ function useAuthState(): AuthContextValue {
       if (event === 'SIGNED_IN') track('auth_signed_in');
       if (cancelled) return;
       if (!session) {
-        setState({ status: 'anonymous', session: null, profile: null, email: null });
+        setState({
+          status: 'anonymous',
+          session: null,
+          profile: null,
+          email: null,
+          inPasswordRecovery: false,
+        });
         return;
       }
       const profile = await fetchProfile(session.user.id);
       if (cancelled) return;
+      // PASSWORD_RECOVERY = user a cliqué le lien "reset password" dans le mail
+      // → on lui propose direct l'UI "choisis un nouveau mot de passe"
+      const isRecovery = event === 'PASSWORD_RECOVERY';
       setState({
         status: 'authenticated',
         session,
         profile,
         email: session.user.email ?? null,
+        inPasswordRecovery: isRecovery,
       });
     });
 
@@ -335,6 +358,27 @@ function useAuthState(): AuthContextValue {
     [],
   );
 
+  // Une fois le user landé via lien reset, il choisit son nouveau mdp
+  const updatePassword = useCallback(
+    async (newPassword: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
+      if (newPassword.length < 6) {
+        return { ok: false, error: 'Mot de passe trop court (6 caractères min)' };
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { ok: false, error: error.message };
+      // Sortie du mode recovery
+      setState((s) => ({ ...s, inPasswordRecovery: false }));
+      return { ok: true };
+    },
+    [],
+  );
+
+  const dismissPasswordRecovery = useCallback(() => {
+    setState((s) => ({ ...s, inPasswordRecovery: false }));
+  }, []);
+
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
     if (!supabase) return;
@@ -365,6 +409,8 @@ function useAuthState(): AuthContextValue {
     signInWithPassword,
     signUpWithPassword,
     resetPassword,
+    updatePassword,
+    dismissPasswordRecovery,
     signOut,
     updateProfile,
   };

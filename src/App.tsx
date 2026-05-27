@@ -30,6 +30,7 @@ import { HomeV2 } from './v2/HomeV2';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
+import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
@@ -2537,6 +2538,15 @@ function App() {
             onClose={() => setShowReviewPrompt(false)}
             googleReviewUrl={googleReviewUrl}
             customerName={customerName}
+          />
+          {/* Modale "choisis ton nouveau mdp" — affichée auto quand le user
+              clique sur le lien dans le mail de reset password */}
+          <PasswordRecoveryModal
+            palette={PALETTE_E}
+            open={appAuth.inPasswordRecovery}
+            email={appAuth.email}
+            onUpdatePassword={appAuth.updatePassword}
+            onDismiss={appAuth.dismissPasswordRecovery}
           />
         </>
       )}
