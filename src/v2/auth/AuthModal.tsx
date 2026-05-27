@@ -1,6 +1,7 @@
-// Modale d'authentification — code OTP 6 chiffres par email
-// Marche sur iOS PWA car pas de redirect : user reste dans la PWA, tape le code
-import React, { useRef, useState } from 'react';
+// Modale d'authentification — email + mot de passe (signin / signup / reset)
+// Migration depuis OTP code à cause des bugs supabase-js sur iOS PWA.
+// Marche partout : Safari, Chrome, PWA installée, in-app browser.
+import React, { useState } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 
@@ -8,98 +9,98 @@ interface AuthModalProps {
   palette: Palette;
   open: boolean;
   onClose: () => void;
+  // Anciennes props (gardées pour compat, plus utilisées dans le nouveau flow)
   onSendMagicLink: (email: string) => Promise<{ ok: boolean; error?: string }>;
   onVerifyOtp: (email: string, token: string) => Promise<{ ok: boolean; error?: string }>;
+  // Nouvelles props email/password
+  onSignInWithPassword: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  onSignUpWithPassword: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  onResetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
-type Step = 'email' | 'code' | 'verifying';
+type Mode = 'signin' | 'signup' | 'reset';
 
-export function AuthModal({ palette, open, onClose, onSendMagicLink, onVerifyOtp }: AuthModalProps) {
+export function AuthModal({
+  palette,
+  open,
+  onClose,
+  onSignInWithPassword,
+  onSignUpWithPassword,
+  onResetPassword,
+}: AuthModalProps) {
+  const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
-  const [step, setStep] = useState<Step>('email');
-  const [sending, setSending] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const [success, setSuccess] = useState<string | null>(null);
 
   if (!open) return null;
 
-  async function handleSendCode(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSending(true);
+    setBusy(true);
     setError(null);
-    const res = await onSendMagicLink(email);
-    setSending(false);
-    if (res.ok) {
-      setStep('code');
-      // Focus sur la première case
-      window.setTimeout(() => inputsRef.current[0]?.focus(), 100);
-    } else {
-      setError(res.error ?? 'Erreur lors de l\'envoi');
-    }
-  }
+    setSuccess(null);
 
-  async function handleVerifyCode(fullCode?: string) {
-    const finalCode = fullCode ?? code.join('');
-    if (finalCode.length !== 6) return;
-    setStep('verifying');
-    setError(null);
-    const res = await onVerifyOtp(email, finalCode);
+    if (mode === 'reset') {
+      const res = await onResetPassword(email);
+      setBusy(false);
+      if (res.ok) {
+        setSuccess('Email envoyé ! Vérifie ta boîte pour réinitialiser ton mot de passe.');
+      } else {
+        setError(res.error ?? 'Erreur lors de l\'envoi');
+      }
+      return;
+    }
+
+    const fn = mode === 'signin' ? onSignInWithPassword : onSignUpWithPassword;
+    const res = await fn(email, password);
+    setBusy(false);
+
     if (res.ok) {
-      // Le onAuthStateChange va trigger la mise à jour, on ferme
       handleClose();
     } else {
-      setStep('code');
-      setError(res.error ?? 'Code incorrect');
-      setCode(['', '', '', '', '', '']);
-      window.setTimeout(() => inputsRef.current[0]?.focus(), 50);
-    }
-  }
-
-  function handleCodeChange(index: number, value: string) {
-    const digit = value.replace(/\D/g, '').slice(0, 1);
-    const next = [...code];
-    next[index] = digit;
-    setCode(next);
-    if (digit && index < 5) {
-      inputsRef.current[index + 1]?.focus();
-    }
-    // Auto-submit si toutes les cases pleines
-    if (digit && index === 5 && next.every((d) => d !== '')) {
-      handleVerifyCode(next.join(''));
-    }
-  }
-
-  function handleCodeKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-    }
-  }
-
-  function handleCodePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted.length === 6) {
-      const next = pasted.split('');
-      setCode(next);
-      handleVerifyCode(pasted);
+      setError(res.error ?? 'Erreur');
     }
   }
 
   function handleClose() {
     setEmail('');
-    setCode(['', '', '', '', '', '']);
-    setStep('email');
+    setPassword('');
+    setMode('signin');
     setError(null);
-    setSending(false);
+    setSuccess(null);
+    setBusy(false);
+    setShowPassword(false);
     onClose();
   }
 
-  function handleBackToEmail() {
-    setStep('email');
-    setCode(['', '', '', '', '', '']);
-    setError(null);
-  }
+  const title =
+    mode === 'signin'
+      ? 'Salut !'
+      : mode === 'signup'
+        ? 'Créer un compte'
+        : 'Mot de passe oublié';
+  const subtitle =
+    mode === 'signin'
+      ? 'Connecte-toi pour cumuler des XP'
+      : mode === 'signup'
+        ? 'Quelques infos et c\'est parti'
+        : 'On t\'envoie un lien de réinitialisation';
+  const cta =
+    mode === 'signin'
+      ? busy
+        ? 'Connexion…'
+        : 'Se connecter'
+      : mode === 'signup'
+        ? busy
+          ? 'Création…'
+          : 'Créer mon compte'
+        : busy
+          ? 'Envoi…'
+          : 'Envoyer le lien';
 
   return (
     <div
@@ -141,7 +142,7 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink, onVerifyOtp
           }}
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
           <Mascotte palette={palette} mood="wave" size={48} level="apprenti" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
@@ -152,13 +153,9 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink, onVerifyOtp
                 lineHeight: 1.1,
               }}
             >
-              {step === 'email' ? 'Salut !' : 'Code reçu ?'}
+              {title}
             </div>
-            <div style={{ fontSize: 13, color: palette.textDim, marginTop: 4 }}>
-              {step === 'email'
-                ? 'Connecte-toi pour cumuler des XP'
-                : `Tape les 6 chiffres reçus par mail`}
-            </div>
+            <div style={{ fontSize: 13, color: palette.textDim, marginTop: 4 }}>{subtitle}</div>
           </div>
           <button
             onClick={handleClose}
@@ -179,195 +176,223 @@ export function AuthModal({ palette, open, onClose, onSendMagicLink, onVerifyOtp
           </button>
         </div>
 
-        {step === 'email' && (
-          <form onSubmit={handleSendCode}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: '.08em',
-                color: palette.textDim,
-                textTransform: 'uppercase',
-                marginBottom: 8,
-              }}
-            >
-              Ton email
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ton@email.com"
-              disabled={sending}
-              autoComplete="email"
-              autoFocus
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                background: palette.bg,
-                border: `1px solid ${palette.line}`,
-                borderRadius: 14,
-                color: palette.text,
-                fontSize: 15,
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
-            />
+        <form onSubmit={handleSubmit}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '.08em',
+              color: palette.textDim,
+              textTransform: 'uppercase',
+              marginBottom: 6,
+            }}
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="ton@email.com"
+            disabled={busy}
+            autoComplete="email"
+            autoFocus
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              background: palette.bg,
+              border: `1px solid ${palette.line}`,
+              borderRadius: 12,
+              color: palette.text,
+              fontSize: 15,
+              outline: 'none',
+              fontFamily: 'inherit',
+              marginBottom: 12,
+              boxSizing: 'border-box',
+            }}
+          />
 
-            {error && (
-              <div style={{ marginTop: 10, fontSize: 12, color: palette.emotion, fontWeight: 600 }}>
-                ⚠️ {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={sending || !email}
-              style={{
-                width: '100%',
-                marginTop: 16,
-                padding: '14px',
-                background: sending ? palette.line : palette.cta,
-                color: palette.ctaText,
-                border: 0,
-                borderRadius: 14,
-                fontFamily: 'Outfit, sans-serif',
-                fontWeight: 800,
-                fontSize: 15,
-                cursor: sending ? 'wait' : 'pointer',
-                opacity: !email ? 0.5 : 1,
-              }}
-            >
-              {sending ? 'Envoi…' : 'Recevoir le code ✨'}
-            </button>
-
-            <div
-              style={{
-                marginTop: 14,
-                fontSize: 11,
-                color: palette.textDim,
-                lineHeight: 1.5,
-                textAlign: 'center',
-              }}
-            >
-              Pas de mot de passe à retenir.
-              <br />
-              Un code à 6 chiffres arrive dans ton mail.
-            </div>
-          </form>
-        )}
-
-        {(step === 'code' || step === 'verifying') && (
-          <div>
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                background: palette.primary + '15',
-                border: `1px solid ${palette.primary}33`,
-                fontSize: 13,
-                color: palette.text,
-                lineHeight: 1.45,
-                marginBottom: 16,
-                textAlign: 'center',
-              }}
-            >
-              Code envoyé à <b>{email}</b>
-            </div>
-
-            {/* 6 cases */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(6, 1fr)',
-                gap: 8,
-                marginBottom: 12,
-              }}
-            >
-              {code.map((digit, i) => (
+          {mode !== 'reset' && (
+            <>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '.08em',
+                  color: palette.textDim,
+                  textTransform: 'uppercase',
+                  marginBottom: 6,
+                }}
+              >
+                Mot de passe {mode === 'signup' && <span style={{ opacity: 0.7 }}>(6 caractères min)</span>}
+              </label>
+              <div style={{ position: 'relative', marginBottom: 6 }}>
                 <input
-                  key={i}
-                  ref={(el) => {
-                    inputsRef.current[i] = el;
-                  }}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d*"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleCodeChange(i, e.target.value)}
-                  onKeyDown={(e) => handleCodeKeyDown(i, e)}
-                  onPaste={handleCodePaste}
-                  disabled={step === 'verifying'}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === 'signup' ? 'Crée un mot de passe' : 'Ton mot de passe'}
+                  disabled={busy}
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  minLength={6}
                   style={{
                     width: '100%',
-                    aspectRatio: '1 / 1.2',
-                    padding: 0,
+                    padding: '12px 44px 12px 14px',
                     background: palette.bg,
-                    border: `1.5px solid ${digit ? palette.primary : palette.line}`,
+                    border: `1px solid ${palette.line}`,
                     borderRadius: 12,
                     color: palette.text,
-                    fontSize: 24,
-                    fontWeight: 800,
-                    fontFamily: 'Outfit, sans-serif',
-                    textAlign: 'center',
+                    fontSize: 15,
                     outline: 'none',
-                    transition: 'border-color .15s',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
                   }}
                 />
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? 'Masquer' : 'Afficher'}
+                  style={{
+                    position: 'absolute',
+                    right: 4,
+                    top: 4,
+                    bottom: 4,
+                    width: 36,
+                    background: 'transparent',
+                    border: 0,
+                    color: palette.textDim,
+                    fontSize: 16,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </>
+          )}
+
+          {error && (
+            <div style={{ marginTop: 8, fontSize: 12, color: palette.emotion, fontWeight: 600 }}>
+              ⚠️ {error}
             </div>
-
-            {error && (
-              <div
-                style={{
-                  marginTop: 4,
-                  marginBottom: 12,
-                  fontSize: 12,
-                  color: palette.emotion,
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}
-              >
-                ⚠️ {error}
-              </div>
-            )}
-
-            {step === 'verifying' && (
-              <div
-                style={{
-                  textAlign: 'center',
-                  fontSize: 13,
-                  color: palette.textDim,
-                  marginBottom: 12,
-                }}
-              >
-                Vérification…
-              </div>
-            )}
-
-            <button
-              onClick={handleBackToEmail}
-              disabled={step === 'verifying'}
+          )}
+          {success && (
+            <div
               style={{
-                width: '100%',
-                padding: '12px',
-                background: 'transparent',
-                color: palette.textDim,
-                border: `1px solid ${palette.line}`,
-                borderRadius: 12,
-                fontFamily: 'Outfit, sans-serif',
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: 'pointer',
+                marginTop: 8,
+                fontSize: 12,
+                color: palette.primary,
+                fontWeight: 600,
+                lineHeight: 1.5,
               }}
             >
-              ← Changer d'email / renvoyer
+              ✅ {success}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy || !email || (mode !== 'reset' && password.length < 6)}
+            style={{
+              width: '100%',
+              marginTop: 14,
+              padding: '14px',
+              background: busy ? palette.line : palette.cta,
+              color: palette.ctaText,
+              border: 0,
+              borderRadius: 14,
+              fontFamily: 'Outfit, sans-serif',
+              fontWeight: 800,
+              fontSize: 15,
+              cursor: busy ? 'wait' : 'pointer',
+              opacity: !email || (mode !== 'reset' && password.length < 6) ? 0.5 : 1,
+              transition: 'opacity .15s',
+            }}
+          >
+            {cta}
+          </button>
+        </form>
+
+        {/* Switch entre signin / signup / reset */}
+        <div
+          style={{
+            marginTop: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            alignItems: 'center',
+            fontSize: 12,
+          }}
+        >
+          {mode === 'signin' && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('signup');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 0,
+                  color: palette.primary,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontFamily: 'inherit',
+                  fontSize: 13,
+                }}
+              >
+                Nouveau ? Créer un compte
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('reset');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 0,
+                  color: palette.textDim,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 11,
+                }}
+              >
+                Mot de passe oublié ?
+              </button>
+            </>
+          )}
+          {(mode === 'signup' || mode === 'reset') && (
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin');
+                setError(null);
+                setSuccess(null);
+              }}
+              style={{
+                background: 'transparent',
+                border: 0,
+                color: palette.primary,
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                fontSize: 13,
+                textDecoration: 'underline',
+              }}
+            >
+              ← Retour à la connexion
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -20,6 +20,15 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   sendMagicLink: (email: string) => Promise<{ ok: boolean; error?: string }>;
   verifyOtp: (email: string, token: string) => Promise<{ ok: boolean; error?: string }>;
+  signInWithPassword: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  signUpWithPassword: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (
     patch: Partial<Pick<Profile, 'first_name' | 'birthday'>>,
@@ -248,6 +257,84 @@ function useAuthState(): AuthContextValue {
     [],
   );
 
+  // ═══ AUTH PAR MOT DE PASSE (PRIMARY FLOW DEPUIS BUG OTP iOS PWA) ═══
+  // Plus rapide, plus fiable, marche partout. Le mot de passe est stocké
+  // côté Supabase (bcrypt). Pas besoin d'OTP.
+
+  const signInWithPassword = useCallback(
+    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
+      if (password.length < 6) return { ok: false, error: 'Mot de passe trop court (6 min)' };
+
+      console.log('[useAuth] signInWithPassword', cleanEmail);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+      if (error) {
+        console.error('[useAuth] signInWithPassword error:', error.message);
+        return { ok: false, error: error.message };
+      }
+      return { ok: true };
+    },
+    [],
+  );
+
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
+      if (password.length < 6)
+        return { ok: false, error: 'Mot de passe trop court (6 caractères min)' };
+
+      console.log('[useAuth] signUpWithPassword', cleanEmail);
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          emailRedirectTo:
+            typeof window !== 'undefined' ? window.location.origin + '/' : undefined,
+        },
+      });
+      if (error) {
+        console.error('[useAuth] signUpWithPassword error:', error.message);
+        return { ok: false, error: error.message };
+      }
+      // Si Supabase est configuré pour confirmer l'email, data.session est null
+      // et le user doit cliquer le lien. Sinon, session est créée direct.
+      if (!data.session) {
+        return {
+          ok: false,
+          error:
+            'Compte créé ! Vérifie ta boîte mail pour confirmer ton inscription (ou désactive la confirmation email dans Supabase).',
+        };
+      }
+      return { ok: true };
+    },
+    [],
+  );
+
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: 'Supabase non configuré' };
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail.includes('@')) return { ok: false, error: 'Email invalide' };
+
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: typeof window !== 'undefined' ? window.location.origin + '/' : undefined,
+      });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    },
+    [],
+  );
+
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
     if (!supabase) return;
@@ -275,6 +362,9 @@ function useAuthState(): AuthContextValue {
     ...state,
     sendMagicLink,
     verifyOtp,
+    signInWithPassword,
+    signUpWithPassword,
+    resetPassword,
     signOut,
     updateProfile,
   };

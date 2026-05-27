@@ -372,13 +372,16 @@ export function HomeV2({
       {/* Animation FlyingDrop signature ajout panier */}
       {flyOverlay}
 
-      {/* Modale auth — code OTP 6 chiffres */}
+      {/* Modale auth — email + mot de passe */}
       <AuthModal
         palette={palette}
         open={authOpen}
         onClose={() => setAuthOpen(false)}
         onSendMagicLink={auth.sendMagicLink}
         onVerifyOtp={auth.verifyOtp}
+        onSignInWithPassword={auth.signInWithPassword}
+        onSignUpWithPassword={auth.signUpWithPassword}
+        onResetPassword={auth.resetPassword}
       />
 
       {/* Bottom sheet profil (visible uniquement si connecté) */}
