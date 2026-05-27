@@ -140,9 +140,10 @@ function useAuthState(): AuthContextValue {
           return;
         }
 
-        // Session VALIDE → on set le state directement depuis localStorage
-        // sans toucher à supabase.auth.getSession()
-        console.log('[useAuth] BOOT — session valide, état authenticated');
+        // Session VALIDE → on set le state IMMÉDIATEMENT (état authenticated)
+        // pour que l'UI affiche le compte tout de suite. fetchProfile est
+        // chargé en arrière-plan sans bloquer l'affichage.
+        console.log('[useAuth] BOOT — session valide, état authenticated (instant)');
         const fakeSession = {
           access_token: parsed.access_token,
           refresh_token: parsed.refresh_token,
@@ -152,24 +153,28 @@ function useAuthState(): AuthContextValue {
           user: parsed.user,
         } as Session;
 
-        // Tentative fetchProfile en arrière-plan (peut hang, on s'en fout)
-        const userId = parsed.user?.id;
-        let profile: Profile | null = null;
-        if (userId) {
-          // Promise avec timeout 5s pour éviter de bloquer
-          const profilePromise = fetchProfile(userId);
-          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
-          profile = await Promise.race([profilePromise, timeout]);
+        // Set state immédiat AVEC profile=null — UI montre "Mon compte" direct
+        if (!cancelled) {
+          setState({
+            status: 'authenticated',
+            session: fakeSession,
+            profile: null,
+            email: parsed.user?.email ?? null,
+            inPasswordRecovery: false,
+          });
         }
-        if (cancelled) return;
 
-        setState({
-          status: 'authenticated',
-          session: fakeSession,
-          profile,
-          email: parsed.user?.email ?? null,
-          inPasswordRecovery: false,
-        });
+        // fetchProfile en arrière-plan (1.5s timeout) — met à jour le state
+        // quand il arrive sans bloquer le rendu initial
+        const userId = parsed.user?.id;
+        if (userId) {
+          const profilePromise = fetchProfile(userId);
+          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+          Promise.race([profilePromise, timeout]).then((profile) => {
+            if (cancelled || !profile) return;
+            setState((s) => ({ ...s, profile }));
+          });
+        }
       } catch (e) {
         console.error('[useAuth] BOOT failed:', e);
         if (!cancelled) {
@@ -423,8 +428,8 @@ function useAuthState(): AuthContextValue {
             };
             window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
             console.log('[useAuth] session écrite, reload imminent');
-            // Petit délai pour que le storage soit bien flushé avant reload
-            window.setTimeout(() => window.location.reload(), 300);
+            // Délai minimal pour flush storage iOS PWA, puis reload
+            window.setTimeout(() => window.location.reload(), 80);
           } catch (e) {
             console.error('[useAuth] localStorage write failed:', e);
             return { ok: false, error: 'Impossible de stocker la session' };
