@@ -69,8 +69,8 @@ export default async function handler(req: any, res: any) {
 
   // ─── send (admin push to all) ────────────────────────────────
   if (action === 'send' && req.method === 'POST') {
-    const expectedPassword = process.env.ADMIN_PUSH_PASSWORD;
-    if (!expectedPassword) return res.status(500).json({ error: 'ADMIN_PUSH_PASSWORD non configuré' });
+    const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
+    if (!expectedPassword) return res.status(500).json({ error: 'ADMIN_PASSWORD non configuré' });
     const authHeader = req.headers?.authorization ?? '';
     const provided = authHeader.replace(/^Bearer\s+/, '').trim();
     if (provided !== expectedPassword) return res.status(401).json({ error: 'Non autorisé' });

@@ -50,7 +50,7 @@ function getActionFromQuery(req: any): string | null {
 }
 
 function requireAdmin(req: any): boolean {
-  const expectedPassword = process.env.ADMIN_PUSH_PASSWORD;
+  const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
   if (!expectedPassword) return false;
   const authHeader = req.headers?.authorization ?? '';
   const provided = authHeader.replace(/^Bearer\s+/, '').trim();
