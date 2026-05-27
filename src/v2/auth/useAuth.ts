@@ -135,6 +135,9 @@ function useAuthState(): AuthContextValue {
     [],
   );
 
+  // ⚠️ Bypass supabase-js : on appelle DIRECTEMENT l'endpoint REST Supabase.
+  // Cela évite tout bug interne du client (versionning, refresh token, etc.).
+  // Au succès, on setSession() manuellement pour que onAuthStateChange fire.
   const verifyOtp = useCallback(
     async (email: string, token: string): Promise<{ ok: boolean; error?: string }> => {
       const supabase = getSupabase();
@@ -145,45 +148,72 @@ function useAuthState(): AuthContextValue {
         return { ok: false, error: 'Le code doit faire 6 chiffres' };
       }
 
-      console.log('[useAuth] verifyOtp start', { email: cleanEmail });
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!url || !anonKey) {
+        return { ok: false, error: 'Config Supabase manquante' };
+      }
 
-      // Timeout 15s pour éviter un hang infini si Supabase ne répond pas
-      const timeoutMs = 15000;
-      let timeoutId: ReturnType<typeof setTimeout> | null = null;
-      const timeoutPromise = new Promise<{ error: { message: string } }>((resolve) => {
-        timeoutId = setTimeout(() => {
-          resolve({
-            error: {
-              message:
-                'Délai dépassé — vérifie ta connexion ou redemande un nouveau code.',
-            },
-          });
-        }, timeoutMs);
-      });
+      console.log('[useAuth] verifyOtp direct REST call', { email: cleanEmail, url });
+
+      // Timeout 10s via AbortController (vrai timeout réseau, pas race promise)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const verifyPromise = supabase.auth.verifyOtp({
-          email: cleanEmail,
-          token: cleanToken,
-          type: 'email',
+        const resp = await fetch(`${url}/auth/v1/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({
+            type: 'email',
+            email: cleanEmail,
+            token: cleanToken,
+          }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
-        const result = (await Promise.race([verifyPromise, timeoutPromise])) as {
-          error: { message: string } | null;
-        };
-        if (timeoutId) clearTimeout(timeoutId);
+        const data = await resp.json().catch(() => ({}));
+        console.log('[useAuth] verifyOtp REST response', resp.status, data);
 
-        if (result.error) {
-          console.error('[useAuth] verifyOtp error:', result.error.message);
-          return { ok: false, error: result.error.message };
+        if (!resp.ok) {
+          const msg =
+            data?.error_description || data?.msg || data?.error || `HTTP ${resp.status}`;
+          return { ok: false, error: msg };
         }
 
-        console.log('[useAuth] verifyOtp OK');
+        // Réponse OK → on a access_token + refresh_token + user
+        if (!data.access_token || !data.refresh_token) {
+          return { ok: false, error: 'Réponse Supabase invalide (pas de session)' };
+        }
+
+        // Injecte la session dans le client supabase-js
+        const { error: setErr } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+
+        if (setErr) {
+          console.error('[useAuth] setSession error:', setErr.message);
+          return { ok: false, error: setErr.message };
+        }
+
+        console.log('[useAuth] verifyOtp OK + session injectée');
         return { ok: true };
       } catch (e: any) {
-        if (timeoutId) clearTimeout(timeoutId);
-        console.error('[useAuth] verifyOtp threw:', e?.message ?? e);
-        return { ok: false, error: e?.message ?? 'Erreur inconnue' };
+        clearTimeout(timeoutId);
+        if (e?.name === 'AbortError') {
+          return {
+            ok: false,
+            error: 'Délai dépassé — vérifie ta connexion ou redemande un nouveau code.',
+          };
+        }
+        console.error('[useAuth] verifyOtp REST threw:', e?.message ?? e);
+        return { ok: false, error: e?.message ?? 'Erreur réseau' };
       }
     },
     [],
