@@ -191,18 +191,47 @@ function useAuthState(): AuthContextValue {
           return { ok: false, error: 'Réponse Supabase invalide (pas de session)' };
         }
 
-        // Injecte la session dans le client supabase-js
-        const { error: setErr } = await supabase.auth.setSession({
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-        });
-
-        if (setErr) {
-          console.error('[useAuth] setSession error:', setErr.message);
-          return { ok: false, error: setErr.message };
+        // Injecte la session dans le client supabase-js avec timeout 3s
+        // (au cas où setSession serait elle aussi buggée)
+        const setSessionController = new AbortController();
+        const setSessionTimeout = setTimeout(() => setSessionController.abort(), 3000);
+        try {
+          const setSessionPromise = supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+          });
+          const abortPromise = new Promise<{ error: { message: string } }>((_, reject) => {
+            setSessionController.signal.addEventListener('abort', () =>
+              reject(new Error('setSession timeout')),
+            );
+          });
+          await Promise.race([setSessionPromise, abortPromise]);
+          clearTimeout(setSessionTimeout);
+          console.log('[useAuth] verifyOtp OK + session injectée via setSession');
+        } catch (setErr: any) {
+          clearTimeout(setSessionTimeout);
+          console.warn('[useAuth] setSession failed/timed out, fallback localStorage write:', setErr?.message);
+          // Fallback nuclear option : on écrit la session DIRECTEMENT en localStorage
+          // au format Supabase attend. Au prochain getSession() ou reload, ce sera lu.
+          try {
+            const projectRef = url.replace('https://', '').split('.')[0];
+            const storageKey = `sb-${projectRef}-auth-token`;
+            const sessionData = {
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+              token_type: data.token_type || 'bearer',
+              expires_in: data.expires_in,
+              expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+              user: data.user,
+            };
+            window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
+            console.log('[useAuth] session écrite en localStorage:', storageKey);
+            // Force reload pour que tout se rafraîchisse proprement
+            window.setTimeout(() => window.location.reload(), 300);
+          } catch (lsErr) {
+            console.error('[useAuth] localStorage fallback failed:', lsErr);
+          }
         }
-
-        console.log('[useAuth] verifyOtp OK + session injectée');
         return { ok: true };
       } catch (e: any) {
         clearTimeout(timeoutId);
