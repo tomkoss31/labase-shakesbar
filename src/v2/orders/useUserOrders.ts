@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, getStoredSession } from '../../lib/supabase';
 
 export interface UserOrder {
   id: string;
@@ -24,8 +24,9 @@ export function useUserOrders() {
         setOrders([]);
         return;
       }
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
+      // Bypass getSession() qui hang iOS PWA — lit localStorage direct
+      const stored = getStoredSession();
+      const token = stored?.access_token;
       if (!token) {
         setOrders([]);
         return;

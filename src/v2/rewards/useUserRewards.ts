@@ -1,7 +1,7 @@
 // Hook qui récupère les récompenses actives (codes roue non utilisés non expirés)
 // du user authentifié. Refetch quand le user change ou quand on demande explicitement.
 import { useCallback, useEffect, useState } from 'react';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, getStoredSession } from '../../lib/supabase';
 
 export interface UserReward {
   id: string;
@@ -27,8 +27,9 @@ export function useUserRewards() {
         setRewards([]);
         return;
       }
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
+      // Bypass getSession() qui hang iOS PWA
+      const stored = getStoredSession();
+      const token = stored?.access_token;
       if (!token) {
         setRewards([]);
         return;

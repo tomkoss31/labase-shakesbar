@@ -1,6 +1,6 @@
 // Hook pour gérer l'inscription aux push notifications web (PWA)
 import { useCallback, useEffect, useState } from 'react';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, getStoredSession } from '../../lib/supabase';
 
 export type PushPermission = NotificationPermission | 'unsupported';
 
@@ -95,13 +95,8 @@ export function usePushNotifications() {
         });
       }
 
-      // 3. Récupère le user id si connecté pour lier l'abonnement
-      let userId: string | null = null;
-      const supabase = getSupabase();
-      if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        userId = data.session?.user?.id ?? null;
-      }
+      // 3. Récupère le user id si connecté (bypass getSession iOS PWA hang)
+      const userId: string | null = getStoredSession()?.user.id ?? null;
 
       // 4. Envoie au backend
       const payload = subscription.toJSON();

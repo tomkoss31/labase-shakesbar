@@ -11,7 +11,7 @@ import {
   WHEEL_COOLDOWN_DAYS,
   type WheelSegment,
 } from './segments';
-import { getSupabase } from '../../lib/supabase';
+import { getSupabase, getStoredSession } from '../../lib/supabase';
 import { track } from '../../lib/analytics';
 
 interface WheelModalProps {
@@ -59,8 +59,9 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
     const supabase = getSupabase();
     if (supabase) {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData.session?.access_token;
+        // Bypass getSession() qui hang iOS PWA
+        const stored = getStoredSession();
+        const token = stored?.access_token;
         if (token) {
           const resp = await fetch('/api/wheel?action=spin', {
             method: 'POST',

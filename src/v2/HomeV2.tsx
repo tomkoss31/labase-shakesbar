@@ -391,6 +391,7 @@ export function HomeV2({
         onClose={() => setProfileOpen(false)}
         profile={auth.profile}
         email={auth.email}
+        userId={auth.session?.user?.id ?? null}
         onUpdateProfile={auth.updateProfile}
         onSignOut={auth.signOut}
       />

@@ -16,6 +16,7 @@ interface ProfileSheetProps {
   onClose: () => void;
   profile: Profile | null;
   email: string | null;
+  userId: string | null;
   onUpdateProfile: (patch: { first_name?: string; birthday?: string }) => Promise<{ ok: boolean; error?: string }>;
   onSignOut: () => Promise<void>;
 }
@@ -30,6 +31,7 @@ export function ProfileSheet({
   onClose,
   profile,
   email,
+  userId,
   onUpdateProfile,
   onSignOut,
 }: ProfileSheetProps) {
@@ -347,8 +349,8 @@ export function ProfileSheet({
           )}
         </div>
 
-        {/* Mon code QR à scanner au comptoir */}
-        {profile && (
+        {/* Mon code QR à scanner au comptoir — visible dès que connecté */}
+        {userId && (
           <button
             onClick={() => setMyCodeOpen(true)}
             style={{
@@ -661,13 +663,14 @@ export function ProfileSheet({
       {/* Modale roue cadeau */}
       <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} />
 
-      {/* Modale Mon Code QR */}
-      {profile && (
+      {/* Modale Mon Code QR — userId suffit (profile peut être null en attendant
+          le chargement asynchrone) */}
+      {userId && (
         <MyCodeModal
           palette={palette}
           open={myCodeOpen}
           onClose={() => setMyCodeOpen(false)}
-          userId={profile.id}
+          userId={userId}
           profile={profile}
         />
       )}

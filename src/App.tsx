@@ -37,7 +37,7 @@ import { PendingCashModal } from './v2/PendingCashModal';
 import { PALETTE_E } from './v2/palette';
 import { useUserRewards } from './v2/rewards/useUserRewards';
 import { useAuth } from './v2/auth/useAuth';
-import { getSupabase } from './lib/supabase';
+import { getSupabase, getStoredSession } from './lib/supabase';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -874,12 +874,9 @@ function App() {
     }
     setIsCreatingPendingCash(true);
     try {
-      let userEmail: string | undefined;
-      const supabase = getSupabase();
-      if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        userEmail = data.session?.user?.email ?? undefined;
-      }
+      // Lecture directe localStorage (bypass getSession hang iOS PWA)
+      const userEmail: string | undefined =
+        appAuth.email ?? getStoredSession()?.user.email ?? undefined;
 
       const response = await fetch('/api/orders?action=create-pending', {
         method: 'POST',
@@ -919,12 +916,10 @@ function App() {
 
       // Récupère email du user authentifié pour permettre au webhook Square
       // d'associer le paiement à un compte (XP, VIP, historique)
-      let userEmail: string | undefined;
-      const supabase = getSupabase();
-      if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        userEmail = data.session?.user?.email ?? undefined;
-      }
+      // ⚠️ getStoredSession() lit localStorage directement (bypass le getSession
+      // hang iOS PWA) qui faisait tourner Square sans jamais lancer le checkout.
+      const userEmail: string | undefined =
+        appAuth.email ?? getStoredSession()?.user.email ?? undefined;
 
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',

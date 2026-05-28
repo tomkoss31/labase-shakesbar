@@ -60,3 +60,31 @@ export function getSupabase(): SupabaseClient | null {
 export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey);
 }
+
+/**
+ * Lit la session directement depuis localStorage sans passer par
+ * supabase.auth.getSession() qui hang sur iOS PWA (bug Web Lock
+ * dans @supabase/auth-js v2.106). Retourne null si pas de session
+ * valide.
+ */
+export function getStoredSession(): {
+  access_token: string;
+  refresh_token: string;
+  user: { id: string; email?: string };
+  expires_at?: number;
+} | null {
+  if (!url || typeof window === 'undefined') return null;
+  try {
+    const projectRef = url.replace(/^https?:\/\//, '').split('.')[0];
+    const raw = window.localStorage.getItem(`sb-${projectRef}-auth-token`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.access_token || !parsed?.user?.id) return null;
+    // Check expiry
+    const now = Math.floor(Date.now() / 1000);
+    if (parsed.expires_at && parsed.expires_at <= now) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
