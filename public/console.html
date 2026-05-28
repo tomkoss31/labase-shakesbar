@@ -436,6 +436,10 @@
         <video id="video" autoplay playsinline muted></video>
         <canvas id="canvas" style="display: none;"></canvas>
       </div>
+      <!-- Debug live : ce que voit le scanner en ce moment -->
+      <div id="scanner-debug" style="display: none; margin-top: 8px; padding: 8px 10px; background: #04100f; border: 1px solid rgba(94,234,212,.2); border-radius: 8px; font-size: 11px; font-family: monospace; color: #94b8b1; word-break: break-all;">
+        En attente de QR…
+      </div>
       <div style="margin-top: 10px;">
         <label>Ou colle un ID manuellement</label>
         <input type="text" id="manualId" placeholder="UUID utilisateur ou code CASH-XXXX" />
@@ -717,6 +721,8 @@ $('toggleCam').addEventListener('click', async () => {
     });
     $('video').srcObject = stream;
     $('scannerZone').style.display = 'block';
+    $('scanner-debug').style.display = 'block';
+    $('scanner-debug').textContent = 'En attente de QR…';
     $('toggleCam').textContent = 'Arrêter';
     scanning = true;
     scanLoop();
@@ -737,12 +743,15 @@ function scanLoop() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const code = window.jsQR(imageData.data, canvas.width, canvas.height);
     if (code && code.data) {
+      $('scanner-debug').textContent = '🟢 QR détecté : ' + code.data.slice(0, 60);
       const now = Date.now();
       if (code.data !== lastScanned || now - lastScannedAt > 3000) {
         lastScanned = code.data;
         lastScannedAt = now;
         handleScanned(code.data);
       }
+    } else {
+      $('scanner-debug').textContent = '⏳ Pas de QR détecté — rapproche le code ou ajuste la lumière';
     }
   }
   requestAnimationFrame(scanLoop);
@@ -750,12 +759,14 @@ function scanLoop() {
 
 function handleScanned(text) {
   if (text.startsWith('LABASE-USER:')) {
+    $('scanner-debug').textContent = '✅ Code client reconnu, lookup en cours…';
     lookupUser(text.replace('LABASE-USER:', ''));
   } else if (text.startsWith('LABASE-CASH:')) {
     const code = text.replace('LABASE-CASH:', '');
     showScannerResult('ok', '💵 Code commande espèces : <b>' + code + '</b>. Va dans l\'onglet Comptoir pour encaisser.');
   } else {
     showScannerResult('err', 'QR non reconnu : ' + text.slice(0, 40));
+    $('scanner-debug').textContent = '❌ QR non reconnu (préfixe LABASE-USER: manquant)';
   }
 }
 
