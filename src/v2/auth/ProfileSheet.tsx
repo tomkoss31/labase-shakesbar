@@ -473,9 +473,16 @@ export function ProfileSheet({
           <button
             onClick={async () => {
               if (push.subscribed) {
-                await push.disable();
+                const res = await push.disable();
+                if (!res.ok) window.alert('Impossible de désactiver les notifications.');
               } else {
-                await push.enable();
+                const res = await push.enable();
+                if (!res.ok) {
+                  window.alert(
+                    'Notifications non activées : ' + (res.error ?? 'erreur inconnue') +
+                    '\n\nVérifie que tu as accepté la permission, et que VITE_VAPID_PUBLIC_KEY est bien configuré côté Vercel.',
+                  );
+                }
               }
             }}
             disabled={push.loading}

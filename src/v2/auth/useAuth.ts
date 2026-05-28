@@ -532,19 +532,50 @@ function useAuthState(): AuthContextValue {
     await supabase.auth.signOut();
   }, []);
 
+  // Bypass supabase.from() qui hang iOS PWA — passe par REST PostgREST direct
   const updateProfile = useCallback(
     async (patch: Partial<Pick<Profile, 'first_name' | 'birthday'>>) => {
-      const supabase = getSupabase();
-      if (!supabase || !state.session) return { ok: false, error: 'Non authentifié' };
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(patch)
-        .eq('id', state.session.user.id)
-        .select()
-        .single();
-      if (error) return { ok: false, error: error.message };
-      setState((s) => ({ ...s, profile: data as Profile }));
-      return { ok: true };
+      const envUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!envUrl || !anonKey || !state.session)
+        return { ok: false, error: 'Non authentifié' };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const resp = await fetch(
+          `${envUrl}/rest/v1/profiles?id=eq.${state.session.user.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: anonKey,
+              Authorization: `Bearer ${state.session.access_token}`,
+              Prefer: 'return=representation',
+            },
+            body: JSON.stringify(patch),
+            signal: controller.signal,
+          },
+        );
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) {
+          const data = await resp.json().catch(() => ({}));
+          return { ok: false, error: data?.message || `HTTP ${resp.status}` };
+        }
+
+        const rows = (await resp.json()) as Profile[];
+        const updated = rows?.[0];
+        if (updated) setState((s) => ({ ...s, profile: updated }));
+        return { ok: true };
+      } catch (e: any) {
+        clearTimeout(timeoutId);
+        if (e?.name === 'AbortError') {
+          return { ok: false, error: 'Délai dépassé — réessaie' };
+        }
+        return { ok: false, error: e?.message ?? 'Erreur réseau' };
+      }
     },
     [state.session],
   );
