@@ -401,6 +401,100 @@ export function HomeV2({
         </>
       )}
 
+      {/* La Base = bien plus qu'un bar : club bien-être + opportunité revenus */}
+      <div style={{ padding: '8px 16px 0' }}>
+        <div
+          style={{
+            borderRadius: 22,
+            overflow: 'hidden',
+            border: `1px solid ${palette.line}`,
+            background: `linear-gradient(135deg, ${palette.card}, ${palette.cardHi})`,
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              right: -30,
+              top: -30,
+              width: 160,
+              height: 160,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${palette.primary}22, transparent 70%)`,
+            }}
+          />
+          <div style={{ padding: 20, position: 'relative' }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '.15em',
+                color: palette.primary,
+                textTransform: 'uppercase',
+              }}
+            >
+              ✨ La Base, c'est aussi un club
+            </div>
+            <div
+              style={{
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 900,
+                fontSize: 22,
+                lineHeight: 1.15,
+                margin: '6px 0 8px',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Ton accompagnement bien-être
+            </div>
+            <div style={{ fontSize: 13.5, color: palette.textDim, lineHeight: 1.5, marginBottom: 16 }}>
+              Perte de poids, énergie, performance sportive : on t'accompagne avec un
+              <b style={{ color: palette.text }}> bilan offert</b> et un suivi personnalisé.
+            </div>
+            <a
+              href={`https://wa.me/33679448759?text=${encodeURIComponent(
+                "Salut ! Je voudrais faire mon bilan bien-être offert La Base 💪",
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                textDecoration: 'none',
+                padding: '14px',
+                background: palette.cta,
+                color: palette.ctaText,
+                borderRadius: 14,
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 900,
+                fontSize: 14,
+                boxShadow: `0 10px 28px ${palette.cta}55`,
+              }}
+            >
+              💪 Faire mon bilan offert
+            </a>
+            <a
+              href={`https://wa.me/33679448759?text=${encodeURIComponent(
+                "Salut ! Je veux en savoir plus sur l'opportunité La Base pour compléter mes revenus 🚀",
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                textDecoration: 'none',
+                marginTop: 10,
+                fontSize: 12,
+                color: palette.primary,
+                fontWeight: 700,
+              }}
+            >
+              🚀 Envie de compléter tes revenus ? Rejoins l'équipe →
+            </a>
+          </div>
+        </div>
+      </div>
+
       <InfoBlock palette={palette} />
       <InstaCard palette={palette} />
 

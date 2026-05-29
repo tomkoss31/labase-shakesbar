@@ -94,27 +94,28 @@ export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalPro
         WebkitBackdropFilter: 'blur(12px)',
         zIndex: 70,
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
+        padding: 16,
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: 480,
+          maxWidth: 460,
+          minHeight: 320,
           maxHeight: '85vh',
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
           background: `linear-gradient(180deg, ${palette.cardHi}, ${palette.bg})`,
           border: `1px solid ${palette.line}`,
-          borderRadius: '28px 28px 0 0',
-          padding: '20px 18px calc(28px + env(safe-area-inset-bottom, 0px))',
+          borderRadius: 24,
+          padding: '22px 18px',
           color: palette.text,
           fontFamily: 'Inter, sans-serif',
         }}
       >
-        <div style={{ width: 40, height: 4, background: palette.line, borderRadius: 999, margin: '0 auto 16px' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 22 }}>
