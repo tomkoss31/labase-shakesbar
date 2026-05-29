@@ -55,7 +55,8 @@
   .lead b { color: #ecfdf5; }
 
   .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
-  .pillar { background: linear-gradient(180deg, rgba(19,48,44,.7), rgba(14,31,29,.7)); border: 1px solid rgba(94,234,212,.12); border-radius: 16px; padding: 16px 8px; text-align: center; }
+  .pillar { display: block; text-decoration: none; color: #ecfdf5; background: linear-gradient(180deg, rgba(19,48,44,.7), rgba(14,31,29,.7)); border: 1px solid rgba(94,234,212,.12); border-radius: 16px; padding: 16px 8px; text-align: center; transition: border-color .15s, transform .15s; }
+  .pillar:active { transform: scale(.96); }
   .pillar-emoji { font-size: 28px; }
   .pillar-txt { font-family: 'Outfit'; font-weight: 800; font-size: 12px; margin-top: 6px; line-height: 1.2; }
 
@@ -121,10 +122,11 @@
     </div>
 
     <div class="pillars anim d4">
-      <div class="pillar"><div class="pillar-emoji">⚖️</div><div class="pillar-txt">Perte de poids</div></div>
-      <div class="pillar"><div class="pillar-emoji">⚡</div><div class="pillar-txt">Énergie</div></div>
-      <div class="pillar"><div class="pillar-emoji">🏆</div><div class="pillar-txt">Performance</div></div>
+      <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="pillar"><div class="pillar-emoji">⚖️</div><div class="pillar-txt">Perte de poids</div></a>
+      <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="pillar"><div class="pillar-emoji">⚡</div><div class="pillar-txt">Énergie</div></a>
+      <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="pillar"><div class="pillar-emoji">🏆</div><div class="pillar-txt">Performance</div></a>
     </div>
+    <div class="anim d4" style="text-align:center;font-size:11px;color:#7fa99f;margin:-18px 0 28px;">👆 Choisis ton objectif pour démarrer ton bilan</div>
   </div>
 
   <div class="section-title anim d5">Qui sommes-nous</div>
@@ -163,10 +165,10 @@
     </div>
   </div>
 
-  <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="cta anim d6">
+  <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="cta">
     💪 Faire mon bilan offert
   </a>
-  <div class="cta-sub anim d6">Gratuit · sans engagement · en ligne</div>
+  <div class="cta-sub">Gratuit · sans engagement · en ligne</div>
 
   <div class="section-title">Et si tu en faisais ton activité ?</div>
   <div class="opp-card anim d6">
