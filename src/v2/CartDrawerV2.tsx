@@ -510,9 +510,26 @@ export function CartDrawerV2({
                         {claimedGift.title} <span style={{ color: palette.primary }}>offert ✓</span>
                       </div>
                       <div style={{ fontSize: 11, color: palette.textDim, marginTop: 2 }}>
-                        −{claimedGift.cost} XP · à récupérer au comptoir avec ta commande
+                        −{claimedGift.cost} XP · débité à la validation de ta commande
                       </div>
                     </div>
+                    <button
+                      onClick={() => onClaimGift(null as any)}
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid ${palette.line}`,
+                        color: palette.textDim,
+                        borderRadius: 8,
+                        padding: '6px 10px',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        flexShrink: 0,
+                      }}
+                    >
+                      Retirer
+                    </button>
                   </div>
                 </div>
               );

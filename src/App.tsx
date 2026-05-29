@@ -57,6 +57,7 @@ type CartItem = {
 };
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
+const PENDING_GIFT_KEY = 'labase-pending-gift';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
 const VIEW_MODE_KEY = 'labase-menu-view-mode';
 
@@ -260,35 +261,45 @@ function App() {
   const userXp = appAuth.profile?.xp ?? 0;
   const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
 
-  // Le client réclame un extra offert avec ses XP (depuis le panier).
-  // Déduction immédiate et sécurisée (API claim-reward authentifiée par son compte).
-  async function handleClaimGift(reward: { id: string; title: string; emoji: string; cost: number }) {
-    const stored = getStoredSession();
-    const token = stored?.access_token;
-    if (!token) {
+  // Le client SÉLECTIONNE un extra à offrir avec ses XP (depuis le panier).
+  // ⚠️ Aucun débit ici : c'est une simple sélection réversible. Les XP ne sont
+  // débités qu'à la VALIDATION de la commande (voir redeemClaimedGift).
+  function handleClaimGift(reward: { id: string; title: string; emoji: string; cost: number } | null) {
+    if (!reward) {
+      setClaimedGift(null);
+      return;
+    }
+    if (!getStoredSession()?.access_token) {
       window.alert('Connecte-toi pour utiliser tes XP.');
       return;
     }
-    if (!window.confirm(`Utiliser ${reward.cost} XP pour ${reward.emoji} ${reward.title} ? Tu le récupéreras au comptoir avec ta commande.`)) {
+    if (userXp < reward.cost) {
+      window.alert('Tu n\'as pas assez de XP pour ce cadeau.');
       return;
     }
+    setClaimedGift(reward);
+    setToastMessage(`🎁 ${reward.title} ajouté · débité à la validation`);
+  }
+
+  // Débite réellement les XP du cadeau sélectionné — appelé UNIQUEMENT à la
+  // validation d'une commande (Square success / espèces / WhatsApp).
+  async function redeemClaimedGift(rewardId: string): Promise<boolean> {
+    const token = getStoredSession()?.access_token;
+    if (!token) return false;
     try {
       const resp = await fetch('/api/orders?action=claim-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ rewardId: reward.id }),
+        body: JSON.stringify({ rewardId }),
       });
-      const data = await resp.json();
       if (resp.ok) {
-        setClaimedGift(reward);
-        setToastMessage(`🎁 ${reward.title} ajouté ! −${reward.cost} XP`);
         await appAuth.refreshProfile();
-      } else {
-        window.alert(data?.error || 'Impossible de réclamer ce cadeau.');
+        return true;
       }
     } catch {
-      window.alert('Erreur réseau, réessaie.');
+      // silencieux : on ne bloque pas la commande si le claim échoue
     }
+    return false;
   }
   const [pendingCashCode, setPendingCashCode] = useState<string | null>(null);
   const [pendingCashTotal, setPendingCashTotal] = useState(0);
@@ -340,6 +351,13 @@ function App() {
         setCart([]);
         window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
         track('order_paid_square');
+        // Débite le cadeau XP choisi (maintenant que la commande est validée)
+        const pendingGift = window.sessionStorage.getItem(PENDING_GIFT_KEY);
+        if (pendingGift) {
+          window.sessionStorage.removeItem(PENDING_GIFT_KEY);
+          void redeemClaimedGift(pendingGift);
+          setClaimedGift(null);
+        }
         // Avis Google : prompt déclenché 8s après le paiement réussi
         // (laisse au user le temps de voir le live tracking d'abord),
         // avec cooldown 30j pour ne pas re-demander trop souvent.
@@ -892,6 +910,11 @@ function App() {
     }
 
     track('order_whatsapp', { items_count: cart.length });
+    // Commande WhatsApp envoyée → on débite le cadeau XP choisi
+    if (claimedGift) {
+      void redeemClaimedGift(claimedGift.id);
+      setClaimedGift(null);
+    }
     window.open(whatsappLink, '_blank', 'noopener,noreferrer');
   }
 
@@ -923,6 +946,11 @@ function App() {
       setPendingCashCode(data.code);
       track('order_paid_cash', { total_cents: data.totalCents ?? 0, items_count: cart.length });
       setPendingCashTotal(data.totalCents);
+      // Commande validée → on débite le cadeau XP choisi
+      if (claimedGift) {
+        void redeemClaimedGift(claimedGift.id);
+        setClaimedGift(null);
+      }
       setCart([]); // vide le panier puisque la commande est créée côté serveur
       setDrawerOpen(false);
     } catch (err: any) {
@@ -986,6 +1014,10 @@ function App() {
       }
 
       window.sessionStorage.setItem(PENDING_SQUARE_CHECKOUT_KEY, '1');
+      // Mémorise le cadeau XP choisi : débité au retour (payment=success)
+      if (claimedGift) {
+        window.sessionStorage.setItem(PENDING_GIFT_KEY, claimedGift.id);
+      }
       window.location.href = data.url;
     } catch (error) {
       console.error(error);
