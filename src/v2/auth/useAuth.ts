@@ -51,23 +51,69 @@ function useAuthState(): AuthContextValue {
     inPasswordRecovery: false,
   });
 
+  // Bypass supabase.from() qui hang iOS PWA — passe par REST PostgREST direct
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
-    const supabase = getSupabase();
-    if (!supabase) return null;
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (error) {
-      if (error.code === 'PGRST116') {
-        const { data: created } = await supabase
-          .from('profiles')
-          .insert({ id: userId })
-          .select()
-          .single();
-        return created as Profile | null;
+    const envUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!envUrl || !anonKey) return null;
+
+    // On a besoin du token pour passer RLS
+    const stored = (() => {
+      try {
+        const projectRef = envUrl.replace(/^https?:\/\//, '').split('.')[0];
+        const raw = window.localStorage.getItem(`sb-${projectRef}-auth-token`);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
       }
-      console.warn('[useAuth] fetchProfile error:', error.message);
+    })();
+    const token = stored?.access_token;
+    if (!token) return null;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const resp = await fetch(
+        `${envUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
+        {
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        },
+      );
+      clearTimeout(timeoutId);
+
+      if (!resp.ok) {
+        console.warn('[useAuth] fetchProfile HTTP', resp.status);
+        return null;
+      }
+      const rows = (await resp.json()) as Profile[];
+      if (rows.length > 0) return rows[0];
+
+      // Pas de profile → on en crée un (trigger handle_new_user a peut-être raté)
+      const createResp = await fetch(`${envUrl}/rest/v1/profiles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: anonKey,
+          Authorization: `Bearer ${token}`,
+          Prefer: 'return=representation',
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+      if (createResp.ok) {
+        const created = (await createResp.json()) as Profile[];
+        return created[0] ?? null;
+      }
+      return null;
+    } catch (e: any) {
+      clearTimeout(timeoutId);
+      console.warn('[useAuth] fetchProfile error:', e?.message ?? e);
       return null;
     }
-    return data as Profile;
   }, []);
 
   useEffect(() => {
