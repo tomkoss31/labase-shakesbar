@@ -34,6 +34,7 @@ interface AuthContextValue extends AuthState {
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ ok: boolean; error?: string }>;
   dismissPasswordRecovery: () => void;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (
     patch: Partial<Pick<Profile, 'first_name' | 'birthday'>>,
@@ -572,6 +573,14 @@ function useAuthState(): AuthContextValue {
     setState((s) => ({ ...s, inPasswordRecovery: false }));
   }, []);
 
+  // Re-fetch le profil (après crédit/réclamation XP) pour rafraîchir l'affichage
+  const refreshProfile = useCallback(async () => {
+    const uid = state.session?.user?.id;
+    if (!uid) return;
+    const p = await fetchProfile(uid);
+    if (p) setState((s) => ({ ...s, profile: p }));
+  }, [state.session, fetchProfile]);
+
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
     if (!supabase) return;
@@ -635,6 +644,7 @@ function useAuthState(): AuthContextValue {
     resetPassword,
     updatePassword,
     dismissPasswordRecovery,
+    refreshProfile,
     signOut,
     updateProfile,
   };

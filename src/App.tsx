@@ -258,6 +258,38 @@ function App() {
   const [xpToSpend, setXpToSpend] = useState(0);
   const appAuth = useAuth();
   const userXp = appAuth.profile?.xp ?? 0;
+  const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
+
+  // Le client réclame un extra offert avec ses XP (depuis le panier).
+  // Déduction immédiate et sécurisée (API claim-reward authentifiée par son compte).
+  async function handleClaimGift(reward: { id: string; title: string; emoji: string; cost: number }) {
+    const stored = getStoredSession();
+    const token = stored?.access_token;
+    if (!token) {
+      window.alert('Connecte-toi pour utiliser tes XP.');
+      return;
+    }
+    if (!window.confirm(`Utiliser ${reward.cost} XP pour ${reward.emoji} ${reward.title} ? Tu le récupéreras au comptoir avec ta commande.`)) {
+      return;
+    }
+    try {
+      const resp = await fetch('/api/orders?action=claim-reward', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rewardId: reward.id }),
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        setClaimedGift(reward);
+        setToastMessage(`🎁 ${reward.title} ajouté ! −${reward.cost} XP`);
+        await appAuth.refreshProfile();
+      } else {
+        window.alert(data?.error || 'Impossible de réclamer ce cadeau.');
+      }
+    } catch {
+      window.alert('Erreur réseau, réessaie.');
+    }
+  }
   const [pendingCashCode, setPendingCashCode] = useState<string | null>(null);
   const [pendingCashTotal, setPendingCashTotal] = useState(0);
   const [isCreatingPendingCash, setIsCreatingPendingCash] = useState(false);
@@ -2509,6 +2541,9 @@ function App() {
             userXp={userXp}
             xpToSpend={xpToSpend}
             setXpToSpend={setXpToSpend}
+            isAuthed={appAuth.status === 'authenticated'}
+            claimedGift={claimedGift}
+            onClaimGift={handleClaimGift}
           />
           <PendingCashModal
             palette={PALETTE_E}

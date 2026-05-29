@@ -46,6 +46,9 @@ interface CartDrawerV2Props {
   userXp?: number;
   xpToSpend?: number;
   setXpToSpend?: (xp: number) => void;
+  isAuthed?: boolean;
+  claimedGift?: { id: string; title: string; emoji: string; cost: number } | null;
+  onClaimGift?: (reward: { id: string; title: string; emoji: string; cost: number }) => void;
 }
 
 // Calcule les suggestions intelligentes d'après le panier
@@ -135,6 +138,9 @@ export function CartDrawerV2({
   userXp = 0,
   xpToSpend = 0,
   setXpToSpend,
+  isAuthed = false,
+  claimedGift = null,
+  onClaimGift,
 }: CartDrawerV2Props) {
   const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
 
@@ -480,11 +486,84 @@ export function CartDrawerV2({
             </div>
           )}
 
-          {/* NOTE : le slider "Utiliser mes XP en réduction" a été retiré.
-              Les XP servent désormais au CATALOGUE de cadeaux (écran
-              "Mes récompenses"), récupérés au comptoir. Plus de réduction
-              cash au checkout (trop coûteuse). xpToSpend reste à 0 →
-              l'API Square n'applique aucune réduction XP. */}
+          {/* 🎁 Offre-toi un extra avec tes XP (catalogue, pas de réduction cash) */}
+          {!empty && isAuthed && onClaimGift && (() => {
+            const GIFTS = [
+              { id: 'topping', title: 'Topping offert', emoji: '✨', cost: 250, sub: 'Protéine, créatine, beurre de cacahuète…' },
+              { id: 'boisson', title: 'Une boisson au choix', emoji: '🥤', cost: 800, sub: 'Smoothie ou shake offert' },
+            ];
+            const affordable = GIFTS.filter((g) => userXp >= g.cost);
+            if (claimedGift) {
+              return (
+                <div style={{ marginTop: 20 }}>
+                  <div
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: 14, borderRadius: 14,
+                      background: `linear-gradient(135deg, ${palette.primary}22, ${palette.card})`,
+                      border: `1px solid ${palette.primary}`,
+                    }}
+                  >
+                    <span style={{ fontSize: 24 }}>{claimedGift.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14 }}>
+                        {claimedGift.title} <span style={{ color: palette.primary }}>offert ✓</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: palette.textDim, marginTop: 2 }}>
+                        −{claimedGift.cost} XP · à récupérer au comptoir avec ta commande
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+            if (affordable.length === 0) return null;
+            return (
+              <div style={{ marginTop: 20 }}>
+                <div
+                  style={{
+                    fontSize: 11, fontWeight: 700, color: palette.primary,
+                    letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 4,
+                  }}
+                >
+                  🎁 Offre-toi un extra avec tes XP
+                </div>
+                <div style={{ fontSize: 11, color: palette.textDim, marginBottom: 10 }}>
+                  Tu as {userXp} XP — utilise-les pour un cadeau, récupéré au comptoir.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {affordable.map((g) => (
+                    <button
+                      key={g.id}
+                      onClick={() => onClaimGift(g)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: 13, borderRadius: 14, cursor: 'pointer',
+                        background: palette.card,
+                        border: `1px solid ${palette.line}`,
+                        color: palette.text, fontFamily: 'inherit', textAlign: 'left',
+                      }}
+                    >
+                      <span style={{ fontSize: 22 }}>{g.emoji}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14 }}>{g.title}</div>
+                        <div style={{ fontSize: 11, color: palette.textDim, marginTop: 2 }}>{g.sub}</div>
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 12,
+                          color: palette.ctaText, background: palette.cta,
+                          padding: '6px 10px', borderRadius: 999, flexShrink: 0,
+                        }}
+                      >
+                        −{g.cost} XP
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Quick-adds intelligents */}
           {!empty && suggestions.length > 0 && onAddSuggestion && (

@@ -256,5 +256,59 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ ok: true, order: data });
   }
 
+  // ─── POST ?action=claim-reward (CLIENT, auth JWT) ─────────────────
+  // Le client réclame un cadeau du catalogue avec SES XP (depuis le panier).
+  // Authentifié par son token Supabase (pas le mdp admin) → ne peut déduire
+  // que ses propres XP. Catalogue serveur = source de vérité (anti-triche).
+  // GARDER SYNCHRO avec src/v2/rewards/catalog.ts.
+  if (action === 'claim-reward' && req.method === 'POST') {
+    if (!clients.public) return res.status(500).json({ error: 'Anon key manquante' });
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Auth requise' });
+
+    const { data: userData, error: userError } = await clients.public.auth.getUser(accessToken);
+    if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
+    const userId = userData.user.id;
+
+    const REWARDS: Record<string, { cost: number; label: string }> = {
+      topping: { cost: 250, label: 'Topping offert' },
+      boisson: { cost: 800, label: 'Une boisson au choix' },
+      'combo-gaufre': { cost: 1500, label: 'Boisson + gaufre healthy' },
+      'cadeau-mois': { cost: 2500, label: 'Cadeau du mois' },
+    };
+    const body = await readBody(req);
+    const rewardId = typeof body?.rewardId === 'string' ? body.rewardId : null;
+    const reward = rewardId ? REWARDS[rewardId] : null;
+    if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
+
+    const { data: profile, error: pErr } = await clients.admin
+      .from('profiles')
+      .select('xp')
+      .eq('id', userId)
+      .single();
+    if (pErr || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
+    if (profile.xp < reward.cost) {
+      return res.status(400).json({ error: `XP insuffisants (${profile.xp}/${reward.cost})` });
+    }
+
+    const newXp = profile.xp - reward.cost;
+    const { error: uErr } = await clients.admin
+      .from('profiles')
+      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
+      .eq('id', userId);
+    if (uErr) return res.status(500).json({ error: uErr.message });
+
+    await clients.admin.from('reward_redemptions').insert({
+      user_id: userId,
+      reward_id: rewardId,
+      reward_label: reward.label,
+      xp_cost: reward.cost,
+      source: 'panier',
+    });
+
+    return res.status(200).json({ ok: true, rewardLabel: reward.label, cost: reward.cost, newXp });
+  }
+
   return res.status(400).json({ error: 'Action non reconnue' });
 }
