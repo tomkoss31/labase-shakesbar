@@ -17,6 +17,7 @@ import { AuthModal } from './auth/AuthModal';
 import { ProfileSheet } from './auth/ProfileSheet';
 import { RewardsModal } from './rewards/RewardsModal';
 import { MyCodeModal } from './auth/MyCodeModal';
+import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -57,6 +58,15 @@ export function HomeV2({
   const [profileOpen, setProfileOpen] = useState(false);
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [myCodeOpen, setMyCodeOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+
+  // Affiche l'onboarding au tout premier lancement
+  React.useEffect(() => {
+    if (!hasSeenOnboarding()) {
+      const t = window.setTimeout(() => setOnboardingOpen(true), 700);
+      return () => window.clearTimeout(t);
+    }
+  }, []);
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
   const auth = useAuth();
   const isAuthed = auth.status === 'authenticated';
@@ -399,6 +409,10 @@ export function HomeV2({
         userId={auth.session?.user?.id ?? null}
         onUpdateProfile={auth.updateProfile}
         onSignOut={auth.signOut}
+        onShowOnboarding={() => {
+          setProfileOpen(false);
+          setOnboardingOpen(true);
+        }}
       />
 
       {/* Écran "Mes récompenses" — catalogue de cadeaux XP */}
@@ -424,6 +438,13 @@ export function HomeV2({
           profile={auth.profile}
         />
       )}
+
+      {/* Onboarding / tutoriel (auto au 1er lancement + rejouable via profil) */}
+      <OnboardingModal
+        palette={palette}
+        open={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+      />
     </div>
   );
 }

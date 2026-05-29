@@ -19,6 +19,7 @@ interface ProfileSheetProps {
   userId: string | null;
   onUpdateProfile: (patch: { first_name?: string; birthday?: string }) => Promise<{ ok: boolean; error?: string }>;
   onSignOut: () => Promise<void>;
+  onShowOnboarding?: () => void;
 }
 
 function fmtEuro(cents: number): string {
@@ -34,6 +35,7 @@ export function ProfileSheet({
   userId,
   onUpdateProfile,
   onSignOut,
+  onShowOnboarding,
 }: ProfileSheetProps) {
   const [firstName, setFirstName] = useState(profile?.first_name ?? '');
   const [birthday, setBirthday] = useState(profile?.birthday ?? '');
@@ -632,6 +634,33 @@ export function ProfileSheet({
               })}
             </div>
           </div>
+        )}
+
+        {/* Revoir le tutoriel */}
+        {onShowOnboarding && (
+          <button
+            onClick={onShowOnboarding}
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              padding: '13px 16px',
+              background: 'transparent',
+              border: `1px solid ${palette.line}`,
+              borderRadius: 12,
+              color: palette.text,
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>💡</span>
+            <span style={{ flex: 1, textAlign: 'left' }}>Comment ça marche ?</span>
+            <span style={{ color: palette.textDim }}>→</span>
+          </button>
         )}
 
         {/* Footer actions */}
