@@ -456,6 +456,25 @@
     <div class="sub">Notification envoyée à TOUS les clients qui ont activé les notifs.</div>
 
     <div class="card">
+      <label>🔗 Liens à partager (story, bio…)</label>
+      <div class="hint" style="margin-top:4px;margin-bottom:10px;">Copie et colle dans tes stories Instagram ou ta bio.</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;min-width:0;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:#5eead4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          🎰 commande.labase-nutrition.com/jeu
+        </div>
+        <button class="primary teal copy-link" data-url="https://commande.labase-nutrition.com/jeu" style="padding:10px 14px;border-radius:10px;font-size:12px;white-space:nowrap;cursor:pointer;">📋 Copier</button>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;min-width:0;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:#5eead4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ✨ commande.labase-nutrition.com/club
+        </div>
+        <button class="primary teal copy-link" data-url="https://commande.labase-nutrition.com/club" style="padding:10px 14px;border-radius:10px;font-size:12px;white-space:nowrap;cursor:pointer;">📋 Copier</button>
+      </div>
+    </div>
+
+    <div class="card">
       <label>Titre</label>
       <input type="text" id="push-title" placeholder="Nouveau shake dispo 🍓" maxlength="60" />
 
@@ -1009,6 +1028,25 @@ async function loadRedemptions() {
     $('redemptions-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
   }
 }
+
+// ═══ COPIER LIENS À PARTAGER ═══
+document.querySelectorAll('.copy-link').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const url = btn.dataset.url;
+    const original = btn.textContent;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // fallback si clipboard API indispo
+      const tmp = document.createElement('textarea');
+      tmp.value = url; document.body.appendChild(tmp); tmp.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(tmp);
+    }
+    btn.textContent = '✅ Copié !';
+    setTimeout(() => { btn.textContent = original; }, 1600);
+  });
+});
 
 // ═══ HEALTH ═══
 $('health-check').addEventListener('click', runHealthCheck);
