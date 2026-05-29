@@ -636,6 +636,51 @@ export function ProfileSheet({
           </div>
         )}
 
+        {/* Contact — une question, un retard, une suggestion */}
+        <div
+          style={{
+            marginBottom: 10,
+            padding: 14,
+            background: palette.card,
+            border: `1px solid ${palette.line}`,
+            borderRadius: 14,
+          }}
+        >
+          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, marginBottom: 2 }}>
+            💬 Une question ?
+          </div>
+          <div style={{ fontSize: 11, color: palette.textDim, marginBottom: 10 }}>
+            Retard, suggestion, demande spéciale — on te répond vite.
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <a
+              href="tel:+33679448759"
+              style={{
+                flex: 1, textAlign: 'center', textDecoration: 'none',
+                padding: '11px', borderRadius: 12,
+                background: palette.bg, border: `1px solid ${palette.line}`,
+                color: palette.text, fontWeight: 700, fontSize: 13,
+                fontFamily: 'Outfit, sans-serif',
+              }}
+            >
+              📞 Appeler
+            </a>
+            <a
+              href="https://wa.me/33679448759"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: 1, textAlign: 'center', textDecoration: 'none',
+                padding: '11px', borderRadius: 12,
+                background: '#25D366', color: '#fff',
+                fontWeight: 700, fontSize: 13, fontFamily: 'Outfit, sans-serif',
+              }}
+            >
+              💬 WhatsApp
+            </a>
+          </div>
+        </div>
+
         {/* Revoir le tutoriel */}
         {onShowOnboarding && (
           <button
