@@ -7,6 +7,15 @@ import React from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import { REWARDS_CATALOG, XP_RULES, nextReward } from './catalog';
+import { useUserRewards } from './useUserRewards';
+
+function fmtDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+  } catch {
+    return '';
+  }
+}
 
 interface RewardsModalProps {
   palette: Palette;
@@ -18,6 +27,10 @@ interface RewardsModalProps {
 }
 
 export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCode }: RewardsModalProps) {
+  const { rewards } = useUserRewards();
+  // Codes gagnés à la roue, actifs et utilisables (on exclut les "tente encore")
+  const activeCodes = rewards.filter((r) => r.reward_type !== 'retry');
+
   if (!open) return null;
 
   const next = nextReward(xp);
@@ -130,6 +143,62 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
             />
           </div>
         </div>
+
+        {/* ─── Codes gagnés à la roue (réductions / cadeaux) ─── */}
+        {activeCodes.length > 0 && (
+          <>
+            <div
+              style={{
+                fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase',
+                color: palette.textDim, margin: '4px 4px 10px',
+              }}
+            >
+              🎟️ Tes codes à utiliser
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+              {activeCodes.map((c) => (
+                <div
+                  key={c.id}
+                  style={{
+                    padding: 14,
+                    borderRadius: 16,
+                    background: `linear-gradient(135deg, ${palette.accent}22, ${palette.card})`,
+                    border: `1px solid ${palette.accent}`,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15, color: palette.accent }}>
+                      {c.reward_label}
+                    </span>
+                    <span style={{ fontSize: 10, color: palette.textDim }}>
+                      exp. {fmtDate(c.expires_at)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontFamily: 'ui-monospace, monospace',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      letterSpacing: '.1em',
+                      color: palette.text,
+                      background: palette.bg,
+                      border: `1px dashed ${palette.accent}66`,
+                      borderRadius: 10,
+                      padding: '8px 12px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {c.reward_code}
+                  </div>
+                  <div style={{ fontSize: 10.5, color: palette.textDim, marginTop: 6, textAlign: 'center' }}>
+                    Applique-le au panier ou présente-le au comptoir
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* ─── BLOC 2 : Catalogue ─── */}
         <div
