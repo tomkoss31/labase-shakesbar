@@ -402,23 +402,82 @@
   }
 
   function showResult(r) {
+    // Écran de QUALIFICATION : on annonce le gain + on pousse à créer le compte
+    // (seule façon de récupérer le cadeau). C'est le moment qui transforme le
+    // joueur en client.
+    const playedEmail = $('email').value.trim().toLowerCase();
     const html =
       '<div class="result-card" style="border-color: #f59e0b;">' +
         '<div style="text-align: center;">' +
-          '<div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #f59e0b; text-transform: uppercase;">' +
-            (r.alreadyPlayed ? 'TU AS DÉJÀ JOUÉ' : '🎉 BRAVO, TU AS GAGNÉ') + '</div>' +
-          '<div style="font-family: Outfit; font-weight: 900; font-size: 30px; margin-top: 6px; line-height: 1.1;">' + r.label + '</div>' +
+          '<div style="font-size: 44px; line-height:1;">🎉</div>' +
+          '<div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #f59e0b; text-transform: uppercase; margin-top:6px;">' +
+            (r.alreadyPlayed ? 'TON CADEAU' : 'BRAVO, TU AS GAGNÉ') + '</div>' +
+          '<div style="font-family: Outfit; font-weight: 900; font-size: 28px; margin-top: 4px; line-height: 1.1;">' + r.label + '</div>' +
         '</div>' +
-        '<div class="code-box">' +
-          '<div class="code-label">TON CODE CADEAU</div>' +
-          '<div class="code-val">' + r.code + '</div>' +
+
+        '<div style="margin-top:16px;padding:14px;background:#04100f;border:1px solid rgba(94,234,212,.18);border-radius:14px;">' +
+          '<div style="font-size:13px;color:#ecfdf5;font-weight:700;text-align:center;line-height:1.5;">' +
+            '🔒 Pour récupérer ton cadeau,<br>crée ton compte La Base' +
+          '</div>' +
+          '<div style="font-size:11.5px;color:#7fa99f;text-align:center;margin-top:6px;line-height:1.5;">' +
+            'Le cadeau se récupère <b style="color:#b9d4ce;">uniquement dans l\'appli</b>, en le présentant au comptoir. Valable 30 jours.' +
+          '</div>' +
         '</div>' +
-        '<div style="margin-top: 14px; font-size: 12.5px; color: #b9d4ce; text-align: center; line-height: 1.55;">' +
-          '📲 Capture cet écran !<br>Présente ce code au comptoir de <b style="color:#ecfdf5;">La Base</b> à Verdun.<br><span style="color:#7fa99f;">Valable 30 jours.</span>' +
-        '</div>' +
-        '<a href="/" style="display: block; margin-top: 16px; padding: 15px; background: linear-gradient(100deg,#14b8a6,#5eead4); color: #02100e; border-radius: 14px; font-family: Outfit; font-weight: 900; text-align: center; text-decoration: none; font-size: 15px;">🥤 Découvrir le menu →</a>' +
+
+        '<label style="margin-top:14px;">Choisis un mot de passe</label>' +
+        '<input type="password" id="signupPwd" placeholder="6 caractères min" autocomplete="new-password" />' +
+        '<button class="cta" id="signupBtn">🎁 Créer mon compte & récupérer</button>' +
+        '<div id="signupError"></div>' +
+        '<div style="font-size:10.5px;color:#7fa99f;text-align:center;margin-top:10px;">Compte créé pour <b style="color:#b9d4ce;">' + playedEmail + '</b></div>' +
       '</div>';
     $('resultArea').innerHTML = html;
+    $('signupBtn').addEventListener('click', () => createAccountAndClaim(playedEmail));
+  }
+
+  async function createAccountAndClaim(email) {
+    const pwd = $('signupPwd').value;
+    if (!pwd || pwd.length < 6) {
+      $('signupError').innerHTML = '<div class="err">⚠️ Mot de passe : 6 caractères minimum</div>';
+      return;
+    }
+    const btn = $('signupBtn');
+    btn.disabled = true;
+    btn.textContent = 'Création…';
+    $('signupError').innerHTML = '';
+    try {
+      const resp = await fetch('/api/wheel?action=signup-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        $('signupError').innerHTML = '<div class="err">⚠️ ' + (data.error || 'Erreur') + '</div>';
+        btn.disabled = false;
+        btn.textContent = '🎁 Créer mon compte & récupérer';
+        return;
+      }
+      // Connecte le client : on écrit la session en localStorage (comme l'app)
+      if (data.session && data.storageKey) {
+        try {
+          localStorage.setItem(data.storageKey, JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            token_type: data.session.token_type || 'bearer',
+            expires_in: data.session.expires_in,
+            expires_at: data.session.expires_at || Math.floor(Date.now() / 1000) + (data.session.expires_in || 3600),
+            user: data.session.user,
+          }));
+        } catch {}
+      }
+      // Redirige vers l'app, connecté, avec le cadeau dans ses récompenses
+      btn.textContent = '✅ C\'est bon !';
+      window.setTimeout(() => { window.location.href = '/'; }, 600);
+    } catch (err) {
+      $('signupError').innerHTML = '<div class="err">⚠️ ' + err.message + '</div>';
+      btn.disabled = false;
+      btn.textContent = '🎁 Créer mon compte & récupérer';
+    }
   }
 </script>
 </body>

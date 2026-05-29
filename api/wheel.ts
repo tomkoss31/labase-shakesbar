@@ -217,5 +217,98 @@ export default async function handler(req: any, res: any) {
     });
   }
 
+  // ─── SIGNUP-CLAIM : créer le compte + lier le cadeau gagné ────────
+  // Après la roue publique, le client crée son compte pour récupérer son
+  // cadeau. On crée le user, on lie le public_spin à son compte (insertion
+  // wheel_spins) et on renvoie une session pour le connecter direct.
+  if (action === 'signup-claim') {
+    const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+    if (!anonKey) return res.status(500).json({ error: 'Anon key manquante' });
+
+    const body = await readBody(req);
+    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : null;
+    const password = typeof body?.password === 'string' ? body.password : null;
+    if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'Email invalide' });
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Mot de passe trop court (6 min)' });
+
+    const admin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // 1. Le cadeau doit exister (la personne a joué)
+    const { data: spin } = await admin
+      .from('public_spins')
+      .select('id, first_name, reward_code, reward_label, reward_type, reward_value, expires_at')
+      .eq('email', email)
+      .maybeSingle();
+    if (!spin) {
+      return res.status(400).json({ error: 'Aucun cadeau trouvé pour cet email. Joue d\'abord à la roue.' });
+    }
+
+    // 2. Créer le compte (email auto-confirmé → connexion immédiate possible)
+    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: spin.first_name ? { first_name: spin.first_name } : undefined,
+    });
+    if (createErr) {
+      const msg = createErr.message || '';
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('exist')) {
+        return res.status(409).json({ error: 'Un compte existe déjà avec cet email. Connecte-toi dans l\'app.' });
+      }
+      return res.status(500).json({ error: msg });
+    }
+    const userId = created.user?.id;
+
+    // 3. Renseigner le prénom dans le profil (le trigger a créé la ligne)
+    if (userId && spin.first_name) {
+      await admin.from('profiles').update({ first_name: spin.first_name }).eq('id', userId);
+    }
+
+    // 4. Lier le cadeau au compte → apparaît dans "Mes récompenses" + scanner
+    if (userId && spin.reward_type !== 'retry') {
+      await admin.from('wheel_spins').insert({
+        user_id: userId,
+        reward_code: spin.reward_code,
+        reward_label: spin.reward_label,
+        reward_type: spin.reward_type,
+        reward_value: spin.reward_value,
+        expires_at: spin.expires_at,
+        used_at: null,
+      });
+    }
+
+    // 5. Ouvrir une session (login REST) pour connecter le client direct
+    let session: any = null;
+    try {
+      const tokenResp = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+        body: JSON.stringify({ email, password }),
+      });
+      if (tokenResp.ok) session = await tokenResp.json();
+    } catch {
+      // pas bloquant : le compte est créé, le client pourra se connecter
+    }
+
+    const projectRef = supabaseUrl.replace(/^https?:\/\//, '').split('.')[0];
+    return res.status(200).json({
+      ok: true,
+      reward: spin.reward_label,
+      storageKey: `sb-${projectRef}-auth-token`,
+      session: session
+        ? {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_in: session.expires_in,
+            expires_at: session.expires_at,
+            token_type: session.token_type,
+            user: session.user,
+          }
+        : null,
+    });
+  }
+
   return res.status(400).json({ error: 'Action non reconnue' });
 }
