@@ -192,6 +192,9 @@ export function CartDrawerV2({
           width: '100%',
           maxWidth: 520,
           maxHeight: '94vh',
+          // Quand le panier est vide, on lui donne une hauteur correcte pour
+          // qu'il ne soit pas un mince bandeau collé en bas (desktop surtout).
+          minHeight: empty ? '60vh' : undefined,
           background: `linear-gradient(180deg, ${palette.cardHi}, ${palette.card})`,
           border: `1px solid ${palette.line}`,
           borderTopLeftRadius: 28,
@@ -255,12 +258,16 @@ export function CartDrawerV2({
             overflowY: 'auto',
             padding: '12px 20px',
             paddingBottom: empty ? 20 : 240,
+            // Centre verticalement le message quand le panier est vide
+            display: empty ? 'flex' : undefined,
+            alignItems: empty ? 'center' : undefined,
+            justifyContent: empty ? 'center' : undefined,
           }}
         >
           {empty ? (
             <div
               style={{
-                padding: '40px 20px',
+                padding: '20px',
                 textAlign: 'center',
                 color: palette.textDim,
               }}
