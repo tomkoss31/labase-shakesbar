@@ -142,6 +142,8 @@ export function HomeV2({
     } else if (t === 'rewards') {
       if (isAuthed) setProfileOpen(true);
       else setAuthOpen(true);
+    } else if (t === 'club') {
+      window.location.href = '/club';
     } else {
       // home
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -452,11 +454,7 @@ export function HomeV2({
               <b style={{ color: palette.text }}> bilan offert</b> et un suivi personnalisé.
             </div>
             <a
-              href={`https://wa.me/33679448759?text=${encodeURIComponent(
-                "Salut ! Je voudrais faire mon bilan bien-être offert La Base 💪",
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/club"
               style={{
                 display: 'block',
                 textAlign: 'center',
@@ -471,12 +469,10 @@ export function HomeV2({
                 boxShadow: `0 10px 28px ${palette.cta}55`,
               }}
             >
-              💪 Faire mon bilan offert
+              ✨ Découvrir l'accompagnement
             </a>
             <a
-              href={`https://wa.me/33679448759?text=${encodeURIComponent(
-                "Salut ! Je veux en savoir plus sur l'opportunité La Base pour compléter mes revenus 🚀",
-              )}`}
+              href="https://www.labase360.fr/opportunite?ref=656dcf35-4859-4a70-9d20-990104813423"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -489,7 +485,7 @@ export function HomeV2({
                 fontWeight: 700,
               }}
             >
-              🚀 Envie de compléter tes revenus ? Rejoins l'équipe →
+              🚀 Et si tu en faisais ton activité ? →
             </a>
           </div>
         </div>

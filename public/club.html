@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>La Base — Ton club bien-être à Verdun</title>
+<meta name="description" content="La Base, c'est bien plus qu'un shake bar : un accompagnement bien-être, perte de poids et performance. Fais ton bilan offert." />
+<meta property="og:title" content="La Base — Ton club bien-être" />
+<meta property="og:description" content="Accompagnement perte de poids, énergie & performance. Bilan offert." />
+<meta property="og:image" content="/icon-512.png" />
+<meta name="theme-color" content="#04100f" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20,184,166,.28), transparent 60%),
+      radial-gradient(ellipse 70% 40% at 80% 8%, rgba(245,158,11,.16), transparent 55%),
+      #04100f;
+    color: #ecfdf5;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 18px 60px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+  @keyframes glowPulse { 0%,100% { box-shadow: 0 0 30px rgba(20,184,166,.45); } 50% { box-shadow: 0 0 54px rgba(20,184,166,.8); } }
+  @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+  .anim { opacity: 0; animation: fadeUp .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  .d1 { animation-delay: .05s; } .d2 { animation-delay: .16s; } .d3 { animation-delay: .28s; }
+  .d4 { animation-delay: .4s; } .d5 { animation-delay: .52s; } .d6 { animation-delay: .64s; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 8px; }
+  .logo-row { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-b {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  .logo-wm { font-family: 'Outfit'; font-weight: 900; font-size: 18px; color: #ecfdf5; }
+  .logo-tag { font-size: 9px; color: #94b8b1; letter-spacing: .22em; font-weight: 600; }
+  .back-link { font-size: 12px; color: #94b8b1; text-decoration: none; }
+
+  .hero { text-align: center; padding: 24px 0 8px; }
+  .hero-emoji { font-size: 70px; line-height: 1; margin-bottom: 6px; display: inline-block; animation: floaty 3.2s ease-in-out infinite; filter: drop-shadow(0 14px 30px rgba(20,184,166,.4)); }
+  h1 { font-family: 'Outfit'; font-weight: 900; font-size: 36px; line-height: 1.05; letter-spacing: -.03em; margin: 8px 0 12px; }
+  h1 .grad { background: linear-gradient(135deg, #5eead4, #14b8a6 55%, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .lead { color: #b9d4ce; font-size: 16px; line-height: 1.55; margin: 0 auto 24px; max-width: 400px; }
+  .lead b { color: #ecfdf5; }
+
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
+  .pillar { background: linear-gradient(180deg, rgba(19,48,44,.7), rgba(14,31,29,.7)); border: 1px solid rgba(94,234,212,.12); border-radius: 16px; padding: 16px 8px; text-align: center; }
+  .pillar-emoji { font-size: 28px; }
+  .pillar-txt { font-family: 'Outfit'; font-weight: 800; font-size: 12px; margin-top: 6px; line-height: 1.2; }
+
+  .section-title { text-align: center; font-family: 'Outfit'; font-weight: 900; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; color: #5eead4; margin: 36px 0 16px; }
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step { display: flex; align-items: center; gap: 14px; background: linear-gradient(180deg, rgba(19,48,44,.6), rgba(14,31,29,.6)); border: 1px solid rgba(94,234,212,.1); border-radius: 16px; padding: 15px 16px; }
+  .step-num { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: rgba(245,158,11,.16); color: #f59e0b; font-family: 'Outfit'; font-weight: 900; font-size: 17px; display: flex; align-items: center; justify-content: center; }
+  .step-txt { font-size: 13.5px; line-height: 1.4; } .step-txt b { color: #ecfdf5; }
+
+  .cta {
+    display: block; width: 100%; padding: 18px; margin-top: 14px;
+    background: linear-gradient(100deg, #f59e0b, #fbbf24, #f59e0b); background-size: 200% auto;
+    color: #1a0f00; border: 0; border-radius: 18px; text-decoration: none; text-align: center;
+    font-family: 'Outfit'; font-weight: 900; font-size: 17px;
+    box-shadow: 0 16px 44px rgba(245,158,11,.4); animation: shimmer 3s linear infinite;
+  }
+  .cta-sub { text-align: center; font-size: 12px; color: #7fa99f; margin-top: 10px; }
+
+  .opp-card {
+    margin-top: 16px; padding: 24px 20px; border-radius: 22px;
+    background: linear-gradient(160deg, #13302c, #0e1f1d);
+    border: 1px solid rgba(94,234,212,.18); text-align: center;
+  }
+  .opp-emoji { font-size: 40px; }
+  .opp-title { font-family: 'Outfit'; font-weight: 900; font-size: 22px; line-height: 1.2; margin: 8px 0 8px; letter-spacing: -.02em; }
+  .opp-lead { font-size: 14px; color: #b9d4ce; line-height: 1.55; margin-bottom: 18px; }
+  .cta-teal {
+    display: block; width: 100%; padding: 16px;
+    background: linear-gradient(100deg, #14b8a6, #5eead4); color: #02100e;
+    border-radius: 16px; text-decoration: none; text-align: center;
+    font-family: 'Outfit'; font-weight: 900; font-size: 15px;
+  }
+  .footer-note { text-align: center; font-size: 11px; color: #7fa99f; margin: 30px 0 0; line-height: 1.6; }
+  .footer-note a { color: #5eead4; text-decoration: none; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar anim d1">
+    <a href="/" class="logo-row">
+      <div class="logo-b">B</div>
+      <div>
+        <div class="logo-wm">LA BASE</div>
+        <div class="logo-tag">SHAKES · VERDUN</div>
+      </div>
+    </a>
+    <a href="/" class="back-link">← L'appli</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-emoji anim d1">💪</div>
+    <h1 class="anim d2">Bien plus qu'un<br><span class="grad">shake bar</span></h1>
+    <div class="lead anim d3">
+      La Base, c'est un vrai <b>club bien-être</b> à Verdun. On t'accompagne pour
+      <b>perdre du poids</b>, <b>retrouver ton énergie</b> et <b>booster tes performances</b> —
+      avec un suivi personnalisé et bienveillant.
+    </div>
+
+    <div class="pillars anim d4">
+      <div class="pillar"><div class="pillar-emoji">⚖️</div><div class="pillar-txt">Perte de poids</div></div>
+      <div class="pillar"><div class="pillar-emoji">⚡</div><div class="pillar-txt">Énergie</div></div>
+      <div class="pillar"><div class="pillar-emoji">🏆</div><div class="pillar-txt">Performance</div></div>
+    </div>
+  </div>
+
+  <div class="section-title anim d5">Comment on t'accompagne</div>
+  <div class="steps anim d5">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-txt"><b>Ton bilan offert</b><br>On fait le point sur tes objectifs et ta composition corporelle.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-txt"><b>Un programme sur-mesure</b><br>Nutrition, hydratation, habitudes : un plan adapté à TON quotidien.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-txt"><b>Un suivi régulier</b><br>On mesure tes progrès et on ajuste avec toi, semaine après semaine.</div>
+    </div>
+  </div>
+
+  <a href="https://www.labase360.fr/bilan-online" target="_blank" rel="noopener" class="cta anim d6">
+    💪 Faire mon bilan offert
+  </a>
+  <div class="cta-sub anim d6">Gratuit · sans engagement · en ligne</div>
+
+  <div class="section-title">Et si tu en faisais ton activité ?</div>
+  <div class="opp-card anim d6">
+    <div class="opp-emoji">🚀</div>
+    <div class="opp-title">As-tu déjà pensé à ce que tu ferais avec 200 ou 300 € de plus par mois ?</div>
+    <div class="opp-lead">
+      Rejoins l'équipe La Base et accompagne à ton tour. Que ce soit pour un complément
+      de revenu ou un vrai projet, on te forme et on t'épaule à chaque étape.
+    </div>
+    <a href="https://www.labase360.fr/opportunite?ref=656dcf35-4859-4a70-9d20-990104813423" target="_blank" rel="noopener" class="cta-teal">
+      Découvrir l'opportunité →
+    </a>
+  </div>
+
+  <div class="footer-note">
+    📍 La Base · 11 rue Saint Pierre, 55100 Verdun<br>
+    <a href="/">Retour à l'application →</a>
+  </div>
+</div>
+</body>
+</html>

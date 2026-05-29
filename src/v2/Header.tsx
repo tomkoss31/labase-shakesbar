@@ -59,7 +59,7 @@ export function LaBaseLogo({ palette, size = 'md' }: LaBaseLogoProps) {
   );
 }
 
-export type HeaderTab = 'home' | 'menu' | 'combos' | 'rewards';
+export type HeaderTab = 'home' | 'menu' | 'combos' | 'rewards' | 'club';
 
 interface IconBtnProps {
   palette: Palette;
@@ -139,6 +139,7 @@ const TABS: Array<{ id: HeaderTab; label: string }> = [
   { id: 'menu', label: 'Menu' },
   { id: 'combos', label: 'Combos' },
   { id: 'rewards', label: 'Récompenses' },
+  { id: 'club', label: '✨ Le Club' },
 ];
 
 export function Header({
