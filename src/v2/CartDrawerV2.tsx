@@ -480,73 +480,11 @@ export function CartDrawerV2({
             </div>
           )}
 
-          {/* XP utilisables (100 XP = 1€, plafond 30%) */}
-          {!empty && userXp > 0 && maxXp > 0 && setXpToSpend && (
-            <div style={{ marginTop: 20 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  marginBottom: 10,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: palette.primary,
-                    letterSpacing: '.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  ⚡ Utiliser mes XP
-                </div>
-                <div style={{ fontSize: 11, color: palette.textDim }}>
-                  {userXp} dispo · 100 XP = 1€
-                </div>
-              </div>
-              <div
-                style={{
-                  background: palette.bg,
-                  border: `1px solid ${palette.line}`,
-                  borderRadius: 14,
-                  padding: 14,
-                }}
-              >
-                <input
-                  type="range"
-                  min={0}
-                  max={maxXp}
-                  step={XP_SPEND_STEP}
-                  value={safeXpToSpend}
-                  onChange={(e) => setXpToSpend(parseInt(e.target.value, 10))}
-                  style={{
-                    width: '100%',
-                    accentColor: palette.primary,
-                  }}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'baseline',
-                    marginTop: 8,
-                  }}
-                >
-                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: palette.primary }}>
-                    {safeXpToSpend} XP
-                  </div>
-                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 18, color: palette.accent }}>
-                    −{(xpDiscountCents / 100).toFixed(2).replace('.', ',')}€
-                  </div>
-                </div>
-                <div style={{ fontSize: 10, color: palette.textDim, marginTop: 4, lineHeight: 1.4 }}>
-                  Max {maxXp} XP utilisables (plafond 30% du total).
-                </div>
-              </div>
-            </div>
-          )}
+          {/* NOTE : le slider "Utiliser mes XP en réduction" a été retiré.
+              Les XP servent désormais au CATALOGUE de cadeaux (écran
+              "Mes récompenses"), récupérés au comptoir. Plus de réduction
+              cash au checkout (trop coûteuse). xpToSpend reste à 0 →
+              l'API Square n'applique aucune réduction XP. */}
 
           {/* Quick-adds intelligents */}
           {!empty && suggestions.length > 0 && onAddSuggestion && (
