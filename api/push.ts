@@ -34,6 +34,17 @@ export default async function handler(req: any, res: any) {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  // ─── broadcasts (GET, public) : liste des messages pour la boîte de réception ─
+  if (action === 'broadcasts' && req.method === 'GET') {
+    const { data, error } = await admin
+      .from('broadcasts')
+      .select('id, title, body, url, emoji, created_at')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ broadcasts: data ?? [] });
+  }
+
   // ─── subscribe (POST = add, DELETE = remove) ─────────────────
   if (action === 'subscribe') {
     if (req.method === 'POST') {
@@ -86,6 +97,14 @@ export default async function handler(req: any, res: any) {
 
     const body = await readBody(req);
     if (!body.title || !body.body) return res.status(400).json({ error: 'title et body requis' });
+
+    // Archive le message dans la boîte de réception (non bloquant)
+    await admin.from('broadcasts').insert({
+      title: body.title,
+      body: body.body,
+      url: body.url ?? null,
+      emoji: body.emoji ?? null,
+    });
 
     const { data: subs } = await admin
       .from('push_subscriptions')

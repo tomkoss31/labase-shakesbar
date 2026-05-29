@@ -18,6 +18,7 @@ import { ProfileSheet } from './auth/ProfileSheet';
 import { RewardsModal } from './rewards/RewardsModal';
 import { MyCodeModal } from './auth/MyCodeModal';
 import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
+import { InboxModal, useInbox } from './inbox/InboxModal';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -59,6 +60,25 @@ export function HomeV2({
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const inbox = useInbox();
+
+  // Ouvre la boîte de réception si on arrive via une notification push (?inbox=1)
+  React.useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get('inbox') === '1') {
+        setInboxOpen(true);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('inbox');
+        window.history.replaceState({}, '', url.toString());
+      }
+    } catch {}
+  }, []);
+
+  function openInbox() {
+    setInboxOpen(true);
+    inbox.markAllRead();
+  }
 
   // Affiche l'onboarding au tout premier lancement
   React.useEffect(() => {
@@ -192,6 +212,8 @@ export function HomeV2({
         cartCount={cartCount}
         onCart={onOpenCart}
         onProfile={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
+        onNotifications={openInbox}
+        notifBadge={inbox.unread}
         activeTab={headerTab}
         onTabChange={handleHeaderTab}
         isAuthed={isAuthed}
@@ -444,6 +466,14 @@ export function HomeV2({
         palette={palette}
         open={onboardingOpen}
         onClose={() => setOnboardingOpen(false)}
+      />
+
+      {/* Boîte de réception (messages / annonces) */}
+      <InboxModal
+        palette={palette}
+        open={inboxOpen}
+        onClose={() => setInboxOpen(false)}
+        broadcasts={inbox.broadcasts}
       />
     </div>
   );

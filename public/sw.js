@@ -52,7 +52,11 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+  // Par défaut, on ouvre la boîte de réception (?inbox=1) pour afficher le
+  // message — sinon l'app s'ouvrait sans rien montrer. Si la notif a une url
+  // spécifique (ex: une promo produit), on l'utilise.
+  const dataUrl = event.notification.data && event.notification.data.url;
+  const targetUrl = dataUrl && dataUrl !== '/' ? dataUrl : '/?inbox=1';
 
   event.waitUntil(
     (async () => {

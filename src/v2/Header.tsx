@@ -128,6 +128,7 @@ interface HeaderProps {
   onCart: () => void;
   onProfile?: () => void;
   onNotifications?: () => void;
+  notifBadge?: number;
   activeTab?: HeaderTab;
   onTabChange?: (tab: HeaderTab) => void;
   isAuthed?: boolean;
@@ -146,6 +147,7 @@ export function Header({
   onCart,
   onProfile,
   onNotifications,
+  notifBadge = 0,
   activeTab = 'home',
   onTabChange,
   isAuthed = false,
@@ -218,7 +220,7 @@ export function Header({
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <IconBtn palette={palette} onClick={onNotifications} ariaLabel="Notifications">
+          <IconBtn palette={palette} onClick={onNotifications} badge={notifBadge} ariaLabel="Notifications">
             <IconBell color={palette.text} />
           </IconBtn>
           <IconBtn palette={palette} onClick={onCart} badge={cartCount} ariaLabel="Panier" dataAttr="data-v2-cart-icon">
