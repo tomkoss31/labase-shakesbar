@@ -31,7 +31,7 @@ const SEGMENT_COUNT = WHEEL_SEGMENTS.length;
 const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
 
 export function WheelModal({ palette, open, onClose }: WheelModalProps) {
-  const [phase, setPhase] = useState<'idle' | 'spinning' | 'result'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'loading' | 'spinning' | 'result'>('idle');
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
   const cooldown = useMemo(() => getWheelCooldown(), [open]);
@@ -49,6 +49,10 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
 
   async function handleSpin() {
     if (phase !== 'idle' || !cooldown.canSpin) return;
+
+    // Feedback IMMÉDIAT : on passe en 'loading' dès le clic (le bouton devient
+    // "La roue tourne…") pour qu'il n'y ait pas 2s de flottement pendant l'appel.
+    setPhase('loading');
 
     // Tentative API serveur si user authentifié — sinon fallback simulation locale
     let winIdx = pickWheelSegment(); // valeur par défaut (fallback)
@@ -85,6 +89,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
               const lastTs = nextTs - 7 * 24 * 60 * 60 * 1000;
               window.localStorage.setItem('labase-wheel-last-spin', String(lastTs));
             }
+            setPhase('idle'); // on ré-affiche l'état initial
             return; // pas de spin
           }
           // Si erreur autre, fallback simulation locale ci-dessous
@@ -407,6 +412,26 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
             }}
           >
             🎰 Faire tourner la roue !
+          </button>
+        )}
+        {(phase === 'loading' || phase === 'spinning') && (
+          <button
+            disabled
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: palette.line,
+              color: palette.text,
+              border: 0,
+              borderRadius: 16,
+              fontFamily: 'Outfit, sans-serif',
+              fontWeight: 900,
+              fontSize: 16,
+              cursor: 'wait',
+              opacity: 0.85,
+            }}
+          >
+            🎰 La roue tourne…
           </button>
         )}
         {phase === 'idle' && !cooldown.canSpin && cooldown.nextSpinDate && (
