@@ -2,7 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/jeu", "destination": "/jeu.html" },
-    { "source": "/console", "destination": "/console.html" }
+    { "source": "/console", "destination": "/console.html" },
+    { "source": "/mentions-legales", "destination": "/mentions-legales.html" },
+    { "source": "/confidentialite", "destination": "/confidentialite.html" }
   ],
   "crons": [
     {

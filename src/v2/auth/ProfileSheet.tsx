@@ -734,10 +734,14 @@ export function ProfileSheet({
             fontSize: 10,
             color: palette.textDim,
             textAlign: 'center',
-            lineHeight: 1.5,
+            lineHeight: 1.6,
           }}
         >
           Tes données restent privées et ne sont jamais partagées.
+          <br />
+          <a href="/confidentialite" style={{ color: palette.textDim, textDecoration: 'underline' }}>Confidentialité</a>
+          {' · '}
+          <a href="/mentions-legales" style={{ color: palette.textDim, textDecoration: 'underline' }}>Mentions légales</a>
         </div>
       </div>
 

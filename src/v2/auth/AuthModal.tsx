@@ -393,6 +393,31 @@ export function AuthModal({
             </button>
           )}
         </div>
+
+        {/* Mention RGPD / liens légaux */}
+        <div
+          style={{
+            marginTop: 14,
+            fontSize: 10,
+            color: palette.textDim,
+            textAlign: 'center',
+            lineHeight: 1.6,
+          }}
+        >
+          {mode === 'signup' && (
+            <>
+              En créant ton compte, tu acceptes notre politique de confidentialité.
+              <br />
+            </>
+          )}
+          <a href="/confidentialite" target="_blank" rel="noopener" style={{ color: palette.textDim, textDecoration: 'underline' }}>
+            Confidentialité
+          </a>
+          {' · '}
+          <a href="/mentions-legales" target="_blank" rel="noopener" style={{ color: palette.textDim, textDecoration: 'underline' }}>
+            Mentions légales
+          </a>
+        </div>
       </div>
     </div>
   );
