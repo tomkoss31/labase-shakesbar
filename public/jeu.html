@@ -2,196 +2,279 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>La Base — Tente ta chance & gagne un cadeau 🎁</title>
 <meta name="description" content="Fais tourner la roue de La Base Shakes & Drinks à Verdun et gagne une réduction, une gaufre offerte ou un smoothie !" />
 <meta property="og:title" content="🎁 Roue cadeau La Base Shakes & Drinks" />
 <meta property="og:description" content="Tente ta chance et gagne ton cadeau au shake bar de Verdun !" />
 <meta property="og:image" content="/icon-512.png" />
+<meta name="theme-color" content="#04100f" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
   body {
-    margin: 0;
-    padding: 16px;
-    background: #04100f;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(20,184,166,.28), transparent 60%),
+      radial-gradient(ellipse 70% 40% at 80% 10%, rgba(245,158,11,.16), transparent 55%),
+      #04100f;
     color: #ecfdf5;
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
-  .container { max-width: 480px; margin: 0 auto; }
-  .brand {
-    text-align: center;
-    margin-bottom: 16px;
-  }
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+
+  /* ─── Animations ─── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes glowPulse { 0%,100% { box-shadow: 0 0 32px rgba(20,184,166,.5); } 50% { box-shadow: 0 0 56px rgba(20,184,166,.85); } }
+  @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+  @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes popIn { 0% { opacity:0; transform: scale(.8); } 60% { transform: scale(1.05); } 100% { opacity:1; transform: scale(1); } }
+  .anim { opacity: 0; animation: fadeUp .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  .d1 { animation-delay: .05s; } .d2 { animation-delay: .18s; } .d3 { animation-delay: .32s; }
+  .d4 { animation-delay: .46s; } .d5 { animation-delay: .6s; } .d6 { animation-delay: .74s; }
+
+  /* ─── HERO ─── */
+  .hero { text-align: center; padding: 38px 0 20px; position: relative; }
+  .logo-row { display: inline-flex; align-items: center; gap: 11px; }
   .logo-b {
-    width: 36px; height: 36px; border-radius: 8px;
+    width: 44px; height: 44px; border-radius: 11px;
     background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
-    color: #04100f;
-    font-family: 'Outfit'; font-weight: 900; font-size: 22px;
+    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 26px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 24px rgba(20,184,166,.55);
+    animation: glowPulse 3s ease-in-out infinite;
   }
-  .logo-wm {
-    font-family: 'Outfit'; font-weight: 900; font-size: 18px; letter-spacing: -.02em;
-  }
-  .logo-tag {
-    font-size: 9px; color: #94b8b1; letter-spacing: .2em; font-weight: 600; margin-top: 2px;
+  .logo-wm { font-family: 'Outfit'; font-weight: 900; font-size: 20px; letter-spacing: -.02em; }
+  .logo-tag { font-size: 9px; color: #94b8b1; letter-spacing: .22em; font-weight: 600; margin-top: 2px; }
+
+  .gift-emoji {
+    font-size: 76px; line-height: 1; margin: 26px 0 6px;
+    display: inline-block;
+    animation: floaty 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 14px 30px rgba(245,158,11,.45));
   }
   h1 {
-    text-align: center;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: 28px;
-    letter-spacing: -.02em;
-    margin: 20px 0 6px;
-    background: linear-gradient(135deg, #fde047, #f59e0b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: 'Outfit', sans-serif; font-weight: 900;
+    font-size: 38px; line-height: 1.05; letter-spacing: -.03em;
+    margin: 6px 0 12px;
   }
-  .lead { text-align: center; color: #94b8b1; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+  h1 .grad {
+    background: linear-gradient(135deg, #fde047, #f59e0b 60%, #fb7185);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lead { color: #b9d4ce; font-size: 15.5px; line-height: 1.55; margin: 0 auto 22px; max-width: 360px; }
+  .lead b { color: #ecfdf5; }
+
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 26px; }
+  .badge {
+    font-size: 12px; font-weight: 700; color: #cdeae4;
+    background: rgba(94,234,212,.1); border: 1px solid rgba(94,234,212,.22);
+    padding: 7px 13px; border-radius: 999px;
+  }
+
+  .cta-big {
+    display: block; width: 100%; padding: 18px;
+    background: linear-gradient(100deg, #f59e0b, #fbbf24, #f59e0b);
+    background-size: 200% auto;
+    color: #1a0f00; border: 0; border-radius: 18px;
+    font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 17px;
+    cursor: pointer; text-decoration: none; text-align: center;
+    box-shadow: 0 16px 44px rgba(245,158,11,.45);
+    animation: shimmer 3s linear infinite;
+  }
+  .scroll-hint { margin-top: 14px; font-size: 12px; color: #7fa99f; }
+
+  /* ─── HOW IT WORKS ─── */
+  .section-title {
+    text-align: center; font-family: 'Outfit'; font-weight: 900;
+    font-size: 13px; letter-spacing: .15em; text-transform: uppercase;
+    color: #5eead4; margin: 44px 0 18px;
+  }
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(180deg, rgba(19,48,44,.7), rgba(14,31,29,.7));
+    border: 1px solid rgba(94,234,212,.1); border-radius: 16px; padding: 15px 16px;
+  }
+  .step-num {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px;
+    background: rgba(245,158,11,.16); color: #f59e0b;
+    font-family: 'Outfit'; font-weight: 900; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-txt { font-size: 13.5px; line-height: 1.4; }
+  .step-txt b { color: #ecfdf5; }
+  .step-emoji { font-size: 24px; margin-left: auto; }
+
+  /* ─── WHEEL / FORM ─── */
+  #jeu { padding-top: 10px; scroll-margin-top: 20px; }
   .form-card, .result-card {
     background: linear-gradient(180deg, #13302c, #0e1f1d);
-    border: 1px solid rgba(94,234,212,.10);
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 14px;
+    border: 1px solid rgba(94,234,212,.12);
+    border-radius: 22px; padding: 20px; margin-bottom: 14px;
   }
-  label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #94b8b1; margin-bottom: 6px; text-transform: uppercase; margin-top: 12px; }
+  label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #94b8b1; margin-bottom: 6px; text-transform: uppercase; margin-top: 14px; }
   label:first-child { margin-top: 0; }
   input {
-    width: 100%;
-    padding: 13px 14px;
-    background: #04100f;
-    border: 1px solid rgba(94,234,212,.10);
-    border-radius: 12px;
-    color: #ecfdf5;
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
+    width: 100%; padding: 14px;
+    background: #04100f; border: 1px solid rgba(94,234,212,.12);
+    border-radius: 12px; color: #ecfdf5; font-size: 16px; font-family: inherit; outline: none;
   }
   input:focus { border-color: #14b8a6; }
   .cta {
-    width: 100%;
-    margin-top: 18px;
-    padding: 16px;
-    background: #f59e0b;
-    color: #1a0f00;
-    border: 0;
-    border-radius: 16px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 14px 36px rgba(245,158,11,.4);
+    width: 100%; margin-top: 20px; padding: 17px;
+    background: linear-gradient(100deg, #f59e0b, #fbbf24, #f59e0b); background-size: 200% auto;
+    color: #1a0f00; border: 0; border-radius: 16px;
+    font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 16px;
+    cursor: pointer; box-shadow: 0 14px 36px rgba(245,158,11,.4);
+    animation: shimmer 3s linear infinite;
   }
-  .cta:disabled { opacity: 0.6; cursor: wait; }
-  .legal { font-size: 10px; color: #94b8b1; text-align: center; margin-top: 12px; line-height: 1.5; }
+  .cta:disabled { opacity: 0.6; cursor: wait; animation: none; }
+  .legal { font-size: 10.5px; color: #7fa99f; text-align: center; margin-top: 14px; line-height: 1.5; }
 
-  /* Wheel */
-  .wheel-zone {
-    position: relative;
-    width: 320px;
-    height: 348px;
-    margin: 0 auto 16px;
-  }
+  .wheel-zone { position: relative; width: 320px; height: 348px; margin: 8px auto 16px; }
   .pointer {
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 14px solid transparent;
-    border-right: 14px solid transparent;
-    border-top: 22px solid #f59e0b;
-    filter: drop-shadow(0 4px 8px rgba(245,158,11,.6));
-    z-index: 3;
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent;
+    border-top: 24px solid #f59e0b; filter: drop-shadow(0 4px 8px rgba(245,158,11,.6)); z-index: 3;
   }
-  .wheel-svg {
-    position: absolute;
-    top: 28px;
-    transition: transform 4200ms cubic-bezier(.17,.67,.18,1);
-    filter: drop-shadow(0 12px 40px rgba(0,0,0,.6));
-  }
-  .err {
-    background: rgba(251,113,133,.15);
-    color: #fb7185;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid #fb7185;
-    font-size: 13px;
-    margin-top: 12px;
-  }
-  .code-box {
-    margin-top: 14px;
-    padding: 16px;
-    background: #04100f;
-    border: 2px dashed #f59e0b;
-    border-radius: 14px;
-    text-align: center;
-  }
+  .wheel-svg { position: absolute; top: 28px; transition: transform 4200ms cubic-bezier(.17,.67,.18,1); filter: drop-shadow(0 12px 40px rgba(0,0,0,.6)); }
+  .err { background: rgba(251,113,133,.15); color: #fb7185; padding: 11px 14px; border-radius: 10px; border: 1px solid #fb7185; font-size: 13px; margin-top: 12px; }
+  .code-box { margin-top: 14px; padding: 18px; background: #04100f; border: 2px dashed #f59e0b; border-radius: 14px; text-align: center; animation: popIn .5s ease forwards; }
   .code-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #94b8b1; text-transform: uppercase; }
-  .code-val { font-family: ui-monospace, monospace; font-weight: 800; font-size: 22px; color: #f59e0b; margin-top: 4px; letter-spacing: .1em; }
-  .footer-note { text-align: center; font-size: 11px; color: #94b8b1; margin-top: 16px; line-height: 1.6; }
+  .code-val { font-family: ui-monospace, monospace; font-weight: 800; font-size: 24px; color: #f59e0b; margin-top: 4px; letter-spacing: .12em; }
+
+  /* ─── FOOTER ─── */
+  .info-card {
+    background: linear-gradient(180deg, rgba(19,48,44,.55), rgba(14,31,29,.55));
+    border: 1px solid rgba(94,234,212,.1); border-radius: 18px; padding: 18px; margin: 8px 0 14px;
+  }
+  .info-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+  .info-row + .info-row { border-top: 1px solid rgba(94,234,212,.08); }
+  .info-ico { font-size: 22px; width: 26px; text-align: center; flex-shrink: 0; }
+  .info-main { font-weight: 700; font-size: 14px; }
+  .info-sub { font-size: 12px; color: #94b8b1; margin-top: 1px; }
+  .info-link { margin-left: auto; font-size: 12px; font-weight: 800; color: #5eead4; text-decoration: none; background: rgba(94,234,212,.1); padding: 7px 12px; border-radius: 10px; }
+  .footer-note { text-align: center; font-size: 11px; color: #7fa99f; margin: 18px 0 30px; line-height: 1.6; }
   .footer-note a { color: #5eead4; text-decoration: none; font-weight: 700; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="brand">
-    <div class="logo">
+
+<!-- ════════ HERO ════════ -->
+<div class="wrap">
+  <div class="hero">
+    <div class="logo-row anim d1">
       <div class="logo-b">B</div>
       <div style="text-align: left;">
         <div class="logo-wm">LA BASE</div>
         <div class="logo-tag">SHAKES&nbsp;·&nbsp;VERDUN</div>
       </div>
     </div>
-  </div>
 
-  <h1>🎁 Tente ta chance</h1>
-  <div class="lead">
-    Fais tourner la roue et gagne un cadeau à utiliser au club.<br>
-    <b style="color: #ecfdf5;">1 seule chance par personne.</b>
-  </div>
+    <div class="gift-emoji anim d2">🎁</div>
 
-  <!-- Form initial -->
-  <div class="form-card" id="formCard">
-    <label>Ton prénom</label>
-    <input type="text" id="firstName" placeholder="Léa" maxlength="40" autocomplete="given-name" />
+    <h1 class="anim d3">Tourne la roue,<br><span class="grad">gagne un cadeau</span></h1>
 
-    <label>Ton email</label>
-    <input type="email" id="email" placeholder="ton@email.com" autocomplete="email" />
-
-    <button class="cta" id="playBtn">🎰 Faire tourner la roue</button>
-
-    <div class="legal">
-      En jouant tu acceptes de recevoir ton code par email et d'être inscrit·e
-      au club La Base. Tu peux te désinscrire à tout moment.
+    <div class="lead anim d4">
+      Une réduction, une gaufre offerte, un smoothie… <b>il y a forcément un cadeau pour toi</b> au shake bar préféré de Verdun.
     </div>
 
-    <div id="formError"></div>
+    <div class="badges anim d5">
+      <span class="badge">🎯 1 cadeau garanti</span>
+      <span class="badge">⚡ 100% gratuit</span>
+      <span class="badge">⭐ Noté 4,9/5</span>
+    </div>
+
+    <a href="#jeu" class="cta-big anim d6" id="goPlay">🎰 Je tente ma chance</a>
+    <div class="scroll-hint anim d6">Gratuit · sans engagement · 30 secondes</div>
   </div>
 
-  <!-- Wheel + result -->
-  <div id="wheelArea" style="display: none;">
-    <div class="wheel-zone">
-      <div class="pointer"></div>
-      <svg class="wheel-svg" id="wheel" width="320" height="320" viewBox="0 0 320 320"></svg>
+  <!-- ════════ HOW IT WORKS ════════ -->
+  <div class="section-title anim d6">Comment ça marche</div>
+  <div class="steps">
+    <div class="step anim d6">
+      <div class="step-num">1</div>
+      <div class="step-txt"><b>Fais tourner la roue</b><br>Renseigne ton prénom + email, et lance le tirage.</div>
+      <div class="step-emoji">🎰</div>
     </div>
-    <div id="resultArea"></div>
+    <div class="step anim d6">
+      <div class="step-num">2</div>
+      <div class="step-txt"><b>Découvre ton cadeau</b><br>Tu reçois un code unique, valable 30 jours.</div>
+      <div class="step-emoji">🎉</div>
+    </div>
+    <div class="step anim d6">
+      <div class="step-num">3</div>
+      <div class="step-txt"><b>Récupère-le au club</b><br>Présente ton code au comptoir de La Base à Verdun.</div>
+      <div class="step-emoji">🥤</div>
+    </div>
+  </div>
+
+  <!-- ════════ JEU (roue + form) ════════ -->
+  <div id="jeu">
+    <div class="section-title">🎁 À toi de jouer</div>
+
+    <div class="form-card" id="formCard">
+      <label>Ton prénom</label>
+      <input type="text" id="firstName" placeholder="Léa" maxlength="40" autocomplete="given-name" />
+
+      <label>Ton email</label>
+      <input type="email" id="email" placeholder="ton@email.com" autocomplete="email" />
+
+      <button class="cta" id="playBtn">🎰 Faire tourner la roue</button>
+
+      <div class="legal">
+        En jouant tu acceptes de recevoir ton code par email et d'être inscrit·e
+        au club La Base. Désinscription possible à tout moment.
+      </div>
+      <div id="formError"></div>
+    </div>
+
+    <div id="wheelArea" style="display: none;">
+      <div class="wheel-zone">
+        <div class="pointer"></div>
+        <svg class="wheel-svg" id="wheel" width="320" height="320" viewBox="0 0 320 320"></svg>
+      </div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+
+  <!-- ════════ INFOS / LOCALISATION ════════ -->
+  <div class="section-title">Où nous trouver</div>
+  <div class="info-card">
+    <div class="info-row">
+      <div class="info-ico">📍</div>
+      <div>
+        <div class="info-main">11 rue Saint Pierre</div>
+        <div class="info-sub">55100 Verdun</div>
+      </div>
+      <a class="info-link" href="https://www.google.com/maps/search/?api=1&query=11+rue+Saint+Pierre+Verdun" target="_blank" rel="noopener">Itinéraire</a>
+    </div>
+    <div class="info-row">
+      <div class="info-ico">⭐</div>
+      <div>
+        <div class="info-main">4,9 / 5 sur Google</div>
+        <div class="info-sub">Avis vérifiés des clients</div>
+      </div>
+      <a class="info-link" href="https://g.page/r/CeJabN1yW1toEAE/review" target="_blank" rel="noopener">Voir / noter</a>
+    </div>
+    <div class="info-row">
+      <div class="info-ico">📸</div>
+      <div>
+        <div class="info-main">@labase_verdun</div>
+        <div class="info-sub">Suis-nous sur Instagram</div>
+      </div>
+      <a class="info-link" href="https://www.instagram.com/labase_verdun/" target="_blank" rel="noopener">Suivre</a>
+    </div>
   </div>
 
   <div class="footer-note">
-    📍 La Base · 11 rue Saint Pierre, Verdun<br>
-    <a href="/">Découvrir le menu →</a>
+    <a href="/">Découvrir le menu complet →</a><br>
+    La Base Shakes & Drinks · Verdun
   </div>
 </div>
 
@@ -254,6 +337,14 @@
   renderWheel();
 
   const $ = (id) => document.getElementById(id);
+
+  // Bouton hero → scroll doux vers le jeu + focus prénom
+  $('goPlay').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('jeu').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => $('firstName').focus({ preventScroll: true }), 600);
+  });
+
   $('playBtn').addEventListener('click', play);
 
   async function play() {
@@ -275,9 +366,9 @@
       const data = await resp.json();
       if (!resp.ok) {
         if (data.alreadyPlayed) {
-          // Affiche le code déjà gagné précédemment
           $('formCard').style.display = 'none';
           $('wheelArea').style.display = 'block';
+          $('wheelArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
           showResult({ label: data.reward, code: data.code, alreadyPlayed: true });
           return;
         }
@@ -287,7 +378,6 @@
         return;
       }
 
-      // Animation
       const winIdx = SEGMENTS.findIndex(s => s.id === data.segment.id);
       const segmentCenter = (winIdx >= 0 ? winIdx : 0) * SEG_ANGLE;
       const fullTurns = 6;
@@ -296,7 +386,10 @@
 
       $('formCard').style.display = 'none';
       $('wheelArea').style.display = 'block';
-      $('wheel').style.transform = `rotate(${target}deg)`;
+      $('wheelArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.requestAnimationFrame(() => {
+        $('wheel').style.transform = `rotate(${target}deg)`;
+      });
 
       window.setTimeout(() => {
         showResult({ label: data.segment.label, code: data.code });
@@ -313,17 +406,17 @@
       '<div class="result-card" style="border-color: #f59e0b;">' +
         '<div style="text-align: center;">' +
           '<div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #f59e0b; text-transform: uppercase;">' +
-            (r.alreadyPlayed ? 'TU AS DÉJÀ JOUÉ' : '🎉 BRAVO') + '</div>' +
-          '<div style="font-family: Outfit; font-weight: 900; font-size: 28px; margin-top: 6px; line-height: 1.1;">' + r.label + '</div>' +
+            (r.alreadyPlayed ? 'TU AS DÉJÀ JOUÉ' : '🎉 BRAVO, TU AS GAGNÉ') + '</div>' +
+          '<div style="font-family: Outfit; font-weight: 900; font-size: 30px; margin-top: 6px; line-height: 1.1;">' + r.label + '</div>' +
         '</div>' +
         '<div class="code-box">' +
-          '<div class="code-label">TON CODE</div>' +
+          '<div class="code-label">TON CODE CADEAU</div>' +
           '<div class="code-val">' + r.code + '</div>' +
         '</div>' +
-        '<div style="margin-top: 14px; font-size: 12px; color: #94b8b1; text-align: center; line-height: 1.5;">' +
-          'Présente ce code au comptoir de La Base à Verdun.<br>Valable 30 jours.' +
+        '<div style="margin-top: 14px; font-size: 12.5px; color: #b9d4ce; text-align: center; line-height: 1.55;">' +
+          '📲 Capture cet écran !<br>Présente ce code au comptoir de <b style="color:#ecfdf5;">La Base</b> à Verdun.<br><span style="color:#7fa99f;">Valable 30 jours.</span>' +
         '</div>' +
-        '<a href="/" style="display: block; margin-top: 16px; padding: 14px; background: #14b8a6; color: #02100e; border-radius: 14px; font-family: Outfit; font-weight: 900; text-align: center; text-decoration: none; font-size: 14px;">Découvrir le menu →</a>' +
+        '<a href="/" style="display: block; margin-top: 16px; padding: 15px; background: linear-gradient(100deg,#14b8a6,#5eead4); color: #02100e; border-radius: 14px; font-family: Outfit; font-weight: 900; text-align: center; text-decoration: none; font-size: 15px;">🥤 Découvrir le menu →</a>' +
       '</div>';
     $('resultArea').innerHTML = html;
   }
