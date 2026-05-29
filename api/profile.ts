@@ -224,5 +224,48 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ today: tally(today), month: tally(all) });
   }
 
+  // ─── GET ?action=stats (dashboard admin : compteurs business) ───
+  if (action === 'stats' && req.method === 'GET') {
+    const countOf = async (table: string, filter?: (q: any) => any) => {
+      let q = admin.from(table).select('id', { count: 'exact', head: true });
+      if (filter) q = filter(q);
+      const { count } = await q;
+      return count ?? 0;
+    };
+
+    const [members, publicPlayers, wheelSpins, pushSubs, redemptions, paidOrders] =
+      await Promise.all([
+        countOf('profiles'),
+        countOf('public_spins'),
+        countOf('wheel_spins'),
+        countOf('push_subscriptions'),
+        countOf('reward_redemptions'),
+        countOf('orders', (q) => q.eq('status', 'paid')),
+      ]);
+
+    // CA encaissé (somme des commandes payées) — fetch léger
+    const { data: paidRows } = await admin
+      .from('orders')
+      .select('total_cents')
+      .eq('status', 'paid');
+    const revenueCents = (paidRows ?? []).reduce((s: number, r: any) => s + (r.total_cents || 0), 0);
+
+    // Nouveaux membres aujourd'hui
+    const now = new Date();
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+    const newToday = await countOf('profiles', (q) => q.gte('created_at', startOfDay));
+
+    return res.status(200).json({
+      members,
+      newToday,
+      publicPlayers,
+      wheelSpins,
+      pushSubs,
+      redemptions,
+      paidOrders,
+      revenueCents,
+    });
+  }
+
   return res.status(400).json({ error: 'Action non reconnue' });
 }

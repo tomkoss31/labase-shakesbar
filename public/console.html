@@ -408,6 +408,7 @@
   <div class="nav-tabs-inner">
     <button class="tab active" data-view="comptoir">🏪 Comptoir</button>
     <button class="tab" data-view="scanner">📷 Scanner XP</button>
+    <button class="tab" data-view="stats">📊 Stats</button>
     <button class="tab" data-view="push">📣 Push notifs</button>
     <button class="tab" data-view="health">⚙️ Diagnostic</button>
   </div>
@@ -448,6 +449,16 @@
     </div>
 
     <div id="scanner-result"></div>
+  </div>
+
+  <!-- ─── STATS ─── -->
+  <div class="view" id="view-stats">
+    <h1>📊 Tableau de bord</h1>
+    <div class="sub">Vue d'ensemble de l'activité. (Le trafic détaillé : Vercel → Analytics)</div>
+    <div class="card">
+      <button class="primary teal" id="stats-load">🔄 Charger les chiffres</button>
+      <div id="stats-result" style="margin-top: 14px;"></div>
+    </div>
   </div>
 
   <!-- ─── PUSH ─── -->
@@ -617,6 +628,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
     if (view === 'comptoir') loadComptoir();
     if (view === 'scanner') {}
+    if (view === 'stats') loadStats();
     if (view === 'health') runHealthCheck();
   });
 });
@@ -1047,6 +1059,40 @@ document.querySelectorAll('.copy-link').forEach((btn) => {
     setTimeout(() => { btn.textContent = original; }, 1600);
   });
 });
+
+// ═══ STATS ═══
+$('stats-load').addEventListener('click', loadStats);
+async function loadStats() {
+  const password = getPassword();
+  if (!password) return;
+  $('stats-result').innerHTML = '<div class="hint">Chargement…</div>';
+  try {
+    const r = await fetch('/api/profile?action=stats', {
+      headers: { 'Authorization': 'Bearer ' + password },
+    });
+    const d = await r.json();
+    if (!r.ok) { $('stats-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    const euro = (d.revenueCents / 100).toFixed(2).replace('.', ',');
+    function tile(emoji, value, label, accent) {
+      return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:14px;padding:16px;text-align:center;">' +
+        '<div style="font-size:24px;">' + emoji + '</div>' +
+        '<div style="font-family:Outfit;font-weight:900;font-size:26px;color:' + (accent||'#ecfdf5') + ';margin-top:4px;">' + value + '</div>' +
+        '<div style="font-size:11px;color:#94b8b1;margin-top:2px;">' + label + '</div></div>';
+    }
+    $('stats-result').innerHTML =
+      '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">' +
+        tile('👥', d.members, 'Membres' + (d.newToday ? ' (+' + d.newToday + ' auj.)' : ''), '#5eead4') +
+        tile('🎰', d.publicPlayers, 'Joueurs roue (web)', '#f59e0b') +
+        tile('🛒', d.paidOrders, 'Commandes payées') +
+        tile('💶', euro + '€', 'CA encaissé (app)', '#5eead4') +
+        tile('🔔', d.pushSubs, 'Abonnés notifs') +
+        tile('🎁', d.redemptions, 'Cadeaux offerts') +
+      '</div>' +
+      '<div class="hint" style="margin-top:12px;">🎡 ' + d.wheelSpins + ' tours de roue membres au total.</div>';
+  } catch (err) {
+    $('stats-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
+  }
+}
 
 // ═══ HEALTH ═══
 $('health-check').addEventListener('click', runHealthCheck);
