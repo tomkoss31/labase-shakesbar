@@ -11,6 +11,7 @@ interface XpCardProps {
   firstName?: string;
   connected?: boolean;
   onConnect?: () => void;
+  onOpenRewards?: () => void;
 }
 
 export function XpCard({
@@ -21,6 +22,7 @@ export function XpCard({
   firstName,
   connected = false,
   onConnect,
+  onOpenRewards,
 }: XpCardProps) {
   const pct = Math.min(100, (xp / xpNext) * 100);
   const mascotteLevel = pct > 80 ? 'pro' : pct > 40 ? 'regulier' : 'apprenti';
@@ -28,6 +30,8 @@ export function XpCard({
   return (
     <div style={{ padding: '4px 16px 16px' }}>
       <div
+        onClick={connected ? onOpenRewards : undefined}
+        role={connected ? 'button' : undefined}
         style={{
           background: `linear-gradient(135deg, ${palette.card}, ${palette.cardHi})`,
           border: `1px solid ${palette.line}`,
@@ -35,6 +39,7 @@ export function XpCard({
           padding: 14,
           position: 'relative',
           overflow: 'hidden',
+          cursor: connected ? 'pointer' : 'default',
         }}
       >
         <div
@@ -159,7 +164,9 @@ export function XpCard({
                 {xpNext - xp} XP avant{' '}
                 <b style={{ color: palette.text, fontWeight: 700 }}>Régulier</b>
               </span>
-              <span style={{ color: palette.primary, fontWeight: 700 }}>−10% bientôt</span>
+              <span style={{ color: palette.primary, fontWeight: 700 }}>
+                Mes récompenses →
+              </span>
             </div>
           </div>
         )}

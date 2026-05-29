@@ -15,6 +15,8 @@ import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import { useAuth } from './auth/useAuth';
 import { AuthModal } from './auth/AuthModal';
 import { ProfileSheet } from './auth/ProfileSheet';
+import { RewardsModal } from './rewards/RewardsModal';
+import { MyCodeModal } from './auth/MyCodeModal';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -53,6 +55,8 @@ export function HomeV2({
   const [activeChip, setActiveChip] = useState('all');
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [rewardsOpen, setRewardsOpen] = useState(false);
+  const [myCodeOpen, setMyCodeOpen] = useState(false);
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
   const auth = useAuth();
   const isAuthed = auth.status === 'authenticated';
@@ -204,6 +208,7 @@ export function HomeV2({
             xp={xp}
             xpNext={next.xp}
             onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
+            onOpenRewards={() => setRewardsOpen(true)}
           />
           <div style={{ padding: '0 16px 16px' }}>
             <SideAddressCard palette={palette} />
@@ -395,6 +400,30 @@ export function HomeV2({
         onUpdateProfile={auth.updateProfile}
         onSignOut={auth.signOut}
       />
+
+      {/* Écran "Mes récompenses" — catalogue de cadeaux XP */}
+      <RewardsModal
+        palette={palette}
+        open={rewardsOpen && isAuthed}
+        onClose={() => setRewardsOpen(false)}
+        xp={xp}
+        firstName={auth.profile?.first_name ?? undefined}
+        onShowMyCode={() => {
+          setRewardsOpen(false);
+          setMyCodeOpen(true);
+        }}
+      />
+
+      {/* QR à montrer au comptoir (accessible depuis les récompenses) */}
+      {auth.session?.user?.id && (
+        <MyCodeModal
+          palette={palette}
+          open={myCodeOpen}
+          onClose={() => setMyCodeOpen(false)}
+          userId={auth.session.user.id}
+          profile={auth.profile}
+        />
+      )}
     </div>
   );
 }
