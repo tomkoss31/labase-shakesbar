@@ -482,7 +482,16 @@
   <!-- ─── DIAGNOSTIC ─── -->
   <div class="view" id="view-health">
     <h1>⚙️ Diagnostic technique</h1>
-    <div class="sub">État des variables d'environnement Vercel + services tiers.</div>
+    <div class="sub">Suivi des cadeaux offerts + état des services.</div>
+
+    <div class="card">
+      <label>🎁 Cadeaux offerts en XP (suivi stock)</label>
+      <div class="hint" style="margin-top:4px;margin-bottom:10px;">
+        Ce qui a été offert via les points (séparé de ton CA Square).
+      </div>
+      <button class="primary teal" id="redemptions-load">📊 Charger le récap</button>
+      <div id="redemptions-result" style="margin-top: 14px;"></div>
+    </div>
 
     <div class="card">
       <button class="primary" id="health-check">🔍 Vérifier /api/health</button>
@@ -962,6 +971,33 @@ $('push-send').addEventListener('click', async () => {
 
 function showPushResult(kind, msg) {
   $('push-result').innerHTML = '<div class="' + kind + '">' + msg + '</div>';
+}
+
+// ═══ CADEAUX OFFERTS (suivi stock) ═══
+$('redemptions-load').addEventListener('click', loadRedemptions);
+async function loadRedemptions() {
+  const password = getPassword();
+  $('redemptions-result').innerHTML = '<div class="hint">Chargement…</div>';
+  try {
+    const r = await fetch('/api/profile?action=redemptions-summary', {
+      headers: { 'Authorization': 'Bearer ' + password },
+    });
+    const data = await r.json();
+    if (!r.ok) { $('redemptions-result').innerHTML = '<div class="err">❌ ' + (data.error || 'Erreur') + '</div>'; return; }
+
+    function block(title, t) {
+      const rows = (t.byType || []).map(x =>
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
+        '<span>' + x.label + '</span><span style="font-weight:800;color:#5eead4;">×' + x.count + '</span></div>'
+      ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
+      return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:12px;padding:14px;margin-top:10px;">' +
+        '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x) · ' + t.totalXp + ' XP</div>' +
+        rows + '</div>';
+    }
+    $('redemptions-result').innerHTML = block("Aujourd'hui", data.today) + block('Ce mois', data.month);
+  } catch (err) {
+    $('redemptions-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
+  }
 }
 
 // ═══ HEALTH ═══

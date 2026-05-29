@@ -173,7 +173,49 @@ export default async function handler(req: any, res: any) {
       .eq('id', userId);
     if (updateError) return res.status(500).json({ error: updateError.message });
 
+    // Journalise le cadeau offert (suivi stock, séparé du CA Square)
+    const source = typeof body?.source === 'string' ? body.source : 'comptoir';
+    await admin.from('reward_redemptions').insert({
+      user_id: userId,
+      reward_id: rewardId,
+      reward_label: reward.label,
+      xp_cost: reward.cost,
+      source,
+    });
+
     return res.status(200).json({ ok: true, rewardLabel: reward.label, cost: reward.cost, newXp });
+  }
+
+  // ─── GET ?action=redemptions-summary (récap cadeaux offerts pour la console) ───
+  if (action === 'redemptions-summary' && req.method === 'GET') {
+    // Bornes : début du jour et début du mois (UTC, suffisant pour un récap)
+    const now = new Date();
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+
+    const { data: rows, error } = await admin
+      .from('reward_redemptions')
+      .select('reward_id, reward_label, xp_cost, created_at')
+      .gte('created_at', startOfMonth)
+      .order('created_at', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+
+    const all = rows ?? [];
+    const today = all.filter((r) => r.created_at >= startOfDay);
+
+    function tally(list: typeof all) {
+      const byType: Record<string, { label: string; count: number; xp: number }> = {};
+      let totalXp = 0;
+      for (const r of list) {
+        if (!byType[r.reward_id]) byType[r.reward_id] = { label: r.reward_label, count: 0, xp: 0 };
+        byType[r.reward_id].count += 1;
+        byType[r.reward_id].xp += r.xp_cost;
+        totalXp += r.xp_cost;
+      }
+      return { total: list.length, totalXp, byType: Object.values(byType) };
+    }
+
+    return res.status(200).json({ today: tally(today), month: tally(all) });
   }
 
   return res.status(400).json({ error: 'Action non reconnue' });
