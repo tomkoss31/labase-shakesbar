@@ -655,42 +655,101 @@ export function CartDrawerV2({
               borderTop: `1px solid ${palette.line}`,
             }}
           >
-            {/* Champs prénom + heure */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Prénom"
-                autoComplete="given-name"
-                style={{
-                  flex: 1,
-                  padding: '12px 14px',
-                  background: palette.bg,
-                  border: `1px solid ${palette.line}`,
-                  borderRadius: 12,
-                  color: palette.text,
-                  fontSize: 14,
-                  outline: 'none',
-                  fontFamily: 'inherit',
-                }}
-              />
-              <input
-                type="time"
-                value={pickupTime}
-                onChange={(e) => setPickupTime(e.target.value)}
-                style={{
-                  width: 120,
-                  padding: '12px 14px',
-                  background: palette.bg,
-                  border: `1px solid ${palette.line}`,
-                  borderRadius: 12,
-                  color: palette.text,
-                  fontSize: 14,
-                  outline: 'none',
-                  fontFamily: 'inherit',
-                }}
-              />
+            {/* Petite intro pour expliquer ce qu'on demande */}
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '.1em',
+                textTransform: 'uppercase',
+                color: palette.textDim,
+                marginBottom: 8,
+              }}
+            >
+              ✏️ Pour ta commande
+            </div>
+
+            {/* Champs prénom + heure
+                ⚠️ fontSize: 16px MINIMUM : sinon iOS Safari zoom auto sur focus
+                et ne dézoome pas → toute la page reste cassée. Standard iOS.   */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: palette.textDim,
+                    marginBottom: 4,
+                    letterSpacing: '.06em',
+                  }}
+                >
+                  Ton prénom
+                </label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="ex : Tom"
+                  autoComplete="given-name"
+                  enterKeyHint="next"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: palette.bg,
+                    border: `1px solid ${palette.line}`,
+                    borderRadius: 12,
+                    color: palette.text,
+                    fontSize: 16,
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+              <div style={{ width: 120 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: palette.textDim,
+                    marginBottom: 4,
+                    letterSpacing: '.06em',
+                  }}
+                >
+                  Heure retrait
+                </label>
+                <input
+                  type="time"
+                  value={pickupTime}
+                  onChange={(e) => setPickupTime(e.target.value)}
+                  enterKeyHint="done"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: palette.bg,
+                    border: `1px solid ${palette.line}`,
+                    borderRadius: 12,
+                    color: palette.text,
+                    fontSize: 16,
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 11,
+                color: palette.textDim,
+                marginBottom: 12,
+                lineHeight: 1.4,
+              }}
+            >
+              💡 On utilise ton prénom pour la commande au comptoir et l'heure pour préparer pile à temps.
             </div>
 
             {/* Récap réductions si appliquées */}
