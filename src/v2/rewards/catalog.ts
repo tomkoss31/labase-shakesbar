@@ -50,6 +50,7 @@ export const REWARDS_CATALOG: RewardTier[] = [
 export const XP_RULES: Array<{ emoji: string; label: string; value: string }> = [
   { emoji: '💸', label: 'Chaque euro dépensé', value: '+10 XP' },
   { emoji: '⚡', label: 'Combo (boisson + smoothie)', value: '+25 XP' },
+  { emoji: '🔥', label: 'Mardi Double XP', value: '×2' },
   { emoji: '🎂', label: 'Ton anniversaire', value: '+500 XP' },
   { emoji: '🎰', label: 'Roue cadeau hebdomadaire', value: 'bonus' },
 ];

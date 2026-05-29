@@ -849,10 +849,15 @@ function renderProfile(p, rewards) {
     '<div class="card">' +
       '<label>💳 Crédit XP après paiement Square caisse</label>' +
       '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
+      '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#ecfdf5;">' +
+        '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:#14b8a6;" />' +
+        '⚡ Commande combo (boisson + smoothie) <b style="color:#5eead4;">+25 XP</b>' +
+      '</label>' +
+      (isTuesdayClient() ? '<div class="hint" style="color:#f59e0b;font-weight:700;margin-top:8px;">🔥 Mardi Double XP actif : les XP sur le montant sont ×2 aujourd\'hui !</div>' : '') +
       '<button class="primary teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
       '<div class="hint">' +
-        'Saisis le montant total que tu viens d\'encaisser sur Square en caisse pour ce client.' +
-        ' Ses XP seront crédités automatiquement (10 XP / € + 50 XP / cmd).' +
+        'Saisis le montant encaissé sur Square. XP crédités : 10 XP/€ + 50 XP/cmd' +
+        ' (+25 si combo, ×2 le mardi).' +
       '</div>' +
     '</div>' +
     '<div class="card">' +
@@ -889,12 +894,17 @@ async function redeemReward(userId, rewardId, label, cost) {
   }
 }
 
+function isTuesdayClient() {
+  return new Date().getDay() === 2; // 2 = mardi (heure locale tablette)
+}
+
 async function creditXP(userId) {
   const password = getPassword();
   const eurosRaw = $('amount').value.trim().replace(',', '.');
   const euros = parseFloat(eurosRaw);
   if (!Number.isFinite(euros) || euros <= 0) { alert('Montant invalide'); return; }
   const amountCents = Math.round(euros * 100);
+  const combo = $('comboCheck') ? $('comboCheck').checked : false;
 
   const btn = $('creditBtn');
   btn.disabled = true;
@@ -903,7 +913,7 @@ async function creditXP(userId) {
     const resp = await fetch('/api/profile?action=credit-manual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos' }),
+      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo }),
     });
     const data = await resp.json();
     if (resp.ok) {

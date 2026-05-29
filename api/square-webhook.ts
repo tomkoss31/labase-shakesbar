@@ -182,7 +182,9 @@ export default async function handler(req: any, res: any) {
     if (profile) {
       const isFirstOrder = profile.total_orders === 0;
       const eurosSpent = Math.floor(totalCents / 100);
-      const xpFromEuros = eurosSpent * 10;
+      // Mardi Double XP (cohérent avec le crédit comptoir)
+      const isTuesday = new Date().getUTCDay() === 2;
+      const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1);
       const xpFromOrder = 50;
       const xpFirstOrderBonus = isFirstOrder ? 200 : 0;
       const xpGained = xpFromEuros + xpFromOrder + xpFirstOrderBonus;

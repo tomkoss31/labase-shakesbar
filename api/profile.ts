@@ -114,8 +114,14 @@ export default async function handler(req: any, res: any) {
     });
 
     const isFirstOrder = profile.total_orders === 0;
+    const isCombo = body?.combo === true;
     const eurosSpent = Math.floor(amountCents / 100);
-    const xpGained = eurosSpent * 10 + 50 + (isFirstOrder ? 200 : 0);
+    // Mardi Double XP (jour creux → ramène du monde). getUTCDay: 2 = mardi.
+    // Le bar opère en journée → UTC = même jour qu'à Paris, fiable.
+    const isTuesday = new Date().getUTCDay() === 2;
+    const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1);
+    const comboBonus = isCombo ? 25 : 0;
+    const xpGained = xpFromEuros + 50 + comboBonus + (isFirstOrder ? 200 : 0);
 
     const newTotalSpent = profile.total_spent_cents + amountCents;
     const newTotalOrders = profile.total_orders + 1;
