@@ -135,5 +135,46 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ ok: true, xpGained, newTotalSpent, newXp });
   }
 
+  // ─── POST ?action=redeem-reward (admin déduit XP pour offrir un cadeau) ───
+  // Catalogue serveur = source de vérité du coût (empêche un client de
+  // tricher en envoyant un coût faux). Garder synchro avec
+  // src/v2/rewards/catalog.ts côté front.
+  if (action === 'redeem-reward' && req.method === 'POST') {
+    const REWARDS: Record<string, { cost: number; label: string }> = {
+      topping: { cost: 250, label: 'Topping offert' },
+      boisson: { cost: 800, label: 'Une boisson au choix' },
+      'combo-gaufre': { cost: 1500, label: 'Boisson + gaufre healthy' },
+      'cadeau-mois': { cost: 2500, label: 'Cadeau du mois' },
+    };
+
+    const body = await readBody(req);
+    const userId = typeof body?.userId === 'string' ? body.userId : null;
+    const rewardId = typeof body?.rewardId === 'string' ? body.rewardId : null;
+    if (!userId || !rewardId) return res.status(400).json({ error: 'userId + rewardId requis' });
+
+    const reward = REWARDS[rewardId];
+    if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
+
+    const { data: profile, error: profileError } = await admin
+      .from('profiles')
+      .select('xp')
+      .eq('id', userId)
+      .single();
+    if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
+
+    if (profile.xp < reward.cost) {
+      return res.status(400).json({ error: `XP insuffisants (${profile.xp}/${reward.cost})` });
+    }
+
+    const newXp = profile.xp - reward.cost;
+    const { error: updateError } = await admin
+      .from('profiles')
+      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
+      .eq('id', userId);
+    if (updateError) return res.status(500).json({ error: updateError.message });
+
+    return res.status(200).json({ ok: true, rewardLabel: reward.label, cost: reward.cost, newXp });
+  }
+
   return res.status(400).json({ error: 'Action non reconnue' });
 }

@@ -803,6 +803,27 @@ function renderProfile(p, rewards) {
     '<span class="reward-pill">🎁 ' + r.reward_label + ' · ' + r.reward_code + '</span>'
   ).join('');
 
+  // Catalogue cadeaux — GARDER SYNCHRO avec src/v2/rewards/catalog.ts
+  const CATALOG = [
+    { id: 'topping', cost: 250, emoji: '✨', title: 'Topping offert' },
+    { id: 'boisson', cost: 800, emoji: '🥤', title: 'Une boisson au choix' },
+    { id: 'combo-gaufre', cost: 1500, emoji: '🧇', title: 'Boisson + gaufre' },
+    { id: 'cadeau-mois', cost: 2500, emoji: '🎁', title: 'Cadeau du mois' },
+  ];
+  const giftButtons = CATALOG.map(c => {
+    const ok = p.xp >= c.cost;
+    return '<button class="gift-btn" data-rid="' + c.id + '" data-cost="' + c.cost +
+      '" data-label="' + c.title + '"' + (ok ? '' : ' disabled') +
+      ' style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid ' +
+      (ok ? '#14b8a6' : 'rgba(94,234,212,.12)') + ';background:' + (ok ? 'rgba(20,184,166,.12)' : '#04100f') +
+      ';color:' + (ok ? '#ecfdf5' : '#5e7a73') + ';font-family:inherit;font-size:13px;font-weight:700;cursor:' +
+      (ok ? 'pointer' : 'not-allowed') + ';text-align:left;">' +
+      '<span style="font-size:20px;">' + c.emoji + '</span>' +
+      '<span style="flex:1;">' + c.title + '</span>' +
+      '<span style="font-weight:800;color:' + (ok ? '#5eead4' : '#5e7a73') + ';">' +
+      (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
+  }).join('');
+
   $('scanner-result').innerHTML =
     '<div class="card" style="border-color: #14b8a6;">' +
       '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
@@ -824,9 +845,39 @@ function renderProfile(p, rewards) {
         'Saisis le montant total que tu viens d\'encaisser sur Square en caisse pour ce client.' +
         ' Ses XP seront crédités automatiquement (10 XP / € + 50 XP / cmd).' +
       '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<label>🎁 Offrir un cadeau (déduit les XP)</label>' +
+      '<div class="hint" style="margin-top:4px;margin-bottom:4px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
+      giftButtons +
     '</div>';
 
   $('creditBtn').addEventListener('click', () => creditXP(p.id));
+  document.querySelectorAll('.gift-btn').forEach(btn => {
+    if (btn.disabled) return;
+    btn.addEventListener('click', () => redeemReward(p.id, btn.dataset.rid, btn.dataset.label, btn.dataset.cost));
+  });
+}
+
+async function redeemReward(userId, rewardId, label, cost) {
+  if (!confirm('Offrir « ' + label + ' » et déduire ' + cost + ' XP ?')) return;
+  const password = getPassword();
+  try {
+    const resp = await fetch('/api/profile?action=redeem-reward', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+      body: JSON.stringify({ userId, rewardId }),
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      showScannerResult('ok', '🎁 « ' + data.rewardLabel + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
+      lookupUser(userId);
+    } else {
+      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+    }
+  } catch (err) {
+    showScannerResult('err', '❌ ' + err.message);
+  }
 }
 
 async function creditXP(userId) {
