@@ -17,9 +17,9 @@ const WHEEL_SEGMENTS = [
 const PUBLIC_SEGMENTS = [
   { id: 'public-discount-10', label: '−10% sur ta 1ère commande', weight: 28, rewardType: 'discount_percent', rewardValue: '10' },
   { id: 'public-discount-5', label: '−5% sur ta 1ère commande', weight: 28, rewardType: 'discount_percent', rewardValue: '5' },
-  { id: 'public-gaufre', label: 'Gaufre healthy offerte (dès 10€)', weight: 20, rewardType: 'free_product', rewardValue: 'Gaufre healthy' },
+  { id: 'public-gaufre', label: 'Gaufre healthy offerte (dès 5€)', weight: 20, rewardType: 'free_product', rewardValue: 'Gaufre healthy' },
   { id: 'public-discount-15', label: '−15% gros gagnant !', weight: 12, rewardType: 'discount_percent', rewardValue: '15' },
-  { id: 'public-smoothie', label: 'Smoothie offert (dès 15€)', weight: 10, rewardType: 'free_product', rewardValue: 'Smoothie au choix' },
+  { id: 'public-smoothie', label: 'Smoothie offert (dès 10€)', weight: 10, rewardType: 'free_product', rewardValue: 'Smoothie au choix' },
   { id: 'public-goodies', label: 'Goodies La Base au comptoir', weight: 2, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
