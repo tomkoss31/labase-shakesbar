@@ -1,7 +1,7 @@
 // La Base — Service Worker
 // Gère install/activate (PWA basique), push notifications et clicks dessus.
 
-const CACHE_VERSION = 'labase-v3-icon-2026-05-30';
+const CACHE_VERSION = 'labase-v4-logo-2026-05-30';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
