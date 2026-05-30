@@ -5,7 +5,8 @@
     { "source": "/console", "destination": "/console.html" },
     { "source": "/mentions-legales", "destination": "/mentions-legales.html" },
     { "source": "/confidentialite", "destination": "/confidentialite.html" },
-    { "source": "/club", "destination": "/club.html" }
+    { "source": "/club", "destination": "/club.html" },
+    { "source": "/logo-preview", "destination": "/logo-preview.html" }
   ],
   "crons": [
     {
