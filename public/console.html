@@ -752,14 +752,15 @@ let scanning = false;
 let lastScanned = '';
 let lastScannedAt = 0;
 
-$('toggleCam').addEventListener('click', async () => {
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null; scanning = false;
-    $('scannerZone').style.display = 'none';
-    $('toggleCam').textContent = 'Démarrer';
-    return;
-  }
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  scanning = false;
+  $('scannerZone').style.display = 'none';
+  if ($('scanner-debug')) $('scanner-debug').style.display = 'none';
+  $('toggleCam').textContent = 'Démarrer';
+}
+
+async function startCamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment' },
@@ -775,6 +776,11 @@ $('toggleCam').addEventListener('click', async () => {
   } catch (err) {
     showScannerResult('err', '❌ Caméra refusée : ' + err.message);
   }
+}
+
+$('toggleCam').addEventListener('click', () => {
+  if (stream) stopCamera();
+  else startCamera();
 });
 
 function scanLoop() {
@@ -836,7 +842,10 @@ async function lookupUser(userId) {
       showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
       return;
     }
+    // Client trouvé → on coupe la caméra et on remonte la fiche en haut
+    stopCamera();
     renderProfile(data.profile, data.rewards);
+    $('scanner-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     showScannerResult('err', '❌ ' + err.message);
   }
@@ -871,6 +880,7 @@ function renderProfile(p, rewards) {
   }).join('');
 
   $('scanner-result').innerHTML =
+    '<button id="rescanBtn" class="primary teal" style="width:100%;margin-bottom:12px;">📷 Scanner un autre client</button>' +
     '<div class="card" style="border-color: #14b8a6;">' +
       '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
       '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
@@ -907,6 +917,14 @@ function renderProfile(p, rewards) {
   document.querySelectorAll('.gift-btn').forEach(btn => {
     if (btn.disabled) return;
     btn.addEventListener('click', () => redeemReward(p.id, btn.dataset.rid, btn.dataset.label, btn.dataset.cost));
+  });
+  // Relancer le scan d'un nouveau client (vide la fiche + rallume la caméra)
+  const rescan = $('rescanBtn');
+  if (rescan) rescan.addEventListener('click', () => {
+    $('scanner-result').innerHTML = '';
+    lastScanned = ''; lastScannedAt = 0;
+    startCamera();
+    $('scannerZone').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
