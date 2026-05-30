@@ -45,7 +45,7 @@ export function LaBaseLogo({ palette, size = 'md' }: LaBaseLogoProps) {
             marginTop: 3,
           }}
         >
-          SHAKES&nbsp;·&nbsp;VERDUN
+          SHAKES&nbsp;&amp;&nbsp;DRINKS
         </div>
       </div>
     </div>
