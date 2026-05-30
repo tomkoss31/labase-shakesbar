@@ -124,6 +124,12 @@ export default async function handler(req: any, res: any) {
   const totalCents = (payment.total_money?.amount as number) ?? 0;
   const buyerEmail = payment.buyer_email_address as string | undefined;
   const note = payment.note as string | undefined;
+  // Heure RÉELLE du paiement Square (pas l'heure de traitement du webhook),
+  // sinon les heures affichées sont fausses quand Square renvoie d'anciens
+  // événements (retry / reconfig webhook).
+  const paidAtIso = payment.created_at
+    ? new Date(payment.created_at as string).toISOString()
+    : new Date().toISOString();
 
   // Vérifier si on a déjà traité ce paiement (idempotence)
   if (squareOrderId) {
@@ -157,7 +163,8 @@ export default async function handler(req: any, res: any) {
     status: 'paid',
     total_cents: totalCents,
     customer_name: note || null,
-    paid_at: new Date().toISOString(),
+    paid_at: paidAtIso,
+    created_at: paidAtIso,
   };
 
   const { data: order, error: orderError } = await supabase
