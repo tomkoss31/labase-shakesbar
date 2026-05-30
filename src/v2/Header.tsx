@@ -12,25 +12,18 @@ export function LaBaseLogo({ palette, size = 'md' }: LaBaseLogoProps) {
   const fs = size === 'lg' ? 22 : size === 'sm' ? 14 : 18;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div
+      <img
+        src="/icon-192.png"
+        alt="La Base"
         style={{
-          width: fs * 1.6,
-          height: fs * 1.6,
+          width: fs * 1.7,
+          height: fs * 1.7,
           borderRadius: 10,
-          background: `linear-gradient(135deg, ${palette.glow1}, ${palette.glow2}, ${palette.accent})`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 900,
-          fontFamily: 'Outfit, sans-serif',
-          color: palette.bg,
-          fontSize: fs * 0.95,
-          boxShadow: `0 0 24px ${palette.primary}55, inset 0 1px 0 rgba(255,255,255,.3)`,
+          boxShadow: `0 0 24px ${palette.primary}44`,
           flexShrink: 0,
+          objectFit: 'cover',
         }}
-      >
-        B
-      </div>
+      />
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
         <div
           style={{
