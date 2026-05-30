@@ -419,7 +419,7 @@
   <!-- ─── COMPTOIR ─── -->
   <div class="view active" id="view-comptoir">
     <h1>🏪 Commandes du jour</h1>
-    <div class="sub">Gère les commandes payées + espèces en attente. Auto-refresh toutes les 15s.</div>
+    <div class="sub">Toutes tes ventes Square remontent ici. Appuie sur <b style="color:#cbd5d1;">✕</b> pour masquer une vente caisse / produit (ça ne touche pas Square). Auto-refresh 15s.</div>
     <div id="comptoir-list"></div>
   </div>
 
@@ -692,6 +692,12 @@ function renderComptoirList(orders) {
     }
     if (o.status === 'ready') {
       buttons.push('<span style="font-size: 11px; color: #22c55e; font-weight: 700;">À retirer</span>');
+    }
+    // Bouton masquer : retire de la liste les ventes caisse/produits qui ne
+    // sont pas des commandes à préparer (passe en "cancelled" côté app, sans
+    // toucher Square).
+    if (o.status !== 'pending_cash') {
+      buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + o.id + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#7f8a88;padding:8px 10px;">✕</button>');
     }
 
     return '<div class="row" data-status="' + o.status + '">' +
