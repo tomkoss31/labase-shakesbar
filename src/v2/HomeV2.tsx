@@ -321,6 +321,50 @@ export function HomeV2({
           }
         }
       `}</style>
+
+      {/* Carte "Bilan offert" — ciblée clients chauds (≥ 3 commandes) */}
+      {isAuthed && (auth.profile?.total_orders ?? 0) >= 3 && (
+        <div style={{ padding: '4px 16px 8px', maxWidth: 1240, margin: '0 auto' }}>
+          <a
+            href="/club"
+            style={{
+              display: 'block',
+              textDecoration: 'none',
+              borderRadius: 18,
+              padding: 18,
+              background: `linear-gradient(135deg, ${palette.primary}, ${palette.accent})`,
+              color: palette.ctaText,
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: `0 12px 30px ${palette.primary}44`,
+            }}
+          >
+            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', opacity: 0.85 }}>
+              💪 Tu es un habitué·e
+            </div>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 21, lineHeight: 1.15, margin: '6px 0 6px' }}>
+              Et si on passait au niveau supérieur ?
+            </div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.45, opacity: 0.95, marginBottom: 12 }}>
+              Perte de poids, énergie, performance… Profite d'un <b>bilan bien-être offert</b> et d'un suivi perso.
+            </div>
+            <div
+              style={{
+                display: 'inline-block',
+                padding: '10px 16px',
+                background: 'rgba(0,0,0,.22)',
+                borderRadius: 12,
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 900,
+                fontSize: 14,
+              }}
+            >
+              ✨ Réserver mon bilan offert →
+            </div>
+          </a>
+        </div>
+      )}
+
       <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
       <CategoryChips palette={palette} active={activeChip} onChange={setActiveChip} />
