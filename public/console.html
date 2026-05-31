@@ -582,6 +582,7 @@ async function init() {
       $('password').value = saved;
       hideGate();
       loadComptoir();
+      openHashTab();
       return;
     }
     // Token invalide → on l'efface et on affiche le gate
@@ -610,6 +611,7 @@ $('gate-form').addEventListener('submit', async (e) => {
     hideGate();
     // Lance le premier load Comptoir
     loadComptoir();
+    openHashTab();
   } else {
     errEl.textContent = '⚠️ Mot de passe incorrect';
     $('gate-password').value = '';
@@ -638,6 +640,14 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (view === 'health') runHealthCheck();
   });
 });
+
+// Ouvre directement un onglet si l'URL contient un hash (#scanner depuis l'app)
+function openHashTab() {
+  const hash = (location.hash || '').replace('#', '');
+  if (!hash) return;
+  const btn = document.querySelector('.tab[data-view="' + hash + '"]');
+  if (btn) btn.click();
+}
 
 function getPassword() {
   return $('password').value.trim();

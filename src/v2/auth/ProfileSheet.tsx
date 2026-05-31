@@ -10,6 +10,18 @@ import { getWheelCooldown } from '../wheel/segments';
 import { useUserOrders } from '../orders/useUserOrders';
 import { MyCodeModal } from './MyCodeModal';
 
+// Liste des emails admin (séparés par virgule dans VITE_ADMIN_EMAIL).
+// Ex : "tomkoss31@gmail.com,milmel55@gmail.com"
+function isAdminEmail(email: string | null): boolean {
+  if (!email) return false;
+  const raw = String(import.meta.env.VITE_ADMIN_EMAIL || '');
+  const admins = raw
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return admins.includes(email.toLowerCase());
+}
+
 interface ProfileSheetProps {
   palette: Palette;
   open: boolean;
@@ -387,9 +399,46 @@ export function ProfileSheet({
           </button>
         )}
 
+        {/* Boutons admin — visibles uniquement pour les comptes admin */}
+        {isAdminEmail(email) && (
+          <button
+            onClick={() => {
+              window.location.href = '/console.html#scanner';
+            }}
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              padding: '14px 16px',
+              background: `linear-gradient(135deg, ${palette.primary}, ${palette.accent})`,
+              border: 'none',
+              borderRadius: 14,
+              color: palette.ctaText,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              boxShadow: `0 8px 24px ${palette.primary}44`,
+            }}
+          >
+            <div style={{ fontSize: 22, lineHeight: 1 }}>📷</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
+                Scanner un client
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 500, marginTop: 2, opacity: 0.85 }}>
+                Flash le QR, crédite les XP au comptoir
+              </div>
+            </div>
+            <div style={{ fontSize: 18 }}>→</div>
+          </button>
+        )}
+
         {/* Bouton Console admin — visible uniquement pour le compte admin */}
-        {email && import.meta.env.VITE_ADMIN_EMAIL &&
-          email.toLowerCase() === String(import.meta.env.VITE_ADMIN_EMAIL).toLowerCase() && (
+        {isAdminEmail(email) && (
           <button
             onClick={() => {
               window.location.href = '/console.html';

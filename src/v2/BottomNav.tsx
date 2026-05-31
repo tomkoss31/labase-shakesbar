@@ -1,9 +1,9 @@
 // Bottom Navigation v2 — 4 onglets fixés bas mobile
 import React from 'react';
 import type { Palette } from './palette';
-import { IconHome, IconMenu, IconBolt, IconAccount } from './icons';
+import { IconHome, IconMenu, IconBolt, IconAccount, IconSparkle } from './icons';
 
-export type NavTab = 'home' | 'menu' | 'combos' | 'account';
+export type NavTab = 'home' | 'menu' | 'combos' | 'club' | 'account';
 
 interface BottomNavProps {
   palette: Palette;
@@ -15,6 +15,7 @@ const TABS: Array<{ id: NavTab; label: string; Icon: typeof IconHome }> = [
   { id: 'home', label: 'Accueil', Icon: IconHome },
   { id: 'menu', label: 'Menu', Icon: IconMenu },
   { id: 'combos', label: 'Combos', Icon: IconBolt },
+  { id: 'club', label: 'Le Club', Icon: IconSparkle },
   { id: 'account', label: 'Compte', Icon: IconAccount },
 ];
 
@@ -37,7 +38,7 @@ export function BottomNav({ palette, active, onChange }: BottomNavProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           gap: 4,
           padding: '8px 8px 12px',
           maxWidth: 720,

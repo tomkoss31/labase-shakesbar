@@ -116,6 +116,8 @@ export function HomeV2({
           .querySelector('[data-v2-section="combos"]')
           ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
+    } else if (t === 'club') {
+      window.location.href = '/club';
     } else if (t === 'account') {
       if (isAuthed) setProfileOpen(true);
       else setAuthOpen(true);
