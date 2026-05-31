@@ -60,6 +60,21 @@ const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const PENDING_GIFT_KEY = 'labase-pending-gift';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
 const VIEW_MODE_KEY = 'labase-menu-view-mode';
+// Persistance du panier : survit au reload de l'auth (inscription depuis le panier)
+const CART_STORAGE_KEY = 'labase-cart-v1';
+// Flag : rouvrir le panier après une inscription lancée depuis le panier
+const REOPEN_CART_KEY = 'labase-reopen-cart';
+
+function loadStoredCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 type MenuViewMode = 'magazine' | 'list';
 
@@ -250,7 +265,7 @@ function FilterPill({
 function App() {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(loadStoredCart);
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Modale auth + roue partagées entre HomeV2 et le panier (nudges)
   const [authOpen, setAuthOpen] = useState(false);
@@ -263,6 +278,29 @@ function App() {
   const appAuth = useAuth();
   const userXp = appAuth.profile?.xp ?? 0;
   const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
+
+  // Persiste le panier (survit au reload de l'auth → produit conservé après inscription)
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      /* quota / mode privé : pas bloquant */
+    }
+  }, [cart]);
+
+  // Après une inscription lancée depuis le panier : on rouvre le panier
+  // une fois connecté, pour que le client finalise sa commande.
+  useEffect(() => {
+    if (appAuth.status !== 'authenticated') return;
+    try {
+      if (sessionStorage.getItem(REOPEN_CART_KEY) === '1') {
+        sessionStorage.removeItem(REOPEN_CART_KEY);
+        if (cart.length > 0) setDrawerOpen(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [appAuth.status, cart.length]);
 
   // Le client SÉLECTIONNE un extra à offrir avec ses XP (depuis le panier).
   // ⚠️ Aucun débit ici : c'est une simple sélection réversible. Les XP ne sont
@@ -2584,6 +2622,8 @@ function App() {
             claimedGift={claimedGift}
             onClaimGift={handleClaimGift}
             onConnect={() => {
+              // Mémorise qu'on devra rouvrir le panier après l'inscription
+              try { sessionStorage.setItem(REOPEN_CART_KEY, '1'); } catch {}
               setDrawerOpen(false);
               setAuthOpen(true);
             }}
