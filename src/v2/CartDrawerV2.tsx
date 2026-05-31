@@ -8,6 +8,7 @@ import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 import { useOpenStatus } from './openingHours';
+import { getWheelCooldown } from './wheel/segments';
 
 interface CartItem {
   key: string;
@@ -50,6 +51,8 @@ interface CartDrawerV2Props {
   isAuthed?: boolean;
   claimedGift?: { id: string; title: string; emoji: string; cost: number } | null;
   onClaimGift?: (reward: { id: string; title: string; emoji: string; cost: number }) => void;
+  onConnect?: () => void; // ouvre l'auth (nudge "crée un compte")
+  onSpinWheel?: () => void; // ouvre la roue (nudge "tente ta chance")
 }
 
 // Calcule les suggestions intelligentes d'après le panier
@@ -142,6 +145,8 @@ export function CartDrawerV2({
   isAuthed = false,
   claimedGift = null,
   onClaimGift,
+  onConnect,
+  onSpinWheel,
 }: CartDrawerV2Props) {
   const suggestions = useMemo(() => computeSuggestions(cart), [cart]);
 
@@ -308,6 +313,69 @@ export function CartDrawerV2({
                   </div>
                 );
               })()}
+
+              {/* Nudge ANONYME : crée un compte pour gagner XP + cadeaux */}
+              {!isAuthed && onConnect && (
+                <div
+                  style={{
+                    padding: 14,
+                    borderRadius: 16,
+                    background: `linear-gradient(135deg, ${palette.primary}22, ${palette.accent}11)`,
+                    border: `1px solid ${palette.accent}66`,
+                    marginBottom: 4,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <div style={{ fontSize: 24, lineHeight: 1 }}>🎁</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15.5, color: palette.text }}>
+                      Gagne sur cette commande !
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: palette.textDim, lineHeight: 1.45, marginBottom: 10 }}>
+                    En créant ton compte (30s), tu cumules des <b style={{ color: palette.text }}>XP</b>,
+                    tu débloques des <b style={{ color: palette.text }}>réductions & cadeaux</b>, et tu peux
+                    tenter la <b style={{ color: palette.text }}>roue 🎰</b>.
+                  </div>
+                  <button
+                    onClick={onConnect}
+                    style={{
+                      width: '100%', padding: '12px', border: 0, borderRadius: 12,
+                      background: palette.cta, color: palette.ctaText,
+                      fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 13.5, cursor: 'pointer',
+                    }}
+                  >
+                    ✨ Créer mon compte / Me connecter
+                  </button>
+                </div>
+              )}
+
+              {/* Nudge CONNECTÉ : roue cadeau dispo avant de valider */}
+              {isAuthed && onSpinWheel && getWheelCooldown().canSpin && (
+                <button
+                  onClick={onSpinWheel}
+                  style={{
+                    width: '100%', textAlign: 'left',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: 14, borderRadius: 16, cursor: 'pointer',
+                    background: `linear-gradient(135deg, ${palette.accent}, ${palette.primary})`,
+                    color: palette.ctaText, border: 0, marginBottom: 4,
+                    fontFamily: 'inherit',
+                    boxShadow: `0 8px 22px ${palette.accent}44`,
+                  }}
+                >
+                  <div style={{ fontSize: 26, lineHeight: 1 }}>🎰</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 14.5 }}>
+                      Tu n'as pas tourné la roue !
+                    </div>
+                    <div style={{ fontSize: 11.5, opacity: 0.9, marginTop: 1 }}>
+                      Tente ta chance avant de valider 🎁
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 18 }}>→</div>
+                </button>
+              )}
+
               {cart.map((item) => (
                 <div
                   key={item.key}

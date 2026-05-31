@@ -252,6 +252,9 @@ function App() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Modale auth + roue partagées entre HomeV2 et le panier (nudges)
+  const [authOpen, setAuthOpen] = useState(false);
+  const [wheelOpen, setWheelOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedProduct | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
@@ -2531,6 +2534,10 @@ function App() {
             onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
             onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
             onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
+            authOpen={authOpen}
+            setAuthOpen={setAuthOpen}
+            wheelOpen={wheelOpen}
+            setWheelOpen={setWheelOpen}
           />
           <ProductModalV2
             palette={PALETTE_E}
@@ -2576,6 +2583,14 @@ function App() {
             isAuthed={appAuth.status === 'authenticated'}
             claimedGift={claimedGift}
             onClaimGift={handleClaimGift}
+            onConnect={() => {
+              setDrawerOpen(false);
+              setAuthOpen(true);
+            }}
+            onSpinWheel={() => {
+              setDrawerOpen(false);
+              setWheelOpen(true);
+            }}
           />
           <PendingCashModal
             palette={PALETTE_E}

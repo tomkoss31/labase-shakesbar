@@ -41,6 +41,11 @@ interface HomeV2Props {
   onOpenCombo: (combo: V2Combo) => void;
   onAddProduct: (product: V2Product, fromButton: HTMLElement) => void;
   onLeaveReview?: () => void;
+  // Contrôle externe (depuis App.tsx) pour ouvrir auth / roue depuis le panier
+  authOpen?: boolean;
+  setAuthOpen?: (open: boolean) => void;
+  wheelOpen?: boolean;
+  setWheelOpen?: (open: boolean) => void;
 }
 
 export function HomeV2({
@@ -50,16 +55,24 @@ export function HomeV2({
   onOpenCombo,
   onAddProduct,
   onLeaveReview,
+  authOpen: authOpenProp,
+  setAuthOpen: setAuthOpenProp,
+  wheelOpen: wheelOpenProp,
+  setWheelOpen: setWheelOpenProp,
 }: HomeV2Props) {
   const palette = PALETTE_E;
   const [tab, setTab] = useState<NavTab>('home');
   const [headerTab, setHeaderTab] = useState<HeaderTab>('home');
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
-  const [authOpen, setAuthOpen] = useState(false);
+  const [authOpenLocal, setAuthOpenLocal] = useState(false);
+  const authOpen = authOpenProp ?? authOpenLocal;
+  const setAuthOpen = setAuthOpenProp ?? setAuthOpenLocal;
   const [profileOpen, setProfileOpen] = useState(false);
   const [rewardsOpen, setRewardsOpen] = useState(false);
-  const [wheelOpen, setWheelOpen] = useState(false);
+  const [wheelOpenLocal, setWheelOpenLocal] = useState(false);
+  const wheelOpen = wheelOpenProp ?? wheelOpenLocal;
+  const setWheelOpen = setWheelOpenProp ?? setWheelOpenLocal;
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
