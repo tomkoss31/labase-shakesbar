@@ -4,6 +4,7 @@ import React from 'react';
 import type { Palette } from './palette';
 import { IconSearch } from './icons';
 import { V2_CHIP_CATEGORIES } from './products-adapter';
+import { getOpenStatus, OPENING_HOURS_TEXT } from './openingHours';
 
 // ── SearchBar ───────────────────────────────────────────────────
 export function SearchBar({
@@ -203,6 +204,8 @@ export function Carousel({ children }: { children: React.ReactNode }) {
 
 // ── Info pratique ───────────────────────────────────────────────
 export function InfoBlock({ palette }: { palette: Palette }) {
+  const status = getOpenStatus();
+  const dotColor = status.isOpen ? '#22c55e' : '#ef4444';
   return (
     <div style={{ padding: '12px 16px 20px' }}>
       <div
@@ -242,11 +245,16 @@ export function InfoBlock({ palette }: { palette: Palette }) {
                   width: 7,
                   height: 7,
                   borderRadius: '50%',
-                  background: '#22c55e',
-                  boxShadow: '0 0 8px #22c55e',
+                  background: dotColor,
+                  boxShadow: `0 0 8px ${dotColor}`,
                 }}
               />
-              <div style={{ fontSize: 12, color: palette.text, fontWeight: 600 }}>Préparation 5 à 10 min</div>
+              <div style={{ fontSize: 12, color: palette.text, fontWeight: 600 }}>
+                {status.isOpen ? `${status.label} · prêt en 5-10 min` : status.label}
+                {!status.isOpen && status.nextOpenLabel && (
+                  <span style={{ color: palette.textDim, fontWeight: 500 }}> · {status.nextOpenLabel}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -292,6 +300,46 @@ export function InfoBlock({ palette }: { palette: Palette }) {
           >
             Avis · 4,9 ★
           </a>
+        </div>
+
+        {/* Horaires d'ouverture */}
+        <div
+          style={{
+            marginTop: 14,
+            paddingTop: 12,
+            borderTop: `1px solid ${palette.line}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '.1em',
+              textTransform: 'uppercase',
+              color: palette.textDim,
+              marginBottom: 8,
+            }}
+          >
+            🕐 Horaires
+          </div>
+          {OPENING_HOURS_TEXT.map((row) => (
+            <div
+              key={row.day}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: 12.5,
+                padding: '3px 0',
+                color: row.hours === 'Fermé' ? palette.textDim : palette.text,
+              }}
+            >
+              <span>{row.day}</span>
+              <span style={{ fontWeight: 600 }}>{row.hours}</span>
+            </div>
+          ))}
+          <div style={{ fontSize: 10.5, color: palette.textDim, marginTop: 8, fontStyle: 'italic' }}>
+            Horaires variables selon les événements
+          </div>
         </div>
       </div>
     </div>

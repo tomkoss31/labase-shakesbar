@@ -10,7 +10,6 @@ import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
-import { SideAddressCard } from './SideAddressCard';
 import { WheelModal } from './wheel/WheelModal';
 import type { HeaderTab } from './Header';
 import { useFlyAnimation, colorForCategory } from './FlyAnimation';
@@ -540,11 +539,6 @@ export function HomeV2({
             </a>
           </div>
         </div>
-      </div>
-
-      {/* Adresse / horaires — déplacée en bas (infos pratiques) */}
-      <div style={{ padding: '0 16px 8px', maxWidth: 1240, margin: '0 auto' }}>
-        <SideAddressCard palette={palette} />
       </div>
 
       <InfoBlock palette={palette} />
