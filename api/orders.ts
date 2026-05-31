@@ -217,7 +217,9 @@ export default async function handler(req: any, res: any) {
       if (profile) {
         const isFirstOrder = profile.total_orders === 0;
         const eurosSpent = Math.floor(order.total_cents / 100);
-        const xpGained = eurosSpent * 10 + 50 + (isFirstOrder ? 200 : 0);
+        // Mardi Double XP (cohérent avec le webhook Square carte)
+        const isTuesday = new Date().getUTCDay() === 2;
+        const xpGained = eurosSpent * 10 * (isTuesday ? 2 : 1) + 50 + (isFirstOrder ? 200 : 0);
         const newTotalSpent = profile.total_spent_cents + order.total_cents;
         const newTotalOrders = profile.total_orders + 1;
         const newXp = profile.xp + xpGained;

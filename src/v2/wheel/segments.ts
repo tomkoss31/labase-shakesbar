@@ -93,8 +93,8 @@ export const WHEEL_SEGMENTS: WheelSegment[] = [
   },
   {
     id: 'goodies',
-    label: 'Goodies La Base au comptoir 🎁',
-    short: 'Goodies',
+    label: 'Cadeau surprise au comptoir 🎁',
+    short: 'Surprise',
     weight: 3,
     rewardType: 'manual_pickup',
     rewardValue: 'goodies',

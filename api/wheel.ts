@@ -12,7 +12,7 @@ const WHEEL_SEGMENTS = [
   { id: 'gaufre-offerte', label: 'Gaufre healthy offerte', weight: 8, rewardType: 'free_product', rewardValue: 'Gaufre healthy' },
   { id: 'smoothie-offert', label: '2ème smoothie offert (1 acheté = 1 offert)', weight: 8, rewardType: 'free_product', rewardValue: '2e smoothie offert' },
   { id: 'boost-drink', label: 'Boost : 2ème drink XL offert (1 acheté = 1 offert)', weight: 7, rewardType: 'free_product', rewardValue: '2e drink XL offert' },
-  { id: 'goodies', label: 'Goodies au comptoir', weight: 3, rewardType: 'manual_pickup', rewardValue: 'goodies' },
+  { id: 'goodies', label: 'Cadeau surprise au comptoir', weight: 3, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
 const PUBLIC_SEGMENTS = [
@@ -22,7 +22,7 @@ const PUBLIC_SEGMENTS = [
   { id: 'public-discount-15', label: '−15% gros gagnant !', weight: 12, rewardType: 'discount_percent', rewardValue: '15' },
   { id: 'public-smoothie', label: '2ème smoothie offert (1 acheté = 1 offert)', weight: 10, rewardType: 'free_product', rewardValue: '2e smoothie offert' },
   { id: 'public-boost', label: 'Boost : 2ème drink XL offert (1 acheté = 1 offert)', weight: 10, rewardType: 'free_product', rewardValue: '2e drink XL offert' },
-  { id: 'public-goodies', label: 'Goodies La Base au comptoir', weight: 2, rewardType: 'manual_pickup', rewardValue: 'goodies' },
+  { id: 'public-goodies', label: 'Cadeau surprise La Base', weight: 2, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
