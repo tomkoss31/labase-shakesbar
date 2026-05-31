@@ -7,7 +7,7 @@ import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
-import { getOpenStatus } from './openingHours';
+import { useOpenStatus } from './openingHours';
 
 interface CartItem {
   key: string;
@@ -168,6 +168,8 @@ export function CartDrawerV2({
 
   const discountCents = rewardDiscountCents + xpDiscountCents;
   const finalTotalCents = Math.max(0, totalCents - discountCents);
+  const openStatus = useOpenStatus();
+
   if (!open) return null;
 
   const empty = cart.length === 0;
@@ -282,7 +284,7 @@ export function CartDrawerV2({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {(() => {
-                const status = getOpenStatus();
+                const status = openStatus;
                 if (status.isOpen) return null;
                 return (
                   <div

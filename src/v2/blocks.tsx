@@ -4,7 +4,7 @@ import React from 'react';
 import type { Palette } from './palette';
 import { IconSearch } from './icons';
 import { V2_CHIP_CATEGORIES } from './products-adapter';
-import { getOpenStatus, OPENING_HOURS_TEXT } from './openingHours';
+import { useOpenStatus, OPENING_HOURS_TEXT } from './openingHours';
 
 // ── SearchBar ───────────────────────────────────────────────────
 export function SearchBar({
@@ -204,7 +204,7 @@ export function Carousel({ children }: { children: React.ReactNode }) {
 
 // ── Info pratique ───────────────────────────────────────────────
 export function InfoBlock({ palette }: { palette: Palette }) {
-  const status = getOpenStatus();
+  const status = useOpenStatus();
   const dotColor = status.isOpen ? '#22c55e' : '#ef4444';
   return (
     <div style={{ padding: '12px 16px 20px' }}>

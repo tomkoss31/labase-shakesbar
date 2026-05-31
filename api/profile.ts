@@ -41,12 +41,6 @@ function getQuery(req: any, key: string): string | null {
 }
 
 export default async function handler(req: any, res: any) {
-  const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
-  if (!expectedPassword) return res.status(500).json({ error: 'ADMIN_PASSWORD non configuré' });
-  const authHeader = req.headers?.authorization ?? '';
-  const provided = authHeader.replace(/^Bearer\s+/, '').trim();
-  if (provided !== expectedPassword) return res.status(401).json({ error: 'Non autorisé' });
-
   const action = getQuery(req, 'action');
   if (!action) return res.status(400).json({ error: 'action requise' });
 
@@ -58,6 +52,78 @@ export default async function handler(req: any, res: any) {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // ════ ACTIONS PUBLIQUES (avant la barrière admin) ════
+
+  // ─── GET ?action=get-settings (statut magasin, lu par l'app cliente) ───
+  if (action === 'get-settings' && req.method === 'GET') {
+    const { data } = await admin
+      .from('store_settings')
+      .select('override_mode, hours')
+      .eq('id', 1)
+      .maybeSingle();
+    return res.status(200).json({
+      override_mode: data?.override_mode ?? 'auto',
+      hours: data?.hours ?? null,
+    });
+  }
+
+  // ─── GET ?action=referral-stats (CLIENT, auth JWT) ────────────
+  // Renvoie le code de parrainage du client + nb de filleuls / validés.
+  if (action === 'referral-stats' && req.method === 'GET') {
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+    const uid = userData.user.id;
+
+    const { data: me } = await admin
+      .from('profiles')
+      .select('referral_code')
+      .eq('id', uid)
+      .maybeSingle();
+
+    const { count: filleuls } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', uid);
+
+    const { count: rewarded } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', uid)
+      .eq('referral_rewarded', true);
+
+    return res.status(200).json({
+      code: me?.referral_code ?? null,
+      filleuls: filleuls ?? 0,
+      rewarded: rewarded ?? 0,
+    });
+  }
+
+  // ════ BARRIÈRE ADMIN (mot de passe) pour toutes les actions suivantes ════
+  const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
+  if (!expectedPassword) return res.status(500).json({ error: 'ADMIN_PASSWORD non configuré' });
+  const adminAuthHeader = req.headers?.authorization ?? '';
+  const adminProvided = adminAuthHeader.replace(/^Bearer\s+/, '').trim();
+  if (adminProvided !== expectedPassword) return res.status(401).json({ error: 'Non autorisé' });
+
+  // ─── POST ?action=set-settings (admin : pilote l'ouverture) ───
+  if (action === 'set-settings' && req.method === 'POST') {
+    const body = await readBody(req);
+    const mode = typeof body?.override_mode === 'string' ? body.override_mode : null;
+    if (!mode || !['auto', 'force_open', 'force_closed'].includes(mode)) {
+      return res.status(400).json({ error: 'override_mode invalide' });
+    }
+    const { error } = await admin
+      .from('store_settings')
+      .update({ override_mode: mode, updated_at: new Date().toISOString() })
+      .eq('id', 1);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ ok: true, override_mode: mode });
+  }
 
   // ─── GET ?action=lookup&id=<uuid> ─────────────────────────────
   if (action === 'lookup' && req.method === 'GET') {
@@ -222,41 +288,6 @@ export default async function handler(req: any, res: any) {
     }
 
     return res.status(200).json({ today: tally(today), month: tally(all) });
-  }
-
-  // ─── GET ?action=referral-stats (CLIENT, auth JWT) ────────────
-  // Renvoie le code de parrainage du client + nb de filleuls / validés.
-  if (action === 'referral-stats' && req.method === 'GET') {
-    const authHeader = req.headers?.authorization ?? '';
-    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
-    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
-
-    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
-    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
-    const uid = userData.user.id;
-
-    const { data: me } = await admin
-      .from('profiles')
-      .select('referral_code')
-      .eq('id', uid)
-      .maybeSingle();
-
-    const { count: filleuls } = await admin
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('referred_by', uid);
-
-    const { count: rewarded } = await admin
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('referred_by', uid)
-      .eq('referral_rewarded', true);
-
-    return res.status(200).json({
-      code: me?.referral_code ?? null,
-      filleuls: filleuls ?? 0,
-      rewarded: rewarded ?? 0,
-    });
   }
 
   // ─── GET ?action=stats (dashboard admin : compteurs business) ───

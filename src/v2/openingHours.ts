@@ -11,6 +11,8 @@
 //
 // ⚠️ Les horaires peuvent varier selon les événements — c'est une base.
 
+import { useState, useEffect } from 'react';
+
 interface DaySlot {
   open: number; // minutes depuis minuit
   close: number;
@@ -54,7 +56,37 @@ export interface OpenStatus {
   nextOpenLabel: string | null;
 }
 
+// ─── Override admin (piloté depuis la console) ───────────────────────
+// 'auto' = suit les horaires | 'force_open' | 'force_closed'
+type OverrideMode = 'auto' | 'force_open' | 'force_closed';
+let _override: OverrideMode = 'auto';
+let _fetched = false;
+
+// Récupère le réglage magasin depuis l'API (une fois). Fallback silencieux
+// sur 'auto' si l'API/table n'existe pas encore (avant migration 009).
+export async function refreshStoreSettings(): Promise<void> {
+  try {
+    const resp = await fetch('/api/profile?action=get-settings');
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data && typeof data.override_mode === 'string') {
+      _override = data.override_mode as OverrideMode;
+      _fetched = true;
+    }
+  } catch {
+    /* pas bloquant : on garde le mode auto / horaires du code */
+  }
+}
+
 export function getOpenStatus(): OpenStatus {
+  // Override admin prioritaire
+  if (_override === 'force_open') {
+    return { isOpen: true, label: 'Ouvert', nextOpenLabel: null };
+  }
+  if (_override === 'force_closed') {
+    return { isOpen: false, label: 'Fermé exceptionnellement', nextOpenLabel: null };
+  }
+
   const { day, minutes } = parisNow();
   const today = SCHEDULE[day];
 
@@ -89,6 +121,24 @@ export function getOpenStatus(): OpenStatus {
   }
 
   return { isOpen: false, label: 'Fermé', nextOpenLabel: null };
+}
+
+// Hook React : récupère le réglage distant au montage et renvoie le statut
+// (re-render quand le réglage admin est connu). Fallback = horaires du code.
+export function useOpenStatus(): OpenStatus {
+  const [, force] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    if (!_fetched) {
+      refreshStoreSettings().then(() => {
+        if (!cancelled) force((n) => n + 1);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return getOpenStatus();
 }
 
 // Liste lisible des horaires (pour une éventuelle section "Horaires")

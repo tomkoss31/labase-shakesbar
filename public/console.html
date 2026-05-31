@@ -416,6 +416,7 @@
     <button class="tab" data-view="scanner">📷 Scanner XP</button>
     <button class="tab" data-view="stats">📊 Stats</button>
     <button class="tab" data-view="push">📣 Push notifs</button>
+    <button class="tab" data-view="settings">🕐 Ouverture</button>
     <button class="tab" data-view="health">⚙️ Diagnostic</button>
   </div>
 </nav>
@@ -512,6 +513,34 @@
 
       <button class="primary" id="push-send" style="margin-top: 16px;">Envoyer à tous les abonnés</button>
       <div id="push-result"></div>
+    </div>
+  </div>
+
+  <!-- ─── OUVERTURE / HORAIRES ─── -->
+  <div class="view" id="view-settings">
+    <h1>🕐 Ouverture du bar</h1>
+    <div class="sub">Pilote l'état d'ouverture affiché dans l'app cliente (jours d'événement, fermeture exceptionnelle…).</div>
+
+    <div class="card">
+      <label>État actuel</label>
+      <div id="settings-current" style="margin:8px 0 14px;font-weight:700;color:#5eead4;">Chargement…</div>
+
+      <label>Forcer l'état</label>
+      <div class="hint" style="margin-top:4px;margin-bottom:12px;">
+        <b>Auto</b> = suit les horaires habituels (mardi-samedi).
+        <b>Forcer ouvert/fermé</b> = pratique pour un événement ou une fermeture exceptionnelle.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="settings-mode primary" data-mode="auto" style="background:#1a1f2e;color:#ecfdf5;border:1px solid rgba(94,234,212,.3);">⏰ Auto (horaires habituels)</button>
+        <button class="settings-mode primary teal" data-mode="force_open">🟢 Forcer ouvert</button>
+        <button class="settings-mode primary" data-mode="force_closed" style="background:#7f1d1d;color:#fff;">🔴 Forcer fermé (exceptionnel)</button>
+      </div>
+      <div id="settings-result" style="margin-top:14px;font-size:13px;"></div>
+
+      <div class="hint" style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(94,234,212,.12);">
+        Horaires habituels : Mardi 10h30-17h30 · Mercredi 10h30-17h00 · Jeudi 10h30-17h30 · Vendredi 10h30-17h30 · Samedi 10h00-13h00.
+        Pour changer ces horaires de base en dur, demande à ton dev.
+      </div>
     </div>
   </div>
 
@@ -637,7 +666,52 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (view === 'comptoir') loadComptoir();
     if (view === 'scanner') {}
     if (view === 'stats') loadStats();
+    if (view === 'settings') loadSettings();
     if (view === 'health') runHealthCheck();
+  });
+});
+
+// ═══ OUVERTURE / HORAIRES ═══
+const SETTINGS_LABELS = {
+  auto: '⏰ Auto (suit les horaires habituels)',
+  force_open: '🟢 Forcé OUVERT',
+  force_closed: '🔴 Forcé FERMÉ (exceptionnel)',
+};
+async function loadSettings() {
+  const el = document.getElementById('settings-current');
+  try {
+    const resp = await fetch('/api/profile?action=get-settings');
+    const data = await resp.json();
+    const mode = data.override_mode || 'auto';
+    el.textContent = SETTINGS_LABELS[mode] || mode;
+    document.querySelectorAll('.settings-mode').forEach((b) => {
+      b.style.outline = b.dataset.mode === mode ? '3px solid #f59e0b' : 'none';
+    });
+  } catch {
+    el.textContent = '⚠️ Impossible de charger (migration 009 jouée ?)';
+  }
+}
+document.querySelectorAll('.settings-mode').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const mode = btn.dataset.mode;
+    const out = document.getElementById('settings-result');
+    out.textContent = 'Enregistrement…';
+    try {
+      const resp = await fetch('/api/profile?action=set-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getPassword() },
+        body: JSON.stringify({ override_mode: mode }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        out.innerHTML = '<span style="color:#f87171;">❌ ' + (data.error || 'Erreur') + '</span>';
+        return;
+      }
+      out.innerHTML = '<span style="color:#34d399;">✅ Enregistré</span>';
+      loadSettings();
+    } catch (e) {
+      out.innerHTML = '<span style="color:#f87171;">❌ ' + e.message + '</span>';
+    }
   });
 });
 
