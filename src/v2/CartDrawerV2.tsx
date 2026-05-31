@@ -7,6 +7,7 @@ import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
+import { getOpenStatus } from './openingHours';
 
 interface CartItem {
   key: string;
@@ -280,6 +281,31 @@ export function CartDrawerV2({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(() => {
+                const status = getOpenStatus();
+                if (status.isOpen) return null;
+                return (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      padding: '12px 14px',
+                      background: 'rgba(239,68,68,.12)',
+                      border: '1px solid rgba(239,68,68,.4)',
+                      borderRadius: 14,
+                      marginBottom: 4,
+                    }}
+                  >
+                    <div style={{ fontSize: 20, lineHeight: 1 }}>🔴</div>
+                    <div style={{ fontSize: 12.5, color: palette.text, lineHeight: 1.4 }}>
+                      <b>Le bar est fermé pour le moment.</b>
+                      {status.nextOpenLabel ? ` ${status.nextOpenLabel}.` : ''} Tu peux
+                      quand même commander : ton retrait se fera à la réouverture 🥤
+                    </div>
+                  </div>
+                );
+              })()}
               {cart.map((item) => (
                 <div
                   key={item.key}
