@@ -24,9 +24,10 @@ interface RewardsModalProps {
   xp: number;
   firstName?: string;
   onShowMyCode?: () => void; // pour aller montrer son QR au comptoir
+  onShareReferral?: () => void; // partage du lien de parrainage
 }
 
-export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCode }: RewardsModalProps) {
+export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCode, onShareReferral }: RewardsModalProps) {
   const { rewards } = useUserRewards();
   // Codes gagnés à la roue, actifs et utilisables (on exclut les "tente encore")
   const activeCodes = rewards.filter((r) => r.reward_type !== 'retry');
@@ -142,6 +143,70 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
               }}
             />
           </div>
+        </div>
+
+        {/* ─── BLOC PARRAINAGE : la meilleure source d'XP ─── */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${palette.accent}22, ${palette.primary}11)`,
+            border: `1px solid ${palette.accent}66`,
+            borderRadius: 18,
+            padding: 16,
+            marginBottom: 18,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ fontSize: 26, lineHeight: 1 }}>🤝</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 17, color: palette.text }}>
+                Parraine = ta meilleure source d'XP
+              </div>
+              <div style={{ fontSize: 12, color: palette.textDim, marginTop: 1 }}>
+                Le moyen le plus rapide de monter en niveau 🚀
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+            {[
+              { n: '1', t: 'Tu partages ton lien à un ami' },
+              { n: '2', t: "Il s'inscrit et reçoit un cadeau de bienvenue (+200 XP)" },
+              { n: '3', t: 'À sa 1ère commande, tu gagnes +500 XP 🎁' },
+            ].map((s) => (
+              <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 22, height: 22, flexShrink: 0, borderRadius: '50%',
+                    background: palette.accent, color: '#02100e',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 12,
+                  }}
+                >
+                  {s.n}
+                </div>
+                <span style={{ fontSize: 12.5, color: palette.text, lineHeight: 1.3 }}>{s.t}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontSize: 11, color: palette.textDim, lineHeight: 1.4, marginBottom: 12 }}>
+            <b style={{ color: palette.text }}>Pourquoi ça vaut le coup ?</b> Tes amis découvrent
+            La Base avec un cadeau, et toi tu cumules des XP sans rien dépenser. Tout le monde y gagne 💚
+          </div>
+
+          {onShareReferral && (
+            <button
+              onClick={onShareReferral}
+              style={{
+                width: '100%', padding: '13px', border: 0, borderRadius: 12,
+                background: palette.cta, color: palette.ctaText,
+                fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 14, cursor: 'pointer',
+                boxShadow: `0 8px 22px ${palette.cta}55`,
+              }}
+            >
+              📤 Partager mon lien de parrainage
+            </button>
+          )}
         </div>
 
         {/* ─── Codes gagnés à la roue (réductions / cadeaux) ─── */}

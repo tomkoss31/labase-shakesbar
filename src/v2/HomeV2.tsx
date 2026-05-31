@@ -597,6 +597,7 @@ export function HomeV2({
           setRewardsOpen(false);
           setMyCodeOpen(true);
         }}
+        onShareReferral={shareReferral}
       />
 
       {/* QR à montrer au comptoir (accessible depuis les récompenses) */}
