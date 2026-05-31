@@ -342,6 +342,14 @@
 
   const $ = (id) => document.getElementById(id);
 
+  // Code de parrainage éventuel : /jeu?ref=CODE → rattaché au compte créé
+  const REF_CODE = (() => {
+    try {
+      const r = new URLSearchParams(location.search).get('ref');
+      return r ? r.trim().toUpperCase().slice(0, 12) : null;
+    } catch { return null; }
+  })();
+
   // Bouton hero → scroll doux vers le jeu + focus prénom
   $('goPlay').addEventListener('click', (e) => {
     e.preventDefault();
@@ -452,7 +460,7 @@
       const resp = await fetch('/api/wheel?action=signup-claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pwd }),
+        body: JSON.stringify({ email, password: pwd, ref: REF_CODE }),
       });
       const data = await resp.json();
       if (!resp.ok) {

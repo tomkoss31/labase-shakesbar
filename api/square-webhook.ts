@@ -182,7 +182,7 @@ export default async function handler(req: any, res: any) {
   if (userId) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp')
+      .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded')
       .eq('id', userId)
       .single();
 
@@ -215,6 +215,32 @@ export default async function handler(req: any, res: any) {
 
       if (updateError) {
         console.error('[square-webhook] profile update failed:', updateError.message);
+      }
+
+      // ─── Récompense parrainage ───────────────────────────────────
+      // À la 1ère commande payée du filleul, le parrain gagne +500 XP.
+      // Bloc 100% gardé : toute erreur ici ne doit JAMAIS perturber
+      // l'enregistrement du paiement (déjà fait au-dessus).
+      if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
+        try {
+          const { data: sponsor } = await supabase
+            .from('profiles')
+            .select('xp')
+            .eq('id', profile.referred_by)
+            .single();
+          if (sponsor) {
+            await supabase
+              .from('profiles')
+              .update({ xp: (sponsor.xp ?? 0) + 500 })
+              .eq('id', profile.referred_by);
+            await supabase
+              .from('profiles')
+              .update({ referral_rewarded: true })
+              .eq('id', userId);
+          }
+        } catch (err: any) {
+          console.warn('[square-webhook] referral reward failed:', err?.message);
+        }
       }
 
       return res.status(200).json({

@@ -14,6 +14,7 @@ export interface Profile {
   xp: number;
   level: MascotteLevel;
   last_spin_at: string | null;
+  referral_code: string | null;
   created_at: string;
   updated_at: string;
 }

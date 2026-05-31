@@ -230,6 +230,7 @@ export default async function handler(req: any, res: any) {
     const body = await readBody(req);
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : null;
     const password = typeof body?.password === 'string' ? body.password : null;
+    const refCode = typeof body?.ref === 'string' ? body.ref.trim().toUpperCase().slice(0, 12) : null;
     if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'Email invalide' });
     if (!password || password.length < 6) return res.status(400).json({ error: 'Mot de passe trop court (6 min)' });
 
@@ -266,6 +267,38 @@ export default async function handler(req: any, res: any) {
     // 3. Renseigner le prénom dans le profil (le trigger a créé la ligne)
     if (userId && spin.first_name) {
       await admin.from('profiles').update({ first_name: spin.first_name }).eq('id', userId);
+    }
+
+    // 3b. Parrainage : rattacher le filleul au parrain + bonus de bienvenue.
+    //     Le parrain ne sera récompensé qu'à la 1ère commande payée du
+    //     filleul (géré dans le webhook Square / mark-paid espèces).
+    if (userId && refCode) {
+      try {
+        const { data: sponsor } = await admin
+          .from('profiles')
+          .select('id')
+          .eq('referral_code', refCode)
+          .maybeSingle();
+        // On n'auto-parraine pas, et le parrain doit exister
+        if (sponsor && sponsor.id && sponsor.id !== userId) {
+          const { data: filleul } = await admin
+            .from('profiles')
+            .select('xp, referred_by')
+            .eq('id', userId)
+            .maybeSingle();
+          if (filleul && !filleul.referred_by) {
+            await admin
+              .from('profiles')
+              .update({
+                referred_by: sponsor.id,
+                xp: (filleul.xp ?? 0) + 200, // bonus de bienvenue filleul
+              })
+              .eq('id', userId);
+          }
+        }
+      } catch (err: any) {
+        console.warn('[signup-claim] referral link failed:', err?.message);
+      }
     }
 
     // 4. Lier le cadeau au compte → apparaît dans "Mes récompenses" + scanner

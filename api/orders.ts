@@ -211,7 +211,7 @@ export default async function handler(req: any, res: any) {
     if (order.user_id) {
       const { data: profile } = await clients.admin
         .from('profiles')
-        .select('total_spent_cents, total_orders, xp')
+        .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded')
         .eq('id', order.user_id)
         .single();
       if (profile) {
@@ -231,6 +231,30 @@ export default async function handler(req: any, res: any) {
             level: computeMascotteLevel(newXp),
           })
           .eq('id', order.user_id);
+
+        // Récompense parrainage à la 1ère commande payée (gardé)
+        if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
+          try {
+            const { data: sponsor } = await clients.admin
+              .from('profiles')
+              .select('xp')
+              .eq('id', profile.referred_by)
+              .single();
+            if (sponsor) {
+              await clients.admin
+                .from('profiles')
+                .update({ xp: (sponsor.xp ?? 0) + 500 })
+                .eq('id', profile.referred_by);
+              await clients.admin
+                .from('profiles')
+                .update({ referral_rewarded: true })
+                .eq('id', order.user_id);
+            }
+          } catch (err: any) {
+            console.warn('[mark-paid] referral reward failed:', err?.message);
+          }
+        }
+
         return res.status(200).json({ ok: true, xpGained, newTotalSpent });
       }
     }

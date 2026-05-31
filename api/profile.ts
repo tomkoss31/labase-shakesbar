@@ -224,6 +224,41 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ today: tally(today), month: tally(all) });
   }
 
+  // ─── GET ?action=referral-stats (CLIENT, auth JWT) ────────────
+  // Renvoie le code de parrainage du client + nb de filleuls / validés.
+  if (action === 'referral-stats' && req.method === 'GET') {
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+    const uid = userData.user.id;
+
+    const { data: me } = await admin
+      .from('profiles')
+      .select('referral_code')
+      .eq('id', uid)
+      .maybeSingle();
+
+    const { count: filleuls } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', uid);
+
+    const { count: rewarded } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', uid)
+      .eq('referral_rewarded', true);
+
+    return res.status(200).json({
+      code: me?.referral_code ?? null,
+      filleuls: filleuls ?? 0,
+      rewarded: rewarded ?? 0,
+    });
+  }
+
   // ─── GET ?action=stats (dashboard admin : compteurs business) ───
   if (action === 'stats' && req.method === 'GET') {
     const countOf = async (table: string, filter?: (q: any) => any) => {
