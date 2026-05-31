@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Affiche QR — La Base Shakes & Drinks</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #1a1a1a; color: #ecfdf5;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px;
+  }
+  .toolbar {
+    width: 100%; max-width: 720px; display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 18px; gap: 12px;
+  }
+  .toolbar p { font-size: 13px; color: #94b8b1; }
+  .print-btn {
+    background: #f59e0b; color: #1a0f00; border: 0; border-radius: 10px;
+    padding: 12px 20px; font-family: 'Outfit'; font-weight: 900; font-size: 14px; cursor: pointer;
+  }
+
+  /* L'affiche (format A4 portrait) */
+  .poster {
+    width: 210mm; max-width: 100%; aspect-ratio: 210 / 297;
+    background: linear-gradient(165deg, #04100f 0%, #0a1f1c 55%, #04100f 100%);
+    border-radius: 18px; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 18mm 14mm;
+    position: relative;
+  }
+  .glow {
+    position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,234,212,.25), transparent 70%);
+    top: -80px; right: -80px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6mm; z-index: 1; }
+  .logo-b {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 34px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-name { font-family: 'Outfit'; font-weight: 900; font-size: 24px; line-height: 1; text-align: left; }
+  .brand-tag { font-size: 10px; letter-spacing: .25em; color: #5eead4; font-weight: 700; }
+
+  .eyebrow {
+    color: #f59e0b; font-family: 'Outfit'; font-weight: 800; font-size: 16px;
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4mm; z-index: 1;
+  }
+  .headline {
+    font-family: 'Outfit'; font-weight: 900; font-size: 52px; line-height: 1.02;
+    letter-spacing: -.02em; margin-bottom: 5mm; z-index: 1;
+  }
+  .headline .accent { color: #5eead4; }
+  .sub { font-size: 19px; color: #cbe4df; line-height: 1.4; margin-bottom: 8mm; max-width: 150mm; z-index: 1; }
+
+  .qr-wrap {
+    background: #fff; padding: 6mm; border-radius: 18px; z-index: 1;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .qr-wrap img { display: block; width: 72mm; height: 72mm; }
+  .qr-cta {
+    margin-top: 6mm; font-family: 'Outfit'; font-weight: 900; font-size: 24px; z-index: 1;
+  }
+  .steps { display: flex; gap: 8mm; margin-top: 7mm; z-index: 1; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 2mm; max-width: 42mm; }
+  .step-num {
+    width: 34px; height: 34px; border-radius: 50%; background: #5eead4; color: #04100f;
+    font-family: 'Outfit'; font-weight: 900; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-txt { font-size: 13px; color: #cbe4df; line-height: 1.3; }
+
+  .foot {
+    margin-top: auto; padding-top: 7mm; font-size: 14px; color: #94b8b1; z-index: 1;
+  }
+  .foot b { color: #ecfdf5; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar { display: none; }
+    .poster { width: 100%; height: 100vh; border-radius: 0; aspect-ratio: auto; }
+    @page { size: A4 portrait; margin: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <p>Aperçu de l'affiche · clique sur Imprimer (format A4 portrait, sans marges).</p>
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimer</button>
+  </div>
+
+  <div class="poster">
+    <div class="glow"></div>
+    <div class="brand">
+      <div class="logo-b">B</div>
+      <div>
+        <div class="brand-name">LA BASE</div>
+        <div class="brand-tag">SHAKES &amp; DRINKS</div>
+      </div>
+    </div>
+
+    <div class="eyebrow">🎰 Jeu concours gratuit</div>
+    <div class="headline">Tourne la roue,<br /><span class="accent">gagne un cadeau</span></div>
+    <div class="sub">Scanne le QR code, tente ta chance et repars avec ta récompense à récupérer en boutique 🎁</div>
+
+    <div class="qr-wrap">
+      <img src="/qr-jeu.png" alt="QR code jeu concours" />
+    </div>
+    <div class="qr-cta">📸 Scanne-moi !</div>
+
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-txt">Scanne le QR avec ton téléphone</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-txt">Tourne la roue &amp; gagne</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-txt">Récupère ton cadeau en boutique</div></div>
+    </div>
+
+    <div class="foot">
+      <b>La Base Shakes &amp; Drinks</b> · 11 rue Saint Pierre, 55100 Verdun · commande.labase-nutrition.com
+    </div>
+  </div>
+</body>
+</html>
