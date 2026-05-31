@@ -1201,8 +1201,24 @@ async function loadStats() {
         tile('💶', euro + '€', 'CA encaissé (app)', '#5eead4') +
         tile('🔔', d.pushSubs, 'Abonnés notifs') +
         tile('🎁', d.redemptions, 'Cadeaux offerts') +
+        tile('🤝', (d.referredTotal || 0), 'Filleuls parrainés', '#5eead4') +
+        tile('✅', (d.referredRewarded || 0), 'Parrainages validés', '#f59e0b') +
       '</div>' +
-      '<div class="hint" style="margin-top:12px;">🎡 ' + d.wheelSpins + ' tours de roue membres au total.</div>';
+      '<div class="hint" style="margin-top:12px;">🎡 ' + d.wheelSpins + ' tours de roue membres au total.</div>' +
+      (function(){
+        // Entonnoir : taux de conversion entre étapes
+        const players = d.publicPlayers || 0;
+        const members = d.members || 0;
+        const buyers = d.paidOrders || 0;
+        const pct = (a, b) => b > 0 ? Math.round((a / b) * 100) + '%' : '—';
+        return '<div style="margin-top:14px;padding:14px;background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:14px;">' +
+          '<div style="font-family:Outfit;font-weight:800;font-size:13px;color:#5eead4;margin-bottom:10px;">📊 Entonnoir</div>' +
+          '<div style="font-size:13px;color:#cbe4df;line-height:1.8;">' +
+            '🎰 Joueurs roue : <b>' + players + '</b><br>' +
+            '👥 Comptes créés : <b>' + members + '</b> <span style="color:#94b8b1;">(' + pct(members, players) + ' des joueurs)</span><br>' +
+            '🛒 Ont commandé : <b>' + buyers + '</b> <span style="color:#94b8b1;">(' + pct(buyers, members) + ' des membres)</span>' +
+          '</div></div>';
+      })();
   } catch (err) {
     $('stats-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
   }

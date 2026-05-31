@@ -321,6 +321,12 @@ export default async function handler(req: any, res: any) {
     const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
     const newToday = await countOf('profiles', (q) => q.gte('created_at', startOfDay));
 
+    // Parrainage : filleuls rattachés + parrainages validés (1ère commande)
+    const [referredTotal, referredRewarded] = await Promise.all([
+      countOf('profiles', (q) => q.not('referred_by', 'is', null)),
+      countOf('profiles', (q) => q.eq('referral_rewarded', true)),
+    ]);
+
     return res.status(200).json({
       members,
       newToday,
@@ -330,6 +336,8 @@ export default async function handler(req: any, res: any) {
       redemptions,
       paidOrders,
       revenueCents,
+      referredTotal,
+      referredRewarded,
     });
   }
 
