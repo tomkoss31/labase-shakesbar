@@ -18,6 +18,8 @@ interface WheelModalProps {
   palette: Palette;
   open: boolean;
   onClose: () => void;
+  // Admin : peut faire tourner la roue en illimité (test des cadeaux)
+  isAdmin?: boolean;
 }
 
 interface SpinResult {
@@ -30,11 +32,13 @@ const WHEEL_RADIUS = WHEEL_SIZE / 2;
 const SEGMENT_COUNT = WHEEL_SEGMENTS.length;
 const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
 
-export function WheelModal({ palette, open, onClose }: WheelModalProps) {
+export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelModalProps) {
   const [phase, setPhase] = useState<'idle' | 'loading' | 'spinning' | 'result'>('idle');
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
   const cooldown = useMemo(() => getWheelCooldown(), [open]);
+  // Admin : on ignore le cooldown (client) pour pouvoir tester en boucle.
+  const canSpin = isAdmin || cooldown.canSpin;
   const audioRef = useRef<number | null>(null);
 
   // Reset quand on (re)ouvre
@@ -48,7 +52,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
   if (!open) return null;
 
   async function handleSpin() {
-    if (phase !== 'idle' || !cooldown.canSpin) return;
+    if (phase !== 'idle' || !canSpin) return;
 
     // Feedback IMMÉDIAT : on passe en 'loading' dès le clic (le bouton devient
     // "La roue tourne…") pour qu'il n'y ait pas 2s de flottement pendant l'appel.
@@ -111,9 +115,9 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
     audioRef.current = window.setTimeout(() => {
       setResult({ segment: winSegment, code: code ?? '' });
       setPhase('result');
-      // Si on a utilisé le serveur, la persistence est faite ; sinon on note local
-      if (!usedServerSide) markWheelSpun();
-      else markWheelSpun(); // par sécurité, on marque aussi local
+      // Admin : on ne marque PAS le cooldown → tests illimités.
+      // Sinon on note le spin (serveur déjà persisté, on marque local par sécurité).
+      if (!isAdmin) markWheelSpun();
     }, duration);
   }
 
@@ -203,8 +207,9 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
           {phase === 'result' ? 'Bravo !' : phase === 'spinning' ? 'Tirage…' : 'Tente ta chance'}
         </h2>
         <div style={{ fontSize: 13, color: palette.textDim, marginBottom: 24 }}>
-          {phase === 'idle' && cooldown.canSpin && '1 spin gratuit par semaine'}
-          {phase === 'idle' && !cooldown.canSpin && `Reviens dans ${cooldown.daysRemaining} jour${cooldown.daysRemaining > 1 ? 's' : ''}`}
+          {phase === 'idle' && isAdmin && '🔁 Mode admin — tirages illimités (test)'}
+          {phase === 'idle' && !isAdmin && cooldown.canSpin && '1 spin gratuit par semaine'}
+          {phase === 'idle' && !isAdmin && !cooldown.canSpin && `Reviens dans ${cooldown.daysRemaining} jour${cooldown.daysRemaining > 1 ? 's' : ''}`}
           {phase === 'spinning' && 'Bonne chance !'}
           {phase === 'result' && 'Note ou screenshot le code à présenter au comptoir'}
         </div>
@@ -394,7 +399,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
         )}
 
         {/* CTA */}
-        {phase === 'idle' && cooldown.canSpin && (
+        {phase === 'idle' && canSpin && (
           <button
             onClick={handleSpin}
             style={{
@@ -434,7 +439,7 @@ export function WheelModal({ palette, open, onClose }: WheelModalProps) {
             🎰 La roue tourne…
           </button>
         )}
-        {phase === 'idle' && !cooldown.canSpin && cooldown.nextSpinDate && (
+        {phase === 'idle' && !canSpin && cooldown.nextSpinDate && (
           <div
             style={{
               padding: '14px 16px',

@@ -187,6 +187,9 @@ export function ProfileSheet({
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const push = usePushNotifications();
   const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
+  // Admin : roue dispo en permanence (test illimité des cadeaux)
+  const isAdmin = isAdminEmail(email);
+  const wheelCanSpin = isAdmin || wheelCooldown.canSpin;
   const { orders } = useUserOrders();
 
   // Sync local state quand le profil change
@@ -609,12 +612,12 @@ export function ProfileSheet({
             width: '100%',
             marginBottom: 10,
             padding: '14px 16px',
-            background: wheelCooldown.canSpin
+            background: wheelCanSpin
               ? `linear-gradient(135deg, ${palette.accent}, ${palette.primary})`
               : palette.bg,
-            border: `1px solid ${wheelCooldown.canSpin ? palette.accent : palette.line}`,
+            border: `1px solid ${wheelCanSpin ? palette.accent : palette.line}`,
             borderRadius: 14,
-            color: wheelCooldown.canSpin ? palette.ctaText : palette.text,
+            color: wheelCanSpin ? palette.ctaText : palette.text,
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
@@ -623,23 +626,23 @@ export function ProfileSheet({
             display: 'flex',
             alignItems: 'center',
             gap: 12,
-            boxShadow: wheelCooldown.canSpin ? `0 8px 24px ${palette.accent}44` : 'none',
+            boxShadow: wheelCanSpin ? `0 8px 24px ${palette.accent}44` : 'none',
           }}
         >
           <div style={{ fontSize: 28, lineHeight: 1 }}>🎁</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15 }}>
-              {wheelCooldown.canSpin ? 'Roue cadeau dispo !' : 'Roue cadeau'}
+              {wheelCanSpin ? 'Roue cadeau dispo !' : 'Roue cadeau'}
             </div>
             <div
               style={{
                 fontSize: 11,
                 fontWeight: 500,
                 marginTop: 2,
-                opacity: wheelCooldown.canSpin ? 0.95 : 0.7,
+                opacity: wheelCanSpin ? 0.95 : 0.7,
               }}
             >
-              {wheelCooldown.canSpin
+              {wheelCanSpin
                 ? '1 tentative gratuite cette semaine'
                 : `Reviens dans ${wheelCooldown.daysRemaining}j`}
             </div>
@@ -926,7 +929,7 @@ export function ProfileSheet({
       </div>
 
       {/* Modale roue cadeau */}
-      <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} />
+      <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} isAdmin={isAdmin} />
 
       {/* Modale Mon Code QR — userId suffit (profile peut être null en attendant
           le chargement asynchrone) */}

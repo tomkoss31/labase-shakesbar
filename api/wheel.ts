@@ -98,6 +98,17 @@ export default async function handler(req: any, res: any) {
     if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
 
     const userId = userData.user.id;
+
+    // Admin : tirages illimités (test des cadeaux). On ne contrôle pas le
+    // cooldown et on ne marque pas last_spin_at pour ce compte.
+    const adminEmails = String(process.env.VITE_ADMIN_EMAIL || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = userData.user.email
+      ? adminEmails.includes(userData.user.email.toLowerCase())
+      : false;
+
     const admin = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -108,7 +119,7 @@ export default async function handler(req: any, res: any) {
       .eq('id', userId)
       .maybeSingle();
 
-    if (profile?.last_spin_at) {
+    if (!isAdmin && profile?.last_spin_at) {
       const lastTs = new Date(profile.last_spin_at).getTime();
       const elapsed = Date.now() - lastTs;
       if (elapsed < COOLDOWN_MS) {
@@ -136,7 +147,9 @@ export default async function handler(req: any, res: any) {
       used_at: segment.rewardType === 'retry' ? now.toISOString() : null,
     });
 
-    await admin.from('profiles').update({ last_spin_at: now.toISOString() }).eq('id', userId);
+    if (!isAdmin) {
+      await admin.from('profiles').update({ last_spin_at: now.toISOString() }).eq('id', userId);
+    }
 
     return res.status(200).json({
       ok: true,
