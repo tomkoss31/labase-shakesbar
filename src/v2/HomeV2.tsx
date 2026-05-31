@@ -5,11 +5,13 @@ import React, { useMemo, useState } from 'react';
 import { PALETTE_E } from './palette';
 import { Header } from './Header';
 import { XpCard } from './XpCard';
+import { QuickActions } from './QuickActions';
 import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
 import { SideAddressCard } from './SideAddressCard';
+import { WheelModal } from './wheel/WheelModal';
 import type { HeaderTab } from './Header';
 import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import { useAuth } from './auth/useAuth';
@@ -58,6 +60,7 @@ export function HomeV2({
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [rewardsOpen, setRewardsOpen] = useState(false);
+  const [wheelOpen, setWheelOpen] = useState(false);
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
@@ -93,6 +96,48 @@ export function HomeV2({
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);
   const mascotteLevel = computeMascotteLevel(xp);
+
+  // Admin : roue en illimité (test des cadeaux)
+  const adminEmails = String(import.meta.env.VITE_ADMIN_EMAIL || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdmin = auth.email ? adminEmails.includes(auth.email.toLowerCase()) : false;
+
+  // Partage du lien de parrainage (natif si dispo, sinon copie)
+  async function shareReferral() {
+    if (!isAuthed) {
+      setAuthOpen(true);
+      return;
+    }
+    const code = auth.profile?.referral_code;
+    if (!code) {
+      setProfileOpen(true);
+      return;
+    }
+    const link = `${window.location.origin}/jeu?ref=${code}`;
+    const text = 'Je te parraine chez La Base 🥤 Tourne la roue, gagne un cadeau à récupérer en boutique 🎁 : ';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'La Base Shakes & Drinks', text, url: link });
+        return;
+      }
+    } catch {
+      /* annulé → fallback copie */
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      window.alert('Lien de parrainage copié ! Partage-le à tes amis 🤝');
+    } catch {
+      window.prompt('Copie ton lien de parrainage :', link);
+    }
+  }
+
+  // Ouvre la roue (ou l'auth si pas connecté)
+  function openWheel() {
+    if (isAuthed) setWheelOpen(true);
+    else setAuthOpen(true);
+  }
 
   function handleBottomTab(t: NavTab) {
     setTab(t);
@@ -246,9 +291,13 @@ export function HomeV2({
             onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
             onOpenRewards={() => setRewardsOpen(true)}
           />
-          <div style={{ padding: '0 16px 16px' }}>
-            <SideAddressCard palette={palette} />
-          </div>
+          <QuickActions
+            palette={palette}
+            onRewards={() => (isAuthed ? setRewardsOpen(true) : setAuthOpen(true))}
+            onWheel={openWheel}
+            onRefer={shareReferral}
+            onClub={() => (window.location.href = '/club')}
+          />
         </div>
       </div>
 
@@ -493,10 +542,18 @@ export function HomeV2({
         </div>
       </div>
 
+      {/* Adresse / horaires — déplacée en bas (infos pratiques) */}
+      <div style={{ padding: '0 16px 8px', maxWidth: 1240, margin: '0 auto' }}>
+        <SideAddressCard palette={palette} />
+      </div>
+
       <InfoBlock palette={palette} />
       <InstaCard palette={palette} />
 
       <BottomNav palette={palette} active={tab} onChange={handleBottomTab} />
+
+      {/* Roue cadeau (ouverte depuis les actions rapides) */}
+      <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} isAdmin={isAdmin} />
 
       {/* Animation FlyingDrop signature ajout panier */}
       {flyOverlay}
