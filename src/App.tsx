@@ -27,6 +27,7 @@ import {
 } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 import { HomeV2 } from './v2/HomeV2';
+import { useCart, type CartItem } from './v2/cart/useCart';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
@@ -46,35 +47,12 @@ type SelectedProduct = Product & {
   categoryPriceLabel: string;
 };
 
-type CartItem = {
-  key: string;
-  name: string;
-  categoryName: string;
-  quantity: number;
-  option: string;
-  unitPriceCents: number;
-  extras?: string[];
-};
-
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const PENDING_GIFT_KEY = 'labase-pending-gift';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
 const VIEW_MODE_KEY = 'labase-menu-view-mode';
-// Persistance du panier : survit au reload de l'auth (inscription depuis le panier)
-const CART_STORAGE_KEY = 'labase-cart-v1';
 // Flag : rouvrir le panier après une inscription lancée depuis le panier
 const REOPEN_CART_KEY = 'labase-reopen-cart';
-
-function loadStoredCart(): CartItem[] {
-  try {
-    const raw = localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 type MenuViewMode = 'magazine' | 'list';
 
@@ -265,7 +243,7 @@ function FilterPill({
 function App() {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [cart, setCart] = useState<CartItem[]>(loadStoredCart);
+  const { cart, setCart, cartCount, cartTotalCents, updateQuantity, clearCart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Modale auth + roue partagées entre HomeV2 et le panier (nudges)
   const [authOpen, setAuthOpen] = useState(false);
@@ -278,15 +256,6 @@ function App() {
   const appAuth = useAuth();
   const userXp = appAuth.profile?.xp ?? 0;
   const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
-
-  // Persiste le panier (survit au reload de l'auth → produit conservé après inscription)
-  useEffect(() => {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    } catch {
-      /* quota / mode privé : pas bloquant */
-    }
-  }, [cart]);
 
   // Après une inscription lancée depuis le panier : on rouvre le panier
   // une fois connecté, pour que le client finalise sa commande.
@@ -389,7 +358,7 @@ function App() {
 
       if (hasPendingSquareCheckout) {
         setShowThankYou(true);
-        setCart([]);
+        clearCart();
         window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
         track('order_paid_square');
         // Débite le cadeau XP choisi (maintenant que la commande est validée)
@@ -542,16 +511,6 @@ function App() {
       })
       .filter((category) => category.items.length > 0);
   }, [activeCategory, query]);
-
-  const cartCount = useMemo(
-    () => cart.reduce((sum, item) => sum + item.quantity, 0),
-    [cart],
-  );
-
-  const cartTotalCents = useMemo(
-    () => cart.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0),
-    [cart],
-  );
 
   const hasRequiredPickupInfo =
     customerName.trim().length > 0 && pickupTime.trim().length > 0;
@@ -843,18 +802,6 @@ function App() {
     setSelectedComboSecondaryOption('');
   }
 
-  function updateQuantity(key: string, delta: number) {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.key === key
-            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
-  }
-
   function getHotComboSuggestions(productName?: string) {
     if (!productName) return [];
     if (productName === 'Thé') {
@@ -992,7 +939,7 @@ function App() {
         void redeemClaimedGift(claimedGift.id);
         setClaimedGift(null);
       }
-      setCart([]); // vide le panier puisque la commande est créée côté serveur
+      clearCart(); // vide le panier puisque la commande est créée côté serveur
       setDrawerOpen(false);
     } catch (err: any) {
       window.alert('Erreur : ' + err.message);

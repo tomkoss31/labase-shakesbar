@@ -8,6 +8,7 @@ import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import { REWARDS_CATALOG, XP_RULES, nextReward } from './catalog';
 import { useUserRewards } from './useUserRewards';
+import { computeMascotteLevel } from '../auth/types';
 
 function fmtDate(iso: string): string {
   try {
@@ -35,7 +36,7 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
   if (!open) return null;
 
   const next = nextReward(xp);
-  const mascotteLevel = xp >= 1500 ? 'pro' : xp >= 800 ? 'regulier' : 'apprenti';
+  const mascotteLevel = computeMascotteLevel(xp); // source unique (types.ts)
 
   // Progression vers le prochain palier (depuis le palier précédent)
   const prevCost = (() => {
