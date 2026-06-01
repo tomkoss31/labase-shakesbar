@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>La Base — Moteur de contenu (à imprimer)</title>
+<style>
+  :root {
+    --teal: #0f8b86;
+    --teal-dark: #0a5f5b;
+    --ink: #1a2421;
+    --dim: #4b5a56;
+    --line: #d7e3e0;
+    --tint: #f1f8f7;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Outfit", system-ui, sans-serif;
+    color: var(--ink);
+    line-height: 1.5;
+    margin: 0;
+    font-size: 12pt;
+  }
+  @page { size: A4; margin: 16mm 14mm; }
+
+  /* Layout */
+  .wrap { max-width: 190mm; margin: 0 auto; padding: 8mm 0; }
+  h1 { font-size: 26pt; color: var(--teal-dark); margin: 0 0 2mm; line-height: 1.1; }
+  h2 { font-size: 16pt; color: var(--teal-dark); border-bottom: 3px solid var(--teal); padding-bottom: 2mm; margin: 10mm 0 4mm; }
+  h3 { font-size: 13.5pt; color: var(--teal); margin: 6mm 0 2mm; }
+  p { margin: 0 0 2.5mm; }
+  .lead { color: var(--dim); font-size: 11pt; }
+  .muted { color: var(--dim); font-size: 10pt; }
+  strong, b { color: var(--teal-dark); }
+
+  /* Cover */
+  .cover { border: 3px solid var(--teal); border-radius: 6mm; padding: 10mm; background: var(--tint); margin-bottom: 6mm; }
+  .badge { display: inline-block; background: var(--teal); color: #fff; font-weight: 700; font-size: 10pt; padding: 1.5mm 4mm; border-radius: 20px; margin-bottom: 4mm; }
+
+  /* Boxes */
+  .box { border: 1.5px solid var(--line); border-radius: 4mm; padding: 6mm; margin: 0 0 5mm; background: #fff; }
+  .carousel { page-break-inside: avoid; break-inside: avoid; border-left: 5px solid var(--teal); }
+  .slide { padding: 2mm 0; border-bottom: 1px dashed var(--line); }
+  .slide:last-child { border-bottom: 0; }
+  .slide .n { display: inline-block; min-width: 22mm; font-weight: 700; color: var(--teal-dark); }
+  .legend { background: var(--tint); border-radius: 3mm; padding: 4mm; margin-top: 3mm; }
+  .legend .t, .reel .t { font-weight: 700; color: var(--teal-dark); display: block; margin-bottom: 1.5mm; }
+  .reel { border: 1px dashed var(--teal); border-radius: 3mm; padding: 4mm; margin-top: 3mm; }
+
+  /* Checklist */
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding: 1.5mm 0 1.5mm 9mm; position: relative; }
+  ul.check li::before { content: "☐"; position: absolute; left: 0; font-size: 14pt; color: var(--teal); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 10.5pt; }
+  th { background: var(--teal); color: #fff; text-align: left; padding: 2.5mm; }
+  td { border-bottom: 1px solid var(--line); padding: 2.5mm; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--tint); }
+  .pill { font-weight: 700; white-space: nowrap; }
+
+  code { background: var(--tint); padding: 0.5mm 1.5mm; border-radius: 2mm; font-size: 10pt; }
+  .pagebreak { page-break-before: always; }
+  .highlight-note { font-size: 9.5pt; color: var(--dim); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <span class="badge">À IMPRIMER · À SURLIGNER</span>
+    <h1>🥤 La Base — Moteur de contenu</h1>
+    <p class="lead">Calendrier 4 semaines · 7 carrousels « Le savais-tu ? » · Templates prêts à coller</p>
+    <p class="muted">Mis à jour le 01/06/2026 — faits validés avec Tom (Défi 7 jours de l'app)</p>
+    <p style="margin-top:4mm"><strong>Principe directeur :</strong> 1 batch de tournage (1-2 h) → 2 semaines de contenu sur les 3 réseaux.</p>
+  </div>
+
+  <!-- HOW TO USE -->
+  <h2>🧭 Comment s'en servir</h2>
+  <ol>
+    <li><strong>1 fois / 2 semaines</strong> : tu tournes tout le bloc (liste ci-dessous).</li>
+    <li>Tu programmes dans <strong>Metricool</strong> (gratuit, 3 réseaux) → 2 semaines d'un coup.</li>
+    <li>Les <strong>stories</strong> se recyclent au jour le jour (10 sec : un shake, un client, un fait).</li>
+    <li>Chaque carrousel = aussi un <strong>Reel</strong> (script fourni) = aussi un post <strong>Facebook</strong>. On poste une fois, on décline partout.</li>
+  </ol>
+
+  <div class="box">
+    <h3 style="margin-top:0">🎬 Liste de tournage — 1 session = 2 semaines</h3>
+    <ul class="check">
+      <li>7 plans « geste smoothie » (préparation, gros plan versé, mousse, fruits)</li>
+      <li>3 plans « energy » (canette/verre, bulles, en main dehors)</li>
+      <li>2 portraits Tom &amp; Mélanie face cam (10-20 sec chacun)</li>
+      <li>5 photos produit fixes (lumière vitrine) pour les carrousels</li>
+      <li>2 ambiances bar (clients, comptoir, vitrine 11 rue St Pierre)</li>
+    </ul>
+  </div>
+
+  <!-- CALENDAR -->
+  <h2>📅 Calendrier éditorial — 4 semaines</h2>
+  <p class="muted">3 posts/semaine + stories quotidiennes. Piliers : 🎓 Éducation · 🥤 Produit · 💪 Preuve · 🎁 Communauté</p>
+  <table>
+    <thead><tr><th>Sem.</th><th>Jour</th><th>Pilier</th><th>Format</th><th>Sujet</th><th>Réseaux</th></tr></thead>
+    <tbody>
+      <tr><td class="pill">1</td><td>Lun</td><td>🥤</td><td>Reel</td><td>« Tu peux le refaire à la maison » (geste signature)</td><td>IG+TT+FB</td></tr>
+      <tr><td class="pill">1</td><td>Mer</td><td>🎓</td><td>Carrousel</td><td><strong>#1 Hydratation</strong></td><td>IG+FB</td></tr>
+      <tr><td class="pill">1</td><td>Ven</td><td>🎁</td><td>Reel/Story</td><td>Lancement <strong>Défi 7 jours</strong> + roue /jeu</td><td>IG+TT</td></tr>
+      <tr><td class="pill">2</td><td>Lun</td><td>🎓</td><td>Carrousel</td><td><strong>#2 Protéines</strong> (25 g végétal)</td><td>IG+FB</td></tr>
+      <tr><td class="pill">2</td><td>Mer</td><td>💪</td><td>Post/Reel</td><td>Témoignage client / avis Google en image</td><td>IG+FB</td></tr>
+      <tr><td class="pill">2</td><td>Ven</td><td>🎓</td><td>Reel</td><td><strong>#3 Energy 0 sucre</strong></td><td>IG+TT</td></tr>
+      <tr><td class="pill">3</td><td>Lun</td><td>🥤</td><td>Carrousel</td><td>Recette du shake de la semaine</td><td>IG+FB</td></tr>
+      <tr><td class="pill">3</td><td>Mer</td><td>🎓</td><td>Carrousel</td><td><strong>#4 Petit-déj / créatine</strong></td><td>IG+FB</td></tr>
+      <tr><td class="pill">3</td><td>Ven</td><td>🎁</td><td>Reel</td><td>Coulisses Tom &amp; Mélanie (le « pourquoi »)</td><td>IG+TT</td></tr>
+      <tr><td class="pill">4</td><td>Lun</td><td>🎓</td><td>Carrousel</td><td><strong>#5 L'assiette idéale</strong></td><td>IG+FB</td></tr>
+      <tr><td class="pill">4</td><td>Mer</td><td>🎓</td><td>Reel</td><td><strong>#6 Sommeil / safran</strong></td><td>IG+TT</td></tr>
+      <tr><td class="pill">4</td><td>Ven</td><td>🎓</td><td>Carrousel</td><td><strong>#7 Fais le point → bilan offert</strong></td><td>IG+FB</td></tr>
+    </tbody>
+  </table>
+  <p class="highlight-note">Sur 4 semaines : les 7 faits + produit + preuve + communauté sont couverts, sans jamais créer dans l'urgence.</p>
+
+  <!-- CAROUSELS -->
+  <h2 class="pagebreak">🎓 Les 7 carrousels « Le savais-tu ? »</h2>
+  <p class="muted">Slides 1080×1080, fond Teal Fresh, 1 idée par slide. Chaque carrousel sert aussi de script Reel.</p>
+
+  <div class="box carousel">
+    <h3>💧 #1 — Hydratation</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « Tu bois assez d'eau ? La vraie réponse va te surprendre 💧 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> Ton corps ≈ <strong>60% d'eau</strong>. Moindre déficit = fatigue, faim, baisse de concentration.</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> Repère simple → <strong>~1 L par tranche de 30 kg</strong> de poids. (60 kg ≈ 2 L)</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> ⚠️ Les boissons sucrées artificielles donnent <strong>encore plus soif</strong>.</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> <strong>Bilan offert → lien en bio.</strong></div>
+    <div class="legend"><span class="t">📝 Légende</span>60% de toi, c'est de l'eau 💧 Pourtant beaucoup sont en léger déficit sans le savoir : fatigue, fringales, tête dans le coton. Le repère ? ~1 L par 30 kg. Et on oublie les boissons sucrées qui donnent encore plus soif. Faire le point ? Bilan offert 👉 lien en bio.</div>
+    <div class="reel"><span class="t">🎬 Reel 15 s</span>Hook face cam : « Si t'es tout le temps fatigué l'aprem… c'est peut-être ça. » → verre d'eau + smoothie → texte « 1 L par 30 kg » → CTA bio.</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>🥤 #2 — Protéines (le shake La Base)</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « Pourquoi un shake La Base ≠ un milkshake 🥤 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> <strong>25 g de protéines</strong> + <strong>24 vitamines &amp; minéraux</strong> par smoothie.</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> <strong>100% végétal, sans lactose, vegan, sans arôme artificiel.</strong></div>
+    <div class="slide"><span class="n">Slide 4 ·</span> Résultat → <strong>satiété</strong> + <strong>maintien musculaire</strong>. Idéal collation/petit-déj.</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> <strong>Tu peux le refaire chez toi, exactement comme au bar.</strong></div>
+    <div class="legend"><span class="t">📝 Légende</span>Un shake La Base = 25 g de protéines végétales + 24 vitamines &amp; minéraux. Sans lactose, vegan, sans arôme artificiel. Tu tiens jusqu'au prochain repas, tu soutiens tes muscles, tu te fais plaisir. Et tu peux le refaire à la maison 😉 Au 11 rue Saint Pierre ou sur l'app.</div>
+    <div class="reel"><span class="t">🎬 Reel 15 s</span>Gros plan préparation → versé au ralenti → texte « 25 g protéines • 24 vitamines • 0 lactose » → Tom : « Et ça, tu peux le refaire chez toi. »</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>🚶 #3 — Energy 0 sucre</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « L'energy qui ne te fait PAS crasher ⚡ »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> <strong>0 sucre. 20 kcal.</strong> (Compare avec ta canette habituelle… 😬)</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> <strong>Guarana + aloe vera</strong>, 100% vegan, sans arôme artificiel.</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> Énergie <strong>propre et durable</strong> → pas de pic, pas de chute 2 h après.</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> À tester avant le sport ou le coup de barre de 15 h.</div>
+    <div class="legend"><span class="t">📝 Légende</span>0 sucre. 20 kcal. Guarana + aloe vera. Voilà ce qu'il y a (et ce qu'il n'y a PAS) dans une energy La Base. 100% vegan, sans arôme artificiel. L'énergie qui dure, sans le crash du sucre à 15 h. Ton boost avant le sport 👉 ici ou à refaire à la maison.</div>
+    <div class="reel"><span class="t">🎬 Reel 12 s</span>Bulles en gros plan → en main dehors → texte « 0 SUCRE / 20 KCAL / GUARANA + ALOE » → CTA.</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>🌅 #4 — Petit-déj &amp; créatine</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « Et si ton petit-déj se buvait en 30 sec ? 🌅 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> Smoothie = <strong>25 g protéines + 24 vitamines &amp; minéraux</strong> = vrai petit-déj complet.</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> Fini le petit-déj sucré qui lâche à 10 h. Tu tiens jusqu'au déjeuner.</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> 💡 Avec l'exercice, la <strong>créatine</strong> est étudiée pour soutenir <strong>muscles et os</strong> — utile femmes &amp; seniors.</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> <strong>Bilan offert 👉 lien en bio.</strong></div>
+    <div class="legend"><span class="t">📝 Légende</span>Le petit-déj le plus rapide ET le plus complet ? Un smoothie : 25 g de protéines, 24 vitamines &amp; minéraux, tu tiens jusqu'à midi. Bonus : avec l'exercice, la créatine est étudiée pour soutenir muscles et os (femmes &amp; seniors). Savoir ce qui te convient ? Bilan offert 👉 lien en bio.</div>
+    <div class="reel"><span class="t">🎬 Reel 15 s</span>Réveil → smoothie en accéléré → texte « Ton petit-déj en 30 sec » → Mélanie face cam sur la créatine.</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>🥗 #5 — L'assiette idéale</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « La règle simple pour ne plus se prendre la tête à table 🥗 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> <strong>½ légumes</strong> 🥦</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> <strong>¼ protéines</strong> 🍗 (ou végétales)</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> <strong>¼ féculents complets</strong> 🍚</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> 💡 Ton énergie se construit <strong>dans l'assiette</strong>, pas qu'à la salle.</div>
+    <div class="slide"><span class="n">Slide 6 ·</span> Le shake complète, il ne remplace pas tout. <strong>Bilan offert.</strong></div>
+    <div class="legend"><span class="t">📝 Légende</span>La méthode de l'assiette, zéro prise de tête : ½ légumes, ¼ protéines, ¼ féculents complets. Ton énergie et tes résultats se jouent là, autant qu'à la salle. Le shake complète — pas remplace. Un plan qui te ressemble ? Bilan offert 👉 lien en bio.</div>
+    <div class="reel"><span class="t">🎬 Reel 12 s</span>Une assiette qu'on remplit zone par zone, texte sur chaque part. Simple et satisfaisant.</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>😴 #6 — Sommeil &amp; safran</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « Tu dors mal ? Ça sabote tous tes efforts 😴 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> Mauvais sommeil = plus de fringales sucrées, moins de récup, moins d'énergie.</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> 💡 Des études récentes suggèrent que le <strong>safran</strong> améliore la <strong>qualité du sommeil</strong>.</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> Des soucis de sommeil ? <strong>On a ce qu'il faut au Club 💜</strong></div>
+    <div class="legend"><span class="t">📝 Légende</span>On peut manger parfait et s'entraîner dur… si on dort mal, tout en pâtit : fringales, récup, énergie. Bonne nouvelle : des études récentes suggèrent que le safran améliore la qualité du sommeil. Si c'est ton point faible, on en parle au Club 💜 Bilan offert 👉 lien en bio.</div>
+    <div class="reel"><span class="t">🎬 Reel 12 s</span>Ambiance feutrée du soir → texte « Et si le problème, c'était le sommeil ? » → CTA Club.</div>
+  </div>
+
+  <div class="box carousel">
+    <h3>🎯 #7 — Fais le point → ton bilan offert</h3>
+    <div class="slide"><span class="n">Slide 1 ·</span> « 7 jours plus tard… on fait le point ? 🎯 »</div>
+    <div class="slide"><span class="n">Slide 2 ·</span> Hydratation 💧 · Protéines 🥤 · Énergie ⚡ · Petit-déj 🌅 · Assiette 🥗 · Sommeil 😴 — tu as les bases.</div>
+    <div class="slide"><span class="n">Slide 3 ·</span> Note ton énergie <strong>/10</strong> et ce qui a changé cette semaine.</div>
+    <div class="slide"><span class="n">Slide 4 ·</span> Envie d'aller plus loin avec un vrai accompagnement perso ?</div>
+    <div class="slide"><span class="n">Slide 5 ·</span> <strong>Ton bilan est OFFERT.</strong> Réserve 👉 lien en bio (Le Club).</div>
+    <div class="legend"><span class="t">📝 Légende</span>Bravo si tu as suivi les 7 jours 🎉 Hydratation, protéines, énergie propre, petit-déj complet, assiette équilibrée, sommeil… les fondations sont là. Note ton énergie /10 et ce qui a bougé. Pour passer au niveau au-dessus avec un suivi perso, ton bilan est offert 💜 Réserve 👉 lien en bio.</div>
+    <div class="reel"><span class="t">🎬 Reel 15 s</span>Montage rapide des 6 thèmes → Tom &amp; Mélanie face cam : « Ton bilan est offert. On t'attend. »</div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <h2 class="pagebreak">🧰 Templates réutilisables</h2>
+
+  <div class="box">
+    <h3 style="margin-top:0">Hooks qui marchent (slide 1 / 3 premières sec)</h3>
+    <p>• « Tu savais que… ? »<br>
+    • « L'erreur que tout le monde fait avec [X]… »<br>
+    • « Si t'es tout le temps fatigué l'aprem, c'est peut-être ça. »<br>
+    • « Ce qu'il y a vraiment dans ton/ta [produit]… »<br>
+    • « 3 trucs que personne ne te dit sur [X] »<br>
+    • « POV : tu découvres que tu peux le refaire chez toi. »</p>
+  </div>
+
+  <div class="box">
+    <h3 style="margin-top:0">Structure de légende (toujours la même)</h3>
+    <p class="muted">[hook qui accroche] → [2-3 phrases de valeur / le fait] → [lien avec La Base, sans forcer] → [CTA clair] 👉 lien en bio → [hashtags]</p>
+  </div>
+
+  <table>
+    <thead><tr><th>Objectif</th><th>CTA à utiliser</th></tr></thead>
+    <tbody>
+      <tr><td>Téléchargements app</td><td>« Joue à la roue 👉 lien en bio »</td></tr>
+      <tr><td>Bilans / Le Club</td><td>« Ton bilan est offert 👉 lien en bio »</td></tr>
+      <tr><td>Ventes produits</td><td>« Passe au 11 rue St Pierre / commande sur l'app »</td></tr>
+      <tr><td>Engagement</td><td>« Dis-le en commentaire 👇 »</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box">
+    <h3 style="margin-top:0">Hashtags (à copier)</h3>
+    <p><strong>Local :</strong> <code>#Verdun #Meuse #Lorraine #GrandEst #Verdun55 #ShakeBarVerdun</code></p>
+    <p><strong>Thème :</strong> <code>#smoothie #proteine #cleaneating #energie #bienetre #nutrition #healthyfood #vegan</code></p>
+    <p><strong>Marque :</strong> <code>#LaBase #LaBase360 #commeaubar</code></p>
+    <p class="highlight-note">8-12 hashtags max. Le local est le plus important pour être trouvé à Verdun.</p>
+  </div>
+
+  <p class="muted" style="text-align:center; margin-top:8mm">La Base · 11 rue Saint Pierre, Verdun · Document de travail interne</p>
+
+</div>
+</body>
+</html>
