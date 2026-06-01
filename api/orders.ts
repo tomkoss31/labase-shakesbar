@@ -31,6 +31,47 @@ function computeMascotteLevel(xp: number): string {
   return 'apprenti';
 }
 
+// Notifie les admins (push) d'une nouvelle commande. 100% gardé : toute erreur
+// ici ne doit jamais empêcher la création de la commande.
+async function notifyAdminsNewOrder(admin: any, title: string, body: string): Promise<void> {
+  const vapidPublic = process.env.VITE_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:tom@labase-nutrition.com';
+  if (!vapidPublic || !vapidPrivate) return;
+
+  const adminEmails = String(process.env.VITE_ADMIN_EMAIL || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  if (adminEmails.length === 0) return;
+
+  const { data: admins } = await admin.from('profiles').select('id').in('email', adminEmails);
+  const adminIds = (admins ?? []).map((a: any) => a.id);
+  if (adminIds.length === 0) return;
+
+  const { data: subs } = await admin
+    .from('push_subscriptions')
+    .select('endpoint, p256dh_key, auth_key')
+    .in('user_id', adminIds);
+  if (!subs || subs.length === 0) return;
+
+  const webpushMod = await import('web-push');
+  const webpush: any = (webpushMod as any).default ?? webpushMod;
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  const payload = JSON.stringify({ title, body, url: '/console.html', tag: 'labase-admin-order' });
+
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh_key, auth: sub.auth_key } },
+        payload,
+      );
+    } catch {
+      /* abonnement mort : on ignore */
+    }
+  }
+}
+
 const ALLOWED_STATUSES = ['paid', 'preparing', 'ready', 'cancelled', 'refunded'];
 
 async function readBody(req: any): Promise<any> {
@@ -183,6 +224,18 @@ export default async function handler(req: any, res: any) {
       };
     });
     await clients.admin.from('order_items').insert(itemsToInsert);
+
+    // Notifie les admins : nouvelle commande espèces à préparer (gardé)
+    try {
+      const euros = (totalCents / 100).toFixed(2).replace('.', ',');
+      await notifyAdminsNewOrder(
+        clients.admin,
+        '🛎️ Nouvelle commande (espèces)',
+        `${customerName || 'Client'} · ${euros}€ · code ${shortCode}${pickupTime ? ` · retrait ${pickupTime}` : ''}`,
+      );
+    } catch (err: any) {
+      console.warn('[create-pending] admin notify failed:', err?.message);
+    }
 
     return res.status(200).json({ ok: true, orderId, code: shortCode, totalCents });
   }
