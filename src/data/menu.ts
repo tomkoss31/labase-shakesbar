@@ -349,6 +349,28 @@ export const categories: Category[] = [
       'Ginseng • Guarana • Vit B & C • extraits végétaux • aloé vera • 0 sucre • 20 cal • colorants naturels',
     items: [
       {
+        name: 'Phénix',
+        description: 'Signature coucher de soleil — un dégradé flamboyant, fruité et pétillant.',
+        flavors: 'Fraise • Pêche • Ananas',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Start 550ml — 6,90€', priceCents: 690 },
+          { label: 'Boost 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/phenix.png',
+      },
+      {
+        name: 'Aurora',
+        description: 'Signature aurore boréale — un dégradé hypnotique, frais et acidulé.',
+        flavors: 'Framboise • Myrtille • Citron',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Start 550ml — 6,90€', priceCents: 690 },
+          { label: 'Boost 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/aurora.png',
+      },
+      {
         name: 'Electric Blue',
         description: 'Boisson iconique ultra visuelle, parfaite Shake Bar.',
         flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
