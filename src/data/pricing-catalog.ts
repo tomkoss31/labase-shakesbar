@@ -48,14 +48,14 @@ const productPriceEntries: Array<[string, number]> = [
   ['Banana Noisette', 890],
   ['Cookies', 890],
   ['Tropical', 890],
-  // Boissons enfants (590)
-  ['Bulle de Fée', 590],
-  ['Spiderman', 590],
-  ['Stitch', 590],
-  ['Licorne', 590],
-  ['Hulk', 590],
-  ['Tropicool', 590],
-  ['Jungle Kid', 590],
+  // Boissons enfants (500 = 5€, sans énergisant)
+  ['Bulle de Fée', 500],
+  ['Spiderman', 500],
+  ['Stitch', 500],
+  ['Licorne', 500],
+  ['Hulk', 500],
+  ['Tropicool', 500],
+  ['Jungle Kid', 500],
   // Café glacé simple (690)
   ['Café glacé simple', 690],
   // Post workout (590)

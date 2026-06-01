@@ -466,7 +466,6 @@ export const categories: Category[] = [
         name: "T'Coco",
         description: 'Tonique et coco, signature originale.',
         flavors: 'Citron • Pêche • Mandarine • Coco',
-        badge: 'Nouveau',
         options: [
           { label: 'Start 550ml — 6,90€', priceCents: 690 },
           { label: 'Boost 950ml — 8,90€', priceCents: 890 },
@@ -746,12 +745,12 @@ export const categories: Category[] = [
     ],
   },
 
-  // 🧒 BOISSONS ENFANTS — 0 sucre / 0 calorie • SANS énergisant • 5,90€
+  // 🧒 BOISSONS ENFANTS — 0 sucre / 0 calorie • SANS énergisant • 5€
   {
     id: 'kids',
     name: 'Boissons enfants',
     icon: Sparkles,
-    price: 'Sans énergisant • 5,90€',
+    price: 'Sans énergisant • 5€',
     accent: 'from-sky-400 via-fuchsia-400 to-amber-400',
     description: '0 sucre • 0 calorie • SANS énergisant • spécial enfants 🧒',
     items: [
@@ -759,43 +758,43 @@ export const categories: Category[] = [
         name: 'Bulle de Fée',
         description: 'Douce et féerique, pensée pour les enfants. Sans énergisant.',
         flavors: 'Pomme • Fruit du dragon',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Spiderman',
         description: 'Pleine de fruits rouges, l’héroïne des petits. Sans énergisant.',
         flavors: 'Fruits rouges',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Stitch',
         description: 'Passion & limonade, sans bulles. Sans énergisant.',
         flavors: 'Passion • Limonade (non pétillant)',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Licorne',
         description: 'Magique et fruitée, pour rêver. Sans énergisant.',
         flavors: 'Myrtille • Fraise • Raisin',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Hulk',
         description: 'Pomme verte qui pète la forme. Sans énergisant.',
         flavors: 'Pomme verte',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Tropicool',
         description: 'Évasion tropicale tout en douceur. Sans énergisant.',
         flavors: 'Melon • Ananas',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
       {
         name: 'Jungle Kid',
         description: 'La Jungle en version enfant : même goût, sans énergisant.',
         flavors: 'Melon • Ananas',
-        basePriceCents: 590,
+        basePriceCents: 500,
       },
     ],
   },

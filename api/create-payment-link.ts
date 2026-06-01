@@ -40,9 +40,9 @@ const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
   ['Fraise bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
   ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890],
   ['Banana Split', 890], ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
-  // Enfants
-  ['Bulle de Fée', 590], ['Spiderman', 590], ['Stitch', 590],
-  ['Licorne', 590], ['Hulk', 590], ['Tropicool', 590], ['Jungle Kid', 590],
+  // Enfants (5€, sans énergisant)
+  ['Bulle de Fée', 500], ['Spiderman', 500], ['Stitch', 500],
+  ['Licorne', 500], ['Hulk', 500], ['Tropicool', 500], ['Jungle Kid', 500],
   // Cafés / sportifs uniques
   ['Café glacé simple', 690],
   ['Post Workout', 590],
