@@ -11,7 +11,7 @@
 
 | # | Chantier | Impact | Effort | Statut |
 |---|----------|:------:|:------:|:------:|
-| A1 | **Mini-palier cadeau accessible** (ex. 100 XP = 1 topping) — effet "goût" dès la 1ère visite | ⭐⭐⭐⭐ | S | 🔜 |
+| A1 | **Mini-palier cadeau accessible** (ex. 100 XP = 1 boost) — effet "goût" dès la 1ère visite | ⭐⭐⭐⭐ | S | ✅ |
 | A2 | **Défis / missions hebdo** ("commande 2× → +100 XP", "essaie un nouveau shake") — LE levier de fréquence | ⭐⭐⭐⭐⭐ | M | 🔜 |
 | A3 | **Streaks** (séries de visites : 3 semaines d'affilée → bonus) | ⭐⭐⭐ | M | 🔜 |
 | A4 | Programme XP / paliers / roue / anniversaire / relance 14j | ⭐⭐⭐⭐ | — | ✅ |
