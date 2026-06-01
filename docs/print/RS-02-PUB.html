@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>La Base — Brief Pub (à imprimer)</title>
+<style>
+  :root { --teal:#0f8b86; --teal-dark:#0a5f5b; --ink:#1a2421; --dim:#4b5a56; --line:#d7e3e0; --tint:#f1f8f7; --warn:#b5532a; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family:"Segoe UI","Outfit",system-ui,sans-serif; color:var(--ink); line-height:1.5; margin:0; font-size:12pt; }
+  @page { size:A4; margin:16mm 14mm; }
+  .wrap { max-width:190mm; margin:0 auto; padding:8mm 0; }
+  h1 { font-size:26pt; color:var(--teal-dark); margin:0 0 2mm; line-height:1.1; }
+  h2 { font-size:16pt; color:var(--teal-dark); border-bottom:3px solid var(--teal); padding-bottom:2mm; margin:10mm 0 4mm; }
+  h3 { font-size:13pt; color:var(--teal); margin:5mm 0 2mm; }
+  p { margin:0 0 2.5mm; }
+  .lead { color:var(--dim); font-size:11pt; }
+  .muted { color:var(--dim); font-size:10pt; }
+  strong,b { color:var(--teal-dark); }
+  .cover { border:3px solid var(--teal); border-radius:6mm; padding:10mm; background:var(--tint); margin-bottom:6mm; }
+  .badge { display:inline-block; background:var(--teal); color:#fff; font-weight:700; font-size:10pt; padding:1.5mm 4mm; border-radius:20px; margin-bottom:4mm; }
+  .box { border:1.5px solid var(--line); border-radius:4mm; padding:6mm; margin:0 0 5mm; background:#fff; page-break-inside:avoid; break-inside:avoid; }
+  .crea { border-left:5px solid var(--teal); }
+  .warnbox { border:1.5px solid var(--warn); background:#fdf3ee; border-radius:4mm; padding:6mm; margin:0 0 5mm; }
+  .warnbox h3 { color:var(--warn); margin-top:0; }
+  ul.check { list-style:none; padding-left:0; }
+  ul.check li { padding:1.5mm 0 1.5mm 9mm; position:relative; }
+  ul.check li::before { content:"☐"; position:absolute; left:0; font-size:14pt; color:var(--teal); }
+  table { width:100%; border-collapse:collapse; margin:3mm 0; font-size:10.5pt; }
+  th { background:var(--teal); color:#fff; text-align:left; padding:2.5mm; }
+  td { border-bottom:1px solid var(--line); padding:2.5mm; vertical-align:top; }
+  tr:nth-child(even) td { background:var(--tint); }
+  pre { background:var(--tint); border-radius:3mm; padding:4mm; font-size:9.5pt; white-space:pre-wrap; line-height:1.35; }
+  .tag { display:inline-block; font-size:8.5pt; font-weight:700; color:#fff; background:var(--teal); border-radius:12px; padding:0.5mm 3mm; vertical-align:middle; }
+  .pagebreak { page-break-before:always; }
+  .kv { font-size:10.5pt; }
+  .kv b { display:inline-block; min-width:24mm; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <span class="badge">À IMPRIMER · À SURLIGNER</span>
+    <h1>💸 La Base — Brief Pub</h1>
+    <p class="lead">5 créas vidéo · structure de campagne Meta · budget 20-30 €/j</p>
+    <p class="muted">Mis à jour le 01/06/2026 — Plateforme : Meta Ads (Instagram + Facebook)</p>
+  </div>
+
+  <div class="warnbox">
+    <h3>⚠️ Règle n°1 avant de dépenser 1 €</h3>
+    <p><strong>Pas de pub sans 3-4 bonnes vidéos d'abord.</strong> On lance la pub seulement après la 1ʳᵉ ou 2ᵉ session de tournage — les Reels du calendrier servent directement de créas (zéro travail en plus).</p>
+    <p><strong>À régler 1 fois :</strong></p>
+    <ul class="check">
+      <li>Compte Meta Business Suite + page FB + Insta reliés</li>
+      <li>Pixel Meta installé (mesure les visites /jeu)</li>
+      <li>1 événement de conversion : visite de /jeu = lead capté</li>
+    </ul>
+    <p class="muted">L'app est une PWA → pas d'« install » trackée comme sur l'App Store. La vraie conversion mesurable = <strong>visite /jeu + compte créé</strong>. On optimise là-dessus.</p>
+  </div>
+
+  <h2>🎯 La logique : 2 temps</h2>
+  <pre>PHASE 1 — On fait connaître (haut d'entonnoir)
+  Objectif : Notoriété / Trafic   ·   Audience LARGE géociblée
+  Créas : 3 vidéos "accroche" (signature, energy, éducation)
+        ↓
+PHASE 2 — On convertit (bas d'entonnoir)
+  Objectif : Conversions (visite /jeu)
+  Audience A : retargeting (a vu une vidéo / visité profil / site)
+  Audience B : lookalike des joueurs /jeu existants
+  Créas : "bilan offert + roue" + témoignage client</pre>
+  <p class="muted">On ne demande pas à un inconnu de s'inscrire tout de suite : on le chauffe (Phase 1), puis on reconvertit ceux qui ont montré de l'intérêt (Phase 2). C'est ça qui fait baisser le coût par inscription.</p>
+
+  <h2>💰 Budget 20-30 €/j</h2>
+  <table>
+    <thead><tr><th>Phase</th><th>Part</th><th>Ex. à 25 €/j</th><th>Optimisé sur</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Phase 1</strong> — Notoriété/Trafic (large)</td><td>~60 %</td><td>~15 €/j</td><td>Vues vidéo / clics, CPM</td></tr>
+      <tr><td><strong>Phase 2A</strong> — Retargeting (chauds)</td><td>~25 %</td><td>~6 €/j</td><td>Visite /jeu</td></tr>
+      <tr><td><strong>Phase 2B</strong> — Lookalike joueurs /jeu</td><td>~15 %</td><td>~4 €/j</td><td>Visite /jeu</td></tr>
+    </tbody>
+  </table>
+  <p>• <strong>Sem. 1-2</strong> : tout sur la Phase 1 (pas encore d'audience à recibler). On laisse tourner.<br>
+  • <strong>Dès sem. 3</strong> : on ouvre les Phases 2A/2B.<br>
+  • <strong>Géociblage</strong> : Verdun + 25-30 km (Étain, Stenay, Clermont-en-Argonne…). Pas toute la France.<br>
+  • <strong>Intérêts</strong> (Phase 1) : sport/fitness, nutrition, alimentation saine, vegan, perte de poids, running. Âge 18-55.</p>
+
+  <h2 class="pagebreak">🎬 Les 5 créas (9:16, ≤ 20 s, sous-titres TOUJOURS)</h2>
+  <p class="muted">Réutilisent les Reels du calendrier. Règle : hook dans les 3 premières secondes, 1 seul message, CTA clair à la fin.</p>
+
+  <div class="box crea">
+    <h3>Créa 1 — « Comme à la maison » (SIGNATURE) <span class="tag">Phase 1</span></h3>
+    <p class="kv"><b>Objectif</b> Notoriété + curiosité. La créa principale.</p>
+    <p class="kv"><b>Hook 0-3 s</b> Tom face cam : « Tu savais que tu peux refaire ton smoothie La Base… chez toi ? »</p>
+    <p class="kv"><b>Déroulé</b> Geste smoothie au bar (versé ralenti) → format « à refaire à la maison » montré.</p>
+    <p class="kv"><b>Texte écran</b> « Comme au bar 🥤 → à la maison 🏠 »</p>
+    <p class="kv"><b>CTA</b> « Découvre comment 👉 » (vers /jeu ou la fiche).</p>
+  </div>
+
+  <div class="box crea">
+    <h3>Créa 2 — « Energy 0 sucre » (PUNCH) <span class="tag">Phase 1</span></h3>
+    <p class="kv"><b>Objectif</b> Accroche large, très partageable.</p>
+    <p class="kv"><b>Hook 0-3 s</b> Gros plan bulles + texte « 0 SUCRE. 20 KCAL. »</p>
+    <p class="kv"><b>Déroulé</b> Energy en main dehors → guarana + aloe → « pas de crash à 15 h ».</p>
+    <p class="kv"><b>Texte écran</b> « L'energy qui te lâche pas ⚡ »</p>
+    <p class="kv"><b>CTA</b> « À tester 👉 »</p>
+  </div>
+
+  <div class="box crea">
+    <h3>Créa 3 — « Ton bilan est offert » (CONVERSION) <span class="tag">Phase 2</span></h3>
+    <p class="kv"><b>Objectif</b> Faire jouer à /jeu + réserver le bilan. La créa qui convertit.</p>
+    <p class="kv"><b>Hook 0-3 s</b> « Un accompagnement nutrition perso… gratuit. Oui, gratuit. »</p>
+    <p class="kv"><b>Déroulé</b> La roue /jeu qui tourne (capture app) → « bilan offert » → ambiance Le Club.</p>
+    <p class="kv"><b>Texte écran</b> « Bilan OFFERT 🎁 + tente ta chance à la roue »</p>
+    <p class="kv"><b>CTA</b> « Joue maintenant 👉 »</p>
+  </div>
+
+  <div class="box crea">
+    <h3>Créa 4 — Témoignage / preuve (CRÉDIBILITÉ) <span class="tag">Phase 2 · retargeting</span></h3>
+    <p class="kv"><b>Objectif</b> Rassurer les indécis (ont déjà vu une vidéo).</p>
+    <p class="kv"><b>Hook 0-3 s</b> Un vrai client : « En 3 semaines, j'ai… » (avec consentement).</p>
+    <p class="kv"><b>Déroulé</b> Témoignage court + ambiance bar + visage Tom/Mélanie.</p>
+    <p class="kv"><b>Texte écran</b> « De vrais résultats, à Verdun »</p>
+    <p class="kv"><b>CTA</b> « Ton tour 👉 bilan offert »</p>
+  </div>
+
+  <div class="box crea">
+    <h3>Créa 5 — « Le savais-tu ? » éducative (TOP FUNNEL) <span class="tag">Phase 1</span></h3>
+    <p class="kv"><b>Objectif</b> Installer l'expertise, audience froide.</p>
+    <p class="kv"><b>Hook 0-3 s</b> « Si t'es tout le temps fatigué l'aprem… c'est peut-être ça. »</p>
+    <p class="kv"><b>Déroulé</b> Le fait expliqué simplement (carrousels #1 ou #2).</p>
+    <p class="kv"><b>Texte écran</b> Le chiffre clé (« 1 L par 30 kg » / « 25 g de protéines »).</p>
+    <p class="kv"><b>CTA</b> « On t'explique 👉 »</p>
+  </div>
+
+  <h2 class="pagebreak">🏗️ Structure du compte Meta</h2>
+  <pre>CAMPAGNE 1 — "LaBase | Notoriété"  (objectif Trafic ou Vues vidéo)
+  └─ Ad set : Verdun +25km · 18-55 · intérêts santé/sport/nutrition
+       ├─ Pub : Créa 1 (signature)
+       ├─ Pub : Créa 2 (energy)
+       └─ Pub : Créa 5 (éducative)
+
+CAMPAGNE 2 — "LaBase | Conversion /jeu"  (objectif Conversions → visite /jeu)
+  ├─ Ad set 2A : RETARGETING (a vu ≥50% d'une vidéo OU visité profil/site, 30 j)
+  │     ├─ Pub : Créa 3 (bilan + roue)
+  │     └─ Pub : Créa 4 (témoignage)
+  └─ Ad set 2B : LOOKALIKE 1-3% des joueurs /jeu existants
+        └─ Pub : Créa 3 (bilan + roue)</pre>
+  <p class="muted">Démarre uniquement la Campagne 1 les 2 premières semaines. La Campagne 2 a besoin que la 1 ait tourné pour avoir une audience à recibler.</p>
+
+  <h2>📊 Ce qu'on regarde</h2>
+  <table>
+    <thead><tr><th>Indicateur</th><th>Bon signe</th><th>Alerte → on ajuste</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CTR</strong> (taux de clic)</td><td>&gt; 1 %</td><td>&lt; 0,8 % → hook/créa ne prend pas</td></tr>
+      <tr><td><strong>CPM</strong> (coût/1000 vues)</td><td>stable/bas</td><td>qui grimpe → audience saturée, change la créa</td></tr>
+      <tr><td><strong>Coût par visite /jeu</strong></td><td>le KPI roi</td><td>trop haut → revoir ciblage Phase 2</td></tr>
+      <tr><td><strong>Complétion vidéo à 3 s</strong></td><td>&gt; 25 %</td><td>chute à 3 s → refaire le hook</td></tr>
+    </tbody>
+  </table>
+  <p class="muted"><strong>Pour ne pas paniquer :</strong> on ne touche à RIEN les 3-4 premiers jours (apprentissage Meta). On juge sur 7 jours minimum.</p>
+
+  <div class="box">
+    <h3 style="margin-top:0">✅ Checklist de lancement</h3>
+    <ul class="check">
+      <li>Pixel Meta posé + événement « visite /jeu » qui remonte (Events Manager)</li>
+      <li>3 créas Phase 1 montées en 9:16 avec sous-titres</li>
+      <li>Audience Verdun +25km + audience d'intérêts créées</li>
+      <li>Campagne 1 lancée à ~15 €/j, on laisse tourner 7 jours</li>
+      <li>J+14 : créer audiences retargeting + lookalike, lancer Campagne 2</li>
+      <li>Check hebdo des indicateurs (mardi, jour de prog — voir RS-RAPPELS.ics)</li>
+    </ul>
+  </div>
+
+  <div class="warnbox">
+    <h3>🚫 Les 5 erreurs à éviter</h3>
+    <p>1. Lancer sans créa vidéo correcte → argent perdu.<br>
+    2. Cibler trop large géographiquement → on paie pour des gens qui ne viendront jamais.<br>
+    3. Couper/modifier une pub tous les jours → on casse l'apprentissage de l'algo.<br>
+    4. Tout le budget sur la conversion dès J1 → personne ne s'inscrit « à froid ».<br>
+    5. Oublier les sous-titres → 90 % scrollent sans le son.</p>
+  </div>
+
+  <p class="muted" style="text-align:center; margin-top:8mm">La Base · 11 rue Saint Pierre, Verdun · Brief pub — à affiner après 7 jours de diffusion</p>
+
+</div>
+</body>
+</html>
