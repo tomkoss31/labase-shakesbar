@@ -49,6 +49,8 @@ interface HomeV2Props {
   wheelOpen?: boolean;
   setWheelOpen?: (open: boolean) => void;
   onReorder?: (items: CartItem[]) => void;
+  canInstall?: boolean;
+  onInstall?: () => void;
 }
 
 export function HomeV2({
@@ -63,7 +65,10 @@ export function HomeV2({
   wheelOpen: wheelOpenProp,
   setWheelOpen: setWheelOpenProp,
   onReorder,
+  canInstall,
+  onInstall,
 }: HomeV2Props) {
+  const [installDismissed, setInstallDismissed] = useState(false);
   const palette = PALETTE_E;
   const [tab, setTab] = useState<NavTab>('home');
   const [headerTab, setHeaderTab] = useState<HeaderTab>('home');
@@ -283,6 +288,54 @@ export function HomeV2({
         onTabChange={handleHeaderTab}
         isAuthed={isAuthed}
       />
+
+      {/* Bannière installer l'app (Android/PC Chromium uniquement) */}
+      {canInstall && onInstall && !installDismissed && (
+        <div style={{ padding: '0 16px 10px', maxWidth: 1240, margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '12px 14px',
+              borderRadius: 14,
+              background: `linear-gradient(135deg, ${palette.primary}22, ${palette.accent}11)`,
+              border: `1px solid ${palette.primary}55`,
+            }}
+          >
+            <div style={{ fontSize: 24, lineHeight: 1 }}>📲</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: palette.text }}>
+                Installe l'app La Base
+              </div>
+              <div style={{ fontSize: 11.5, color: palette.textDim, marginTop: 1 }}>
+                Accès direct + notifs de tes cadeaux
+              </div>
+            </div>
+            <button
+              onClick={onInstall}
+              style={{
+                flex: 'none', padding: '9px 14px', border: 0, borderRadius: 10,
+                background: palette.cta, color: palette.ctaText,
+                fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 12.5, cursor: 'pointer',
+              }}
+            >
+              Installer
+            </button>
+            <button
+              onClick={() => setInstallDismissed(true)}
+              aria-label="Fermer"
+              style={{
+                flex: 'none', width: 28, height: 28, borderRadius: '50%',
+                background: 'transparent', border: `1px solid ${palette.line}`,
+                color: palette.textDim, cursor: 'pointer', fontSize: 14,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hero grid : carousel à gauche (col 1), XP + adresse à droite (col 2) en desktop */}
       <div

@@ -2523,6 +2523,8 @@ function App() {
             setAuthOpen={setAuthOpen}
             wheelOpen={wheelOpen}
             setWheelOpen={setWheelOpen}
+            canInstall={Boolean(deferredInstallPrompt)}
+            onInstall={handleInstallApp}
             onReorder={(items) => {
               if (!items.length) return;
               // Fusionne avec le panier existant (somme les quantités si même article)
