@@ -22,9 +22,11 @@ interface Challenge {
   claimed: boolean;
 }
 
-// Défis hebdomadaires — fetch + progression + crédit auto à l'ouverture
+// Défis hebdomadaires + série — fetch + progression + crédit auto à l'ouverture
 function ChallengesBlock({ palette }: { palette: Palette }) {
   const [challenges, setChallenges] = useState<Challenge[] | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [nextMilestone, setNextMilestone] = useState<{ weeks: number; xp: number } | null>(null);
 
   useEffect(() => {
     const session = getStoredSession();
@@ -35,7 +37,10 @@ function ChallengesBlock({ palette }: { palette: Palette }) {
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (!cancelled && d && Array.isArray(d.challenges)) setChallenges(d.challenges);
+        if (cancelled || !d) return;
+        if (Array.isArray(d.challenges)) setChallenges(d.challenges);
+        if (typeof d.streak === 'number') setStreak(d.streak);
+        setNextMilestone(d.nextStreakMilestone ?? null);
       })
       .catch(() => {});
     return () => {
@@ -47,6 +52,33 @@ function ChallengesBlock({ palette }: { palette: Palette }) {
 
   return (
     <div style={{ marginBottom: 18 }}>
+      {/* Carte série de visites */}
+      {streak >= 1 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: 14,
+            borderRadius: 16,
+            marginBottom: 12,
+            background: `linear-gradient(135deg, ${palette.accent}26, ${palette.card})`,
+            border: `1px solid ${palette.accent}66`,
+          }}
+        >
+          <div style={{ fontSize: 30, lineHeight: 1 }}>🔥</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 16 }}>
+              {streak} semaine{streak > 1 ? 's' : ''} d'affilée !
+            </div>
+            <div style={{ fontSize: 11.5, color: palette.textDim, marginTop: 2 }}>
+              {nextMilestone
+                ? `Encore ${nextMilestone.weeks - streak} sem. → +${nextMilestone.xp} XP`
+                : 'Tu es une légende de la régularité 👑'}
+            </div>
+          </div>
+        </div>
+      )}
       <div
         style={{
           fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase',

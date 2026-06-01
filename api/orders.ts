@@ -191,14 +191,39 @@ export default async function handler(req: any, res: any) {
     const weekStartDate = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
     const weekStartIso = monday.toISOString();
 
-    // Nb de commandes payées cette semaine
-    const { count } = await clients.admin
+    // Toutes les commandes payées (pour le compteur de la semaine ET la série)
+    const { data: paidOrders } = await clients.admin
       .from('orders')
-      .select('id', { count: 'exact', head: true })
+      .select('paid_at')
       .eq('user_id', uid)
       .eq('status', 'paid')
-      .gte('paid_at', weekStartIso);
-    const orderCount = count ?? 0;
+      .not('paid_at', 'is', null)
+      .order('paid_at', { ascending: false })
+      .limit(500);
+
+    const orderCount = (paidOrders ?? []).filter(
+      (o: any) => o.paid_at && o.paid_at >= weekStartIso,
+    ).length;
+
+    // ── Série de visites (semaines consécutives avec ≥1 commande) ──
+    const ymd = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const mondayOf = (iso: string) => {
+      const p = new Date(new Date(iso).toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+      const dd = p.getDay();
+      p.setDate(p.getDate() + (dd === 0 ? -6 : 1 - dd));
+      p.setHours(0, 0, 0, 0);
+      return ymd(p);
+    };
+    const weekSet = new Set((paidOrders ?? []).map((o: any) => mondayOf(o.paid_at)));
+    let streak = 0;
+    const cursor = new Date(monday);
+    // Tolérance : si pas encore commandé cette semaine, on part de la semaine dernière
+    if (!weekSet.has(ymd(cursor))) cursor.setDate(cursor.getDate() - 7);
+    while (weekSet.has(ymd(cursor))) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 7);
+    }
 
     const DEFS = [
       { id: 'orders-2', title: '2 commandes cette semaine', goal: 2, xp: 100, emoji: '☕' },
@@ -245,7 +270,45 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    return res.status(200).json({ weekStart: weekStartDate, orderCount, challenges: out });
+    // ── Paliers de série : bonus crédité une seule fois dans la vie ──
+    // (sentinel week_start fixe → la contrainte unique garantit le once-ever)
+    const STREAK_MILESTONES = [
+      { id: 'streak-3', weeks: 3, xp: 150 },
+      { id: 'streak-8', weeks: 8, xp: 500 },
+    ];
+    const STREAK_SENTINEL = '2000-01-01';
+    const { data: sClaims } = await clients.admin
+      .from('challenge_claims')
+      .select('challenge_id')
+      .eq('user_id', uid)
+      .eq('week_start', STREAK_SENTINEL);
+    const sClaimed = new Set((sClaims ?? []).map((c: any) => c.challenge_id));
+    let streakBonus: { weeks: number; xp: number } | null = null;
+    for (const m of STREAK_MILESTONES) {
+      if (streak >= m.weeks && !sClaimed.has(m.id)) {
+        const { error: insErr } = await clients.admin.from('challenge_claims').insert({
+          user_id: uid,
+          challenge_id: m.id,
+          week_start: STREAK_SENTINEL,
+          xp_awarded: m.xp,
+        });
+        if (!insErr) {
+          const { data: p } = await clients.admin.from('profiles').select('xp').eq('id', uid).single();
+          if (p) await clients.admin.from('profiles').update({ xp: (p.xp ?? 0) + m.xp }).eq('id', uid);
+          streakBonus = { weeks: m.weeks, xp: m.xp };
+        }
+      }
+    }
+    const nextStreakMilestone = STREAK_MILESTONES.find((m) => m.weeks > streak) ?? null;
+
+    return res.status(200).json({
+      weekStart: weekStartDate,
+      orderCount,
+      challenges: out,
+      streak,
+      nextStreakMilestone,
+      streakBonus,
+    });
   }
 
   // ─── GET ?action=today ─────────────────────────────────────────
