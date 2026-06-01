@@ -62,6 +62,7 @@ export function ProfileSheet({
   // Admin : roue dispo en permanence (test illimité des cadeaux)
   const isAdmin = isAdminEmail(email);
   const wheelCanSpin = isAdmin || wheelCooldown.canSpin;
+  const [adminOpen, setAdminOpen] = useState(false);
   const { orders } = useUserOrders();
 
   // Sync local state quand le profil change
@@ -426,8 +427,34 @@ export function ProfileSheet({
           </button>
         )}
 
-        {/* Boutons admin — visibles uniquement pour les comptes admin */}
-        {isAdminEmail(email) && (
+        {/* Section Admin repliable — visible uniquement pour les comptes admin */}
+        {isAdmin && (
+          <button
+            onClick={() => setAdminOpen((v) => !v)}
+            style={{
+              width: '100%',
+              marginBottom: adminOpen ? 10 : 10,
+              padding: '12px 16px',
+              background: 'transparent',
+              border: `1px solid ${palette.line}`,
+              borderRadius: 14,
+              color: palette.textDim,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <div style={{ fontSize: 18 }}>⚙️</div>
+            <div style={{ flex: 1, textAlign: 'left' }}>Admin (gérant)</div>
+            <div style={{ fontSize: 14 }}>{adminOpen ? '▾' : '▸'}</div>
+          </button>
+        )}
+
+        {isAdmin && adminOpen && (
           <button
             onClick={() => {
               window.location.href = '/console.html#scanner';
@@ -464,8 +491,8 @@ export function ProfileSheet({
           </button>
         )}
 
-        {/* Bouton Console admin — visible uniquement pour le compte admin */}
-        {isAdminEmail(email) && (
+        {/* Bouton Console admin — dans la section Admin repliable */}
+        {isAdmin && adminOpen && (
           <button
             onClick={() => {
               window.location.href = '/console.html';
