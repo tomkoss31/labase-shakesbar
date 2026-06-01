@@ -138,6 +138,37 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ orders: data ?? [] });
   }
 
+  // ─── GET ?action=last-order (CLIENT, JWT) : dernière commande + articles ───
+  // Sert au bouton "Recommander" (Order Again). On renvoie la commande la plus
+  // récente QUI A des lignes (les ventes Square pures n'ont pas de lignes).
+  if (action === 'last-order' && req.method === 'GET') {
+    if (!clients.public) return res.status(500).json({ error: 'Anon key manquante' });
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Auth requise' });
+
+    const { data: userData, error: userError } = await clients.public.auth.getUser(accessToken);
+    if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
+
+    const { data: orders } = await clients.admin
+      .from('orders')
+      .select('id, total_cents, created_at')
+      .eq('user_id', userData.user.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    for (const o of orders ?? []) {
+      const { data: items } = await clients.admin
+        .from('order_items')
+        .select('product_name, option_label, category_name, quantity, unit_price_cents')
+        .eq('order_id', o.id);
+      if (items && items.length) {
+        return res.status(200).json({ order: o, items });
+      }
+    }
+    return res.status(200).json({ order: null, items: [] });
+  }
+
   // ─── GET ?action=today ─────────────────────────────────────────
   if (action === 'today' && req.method === 'GET') {
     if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });

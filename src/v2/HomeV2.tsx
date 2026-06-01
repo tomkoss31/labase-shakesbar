@@ -6,6 +6,8 @@ import { PALETTE_E } from './palette';
 import { Header } from './Header';
 import { XpCard } from './XpCard';
 import { QuickActions } from './QuickActions';
+import { ReorderCard } from './ReorderCard';
+import type { CartItem } from './cart/useCart';
 import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
@@ -46,6 +48,7 @@ interface HomeV2Props {
   setAuthOpen?: (open: boolean) => void;
   wheelOpen?: boolean;
   setWheelOpen?: (open: boolean) => void;
+  onReorder?: (items: CartItem[]) => void;
 }
 
 export function HomeV2({
@@ -59,6 +62,7 @@ export function HomeV2({
   setAuthOpen: setAuthOpenProp,
   wheelOpen: wheelOpenProp,
   setWheelOpen: setWheelOpenProp,
+  onReorder,
 }: HomeV2Props) {
   const palette = PALETTE_E;
   const [tab, setTab] = useState<NavTab>('home');
@@ -310,6 +314,9 @@ export function HomeV2({
             onRefer={shareReferral}
             onClub={() => (window.location.href = '/club')}
           />
+          {onReorder && (
+            <ReorderCard palette={palette} isAuthed={isAuthed} onReorder={onReorder} />
+          )}
         </div>
       </div>
 

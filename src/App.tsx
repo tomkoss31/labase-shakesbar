@@ -2523,6 +2523,20 @@ function App() {
             setAuthOpen={setAuthOpen}
             wheelOpen={wheelOpen}
             setWheelOpen={setWheelOpen}
+            onReorder={(items) => {
+              if (!items.length) return;
+              // Fusionne avec le panier existant (somme les quantités si même article)
+              setCart((prev) => {
+                const map = new Map(prev.map((m) => [m.key, { ...m }]));
+                for (const it of items) {
+                  const ex = map.get(it.key);
+                  if (ex) map.set(it.key, { ...ex, quantity: ex.quantity + it.quantity });
+                  else map.set(it.key, { ...it });
+                }
+                return Array.from(map.values());
+              });
+              setDrawerOpen(true);
+            }}
           />
           <ProductModalV2
             palette={PALETTE_E}
