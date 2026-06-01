@@ -13,7 +13,7 @@
 |---|----------|:------:|:------:|:------:|
 | A1 | **Mini-palier cadeau accessible** (ex. 100 XP = 1 boost) — effet "goût" dès la 1ère visite | ⭐⭐⭐⭐ | S | ✅ |
 | A2 | **Défis / missions hebdo** ("commande 2× → +100 XP", "commande 3× → +250 XP") — LE levier de fréquence | ⭐⭐⭐⭐⭐ | M | ✅ |
-| A3 | **Streaks** (séries de visites : 3 semaines d'affilée → bonus) | ⭐⭐⭐ | M | 🔜 |
+| A3 | **Streaks** (series de visites : 3 semaines d affilee -> bonus) | ⭐⭐⭐ | M | ✅ |
 | A4 | Programme XP / paliers / roue / anniversaire / relance 14j | ⭐⭐⭐⭐ | — | ✅ |
 
 ## 🅱️ Acquisition / Viralité
