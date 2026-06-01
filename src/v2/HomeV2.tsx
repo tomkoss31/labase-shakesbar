@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { XpCard } from './XpCard';
 import { QuickActions } from './QuickActions';
 import { ReorderCard } from './ReorderCard';
+import { WellnessChallenge } from './wellness/WellnessChallenge';
 import type { CartItem } from './cart/useCart';
 import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
@@ -437,6 +438,13 @@ export function HomeV2({
           </a>
         </div>
       )}
+
+      {/* Défi bien-être 7 jours (C2) — auto-éducation + pont coaching */}
+      <WellnessChallenge
+        palette={palette}
+        isAuthed={isAuthed}
+        onConnect={() => setAuthOpen(true)}
+      />
 
       <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />

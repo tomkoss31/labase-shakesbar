@@ -311,6 +311,94 @@ export default async function handler(req: any, res: any) {
     });
   }
 
+  // ─── Défi bien-être 7 jours (C2) — wellness / start / checkin ───
+  if (action === 'wellness' || action === 'wellness-start' || action === 'wellness-checkin') {
+    if (!clients.public) return res.status(500).json({ error: 'Anon key manquante' });
+    const accessToken = (req.headers?.authorization ?? '').replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Auth requise' });
+    const { data: userData, error: userError } = await clients.public.auth.getUser(accessToken);
+    if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
+    const uid = userData.user.id;
+
+    const pNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+    const parisToday = `${pNow.getFullYear()}-${String(pNow.getMonth() + 1).padStart(2, '0')}-${String(pNow.getDate()).padStart(2, '0')}`;
+    const TOTAL = 7;
+    const XP_PER_DAY = 30;
+    const XP_BONUS = 300;
+
+    // GET ?action=wellness : état du parcours + compteur communautaire
+    if (action === 'wellness' && req.method === 'GET') {
+      const { count: participants } = await clients.admin
+        .from('wellness_challenge')
+        .select('user_id', { count: 'exact', head: true });
+      const { data: row } = await clients.admin
+        .from('wellness_challenge')
+        .select('*')
+        .eq('user_id', uid)
+        .maybeSingle();
+      if (!row) {
+        return res.status(200).json({ started: false, total: TOTAL, participants: participants ?? 0 });
+      }
+      return res.status(200).json({
+        started: true,
+        count: row.count,
+        total: TOTAL,
+        completed: Boolean(row.completed_at),
+        canCheckInToday: row.count < TOTAL && row.last_checkin !== parisToday,
+        participants: participants ?? 0,
+      });
+    }
+
+    // POST ?action=wellness-start : démarre le parcours
+    if (action === 'wellness-start' && req.method === 'POST') {
+      const { data: existing } = await clients.admin
+        .from('wellness_challenge')
+        .select('user_id')
+        .eq('user_id', uid)
+        .maybeSingle();
+      if (!existing) {
+        await clients.admin
+          .from('wellness_challenge')
+          .insert({ user_id: uid, started_on: parisToday, count: 0 });
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    // POST ?action=wellness-checkin : valide la mission du jour (1/jour)
+    if (action === 'wellness-checkin' && req.method === 'POST') {
+      const { data: row } = await clients.admin
+        .from('wellness_challenge')
+        .select('*')
+        .eq('user_id', uid)
+        .maybeSingle();
+      if (!row) return res.status(400).json({ error: 'Défi non démarré' });
+      if (row.completed_at || row.count >= TOTAL) {
+        return res.status(200).json({ ok: true, count: row.count, completed: true, xpAwarded: 0 });
+      }
+      if (row.last_checkin === parisToday) {
+        return res.status(409).json({ error: 'Déjà validé aujourd’hui', count: row.count });
+      }
+      const newCount = row.count + 1;
+      const completedNow = newCount >= TOTAL;
+      await clients.admin
+        .from('wellness_challenge')
+        .update({
+          count: newCount,
+          last_checkin: parisToday,
+          completed_at: completedNow ? new Date().toISOString() : null,
+        })
+        .eq('user_id', uid);
+
+      const xpAwarded = XP_PER_DAY + (completedNow ? XP_BONUS : 0);
+      const { data: p } = await clients.admin.from('profiles').select('xp').eq('id', uid).single();
+      if (p) await clients.admin.from('profiles').update({ xp: (p.xp ?? 0) + xpAwarded }).eq('id', uid);
+
+      return res.status(200).json({ ok: true, count: newCount, completed: completedNow, xpAwarded });
+    }
+
+    return res.status(405).json({ error: 'Méthode non autorisée' });
+  }
+
   // ─── GET ?action=today ─────────────────────────────────────────
   if (action === 'today' && req.method === 'GET') {
     if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });
