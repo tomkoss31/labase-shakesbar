@@ -1,7 +1,6 @@
 // Bottom sheet du profil — édition prénom/anniv + statut + déconnexion
 import React, { useState, useEffect } from 'react';
 import type { Palette } from '../palette';
-import { getStoredSession } from '../../lib/supabase';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { VIP_TIERS, computeMascotteLevel, nextLevelThreshold } from './types';
@@ -21,133 +20,6 @@ function isAdminEmail(email: string | null): boolean {
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
   return admins.includes(email.toLowerCase());
-}
-
-// Carte "Parraine tes amis" — lien unique + partage + compteur de filleuls
-function ReferralCard({ palette, code }: { palette: Palette; code: string | null }) {
-  const [filleuls, setFilleuls] = useState<number | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  const link =
-    typeof window !== 'undefined' && code
-      ? `${window.location.origin}/jeu?ref=${code}`
-      : '';
-
-  useEffect(() => {
-    let cancelled = false;
-    const session = getStoredSession();
-    if (!session?.access_token) return;
-    fetch('/api/profile?action=referral-stats', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (!cancelled && d && typeof d.filleuls === 'number') setFilleuls(d.filleuls);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!code) return null;
-
-  const shareText =
-    'Je te parraine chez La Base 🥤 Tourne la roue, gagne un cadeau à récupérer en boutique 🎁 : ';
-
-  async function share() {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'La Base Shakes & Drinks', text: shareText, url: link });
-        return;
-      }
-    } catch {
-      /* l'utilisateur a annulé le partage natif → on retombe sur le copier */
-    }
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      window.prompt('Copie ton lien de parrainage :', link);
-    }
-  }
-
-  return (
-    <div
-      style={{
-        marginBottom: 10,
-        padding: '16px',
-        background: `linear-gradient(135deg, ${palette.accent}22, ${palette.primary}11)`,
-        border: `1px solid ${palette.accent}55`,
-        borderRadius: 14,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <div style={{ fontSize: 24, lineHeight: 1 }}>🤝</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 15, color: palette.text }}>
-            Parraine tes amis
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 500, color: palette.textDim, marginTop: 1 }}>
-            Ils gagnent un cadeau, tu gagnes +500 XP à leur 1ère commande
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          background: palette.bg,
-          border: `1px solid ${palette.line}`,
-          borderRadius: 10,
-          padding: '8px 10px',
-          marginTop: 8,
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            fontSize: 12,
-            fontFamily: 'ui-monospace, monospace',
-            color: palette.accent,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {link.replace(/^https?:\/\//, '')}
-        </div>
-        <button
-          onClick={share}
-          style={{
-            flex: 'none',
-            padding: '8px 14px',
-            background: palette.cta,
-            color: palette.ctaText,
-            border: 'none',
-            borderRadius: 8,
-            fontSize: 12,
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {copied ? '✓ Copié' : '📤 Partager'}
-        </button>
-      </div>
-
-      {filleuls !== null && filleuls > 0 && (
-        <div style={{ fontSize: 11.5, color: palette.textDim, marginTop: 8, fontWeight: 600 }}>
-          👥 {filleuls} {filleuls > 1 ? 'amis parrainés' : 'ami parrainé'}
-        </div>
-      )}
-    </div>
-  );
 }
 
 interface ProfileSheetProps {
@@ -393,48 +265,72 @@ export function ProfileSheet({
             )}
           </div>
 
-          <label style={{ display: 'block', fontSize: 11, color: palette.textDim, marginBottom: 4 }}>Prénom</label>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            disabled={!editing || saving}
-            placeholder="Comment t'appeler ?"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              background: editing ? palette.card : 'transparent',
-              border: `1px solid ${palette.line}`,
-              borderRadius: 10,
-              color: palette.text,
-              fontSize: 14,
-              outline: 'none',
-              fontFamily: 'inherit',
-              opacity: editing ? 1 : 0.65,
-            }}
-          />
-
-          <label style={{ display: 'block', fontSize: 11, color: palette.textDim, marginTop: 10, marginBottom: 4 }}>
-            Anniversaire <span style={{ color: palette.primary }}>(+500 XP offerts ✨)</span>
-          </label>
-          <input
-            type="date"
-            value={birthday}
-            onChange={(e) => setBirthday(e.target.value)}
-            disabled={!editing || saving}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              background: editing ? palette.card : 'transparent',
-              border: `1px solid ${palette.line}`,
-              borderRadius: 10,
-              color: palette.text,
-              fontSize: 14,
-              outline: 'none',
-              fontFamily: 'inherit',
-              opacity: editing ? 1 : 0.65,
-            }}
-          />
+          {!editing ? (
+            // Mode replié : résumé compact (gain de place)
+            <div style={{ fontSize: 13.5, color: palette.text, lineHeight: 1.5 }}>
+              👤 <b>{firstName || 'Prénom non renseigné'}</b>
+              {birthday ? (
+                <span style={{ color: palette.textDim }}>
+                  {' · 🎂 '}
+                  {(() => {
+                    try {
+                      return new Date(birthday).toLocaleDateString('fr-FR', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                      });
+                    } catch {
+                      return birthday;
+                    }
+                  })()}
+                </span>
+              ) : (
+                <span style={{ color: palette.primary, fontSize: 12 }}>
+                  {' · 🎂 ajoute ta date (+500 XP ✨)'}
+                </span>
+              )}
+            </div>
+          ) : (
+            <>
+              <label style={{ display: 'block', fontSize: 11, color: palette.textDim, marginBottom: 4 }}>Prénom</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={saving}
+                placeholder="Comment t'appeler ?"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: palette.card,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 10,
+                  color: palette.text,
+                  fontSize: 16,
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <label style={{ display: 'block', fontSize: 11, color: palette.textDim, marginTop: 10, marginBottom: 4 }}>
+                Anniversaire <span style={{ color: palette.primary }}>(+500 XP offerts ✨)</span>
+              </label>
+              <input
+                type="date"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                disabled={saving}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: palette.card,
+                  border: `1px solid ${palette.line}`,
+                  borderRadius: 10,
+                  color: palette.text,
+                  fontSize: 16,
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </>
+          )}
 
           {editing && (
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -650,8 +546,6 @@ export function ProfileSheet({
           <div style={{ fontSize: 18 }}>→</div>
         </button>
 
-        {/* Parrainage — acquisition virale */}
-        <ReferralCard palette={palette} code={profile?.referral_code ?? null} />
 
         {/* Push notifications */}
         {push.supported && (
