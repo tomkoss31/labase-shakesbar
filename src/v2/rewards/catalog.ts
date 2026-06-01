@@ -13,6 +13,14 @@ export interface RewardTier {
 
 export const REWARDS_CATALOG: RewardTier[] = [
   {
+    id: 'boost',
+    cost: 100,
+    emoji: '🍯',
+    title: 'Un sirop / boost offert',
+    desc: 'Une dose de sirop parfumé ou un boost sur ta prochaine boisson',
+    perceivedValue: 'offert',
+  },
+  {
     id: 'topping',
     cost: 250,
     emoji: '✨',

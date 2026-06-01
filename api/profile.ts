@@ -213,6 +213,7 @@ export default async function handler(req: any, res: any) {
   // src/v2/rewards/catalog.ts côté front.
   if (action === 'redeem-reward' && req.method === 'POST') {
     const REWARDS: Record<string, { cost: number; label: string }> = {
+      boost: { cost: 100, label: 'Sirop / boost offert' },
       topping: { cost: 250, label: 'Topping offert' },
       boisson: { cost: 800, label: 'Une boisson au choix' },
       'combo-gaufre': { cost: 1500, label: 'Boisson + gaufre healthy' },

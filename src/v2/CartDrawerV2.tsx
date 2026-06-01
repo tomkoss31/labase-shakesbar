@@ -592,6 +592,7 @@ export function CartDrawerV2({
           {/* 🎁 Offre-toi un extra avec tes XP (catalogue, pas de réduction cash) */}
           {!empty && isAuthed && onClaimGift && (() => {
             const GIFTS = [
+              { id: 'boost', title: 'Sirop / boost offert', emoji: '🍯', cost: 100, sub: 'Une dose de sirop parfumé ou un boost' },
               { id: 'topping', title: 'Topping offert', emoji: '✨', cost: 250, sub: 'Protéine, créatine, beurre de cacahuète…' },
               { id: 'boisson', title: 'Une boisson au choix', emoji: '🥤', cost: 800, sub: 'Smoothie ou shake offert' },
             ];
