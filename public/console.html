@@ -502,7 +502,20 @@
       <label>URL à ouvrir au clic (optionnel)</label>
       <input type="text" id="push-url" placeholder="/ (défaut)" />
 
-      <label>Aperçu</label>
+      <label>🎯 Cible</label>
+      <div class="hint" style="margin-top:4px;margin-bottom:8px;">À qui envoyer. "Tous" archive aussi dans la boîte de réception ; les cibles sont des push directes uniquement.</div>
+      <style>
+        .seg-btn { padding:8px 12px; border-radius:999px; border:1px solid rgba(94,234,212,.25); background:#04100f; color:#94b8b1; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .seg-btn.active { background:#14b8a6; color:#02100e; border-color:#14b8a6; }
+      </style>
+      <div id="push-segments" style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="seg-btn active" data-segment="all">👥 Tous</button>
+        <button type="button" class="seg-btn" data-segment="dormant">😴 Dormants (21j+)</button>
+        <button type="button" class="seg-btn" data-segment="active">🔥 Actifs (14j)</button>
+        <button type="button" class="seg-btn" data-segment="vip">👑 VIP</button>
+      </div>
+
+      <label style="margin-top:16px;">Aperçu</label>
       <div class="preview">
         <div class="preview-icon">B</div>
         <div>
@@ -511,7 +524,7 @@
         </div>
       </div>
 
-      <button class="primary" id="push-send" style="margin-top: 16px;">Envoyer à tous les abonnés</button>
+      <button class="primary" id="push-send" style="margin-top: 16px;">📣 Envoyer la notification</button>
       <div id="push-result"></div>
     </div>
   </div>
@@ -1104,6 +1117,15 @@ function updatePreview() {
 $('push-title').addEventListener('input', updatePreview);
 $('push-body').addEventListener('input', updatePreview);
 
+// Sélection du segment cible
+let pushSegment = 'all';
+document.querySelectorAll('.seg-btn').forEach((b) => {
+  b.addEventListener('click', () => {
+    pushSegment = b.dataset.segment;
+    document.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('active', x === b));
+  });
+});
+
 $('push-send').addEventListener('click', async () => {
   const password = getPassword();
   const title = $('push-title').value.trim();
@@ -1118,12 +1140,13 @@ $('push-send').addEventListener('click', async () => {
     const resp = await fetch('/api/push?action=send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ title, body, url }),
+      body: JSON.stringify({ title, body, url, segment: pushSegment }),
     });
     const data = await resp.json();
     if (resp.ok) {
       showPushResult('ok',
-        '✅ Envoyé à ' + data.sent + ' / ' + data.total + ' abonnés' +
+        '✅ Envoyé à ' + data.sent + ' / ' + data.total + ' abonnés (' + (data.segment || 'tous') + ')' +
+        (data.note ? ' · ' + data.note : '') +
         (data.failed ? ` · ${data.failed} échecs` : '')
       );
       $('push-title').value = '';
@@ -1136,7 +1159,7 @@ $('push-send').addEventListener('click', async () => {
     showPushResult('err', '❌ ' + err.message);
   } finally {
     $('push-send').disabled = false;
-    $('push-send').textContent = 'Envoyer à tous les abonnés';
+    $('push-send').textContent = '📣 Envoyer la notification';
   }
 });
 

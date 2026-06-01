@@ -19,6 +19,33 @@ function getActionFromQuery(req: any): string | null {
   return new URLSearchParams(qs).get('action');
 }
 
+// Résout les user_ids cibles d'un segment. Renvoie null pour "tous".
+async function resolveSegment(admin: any, segment: string): Promise<string[] | null> {
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+  if (segment === 'all' || !segment) return null;
+
+  if (segment === 'vip') {
+    const { data } = await admin.from('profiles').select('id').in('vip_tier', ['vip', 'elite', 'legende']);
+    return (data ?? []).map((p: any) => p.id);
+  }
+  if (segment === 'active') {
+    const since = new Date(now - 14 * DAY).toISOString();
+    const { data } = await admin
+      .from('orders').select('user_id').eq('status', 'paid').gte('paid_at', since).not('user_id', 'is', null);
+    return Array.from(new Set((data ?? []).map((o: any) => o.user_id)));
+  }
+  if (segment === 'dormant') {
+    const since = new Date(now - 21 * DAY).toISOString();
+    const { data: recent } = await admin
+      .from('orders').select('user_id').eq('status', 'paid').gte('paid_at', since).not('user_id', 'is', null);
+    const recentSet = new Set((recent ?? []).map((o: any) => o.user_id));
+    const { data: buyers } = await admin.from('profiles').select('id').gt('total_orders', 0);
+    return (buyers ?? []).map((p: any) => p.id).filter((id: string) => !recentSet.has(id));
+  }
+  return [];
+}
+
 export default async function handler(req: any, res: any) {
   const action = getActionFromQuery(req);
   if (!action) return res.status(400).json({ error: 'action requise' });
@@ -98,19 +125,30 @@ export default async function handler(req: any, res: any) {
     const body = await readBody(req);
     if (!body.title || !body.body) return res.status(400).json({ error: 'title et body requis' });
 
-    // Archive le message dans la boîte de réception (non bloquant)
-    await admin.from('broadcasts').insert({
-      title: body.title,
-      body: body.body,
-      url: body.url ?? null,
-      emoji: body.emoji ?? null,
-    });
+    const segment = typeof body.segment === 'string' ? body.segment : 'all';
+    const targetUserIds = await resolveSegment(admin, segment);
+    if (targetUserIds && targetUserIds.length === 0) {
+      return res.status(200).json({ ok: true, sent: 0, total: 0, segment, note: 'Aucun client dans ce segment' });
+    }
 
-    const { data: subs } = await admin
+    // Archive dans la boîte de réception UNIQUEMENT pour "tous" (l'inbox est
+    // partagée/publique). Une push ciblée n'apparaît pas chez les non-ciblés.
+    if (segment === 'all') {
+      await admin.from('broadcasts').insert({
+        title: body.title,
+        body: body.body,
+        url: body.url ?? null,
+        emoji: body.emoji ?? null,
+      });
+    }
+
+    let subsQuery = admin
       .from('push_subscriptions')
-      .select('id, endpoint, p256dh_key, auth_key');
+      .select('id, endpoint, p256dh_key, auth_key, user_id');
+    if (targetUserIds) subsQuery = subsQuery.in('user_id', targetUserIds);
+    const { data: subs } = await subsQuery;
     if (!subs || subs.length === 0) {
-      return res.status(200).json({ ok: true, sent: 0, total: 0 });
+      return res.status(200).json({ ok: true, sent: 0, total: 0, segment });
     }
 
     const payload = JSON.stringify({
@@ -158,6 +196,7 @@ export default async function handler(req: any, res: any) {
       sent,
       failed,
       total: subs.length,
+      segment,
       cleanedExpired: expired.length,
     });
   }
