@@ -164,7 +164,22 @@ export default async function handler(req: any, res: any) {
     if (error) return res.status(500).json({ error: error.message });
 
     const data = [...(pendingCashData ?? []), ...(paidData ?? [])];
-    return res.status(200).json({ orders: data });
+
+    // Joindre le détail des articles (pour savoir quoi préparer au comptoir).
+    // Les commandes Square (webhook) n'ont pas de lignes -> items vide, normal.
+    const orderIds = data.map((o: any) => o.id);
+    const itemsByOrder: Record<string, any[]> = {};
+    if (orderIds.length > 0) {
+      const { data: items } = await clients.admin
+        .from('order_items')
+        .select('order_id, product_name, option_label, category_name, quantity, unit_price_cents')
+        .in('order_id', orderIds);
+      for (const it of items ?? []) {
+        (itemsByOrder[it.order_id] ||= []).push(it);
+      }
+    }
+    const withItems = data.map((o: any) => ({ ...o, items: itemsByOrder[o.id] ?? [] }));
+    return res.status(200).json({ orders: withItems });
   }
 
   // ─── POST ?action=create-pending ─────────────────────────────

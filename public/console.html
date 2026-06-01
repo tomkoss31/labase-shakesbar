@@ -790,11 +790,26 @@ function renderComptoirList(orders) {
       buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + o.id + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#7f8a88;padding:8px 10px;">✕</button>');
     }
 
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let itemsHtml;
+    if (o.items && o.items.length) {
+      itemsHtml = '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">' +
+        o.items.map((it) => {
+          const qty = (it.quantity > 1 ? it.quantity + '× ' : '');
+          const opt = it.option_label ? ' <span style="color:#94b8b1;">· ' + esc(it.option_label) + '</span>' : '';
+          return '<div style="font-size:13px;color:#ecfdf5;line-height:1.35;">🥤 <b>' + qty + '</b>' + esc(it.product_name) + opt + '</div>';
+        }).join('') +
+        '</div>';
+    } else {
+      itemsHtml = '<div style="margin-top:6px;font-size:11px;color:#7f8a88;font-style:italic;">Détail non dispo (vente Square)</div>';
+    }
+
     return '<div class="row" data-status="' + o.status + '">' +
       '<div>' +
-        '<div class="meta">' + name + '</div>' +
+        '<div class="meta">' + esc(name) + '</div>' +
         '<div class="meta-sub">' + time + pickup + '</div>' +
         '<span class="status-pill status-' + o.status + '">' + statusLabel + '</span>' +
+        itemsHtml +
       '</div>' +
       '<div class="total">' + total + '€</div>' +
       '<div class="actions">' + buttons.join('') + '</div>' +
