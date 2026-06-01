@@ -42,7 +42,7 @@ const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
   ['Banana Split', 890], ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
   // Enfants
   ['Bulle de Fée', 590], ['Spiderman', 590], ['Stitch', 590],
-  ['Licorne', 590], ['Hulk', 590], ['Tropicool', 590],
+  ['Licorne', 590], ['Hulk', 590], ['Tropicool', 590], ['Jungle Kid', 590],
   // Cafés / sportifs uniques
   ['Café glacé simple', 690],
   ['Post Workout', 590],

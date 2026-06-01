@@ -745,6 +745,60 @@ export const categories: Category[] = [
       },
     ],
   },
+
+  // 🧒 BOISSONS ENFANTS — 0 sucre / 0 calorie • SANS énergisant • 5,90€
+  {
+    id: 'kids',
+    name: 'Boissons enfants',
+    icon: Sparkles,
+    price: 'Sans énergisant • 5,90€',
+    accent: 'from-sky-400 via-fuchsia-400 to-amber-400',
+    description: '0 sucre • 0 calorie • SANS énergisant • spécial enfants 🧒',
+    items: [
+      {
+        name: 'Bulle de Fée',
+        description: 'Douce et féerique, pensée pour les enfants. Sans énergisant.',
+        flavors: 'Pomme • Fruit du dragon',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Spiderman',
+        description: 'Pleine de fruits rouges, l’héroïne des petits. Sans énergisant.',
+        flavors: 'Fruits rouges',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Stitch',
+        description: 'Passion & limonade, sans bulles. Sans énergisant.',
+        flavors: 'Passion • Limonade (non pétillant)',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Licorne',
+        description: 'Magique et fruitée, pour rêver. Sans énergisant.',
+        flavors: 'Myrtille • Fraise • Raisin',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Hulk',
+        description: 'Pomme verte qui pète la forme. Sans énergisant.',
+        flavors: 'Pomme verte',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Tropicool',
+        description: 'Évasion tropicale tout en douceur. Sans énergisant.',
+        flavors: 'Melon • Ananas',
+        basePriceCents: 590,
+      },
+      {
+        name: 'Jungle Kid',
+        description: 'La Jungle en version enfant : même goût, sans énergisant.',
+        flavors: 'Melon • Ananas',
+        basePriceCents: 590,
+      },
+    ],
+  },
 ];
 
 // ─── Sections home page (legacy + V2) ───────────────────────────────

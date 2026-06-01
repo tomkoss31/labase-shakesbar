@@ -32,6 +32,7 @@ import {
   V2_DRINKS,
   V2_HOT,
   V2_HEALTH,
+  V2_KIDS,
   V2_WAFFLES,
   type V2Product,
   type V2Combo,
@@ -242,6 +243,7 @@ export function HomeV2({
   const drinks = useMemo(() => V2_DRINKS.filter(matchesQuery), [filteredQuery]);
   const hot = useMemo(() => V2_HOT.filter(matchesQuery), [filteredQuery]);
   const health = useMemo(() => V2_HEALTH.filter(matchesQuery), [filteredQuery]);
+  const kids = useMemo(() => V2_KIDS.filter(matchesQuery), [filteredQuery]);
   const waffles = useMemo(() => V2_WAFFLES.filter(matchesQuery), [filteredQuery]);
 
   function handleSlideClick(slide: V2HeroSlide) {
@@ -529,6 +531,25 @@ export function HomeV2({
           <SectionHead palette={palette} icon="⚡" title="Boissons énergisantes" sub={`${drinks.length} recettes · 0 sucre`} />
           <Carousel>
             {drinks.map((p) => (
+              <ProductCard
+                key={p.id}
+                palette={palette}
+                product={p}
+                onClick={() => onOpenProduct(p)}
+                onAdd={handleAddProduct(p)}
+              />
+            ))}
+          </Carousel>
+          <div style={{ height: 22 }} />
+        </>
+      )}
+
+      {/* Boissons enfants — sans énergisant */}
+      {shouldShowSection('kids') && kids.length > 0 && (
+        <>
+          <SectionHead palette={palette} icon="🧒" title="Boissons enfants" sub={`${kids.length} recettes · sans énergisant`} />
+          <Carousel>
+            {kids.map((p) => (
               <ProductCard
                 key={p.id}
                 palette={palette}

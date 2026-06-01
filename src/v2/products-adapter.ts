@@ -77,6 +77,7 @@ const drinksCat = categories.find((c) => c.id === 'drinks');
 const hotCat = categories.find((c) => c.id === 'hot');
 const wafflesCat = categories.find((c) => c.id === 'waffles');
 const healthCat = categories.find((c) => c.id === 'health');
+const kidsCat = categories.find((c) => c.id === 'kids');
 
 // Liste plate de tous les produits avec leur catégorie
 export const ALL_V2_PRODUCTS: V2Product[] = categories.flatMap((category) =>
@@ -123,6 +124,10 @@ export const V2_HEALTH: V2Product[] = healthCat
   ? healthCat.items.map((p) => adaptProduct(p, healthCat))
   : [];
 
+export const V2_KIDS: V2Product[] = kidsCat
+  ? kidsCat.items.map((p) => adaptProduct(p, kidsCat))
+  : [];
+
 export const V2_WAFFLES: V2Product[] = wafflesCat
   ? wafflesCat.items.map((p) => adaptProduct(p, wafflesCat))
   : [];
@@ -147,6 +152,7 @@ export const V2_CHIP_CATEGORIES = [
   { id: 'hot', label: 'Hot', icon: '☕' },
   { id: 'waffles', label: 'Gaufre', icon: '🧇' },
   { id: 'health', label: 'Santé', icon: '💧' },
+  { id: 'kids', label: 'Enfants', icon: '🧒' },
   { id: 'combos', label: 'Combos', icon: '🎯' },
 ];
 

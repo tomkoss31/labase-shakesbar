@@ -55,6 +55,7 @@ const productPriceEntries: Array<[string, number]> = [
   ['Licorne', 590],
   ['Hulk', 590],
   ['Tropicool', 590],
+  ['Jungle Kid', 590],
   // Café glacé simple (690)
   ['Café glacé simple', 690],
   // Post workout (590)
