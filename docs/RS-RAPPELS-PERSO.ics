@@ -1,0 +1,122 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//La Base//Rappels Compte Perso Tom//FR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Tom — Routine Perso RS
+X-WR-TIMEZONE:Europe/Paris
+BEGIN:VTIMEZONE
+TZID:Europe/Paris
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:tom-prep-semaine@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260604T180000
+DTEND;TZID=Europe/Paris:20260604T184500
+SUMMARY:📚 Préparer ma strat RS (lecture + Metricool)
+DESCRIPTION:Cette semaine = prepa, le sprint demarre lundi 8.\n\n- Lire les 3 PDF (contenu, pub, ma strat perso)\n- Creer un compte Metricool\n- Connecter La Base (pro) + mon compte perso\n- Surligner mes 6 premiers posts a tourner
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Prepa strat RS (lecture + Metricool)
+TRIGGER:-PT15M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-story-matin@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T093000
+DTEND;TZID=Europe/Paris:20260608T093500
+RRULE:FREQ=DAILY
+SUMMARY:🌅 Story du jour (3 min)
+DESCRIPTION:1 story rapide : mood du jour, ta sortie, une coulisse du bar, les enfants/animaux. Faible effort, recyclage.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Story du jour (3 min)
+TRIGGER:-PT5M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-commentaires@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T150000
+DTEND;TZID=Europe/Paris:20260608T151000
+RRULE:FREQ=DAILY
+SUMMARY:💬 Commentaires & DM (10 min)
+DESCRIPTION:Verifier que le post du jour est bien sorti + repondre a TOUS les commentaires et messages prives.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Repondre aux commentaires & DM
+TRIGGER:-PT5M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-engagement-soir@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T203000
+DTEND;TZID=Europe/Paris:20260608T204200
+RRULE:FREQ=DAILY
+SUMMARY:🌙 Engagement actif (12 min)
+DESCRIPTION:Le secret n1 de la croissance. Commenter sincerement chez 5 comptes : cyclistes, comptes locaux Verdun, ta cible (hommes 30-50). Tu vas vers eux, ils reviennent vers toi.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Engagement : commenter chez 5 comptes
+TRIGGER:-PT5M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-pilotage-dimanche@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260614T200000
+DTEND;TZID=Europe/Paris:20260614T201500
+RRULE:FREQ=WEEKLY;BYDAY=SU
+SUMMARY:📊 Pilotage hebdo (15 min)
+DESCRIPTION:Noter 3 idees de la semaine + regarder 3 chiffres : vues, nouveaux abonnes, enregistrements/partages (le signal n1 pour l'algo). Tous les 14 j : point ensemble.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Pilotage hebdo (3 idees + 3 chiffres)
+TRIGGER:-PT10M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-batch-reels-perso@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T120000
+DTEND;TZID=Europe/Paris:20260608T123000
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO
+SUMMARY:🎬 Tourner 3 Reels perso (+ photos)
+DESCRIPTION:Juste apres le batch La Base. 1 Reel Mouvement + 1 Energie/ventre plat + 1 Lien/Mindset, + quelques photos. De quoi tenir 2 semaines.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Tourner tes 3 Reels perso
+TRIGGER:-PT10M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:tom-prog-perso@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260609T150000
+DTEND;TZID=Europe/Paris:20260609T152000
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
+SUMMARY:📲 Programmer mes 6 posts perso (Metricool)
+DESCRIPTION:Juste apres la prog La Base. Caler 3 posts/sem sur 2 semaines (Lun Mouvement, Mer Energie, Ven Lien/Mindset). Legendes + lien en bio.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Programmer tes 6 posts perso
+TRIGGER:-PT10M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
