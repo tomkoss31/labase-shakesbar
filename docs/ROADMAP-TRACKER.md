@@ -30,7 +30,7 @@
 | # | Chantier | Impact | Effort | Statut |
 |---|----------|:------:|:------:|:------:|
 | C1 | **Carte "Bilan offert"** ciblée clients chauds (≥3 commandes) → /club | ⭐⭐⭐⭐ | — | ✅ |
-| C2 | **Défi bien-être communautaire** (challenge 7 jours relié au bilan) | ⭐⭐⭐⭐ | L | 🔜 |
+| C2 | **Defi bien-etre 7 jours** (auto-education produit + pont bilan/coaching) | ⭐⭐⭐⭐ | L | ✅ |
 | C3 | Page Le Club + onglet hub + lien bilan/opportunité | ⭐⭐⭐ | — | ✅ |
 
 ## 🇩 UX / Parcours
