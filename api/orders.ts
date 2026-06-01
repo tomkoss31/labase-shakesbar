@@ -169,6 +169,85 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ order: null, items: [] });
   }
 
+  // ─── GET ?action=challenges (CLIENT, JWT) : défis de la semaine ───
+  // Défis basés sur le nb de commandes payées de la semaine (lundi→). On
+  // crédite les XP dès qu'un palier est atteint (1×/semaine via contrainte unique).
+  if (action === 'challenges' && req.method === 'GET') {
+    if (!clients.public) return res.status(500).json({ error: 'Anon key manquante' });
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Auth requise' });
+    const { data: userData, error: userError } = await clients.public.auth.getUser(accessToken);
+    if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
+    const uid = userData.user.id;
+
+    // Lundi 00:00 (heure de Paris) de la semaine courante
+    const parisNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+    const dow = parisNow.getDay(); // 0=dim..6=sam
+    const toMonday = dow === 0 ? -6 : 1 - dow;
+    const monday = new Date(parisNow);
+    monday.setDate(parisNow.getDate() + toMonday);
+    monday.setHours(0, 0, 0, 0);
+    const weekStartDate = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+    const weekStartIso = monday.toISOString();
+
+    // Nb de commandes payées cette semaine
+    const { count } = await clients.admin
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', uid)
+      .eq('status', 'paid')
+      .gte('paid_at', weekStartIso);
+    const orderCount = count ?? 0;
+
+    const DEFS = [
+      { id: 'orders-2', title: '2 commandes cette semaine', goal: 2, xp: 100, emoji: '☕' },
+      { id: 'orders-3', title: '3 commandes cette semaine', goal: 3, xp: 250, emoji: '🔥' },
+    ];
+
+    // Réclamations déjà faites cette semaine
+    const { data: claims } = await clients.admin
+      .from('challenge_claims')
+      .select('challenge_id')
+      .eq('user_id', uid)
+      .eq('week_start', weekStartDate);
+    const claimed = new Set((claims ?? []).map((c: any) => c.challenge_id));
+
+    const out = [];
+    for (const d of DEFS) {
+      const completed = orderCount >= d.goal;
+      let justAwarded = false;
+      if (completed && !claimed.has(d.id)) {
+        // Crédit gardé par la contrainte unique (anti double-crédit)
+        const { error: insErr } = await clients.admin.from('challenge_claims').insert({
+          user_id: uid,
+          challenge_id: d.id,
+          week_start: weekStartDate,
+          xp_awarded: d.xp,
+        });
+        if (!insErr) {
+          const { data: p } = await clients.admin.from('profiles').select('xp').eq('id', uid).single();
+          if (p) await clients.admin.from('profiles').update({ xp: (p.xp ?? 0) + d.xp }).eq('id', uid);
+          justAwarded = true;
+          claimed.add(d.id);
+        }
+      }
+      out.push({
+        id: d.id,
+        title: d.title,
+        emoji: d.emoji,
+        goal: d.goal,
+        progress: Math.min(orderCount, d.goal),
+        xp: d.xp,
+        completed,
+        claimed: claimed.has(d.id),
+        justAwarded,
+      });
+    }
+
+    return res.status(200).json({ weekStart: weekStartDate, orderCount, challenges: out });
+  }
+
   // ─── GET ?action=today ─────────────────────────────────────────
   if (action === 'today' && req.method === 'GET') {
     if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });

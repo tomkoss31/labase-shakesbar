@@ -3,12 +3,115 @@
 //   1. Jauge de progression vers le prochain cadeau
 //   2. Catalogue boutique (débloqué en couleur / grisé sinon)
 //   3. "Comment gagner des XP"
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import { REWARDS_CATALOG, XP_RULES, nextReward } from './catalog';
 import { useUserRewards } from './useUserRewards';
 import { computeMascotteLevel } from '../auth/types';
+import { getStoredSession } from '../../lib/supabase';
+
+interface Challenge {
+  id: string;
+  title: string;
+  emoji: string;
+  goal: number;
+  progress: number;
+  xp: number;
+  completed: boolean;
+  claimed: boolean;
+}
+
+// Défis hebdomadaires — fetch + progression + crédit auto à l'ouverture
+function ChallengesBlock({ palette }: { palette: Palette }) {
+  const [challenges, setChallenges] = useState<Challenge[] | null>(null);
+
+  useEffect(() => {
+    const session = getStoredSession();
+    if (!session?.access_token) return;
+    let cancelled = false;
+    fetch('/api/orders?action=challenges', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d && Array.isArray(d.challenges)) setChallenges(d.challenges);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!challenges || challenges.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div
+        style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase',
+          color: palette.textDim, margin: '4px 4px 10px',
+        }}
+      >
+        🏆 Défis de la semaine
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {challenges.map((c) => {
+          const pct = Math.min(100, (c.progress / c.goal) * 100);
+          return (
+            <div
+              key={c.id}
+              style={{
+                padding: 14,
+                borderRadius: 16,
+                background: c.claimed
+                  ? `linear-gradient(135deg, ${palette.primary}22, ${palette.card})`
+                  : palette.card,
+                border: `1px solid ${c.claimed ? palette.primary : palette.line}`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ fontSize: 22, lineHeight: 1 }}>{c.emoji}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14 }}>
+                    {c.title}
+                  </div>
+                  <div style={{ fontSize: 11, color: palette.textDim, marginTop: 1 }}>
+                    {c.progress}/{c.goal} commande{c.goal > 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    flex: 'none',
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    padding: '4px 10px',
+                    borderRadius: 999,
+                    background: c.claimed ? palette.cta : 'rgba(0,0,0,.25)',
+                    color: c.claimed ? palette.ctaText : palette.accent,
+                  }}
+                >
+                  {c.claimed ? `✅ +${c.xp} XP` : `+${c.xp} XP`}
+                </div>
+              </div>
+              <div style={{ height: 7, background: 'rgba(0,0,0,.4)', borderRadius: 999, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${pct}%`,
+                    background: `linear-gradient(90deg, ${palette.glow1}, ${palette.accent})`,
+                    borderRadius: 999,
+                    transition: 'width .5s ease',
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function fmtDate(iso: string): string {
   try {
@@ -145,6 +248,9 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
             />
           </div>
         </div>
+
+        {/* ─── Défis de la semaine ─── */}
+        <ChallengesBlock palette={palette} />
 
         {/* ─── BLOC PARRAINAGE : la meilleure source d'XP ─── */}
         <div
