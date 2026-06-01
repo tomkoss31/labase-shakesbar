@@ -316,6 +316,9 @@ function App() {
   const [isCreatingPendingCash, setIsCreatingPendingCash] = useState(false);
   const [pickupTime, setPickupTime] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
+  // Édition d'un article du panier (D2) : clé de la ligne en cours d'édition + ses extras
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingExtras, setEditingExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
@@ -475,6 +478,12 @@ function App() {
       })),
     );
   }, []);
+
+  // D2 — clés des lignes panier éditables (celles qui correspondent à un produit du catalogue)
+  const editableCartKeys = useMemo(() => {
+    const names = new Set(allProducts.map((p) => p.name));
+    return new Set(cart.filter((i) => names.has(i.name)).map((i) => i.key));
+  }, [cart, allProducts]);
 
   const bestCombo = useMemo(
     () => comboOffers.find((combo) => combo.id === 'combo-power') ?? comboOffers[0],
@@ -649,12 +658,16 @@ function App() {
   function openProduct(productName: string) {
     const product = allProducts.find((entry) => entry.name === productName);
     if (!product) return;
+    setEditingKey(null);
+    setEditingExtras([]);
     setSelectedCombo(null);
     setSelected(product);
     setSelectedOption(product.options?.[0]?.label ?? '');
   }
 
   function openProductFromCategory(category: Category, item: Product) {
+    setEditingKey(null);
+    setEditingExtras([]);
     setSelectedCombo(null);
     setSelected({
       ...item,
@@ -731,9 +744,64 @@ function App() {
   }
 
   function addToCart(product: SelectedProduct, extras: string[] = []) {
-    addPreparedProductToCart(product, selectedOption, product.name, extras);
+    if (editingKey) {
+      // Mode édition (D2) : remplace la ligne existante au lieu d'ajouter
+      replaceCartItem(editingKey, product, selectedOption, extras);
+    } else {
+      addPreparedProductToCart(product, selectedOption, product.name, extras);
+    }
     setSelected(null);
     setSelectedOption('');
+    setEditingKey(null);
+    setEditingExtras([]);
+  }
+
+  // D2 — ouvre la modale produit pré-remplie pour éditer une ligne du panier
+  function handleEditItem(item: CartItem) {
+    const product = allProducts.find((entry) => entry.name === item.name);
+    if (!product) return; // combos / quick-adds non ré"-configurables" : pas d'édition
+    setSelectedCombo(null);
+    setSelected(product);
+    setSelectedOption(item.option || product.options?.[0]?.label || '');
+    setEditingExtras(item.extras ?? []);
+    setEditingKey(item.key);
+  }
+
+  // D2 — remplace une ligne par une nouvelle config en conservant la quantité
+  function replaceCartItem(
+    oldKey: string,
+    product: SelectedProduct,
+    optionLabel: string,
+    extras: string[],
+  ) {
+    const basePriceCents = getConfiguredBasePrice(product, optionLabel);
+    const unitPriceCents = basePriceCents + extras.length * 250;
+    const extrasKey = extras.length > 0 ? extras.slice().sort().join('|') : '';
+    const newKey = `${product.categoryId}-${product.name}-${optionLabel}-${extrasKey}`;
+    setCart((prev) => {
+      const oldLine = prev.find((i) => i.key === oldKey);
+      const qty = oldLine?.quantity ?? 1;
+      const without = prev.filter((i) => i.key !== oldKey);
+      const existing = without.find((i) => i.key === newKey);
+      if (existing) {
+        // La nouvelle config rejoint une ligne identique déjà présente → on cumule
+        return without.map((i) =>
+          i.key === newKey ? { ...i, quantity: i.quantity + qty } : i,
+        );
+      }
+      return [
+        ...without,
+        {
+          key: newKey,
+          name: product.name,
+          categoryName: product.categoryName,
+          quantity: qty,
+          option: optionLabel,
+          unitPriceCents,
+          extras: extras.length > 0 ? extras : undefined,
+        },
+      ];
+    });
   }
 
   function addSuggestedProduct(productName: string, preferredOptionLabel?: string) {
@@ -2546,7 +2614,13 @@ function App() {
             product={selected}
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
-            onClose={() => setSelected(null)}
+            initialExtras={editingExtras}
+            editing={Boolean(editingKey)}
+            onClose={() => {
+              setSelected(null);
+              setEditingKey(null);
+              setEditingExtras([]);
+            }}
             onAdd={(extras) => selected && addToCart(selected, extras)}
             getPrice={(p) => getConfiguredBasePrice(p, selectedOption)}
             optionSectionLabel={(p) => getOptionSectionLabel(p)}
@@ -2566,6 +2640,8 @@ function App() {
             pickupTime={pickupTime}
             setPickupTime={setPickupTime}
             onUpdateQty={updateQuantity}
+            onEditItem={handleEditItem}
+            editableKeys={editableCartKeys}
             onSquareCheckout={handleSquareCheckout}
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}

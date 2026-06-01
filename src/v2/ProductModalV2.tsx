@@ -22,6 +22,8 @@ interface ProductModalV2Props {
   setSelectedOption: (label: string) => void;
   onClose: () => void;
   onAdd: (selectedExtras: string[]) => void;
+  initialExtras?: string[];
+  editing?: boolean;
   getPrice: (p: SelectedProduct) => number;
   optionSectionLabel: (p: SelectedProduct) => string;
   onOpenCombo?: (combo: ComboOffer, presetProductName?: string) => void;
@@ -55,15 +57,18 @@ export function ProductModalV2({
   setSelectedOption,
   onClose,
   onAdd,
+  initialExtras,
+  editing,
   getPrice,
   optionSectionLabel,
   onOpenCombo,
 }: ProductModalV2Props) {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
-  // Reset extras quand on change de produit
+  // Reset extras quand on change de produit (ou pré-remplit en mode édition)
   useEffect(() => {
-    setSelectedExtras([]);
+    setSelectedExtras(initialExtras ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.name]);
 
   if (!open || !product) return null;
@@ -518,7 +523,7 @@ export function ProductModalV2({
             onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            <span>Ajouter au panier</span>
+            <span>{editing ? 'Mettre à jour' : 'Ajouter au panier'}</span>
             <span>{fmtEuro(totalCents)}</span>
           </button>
         </div>

@@ -36,6 +36,8 @@ interface CartDrawerV2Props {
   pickupTime: string;
   setPickupTime: (v: string) => void;
   onUpdateQty: (key: string, delta: number) => void;
+  onEditItem?: (item: CartItem) => void;
+  editableKeys?: Set<string>;
   onSquareCheckout: () => void;
   onWhatsAppOrder: () => void;
   onPayOnSite?: () => void;
@@ -130,6 +132,8 @@ export function CartDrawerV2({
   pickupTime,
   setPickupTime,
   onUpdateQty,
+  onEditItem,
+  editableKeys,
   onSquareCheckout,
   onWhatsAppOrder,
   onPayOnSite,
@@ -435,6 +439,25 @@ export function CartDrawerV2({
                     <div style={{ fontSize: 12, color: palette.primary, fontWeight: 700, marginTop: 4 }}>
                       {fmtEuro(item.unitPriceCents * item.quantity)}
                     </div>
+                    {onEditItem && editableKeys?.has(item.key) && (
+                      <button
+                        onClick={() => onEditItem(item)}
+                        style={{
+                          marginTop: 4,
+                          padding: 0,
+                          background: 'transparent',
+                          border: 0,
+                          color: palette.textDim,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        ✏️ Modifier
+                      </button>
+                    )}
                   </div>
 
                   {/* Stepper */}

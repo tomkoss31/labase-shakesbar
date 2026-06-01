@@ -67,7 +67,7 @@
 | # | Action | Statut |
 |---|--------|:------:|
 | T1 | Définir `CRON_SECRET` dans Vercel | ✅ |
-| T2 | Jouer migrations 008 (parrainage) + 009 (horaires) en base | ✅ (008) / ⬜ vérifier 009 |
+| T2 | Jouer migrations 008 (parrainage) + 009 (horaires) + 010 (défis) en base | ✅ (008 / 009 / 010) |
 | T3 | Imprimer l'affiche QR (`/affiche`) et la poser au comptoir | 👤 🔜 |
 | T4 | Mettre `/jeu` en bio Instagram + plan de contenu | 👤 🔜 |
 | T5 | Vérifier notifs activées sur compte Mélanie (pour recevoir les commandes) | 👤 🔜 |
