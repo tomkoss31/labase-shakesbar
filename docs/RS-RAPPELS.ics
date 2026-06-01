@@ -48,11 +48,11 @@ DTSTAMP:20260601T120000Z
 DTSTART;TZID=Europe/Paris:20260609T140000
 DTEND;TZID=Europe/Paris:20260609T150000
 RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
-SUMMARY:📅 La Base — Programmation Metricool (2 sem d'un coup)
+SUMMARY:📅 La Base — Programmation Meta Business Suite (2 sem d'un coup)
 DESCRIPTION:Programmer les posts des 2 prochaines semaines.\n\n- Monter les Reels / carrousels tournes hier\n- Caler 3 posts/semaine selon le calendrier\n- Ecrire les legendes (templates dans le PDF)\n- Verifier le lien /jeu en bio des 3 reseaux\n\nVoir le PDF : docs/print/RS-01-CONTENU.pdf
 BEGIN:VALARM
 ACTION:DISPLAY
-DESCRIPTION:Programmation Metricool La Base
+DESCRIPTION:Programmation Meta Business Suite La Base
 TRIGGER:-PT30M
 END:VALARM
 END:VEVENT

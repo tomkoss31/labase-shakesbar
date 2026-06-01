@@ -10,7 +10,7 @@
 ## 🧭 Comment s'en servir (lis ça en premier)
 
 1. **1 fois toutes les 2 semaines**, tu tournes/photographies tout le bloc (liste de tournage ci-dessous).
-2. Tu programmes les posts dans **Metricool** (gratuit, 3 réseaux) → 2 semaines d'un coup.
+2. Tu programmes les posts dans **Meta Business Suite** (gratuit, Insta + FB, déjà en place) → 2 semaines d'un coup.
 3. Les **stories** se recyclent au jour le jour (10 sec : un shake, un client, un fait).
 4. Chaque carrousel Insta = **aussi** un Reel (script fourni) = **aussi** un post Facebook (même visuel). On poste une fois, on décline partout.
 

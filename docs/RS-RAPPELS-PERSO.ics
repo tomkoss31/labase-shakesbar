@@ -27,11 +27,11 @@ UID:tom-prep-semaine@labase-shakesbar
 DTSTAMP:20260601T120000Z
 DTSTART;TZID=Europe/Paris:20260604T180000
 DTEND;TZID=Europe/Paris:20260604T184500
-SUMMARY:📚 Préparer ma strat RS (lecture + Metricool)
-DESCRIPTION:Cette semaine = prepa, le sprint demarre lundi 8.\n\n- Lire les 3 PDF (contenu, pub, ma strat perso)\n- Creer un compte Metricool\n- Connecter La Base (pro) + mon compte perso\n- Surligner mes 6 premiers posts a tourner
+SUMMARY:📚 Préparer ma strat RS (lecture + Meta Business Suite)
+DESCRIPTION:Cette semaine = prepa, le sprint demarre lundi 8.\n\n- Lire les 3 PDF (contenu, pub, ma strat perso)\n- Verifier Meta Business Suite (deja installe)\n- Connecter les 2 comptes Insta + 2 pages FB\n- Surligner mes 6 premiers posts a tourner
 BEGIN:VALARM
 ACTION:DISPLAY
-DESCRIPTION:Prepa strat RS (lecture + Metricool)
+DESCRIPTION:Prepa strat RS (lecture + Meta Business Suite)
 TRIGGER:-PT15M
 END:VALARM
 END:VEVENT
@@ -111,8 +111,8 @@ DTSTAMP:20260601T120000Z
 DTSTART;TZID=Europe/Paris:20260609T150000
 DTEND;TZID=Europe/Paris:20260609T152000
 RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
-SUMMARY:📲 Programmer mes 6 posts perso (Metricool)
-DESCRIPTION:Juste apres la prog La Base. Caler 3 posts/sem sur 2 semaines (Lun Mouvement, Mer Energie, Ven Lien/Mindset). Legendes + lien en bio.
+SUMMARY:📲 Programmer mes 6 posts perso (Meta Business Suite)
+DESCRIPTION:Juste apres la prog La Base. Dans Meta Business Suite, caler 3 posts/sem sur 2 semaines (Lun Mouvement, Mer Energie, Ven Lien/Mindset). Legendes + lien en bio.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Programmer tes 6 posts perso

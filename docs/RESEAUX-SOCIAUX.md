@@ -121,7 +121,7 @@ PARRAINAGE (boucle virale : le client ramène ses amis)
 ## 10. 🗓️ Rythme minimal viable (adapté au manque de temps)
 
 - **Cadence réaliste proposée** : ~**3 posts/semaine** + **stories quotidiennes recyclées**, sur **1 seule session de batch toutes les 2 semaines** (1-2 h).
-- **Outil de programmation gratuit** : Meta Business Suite (Insta+FB) / Metricool (les 3 réseaux) → on programme 2 semaines d'un coup.
+- **Outil de programmation gratuit** : **Meta Business Suite** (Insta+FB) — déjà en place, gère les 2 comptes (pro + perso) sans payer → on programme 2 semaines d'un coup. (Metricool = option payante plus tard si on veut TikTok + analytics au même endroit.)
 - **Système de rappels récurrents** (Tom a aimé l'idée des rappels ce matin) : jour de tournage, jour de programmation, check hebdo des avis Google. À structurer dans la conv dédiée.
 
 ---

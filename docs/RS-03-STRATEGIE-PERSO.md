@@ -57,7 +57,7 @@
 
 ### 📅 Semaine TYPE (posts programmés à l'avance = 0 effort le jour J)
 
-| Jour | Post (auto via Metricool) | Pilier | Stories |
+| Jour | Post (auto via Meta) | Pilier | Stories |
 |---|---|---|---|
 | **Lun** | Reel sortie / sport | 🚴 Mouvement | mood + coulisse bar |
 | **Mar** | — (jour engagement only) | — | 1 fait « énergie » |
@@ -74,7 +74,7 @@
 | Quand | Tâche | Durée add. |
 |---|---|---|
 | **Lundi batch** (déjà dans `RS-RAPPELS.ics`) | + Tourner **3 Reels perso** (1 Mouvement, 1 Énergie, 1 Lien/Mindset) + qq photos | +30 min |
-| **Mardi prog** (déjà dans `RS-RAPPELS.ics`) | + **Programmer tes 6 posts perso** des 2 prochaines semaines dans Metricool | +20 min |
+| **Mardi prog** (déjà dans `RS-RAPPELS.ics`) | + **Programmer tes 6 posts perso** des 2 prochaines semaines dans Meta Business Suite | +20 min |
 
 **Total effort réel : ~25 min/jour + 50 min toutes les 2 semaines.** Tenable, même au bar.
 
