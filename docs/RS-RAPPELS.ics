@@ -1,0 +1,87 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//La Base//Rappels Reseaux Sociaux//FR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:La Base — Rappels Com
+X-WR-TIMEZONE:Europe/Paris
+BEGIN:VTIMEZONE
+TZID:Europe/Paris
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:labase-tournage@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T100000
+DTEND;TZID=Europe/Paris:20260608T120000
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO
+SUMMARY:🎬 La Base — Tournage contenu (batch 2 semaines)
+DESCRIPTION:1 session = 2 semaines de contenu.\n\nCHECKLIST :\n- 7 plans geste smoothie (prepa, verse, mousse, fruits)\n- 3 plans energy (canette/verre, bulles, en main dehors)\n- 2 portraits Tom & Melanie face cam (10-20 s)\n- 5 photos produit fixes (lumiere vitrine)\n- 2 ambiances bar (clients, comptoir, vitrine)\n\nVoir le PDF : docs/print/RS-01-CONTENU.pdf
+LOCATION:La Base, 11 rue Saint Pierre, Verdun
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Demain : tournage contenu La Base (prepa le materiel)
+TRIGGER:-P1D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Tournage contenu La Base maintenant
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:labase-programmation@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260609T140000
+DTEND;TZID=Europe/Paris:20260609T150000
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU
+SUMMARY:📅 La Base — Programmation Metricool (2 sem d'un coup)
+DESCRIPTION:Programmer les posts des 2 prochaines semaines.\n\n- Monter les Reels / carrousels tournes hier\n- Caler 3 posts/semaine selon le calendrier\n- Ecrire les legendes (templates dans le PDF)\n- Verifier le lien /jeu en bio des 3 reseaux\n\nVoir le PDF : docs/print/RS-01-CONTENU.pdf
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Programmation Metricool La Base
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:labase-avis-google@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260605T090000
+DTEND;TZID=Europe/Paris:20260605T092000
+RRULE:FREQ=WEEKLY;BYDAY=FR
+SUMMARY:⭐ La Base — Check & réponses avis Google
+DESCRIPTION:Routine hebdo locale (crucial pour etre trouve a Verdun).\n\n- Repondre a TOUS les nouveaux avis Google\n- Ajouter 1-2 photos sur la fiche\n- Verifier horaires a jour\n- 1 post Google Business si possible
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Check avis Google La Base
+TRIGGER:-PT15M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:labase-stories@labase-shakesbar
+DTSTAMP:20260601T120000Z
+DTSTART;TZID=Europe/Paris:20260608T110000
+DTEND;TZID=Europe/Paris:20260608T110500
+RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR
+SUMMARY:📲 La Base — Story du jour (10 sec)
+DESCRIPTION:Faible effort, recyclage. Poste 1 story rapide :\n- un shake en prepa, OU\n- un client / une ambiance, OU\n- un fait Le savais-tu ?\n\nAstuce : passe a quotidien (MO-SU) si tu prends le rythme.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Story du jour La Base (10 sec)
+TRIGGER:-PT5M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
