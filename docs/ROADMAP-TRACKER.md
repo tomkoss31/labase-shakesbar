@@ -23,7 +23,7 @@
 | B1 | **Parrainage viral** (lien unique, +500 XP à la 1ère commande du filleul) | ⭐⭐⭐⭐⭐ | — | ✅ |
 | B2 | **Nudges panier** (créer un compte / tourner la roue avant de valider) | ⭐⭐⭐⭐ | — | ✅ |
 | B3 | **Kit QR magasin** (affiche imprimable `/affiche`) | ⭐⭐⭐⭐ | — | ✅ (codé) |
-| B4 | **Push ciblées / segmentées** (par produit préféré, client dormant) au lieu de "tous" | ⭐⭐⭐⭐ | M | 🔜 |
+| B4 | **Push ciblées / segmentées** (Tous, Dormants 21j, Actifs 14j, VIP) | ⭐⭐⭐⭐ | M | ✅ |
 
 ## 🆑 Conversion vers le coaching (la marge)
 
