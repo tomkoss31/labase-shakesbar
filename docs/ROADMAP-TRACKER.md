@@ -37,7 +37,7 @@
 
 | # | Chantier | Impact | Effort | Statut |
 |---|----------|:------:|:------:|:------:|
-| D1 | **"🔁 Recommander"** (Order Again) sur l'accueil — re-remplit le panier en 1 tap | ⭐⭐⭐⭐ | M | 🔜 |
+| D1 | **"🔁 Recommander"** (Order Again) sur l'accueil — re-remplit le panier en 1 tap | ⭐⭐⭐⭐ | M | ✅ |
 | D2 | **Édition d'un article dans le panier** (modifier sans supprimer) | ⭐⭐⭐ | M | 🔜 |
 | D3 | **Bouton "Installer l'app"** Android/PC (beforeinstallprompt) | ⭐⭐⭐ | S | 🔜 |
 | D4 | Panier persistant (survit à l'inscription) | ⭐⭐⭐⭐ | — | ✅ |
