@@ -88,6 +88,9 @@ export function findV2ProductByName(name: string): V2Product | undefined {
   return ALL_V2_PRODUCTS.find((p) => p.name === name);
 }
 
+// Nouveautés : tous les produits badgés "Nouveau" (carrousel d'accueil)
+export const V2_NEW: V2Product[] = ALL_V2_PRODUCTS.filter((p) => p.badge === 'Nouveau');
+
 // Populaires : utilise featuredSelections du menu.ts, fallback sur premiers smoothies + drinks
 export const V2_POPULAR: V2Product[] = (() => {
   const fromFeatured = featuredSelections

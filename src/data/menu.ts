@@ -371,6 +371,17 @@ export const categories: Category[] = [
         image: '/images/drinks/aurora.png',
       },
       {
+        name: 'Jungle',
+        description: 'Signature melon-ananas, énergisante & naturelle. Version enfant sans énergisant sur demande.',
+        flavors: 'Melon • Ananas',
+        badge: 'Nouveau',
+        options: [
+          { label: 'Start 550ml — 6,90€', priceCents: 690 },
+          { label: 'Boost 950ml — 8,90€', priceCents: 890 },
+        ],
+        image: '/images/drinks/jungle.png',
+      },
+      {
         name: 'Electric Blue',
         description: 'Boisson iconique ultra visuelle, parfaite Shake Bar.',
         flavors: 'Citron • Framboise bleue • Myrtille • Raisin',
@@ -395,7 +406,6 @@ export const categories: Category[] = [
         name: 'Tonic Mandarine',
         description: 'Simple, vif, désaltérant.',
         flavors: 'Citron • Mandarine',
-        badge: 'Nouveau',
         options: [
           { label: 'Start 550ml — 6,90€', priceCents: 690 },
           { label: 'Boost 950ml — 8,90€', priceCents: 890 },

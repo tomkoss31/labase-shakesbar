@@ -26,6 +26,7 @@ import { InboxModal, useInbox } from './inbox/InboxModal';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
+  V2_NEW,
   V2_COMBOS,
   V2_SMOOTHIES,
   V2_DRINKS,
@@ -235,6 +236,7 @@ export function HomeV2({
     return activeChip === sectionId;
   }
 
+  const nouveautes = useMemo(() => V2_NEW.filter(matchesQuery), [filteredQuery]);
   const populaires = useMemo(() => V2_POPULAR.filter(matchesQuery), [filteredQuery]);
   const smoothies = useMemo(() => V2_SMOOTHIES.filter(matchesQuery), [filteredQuery]);
   const drinks = useMemo(() => V2_DRINKS.filter(matchesQuery), [filteredQuery]);
@@ -449,6 +451,25 @@ export function HomeV2({
       <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
       <CategoryChips palette={palette} active={activeChip} onChange={setActiveChip} />
+
+      {/* Nouveautés — boissons signature fraîchement ajoutées */}
+      {shouldShowSection('popular') && nouveautes.length > 0 && (
+        <>
+          <SectionHead palette={palette} icon="✨" title="Nouveautés" sub={`${nouveautes.length} à découvrir`} />
+          <Carousel>
+            {nouveautes.map((p) => (
+              <ProductCard
+                key={p.id}
+                palette={palette}
+                product={p}
+                onClick={() => onOpenProduct(p)}
+                onAdd={handleAddProduct(p)}
+              />
+            ))}
+          </Carousel>
+          <div style={{ height: 22 }} />
+        </>
+      )}
 
       {/* Populaires */}
       {shouldShowSection('popular') && populaires.length > 0 && (
