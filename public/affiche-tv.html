@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Écran TV — La Base Shakes & Drinks</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ecfdf5;
+    background: linear-gradient(135deg, #04100f 0%, #0a1f1c 55%, #04100f 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Halos décoratifs */
+  .glow { position: fixed; border-radius: 50%; filter: blur(10px); z-index: 0; }
+  .glow.a { width: 38vw; height: 38vw; top: -12vw; right: -8vw;
+    background: radial-gradient(circle, rgba(94,234,212,.22), transparent 70%); }
+  .glow.b { width: 34vw; height: 34vw; bottom: -12vw; left: -10vw;
+    background: radial-gradient(circle, rgba(245,158,11,.16), transparent 70%); }
+
+  .tv {
+    position: relative; z-index: 1;
+    width: 100vw; height: 100vh;
+    display: grid; grid-template-columns: 1.05fr 0.95fr;
+    align-items: center; gap: 4vw;
+    padding: 6vh 6vw;
+  }
+
+  /* Colonne gauche : message */
+  .left { display: flex; flex-direction: column; justify-content: center; }
+  .brand { display: flex; align-items: center; gap: 1.2vw; margin-bottom: 3.5vh; }
+  .logo-b {
+    width: 6vh; height: 6vh; border-radius: 1.4vh; flex: none;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 3.4vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-name { font-family: 'Outfit'; font-weight: 900; font-size: 3.4vh; line-height: 1; }
+  .brand-tag { font-size: 1.4vh; letter-spacing: .25em; color: #5eead4; font-weight: 700; }
+
+  .eyebrow {
+    color: #f59e0b; font-family: 'Outfit'; font-weight: 800; font-size: 2.6vh;
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: 2vh;
+  }
+  .headline {
+    font-family: 'Outfit'; font-weight: 900; font-size: 8.5vh; line-height: 1;
+    letter-spacing: -.02em; margin-bottom: 3vh;
+  }
+  .headline .accent { color: #5eead4; }
+  .sub { font-size: 3vh; color: #cbe4df; line-height: 1.35; max-width: 42vw; margin-bottom: 5vh; }
+
+  .steps { display: flex; gap: 2.5vw; }
+  .step { display: flex; align-items: center; gap: 1vw; }
+  .step-num {
+    width: 5vh; height: 5vh; border-radius: 50%; background: #5eead4; color: #04100f; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 2.6vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-txt { font-size: 2vh; color: #cbe4df; line-height: 1.2; max-width: 11vw; }
+
+  /* Colonne droite : QR */
+  .right { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .qr-wrap {
+    background: #fff; padding: 2.5vh; border-radius: 3vh;
+    box-shadow: 0 2vh 6vh rgba(0,0,0,.45);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .qr-wrap img { display: block; width: 46vh; height: 46vh; }
+  .qr-cta {
+    margin-top: 3vh; font-family: 'Outfit'; font-weight: 900; font-size: 4vh; color: #ecfdf5;
+  }
+  .qr-cta .pic { animation: bob 1.6s ease-in-out infinite; display: inline-block; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 2vh 6vh rgba(0,0,0,.45); }
+    50% { transform: scale(1.03); box-shadow: 0 2vh 8vh rgba(94,234,212,.4); }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-0.8vh); }
+  }
+
+  .foot {
+    position: fixed; bottom: 3vh; left: 0; width: 100%; text-align: center;
+    font-size: 2vh; color: #94b8b1; z-index: 1;
+  }
+  .foot b { color: #ecfdf5; }
+
+  /* Sécurité écrans verticaux (au cas où) */
+  @media (orientation: portrait) {
+    .tv { grid-template-columns: 1fr; gap: 4vh; text-align: center; }
+    .left { align-items: center; text-align: center; }
+    .sub { max-width: 80vw; }
+    .qr-wrap img { width: 40vh; height: 40vh; }
+    .step-txt { max-width: 26vw; }
+  }
+</style>
+</head>
+<body>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+
+  <div class="tv">
+    <div class="left">
+      <div class="brand">
+        <div class="logo-b">B</div>
+        <div>
+          <div class="brand-name">LA BASE</div>
+          <div class="brand-tag">SHAKES &amp; DRINKS</div>
+        </div>
+      </div>
+
+      <div class="eyebrow">🎰 Jeu concours gratuit</div>
+      <div class="headline">Tourne la roue,<br /><span class="accent">gagne un cadeau</span></div>
+      <div class="sub">Scanne le QR code, tente ta chance et repars avec ta récompense à récupérer en boutique 🎁</div>
+
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-txt">Scanne avec ton téléphone</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-txt">Tourne la roue &amp; gagne</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-txt">Récupère ton cadeau</div></div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="qr-wrap">
+        <img src="/qr-jeu.png" alt="QR code jeu concours" />
+      </div>
+      <div class="qr-cta"><span class="pic">📸</span> Scanne-moi !</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>La Base Shakes &amp; Drinks</b> · 11 rue Saint Pierre, 55100 Verdun · commande.labase-nutrition.com
+  </div>
+</body>
+</html>

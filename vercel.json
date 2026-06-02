@@ -7,6 +7,7 @@
     { "source": "/confidentialite", "destination": "/confidentialite.html" },
     { "source": "/club", "destination": "/club.html" },
     { "source": "/affiche", "destination": "/affiche-qr.html" },
+    { "source": "/affiche-tv", "destination": "/affiche-tv.html" },
     { "source": "/logo-preview", "destination": "/logo-preview.html" }
   ],
   "crons": [
