@@ -90,6 +90,7 @@ const optionPriceEntries: Array<[string, number]> = [
   ['Chocolat blanc — 6,90€', 690],
   ['Caramel — 6,90€', 690],
   ['Caramel beurre salé — 6,90€', 690],
+  ['Spéculoos — 6,90€', 690],
 ];
 
 // ─── Combos ────────────────────────────────────────────────────────

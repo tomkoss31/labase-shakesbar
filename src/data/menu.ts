@@ -716,13 +716,14 @@ export const categories: Category[] = [
       {
         name: 'Gaufre healthy',
         description: 'Topping au choix : miel, chocolat, caramel beurre salé…',
-        flavors: 'Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé',
+        flavors: 'Miel • Chocolat • Chocolat blanc • Caramel • Caramel beurre salé • Spéculoos',
         options: [
           { label: 'Miel — 6,90€', priceCents: 690 },
           { label: 'Chocolat — 6,90€', priceCents: 690 },
           { label: 'Chocolat blanc — 6,90€', priceCents: 690 },
           { label: 'Caramel — 6,90€', priceCents: 690 },
           { label: 'Caramel beurre salé — 6,90€', priceCents: 690 },
+          { label: 'Spéculoos — 6,90€', priceCents: 690 },
         ],
         image: '/images/waffle/gaufre-healthy.png',
       },
