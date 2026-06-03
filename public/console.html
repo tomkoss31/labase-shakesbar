@@ -972,9 +972,32 @@ async function lookupUser(userId) {
 function renderProfile(p, rewards) {
   const name = p.first_name || '(prénom non renseigné)';
   const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
-  const rewardsHtml = (rewards || []).map(r =>
-    '<span class="reward-pill">🎁 ' + r.reward_label + ' · ' + r.reward_code + '</span>'
-  ).join('');
+  // Codes actifs en radio : 1 seul utilisable par encaissement (pas
+  // cumulable). L'option par défaut "Aucun" évite d'appliquer un code par
+  // erreur. Le code n'est marqué utilisé QUE si l'encaissement passe
+  // (cf. credit-manual côté API).
+  const rewardsList = rewards || [];
+  const rewardsHtml = rewardsList.length === 0 ? '' :
+    '<div style="margin-top: 12px;">' +
+      '<div class="stat-label" style="margin-bottom: 8px;">CODES ACTIFS · à appliquer à la prochaine vente</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        '<label class="reward-radio" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;cursor:pointer;">' +
+          '<input type="radio" name="useReward" value="" checked data-label="" data-hint="" style="accent-color:#14b8a6;" />' +
+          '<span style="font-size:13px;color:#94b8b1;">Aucun code utilisé sur cette vente</span>' +
+        '</label>' +
+        rewardsList.map(r => {
+          const hint = rewardHint(r);
+          return '<label class="reward-radio" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.30);border-radius:10px;cursor:pointer;">' +
+            '<input type="radio" name="useReward" value="' + r.id + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:#fb7185;" />' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:13px;font-weight:700;color:#fb7185;">🎁 ' + escapeHtml(r.reward_label) + '</div>' +
+              '<div style="font-size:10px;color:#94b8b1;margin-top:2px;font-family:monospace;">' + escapeHtml(r.reward_code) + '</div>' +
+            '</div>' +
+          '</label>';
+        }).join('') +
+      '</div>' +
+      '<div id="rewardHint" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:10px;font-size:12px;color:#f59e0b;font-weight:600;"></div>' +
+    '</div>';
 
   // Catalogue cadeaux — GARDER SYNCHRO avec src/v2/rewards/catalog.ts
   const CATALOG = [
@@ -1030,12 +1053,36 @@ function renderProfile(p, rewards) {
       '<label>🎁 Offrir un cadeau (déduit les XP)</label>' +
       '<div class="hint" style="margin-top:4px;margin-bottom:4px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
       giftButtons +
+    '</div>' +
+    '<div class="card" style="border-color:rgba(94,234,212,.25);">' +
+      '<label>📋 Migration carte fidélité papier</label>' +
+      '<div class="hint" style="margin-top:4px;margin-bottom:8px;">Client qui passait par la carte papier ? Ajoute ses points en XP ici. Ne touche pas au CA ni au nombre de commandes.</div>' +
+      '<input type="number" id="manualXp" placeholder="XP à créditer (ex: 230)" step="1" min="1" max="100000" />' +
+      '<input type="text" id="manualReason" placeholder="Raison (ex: Carte papier — 230 points, client depuis avril 2024)" maxlength="280" style="margin-top:8px;" />' +
+      '<button class="primary teal" id="manualXpBtn" style="margin-top:10px;">📋 Créditer XP manuellement</button>' +
     '</div>';
 
   $('creditBtn').addEventListener('click', () => creditXP(p.id));
+  $('manualXpBtn').addEventListener('click', () => creditXpManual(p.id));
   document.querySelectorAll('.gift-btn').forEach(btn => {
     if (btn.disabled) return;
     btn.addEventListener('click', () => redeemReward(p.id, btn.dataset.rid, btn.dataset.label, btn.dataset.cost));
+  });
+  // Hint dynamique selon le code promo sélectionné — rappelle au coach
+  // combien déduire du montant Square AVANT de saisir.
+  document.querySelectorAll('input[name="useReward"]').forEach(input => {
+    input.addEventListener('change', () => {
+      const hint = input.dataset.hint || '';
+      const box = $('rewardHint');
+      if (!box) return;
+      if (hint) {
+        box.textContent = '💡 ' + hint;
+        box.style.display = 'block';
+      } else {
+        box.textContent = '';
+        box.style.display = 'none';
+      }
+    });
   });
   // Relancer le scan d'un nouveau client (vide la fiche + rallume la caméra)
   const rescan = $('rescanBtn');
@@ -1079,6 +1126,17 @@ async function creditXP(userId) {
   if (!Number.isFinite(euros) || euros <= 0) { alert('Montant invalide'); return; }
   const amountCents = Math.round(euros * 100);
   const combo = $('comboCheck') ? $('comboCheck').checked : false;
+  // Code promo sélectionné (radio). value = '' si "Aucun".
+  const selectedReward = document.querySelector('input[name="useReward"]:checked');
+  const wheelSpinId = selectedReward && selectedReward.value ? selectedReward.value : null;
+  const rewardLabel = selectedReward ? (selectedReward.dataset.label || '') : '';
+
+  // Confirmation explicite si un code est appliqué : évite les fausses
+  // manips qui crameraient un code que le client n'a pas demandé.
+  if (wheelSpinId) {
+    const ok = confirm('Appliquer le code « ' + rewardLabel + ' » sur cette vente ?\n\nLe montant Square doit déjà être REDUIT en conséquence.\nLe code sera marqué comme utilisé et ne réapparaîtra plus.');
+    if (!ok) return;
+  }
 
   const btn = $('creditBtn');
   btn.disabled = true;
@@ -1087,11 +1145,15 @@ async function creditXP(userId) {
     const resp = await fetch('/api/profile?action=credit-manual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo }),
+      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo, wheelSpinId }),
     });
     const data = await resp.json();
     if (resp.ok) {
-      showScannerResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.');
+      let msg = '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.';
+      if (data.rewardUsed) {
+        msg += ' · Code « ' + data.rewardUsed.label + ' » marqué utilisé.';
+      }
+      showScannerResult('ok', msg);
       lookupUser(userId);
     } else {
       showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
@@ -1101,6 +1163,75 @@ async function creditXP(userId) {
     showScannerResult('err', '❌ ' + err.message);
     btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
   }
+}
+
+// Crédit XP direct (migration carte papier) — pas une vente, pas d'XP
+// dérivé (×2 mardi, combo, etc.). C'est juste un report 1:1 des points
+// de la carte papier vers le compteur XP de l'app.
+async function creditXpManual(userId) {
+  const password = getPassword();
+  const xpRaw = $('manualXp').value.trim();
+  const xpAmount = parseInt(xpRaw, 10);
+  const reason = ($('manualReason').value || '').trim();
+  if (!Number.isFinite(xpAmount) || xpAmount <= 0 || xpAmount > 100000) {
+    alert('XP invalide (1 à 100000)');
+    return;
+  }
+  if (reason.length < 3) {
+    alert('Raison requise (ex: « Carte papier 230 points »)');
+    return;
+  }
+  const ok = confirm('Créditer ' + xpAmount + ' XP à ce client ?\n\nRaison : ' + reason + '\n\nC\'est un crédit manuel, pas une vente — ça ne touche pas au CA ni au nombre de commandes.');
+  if (!ok) return;
+
+  const btn = $('manualXpBtn');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const resp = await fetch('/api/profile?action=credit-xp-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
+      body: JSON.stringify({ userId, xpAmount, reason }),
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      showScannerResult('ok', '✅ +' + data.xpAdded + ' XP crédités manuellement. Nouveau total : ' + data.newXp + ' XP.');
+      lookupUser(userId);
+    } else {
+      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
+    }
+  } catch (err) {
+    showScannerResult('err', '❌ ' + err.message);
+    btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
+  }
+}
+
+// ─── Helpers rendu codes promo ─────────────────────────────────────
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/\n/g, ' ');
+}
+// Hint contextuel : rappelle au coach combien déduire du montant Square
+// avant de saisir, selon le type de récompense.
+function rewardHint(r) {
+  if (!r) return '';
+  if (r.reward_type === 'discount_percent') {
+    return 'Réduction de ' + r.reward_value + '% à déduire AVANT de saisir le montant Square.';
+  }
+  if (r.reward_type === 'free_product') {
+    return 'Produit offert : ' + (r.reward_value || r.reward_label) + '. Déduis sa valeur du montant Square avant de saisir.';
+  }
+  if (r.reward_type === 'xp_multiplier') {
+    return 'XP ×' + r.reward_value + ' pendant 24h après application (à gérer côté DB pour l\'instant — flag ce code et préviens Tom).';
+  }
+  if (r.reward_type === 'manual_pickup') {
+    return 'Cadeau surprise à remettre au comptoir — pas de réduction sur Square.';
+  }
+  return '';
 }
 
 function showScannerResult(kind, msg) {

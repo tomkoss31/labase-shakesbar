@@ -152,11 +152,17 @@ export default async function handler(req: any, res: any) {
   }
 
   // ─── POST ?action=credit-manual ───────────────────────────────
+  // Encaisse une vente Square caisse + crédit XP.
+  // Optionnel : wheelSpinId → marque le code promo comme utilisé
+  // ATOMIQUEMENT avec la vente (pas de marquage si l'encaissement plante).
   if (action === 'credit-manual' && req.method === 'POST') {
     const body = await readBody(req);
     const userId = typeof body?.userId === 'string' ? body.userId : null;
     const amountCents = Number(body?.amountCents);
     const paymentMethod = typeof body?.paymentMethod === 'string' ? body.paymentMethod : 'square_pos';
+    const wheelSpinId = typeof body?.wheelSpinId === 'string' && body.wheelSpinId
+      ? body.wheelSpinId
+      : null;
 
     if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) {
       return res.status(400).json({ error: 'userId + amountCents > 0 requis' });
@@ -169,15 +175,38 @@ export default async function handler(req: any, res: any) {
       .single();
     if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
 
+    // Si un code promo est passé : vérifier qu'il est valide (appartient au
+    // client, non utilisé, non expiré) AVANT d'encaisser. Évite de marquer un
+    // code utilisé qui ne l'était pas, et évite l'attaque "wheelSpinId d'un
+    // autre client".
+    let validatedSpin: { id: string; reward_code: string; reward_label: string } | null = null;
+    if (wheelSpinId) {
+      const nowIso = new Date().toISOString();
+      const { data: spin } = await admin
+        .from('wheel_spins')
+        .select('id, reward_code, reward_label, used_at, expires_at, user_id')
+        .eq('id', wheelSpinId)
+        .maybeSingle();
+      if (!spin) return res.status(400).json({ error: 'Code promo introuvable' });
+      if (spin.user_id !== userId) return res.status(400).json({ error: 'Code promo ne correspond pas à ce client' });
+      if (spin.used_at) return res.status(400).json({ error: 'Code déjà utilisé' });
+      if (spin.expires_at && spin.expires_at <= nowIso) return res.status(400).json({ error: 'Code expiré' });
+      validatedSpin = { id: spin.id, reward_code: spin.reward_code, reward_label: spin.reward_label };
+    }
+
     const nowIso = new Date().toISOString();
-    await admin.from('orders').insert({
-      user_id: userId,
-      status: 'paid',
-      payment_method: paymentMethod,
-      total_cents: amountCents,
-      paid_at: nowIso,
-      created_at: nowIso,
-    });
+    const { data: createdOrder } = await admin
+      .from('orders')
+      .insert({
+        user_id: userId,
+        status: 'paid',
+        payment_method: paymentMethod,
+        total_cents: amountCents,
+        paid_at: nowIso,
+        created_at: nowIso,
+      })
+      .select('id')
+      .maybeSingle();
 
     const isFirstOrder = profile.total_orders === 0;
     const isCombo = body?.combo === true;
@@ -204,7 +233,71 @@ export default async function handler(req: any, res: any) {
       })
       .eq('id', userId);
 
-    return res.status(200).json({ ok: true, xpGained, newTotalSpent, newXp });
+    // Marquer le code promo comme utilisé MAINTENANT (après la vente OK).
+    // Si ça plante ici, on log mais on ne casse pas la réponse — la vente
+    // est passée, le code reste actif (le client peut le réutiliser une fois,
+    // c'est moins grave qu'une vente refusée).
+    let rewardUsed: { code: string; label: string } | null = null;
+    if (validatedSpin) {
+      const { error: markErr } = await admin
+        .from('wheel_spins')
+        .update({ used_at: nowIso, used_in_order_id: createdOrder?.id ?? null })
+        .eq('id', validatedSpin.id)
+        .is('used_at', null); // double-check anti race condition
+      if (markErr) {
+        console.warn('[credit-manual] mark-used failed:', markErr.message);
+      } else {
+        rewardUsed = { code: validatedSpin.reward_code, label: validatedSpin.reward_label };
+      }
+    }
+
+    return res.status(200).json({ ok: true, xpGained, newTotalSpent, newXp, rewardUsed });
+  }
+
+  // ─── POST ?action=credit-xp-manual ────────────────────────────
+  // Crédit XP direct sans vente (migration carte fidélité papier).
+  // Ne touche PAS total_spent_cents / total_orders : c'est pas une vente.
+  // Trace dans xp_manual_credits avec la raison libre saisie par l'admin.
+  if (action === 'credit-xp-manual' && req.method === 'POST') {
+    const body = await readBody(req);
+    const userId = typeof body?.userId === 'string' ? body.userId : null;
+    const xpAmount = Number(body?.xpAmount);
+    const reason = typeof body?.reason === 'string' ? body.reason.trim().slice(0, 280) : '';
+
+    if (!userId) return res.status(400).json({ error: 'userId requis' });
+    if (!Number.isFinite(xpAmount) || xpAmount <= 0 || xpAmount > 100000) {
+      return res.status(400).json({ error: 'XP invalide (1 à 100000)' });
+    }
+    if (!reason || reason.length < 3) {
+      return res.status(400).json({ error: 'Raison requise (3 caractères min)' });
+    }
+
+    const { data: profile, error: profileError } = await admin
+      .from('profiles')
+      .select('xp')
+      .eq('id', userId)
+      .single();
+    if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
+
+    const newXp = profile.xp + Math.floor(xpAmount);
+
+    const { error: updateError } = await admin
+      .from('profiles')
+      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
+      .eq('id', userId);
+    if (updateError) return res.status(500).json({ error: updateError.message });
+
+    // Log la trace même si l'insert échoue (table absente sur prod p.ex.) :
+    // l'XP a été crédité, on ne reverse pas pour un log raté.
+    const { error: logError } = await admin.from('xp_manual_credits').insert({
+      user_id: userId,
+      xp_added: Math.floor(xpAmount),
+      reason,
+      source: 'console_admin',
+    });
+    if (logError) console.warn('[credit-xp-manual] log failed:', logError.message);
+
+    return res.status(200).json({ ok: true, xpAdded: Math.floor(xpAmount), newXp });
   }
 
   // ─── POST ?action=redeem-reward (admin déduit XP pour offrir un cadeau) ───
