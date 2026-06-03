@@ -158,7 +158,7 @@ export const V2_CHIP_CATEGORIES = [
 
 // Hero slides — combos + nouveaux + avis Google
 const heroFeaturedCombo = V2_COMBOS.find((c) => c.id === 'combo-power') ?? V2_COMBOS[0];
-const heroFeaturedProduct = findV2ProductByName('Choco Buenos') ?? V2_POPULAR[0];
+const heroFeaturedProduct = findV2ProductByName('Bueno') ?? V2_POPULAR[0];
 
 export type V2HeroSlide = {
   type: 'combo' | 'new' | 'review';
@@ -193,7 +193,7 @@ export const V2_HERO_SLIDES: V2HeroSlide[] = [
   {
     type: 'new',
     tag: 'Recette signature',
-    title: heroFeaturedProduct?.name ?? 'Choco Buenos',
+    title: heroFeaturedProduct?.name ?? 'Bueno',
     sub: heroFeaturedProduct?.sub ?? '',
     price: heroFeaturedProduct ? fmtEuro(heroFeaturedProduct.price) : undefined,
     cta: 'Découvrir',

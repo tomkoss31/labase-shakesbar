@@ -36,6 +36,7 @@ function normalizeKey(value: string = ''): string {
 
 // Smoothies (890), enfants (590), café glacé simple (690), post workout (590)
 const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
+  ["M&M's", 890], ['Bueno', 890],
   ['Casse Noisette', 890], ['Cappuccino', 890], ['Pina Colada', 890],
   ['Fraise bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
   ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890],

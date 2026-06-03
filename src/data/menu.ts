@@ -241,6 +241,22 @@ export const categories: Category[] = [
       '24g protéines végétales • 25 vitamines & minéraux • 250 cal • Sans lactose & sans gluten',
     items: [
       {
+        name: "M&M's",
+        description: 'Smoothie chocolat gourmand caramel-noisette, topping M&M\'s.',
+        flavors: 'Chocolat • Caramel • Noisette • Topping M&M\'s • 24g protéines • 250 cal',
+        badge: 'Gourmand',
+        basePriceCents: 890,
+        image: '/images/shake/mm.png',
+      },
+      {
+        name: 'Bueno',
+        description: 'Smoothie choco-noisette, topping gaufrette gourmande.',
+        flavors: 'Chocolat • Noisette • Topping gaufrette • 24g protéines • 250 cal',
+        badge: 'Gourmand',
+        basePriceCents: 890,
+        image: '/images/shake/bueno.png',
+      },
+      {
         name: 'Casse Noisette',
         description: 'Un smoothie rond et réconfortant, café latte et noisette.',
         flavors: 'Café latte • Noisette • 24g protéines • 250 cal',

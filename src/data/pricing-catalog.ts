@@ -35,6 +35,8 @@ export function normalizeCatalogKey(value: string = ''): string {
 // ─── Produits avec basePriceCents ─────────────────────────────────
 const productPriceEntries: Array<[string, number]> = [
   // Smoothies (890)
+  ["M&M's", 890],
+  ['Bueno', 890],
   ['Casse Noisette', 890],
   ['Cappuccino', 890],
   ['Pina Colada', 890],
