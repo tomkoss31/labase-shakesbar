@@ -689,7 +689,7 @@ export function HomeV2({
               ✨ Découvrir l'accompagnement
             </a>
             <a
-              href="https://www.labase360.fr/opportunite?ref=656dcf35-4859-4a70-9d20-990104813423"
+              href="https://www.labase360.fr/rejoindre?ref=656dcf35-4859-4a70-9d20-990104813423"
               target="_blank"
               rel="noopener noreferrer"
               style={{
