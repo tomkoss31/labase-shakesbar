@@ -266,6 +266,57 @@
     margin: 2px 4px 2px 0;
   }
 
+  /* Reward radio cards — annule le text-transform/letter-spacing/uppercase
+     du <label> global, et empêche le radio input d'hériter width:100% */
+  label.reward-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    font-size: 13px;
+  }
+  label.reward-radio input[type="radio"] {
+    width: 18px !important;
+    height: 18px;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+  label.reward-radio .reward-label-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  label.reward-radio .reward-label-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fb7185;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  label.reward-radio .reward-label-code {
+    font-size: 10px;
+    color: #94b8b1;
+    margin-top: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  label.reward-radio.reward-radio-none {
+    background: #04100f;
+    border: 1px solid rgba(94,234,212,.15);
+  }
+  label.reward-radio.reward-radio-code {
+    background: rgba(251,113,133,.08);
+    border: 1px solid rgba(251,113,133,.30);
+  }
+
   /* Login gate */
   #login-gate {
     position: fixed;
@@ -979,19 +1030,19 @@ function renderProfile(p, rewards) {
   const rewardsList = rewards || [];
   const rewardsHtml = rewardsList.length === 0 ? '' :
     '<div style="margin-top: 12px;">' +
-      '<div class="stat-label" style="margin-bottom: 8px;">CODES ACTIFS · à appliquer à la prochaine vente</div>' +
+      '<div class="stat-label" style="margin-bottom: 8px;">Codes actifs · à appliquer à la prochaine vente</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;">' +
-        '<label class="reward-radio" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;cursor:pointer;">' +
+        '<label class="reward-radio reward-radio-none">' +
           '<input type="radio" name="useReward" value="" checked data-label="" data-hint="" style="accent-color:#14b8a6;" />' +
-          '<span style="font-size:13px;color:#94b8b1;">Aucun code utilisé sur cette vente</span>' +
+          '<span class="reward-label-wrap" style="color:#94b8b1;">Aucun code utilisé sur cette vente</span>' +
         '</label>' +
         rewardsList.map(r => {
           const hint = rewardHint(r);
-          return '<label class="reward-radio" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.30);border-radius:10px;cursor:pointer;">' +
+          return '<label class="reward-radio reward-radio-code">' +
             '<input type="radio" name="useReward" value="' + r.id + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:#fb7185;" />' +
-            '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:13px;font-weight:700;color:#fb7185;">🎁 ' + escapeHtml(r.reward_label) + '</div>' +
-              '<div style="font-size:10px;color:#94b8b1;margin-top:2px;font-family:monospace;">' + escapeHtml(r.reward_code) + '</div>' +
+            '<div class="reward-label-wrap">' +
+              '<div class="reward-label-title">🎁 ' + escapeHtml(r.reward_label) + '</div>' +
+              '<div class="reward-label-code">' + escapeHtml(r.reward_code) + '</div>' +
             '</div>' +
           '</label>';
         }).join('') +
@@ -1033,7 +1084,7 @@ function renderProfile(p, rewards) {
         '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
         '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
       '</div>' +
-      (rewardsHtml ? '<div style="margin-top: 12px;"><div class="stat-label" style="margin-bottom: 6px;">CODES ACTIFS</div>' + rewardsHtml + '</div>' : '') +
+      rewardsHtml +
     '</div>' +
     '<div class="card">' +
       '<label>💳 Crédit XP après paiement Square caisse</label>' +
