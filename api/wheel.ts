@@ -325,6 +325,13 @@ export default async function handler(req: any, res: any) {
         expires_at: spin.expires_at,
         used_at: null,
       });
+      // ⚠️ Anti double-cadeau : le tour de la roue PUBLIQUE compte comme le
+      // tour de la période. On démarre le cooldown de la roue in-app pour
+      // éviter un 2e tour gratuit immédiat au nouveau client.
+      await admin
+        .from('profiles')
+        .update({ last_spin_at: new Date().toISOString() })
+        .eq('id', userId);
     }
 
     // 5. Ouvrir une session (login REST) pour connecter le client direct
