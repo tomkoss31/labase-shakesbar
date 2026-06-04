@@ -37,10 +37,9 @@
   .left { display: flex; flex-direction: column; justify-content: center; }
   .brand { display: flex; align-items: center; gap: 1.2vw; margin-bottom: 3.5vh; }
   .logo-b {
-    width: 6vh; height: 6vh; border-radius: 1.4vh; flex: none;
-    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
-    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 3.4vh;
-    display: flex; align-items: center; justify-content: center;
+    width: 7vh; height: 7vh; border-radius: 1.6vh; flex: none;
+    display: block; object-fit: cover;
+    box-shadow: 0 1vh 2.5vh rgba(0,0,0,.45);
   }
   .brand-name { font-family: 'Outfit'; font-weight: 900; font-size: 3.4vh; line-height: 1; }
   .brand-tag { font-size: 1.4vh; letter-spacing: .25em; color: #5eead4; font-weight: 700; }
@@ -110,7 +109,7 @@
   <div class="tv">
     <div class="left">
       <div class="brand">
-        <div class="logo-b">B</div>
+        <img class="logo-b" src="icon-512.png" alt="La Base" />
         <div>
           <div class="brand-name">LA BASE</div>
           <div class="brand-tag">SHAKES &amp; DRINKS</div>
@@ -130,7 +129,7 @@
 
     <div class="right">
       <div class="qr-wrap">
-        <img src="/qr-jeu.png" alt="QR code jeu concours" />
+        <img src="qr-jeu.png" alt="QR code jeu concours" />
       </div>
       <div class="qr-cta"><span class="pic">📸</span> Scanne-moi !</div>
     </div>
