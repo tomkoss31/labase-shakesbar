@@ -134,3 +134,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Fichiers de rendu menu TV (locaux, non déployés)
+public/_*.html

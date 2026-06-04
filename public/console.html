@@ -1093,6 +1093,7 @@ function renderProfile(p, rewards) {
         '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:#14b8a6;" />' +
         '⚡ Commande combo (boisson + smoothie) <b style="color:#5eead4;">+25 XP</b>' +
       '</label>' +
+      '<input type="text" id="saleNote" placeholder="Détail vente (ex: 2 smoothies + gaufre) — optionnel" maxlength="120" style="margin-top:10px;" />' +
       (isTuesdayClient() ? '<div class="hint" style="color:#f59e0b;font-weight:700;margin-top:8px;">🔥 Mardi Double XP actif : les XP sur le montant sont ×2 aujourd\'hui !</div>' : '') +
       '<button class="primary teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
       '<div class="hint">' +
@@ -1177,6 +1178,7 @@ async function creditXP(userId) {
   if (!Number.isFinite(euros) || euros <= 0) { alert('Montant invalide'); return; }
   const amountCents = Math.round(euros * 100);
   const combo = $('comboCheck') ? $('comboCheck').checked : false;
+  const saleNote = $('saleNote') ? $('saleNote').value.trim().slice(0, 120) : '';
   // Code promo sélectionné (radio). value = '' si "Aucun".
   const selectedReward = document.querySelector('input[name="useReward"]:checked');
   const wheelSpinId = selectedReward && selectedReward.value ? selectedReward.value : null;
@@ -1196,7 +1198,7 @@ async function creditXP(userId) {
     const resp = await fetch('/api/profile?action=credit-manual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo, wheelSpinId }),
+      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo, wheelSpinId, note: saleNote }),
     });
     const data = await resp.json();
     if (resp.ok) {

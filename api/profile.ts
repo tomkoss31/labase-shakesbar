@@ -163,6 +163,7 @@ export default async function handler(req: any, res: any) {
     const wheelSpinId = typeof body?.wheelSpinId === 'string' && body.wheelSpinId
       ? body.wheelSpinId
       : null;
+    const note = typeof body?.note === 'string' ? body.note.trim().slice(0, 120) : '';
 
     if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) {
       return res.status(400).json({ error: 'userId + amountCents > 0 requis' });
@@ -208,6 +209,20 @@ export default async function handler(req: any, res: any) {
       })
       .select('id')
       .maybeSingle();
+
+    // Note libre du comptoir (« 2 smoothies + gaufre ») → on la stocke comme
+    // un order_item unique, ce qui la fait apparaître dans le détail de la
+    // commande (sinon « Détail non dispo »). Best-effort, ne casse pas la vente.
+    if (note && createdOrder?.id) {
+      try {
+        await admin.from('order_items').insert({
+          order_id: createdOrder.id,
+          product_name: note,
+          quantity: 1,
+          unit_price_cents: amountCents,
+        });
+      } catch { /* non bloquant */ }
+    }
 
     const isFirstOrder = profile.total_orders === 0;
     const isCombo = body?.combo === true;
