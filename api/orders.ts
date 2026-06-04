@@ -407,7 +407,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: paidData, error: paidErr } = await clients.admin
       .from('orders')
-      .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method')
+      .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method, user_id')
       .gte('paid_at', since)
       .in('status', ['paid', 'preparing', 'ready'])
       .order('paid_at', { ascending: false })
@@ -415,7 +415,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: pendingCashData, error: pendingErr } = await clients.admin
       .from('orders')
-      .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method')
+      .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method, user_id')
       .eq('status', 'pending_cash')
       .gte('created_at', since)
       .order('created_at', { ascending: false })
@@ -439,7 +439,25 @@ export default async function handler(req: any, res: any) {
         (itemsByOrder[it.order_id] ||= []).push(it);
       }
     }
-    const withItems = data.map((o: any) => ({ ...o, items: itemsByOrder[o.id] ?? [] }));
+    // Résoudre le nom du client pour les commandes liées à un compte (scan XP /
+    // commande app) dont customer_name est vide → on affiche le prénom au comptoir.
+    const userIds = Array.from(
+      new Set(data.filter((o: any) => o.user_id && !o.customer_name).map((o: any) => o.user_id)),
+    );
+    const nameByUser: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: profs } = await clients.admin
+        .from('profiles')
+        .select('id, first_name, email')
+        .in('id', userIds);
+      for (const p of profs ?? []) nameByUser[p.id] = p.first_name || p.email || '';
+    }
+
+    const withItems = data.map((o: any) => ({
+      ...o,
+      customer_name: o.customer_name || (o.user_id ? nameByUser[o.user_id] : null) || null,
+      items: itemsByOrder[o.id] ?? [],
+    }));
     return res.status(200).json({ orders: withItems });
   }
 

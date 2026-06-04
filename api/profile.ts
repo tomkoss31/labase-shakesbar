@@ -170,7 +170,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: profile, error: profileError } = await admin
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp')
+      .select('total_spent_cents, total_orders, xp, first_name, email')
       .eq('id', userId)
       .single();
     if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
@@ -202,6 +202,7 @@ export default async function handler(req: any, res: any) {
         status: 'paid',
         payment_method: paymentMethod,
         total_cents: amountCents,
+        customer_name: profile.first_name || profile.email || null,
         paid_at: nowIso,
         created_at: nowIso,
       })
