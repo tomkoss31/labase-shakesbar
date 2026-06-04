@@ -38,12 +38,11 @@
   }
 
   /* Marque */
-  .brand { display: flex; align-items: center; gap: 2.4mm; margin-bottom: 4mm; }
+  .brand { display: flex; align-items: center; gap: 2.6mm; margin-bottom: 4mm; }
   .logo-b {
-    width: 9mm; height: 9mm; border-radius: 2.2mm; flex: none;
-    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
-    color: #04100f; font-family: 'Outfit'; font-weight: 900; font-size: 5.4mm;
-    display: flex; align-items: center; justify-content: center;
+    width: 12mm; height: 12mm; border-radius: 2.8mm; flex: none;
+    display: block; object-fit: cover;
+    box-shadow: 0 1mm 3mm rgba(0,0,0,.4);
   }
   .brand-txt { text-align: left; }
   .brand-name { font-family: 'Outfit'; font-weight: 900; font-size: 5mm; line-height: 1; }
@@ -99,7 +98,7 @@
 
   <div class="flyer">
     <div class="brand">
-      <div class="logo-b">B</div>
+      <img class="logo-b" src="icon-512.png" alt="La Base" />
       <div class="brand-txt">
         <div class="brand-name">LA BASE</div>
         <div class="brand-tag">SHAKES &amp; DRINKS</div>
