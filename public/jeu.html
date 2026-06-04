@@ -482,9 +482,11 @@
           }));
         } catch {}
       }
-      // Redirige vers l'app, connecté, avec le cadeau dans ses récompenses
+      // Redirige vers l'app, connecté, avec le cadeau dans ses récompenses.
+      // ?welcome=1 → l'app ouvre direct la slide "Installe l'app" (le lead
+      // ne peut pas louper l'étape téléchargement).
       btn.textContent = '✅ C\'est bon !';
-      window.setTimeout(() => { window.location.href = '/'; }, 600);
+      window.setTimeout(() => { window.location.href = '/?welcome=1'; }, 600);
     } catch (err) {
       $('signupError').innerHTML = '<div class="err">⚠️ ' + err.message + '</div>';
       btn.disabled = false;

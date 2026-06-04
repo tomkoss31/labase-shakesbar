@@ -87,6 +87,7 @@ export function HomeV2({
   const setWheelOpen = setWheelOpenProp ?? setWheelOpenLocal;
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingInstall, setOnboardingInstall] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const inbox = useInbox();
 
@@ -107,8 +108,17 @@ export function HomeV2({
     inbox.markAllRead();
   }
 
-  // Affiche l'onboarding au tout premier lancement
+  // Affiche l'onboarding au tout premier lancement.
+  // Cas spécial : arrivée depuis la roue /jeu (?welcome=1) → on ouvre direct
+  // sur la slide INSTALLATION (sinon le lead loupe l'étape "télécharge l'app").
   React.useEffect(() => {
+    const welcome = new URLSearchParams(window.location.search).get('welcome') === '1';
+    if (welcome) {
+      setOnboardingInstall(true);
+      setOnboardingOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
     if (!hasSeenOnboarding()) {
       const t = window.setTimeout(() => setOnboardingOpen(true), 700);
       return () => window.clearTimeout(t);
@@ -776,6 +786,7 @@ export function HomeV2({
       <OnboardingModal
         palette={palette}
         open={onboardingOpen}
+        startAtInstall={onboardingInstall}
         onClose={() => setOnboardingOpen(false)}
       />
 

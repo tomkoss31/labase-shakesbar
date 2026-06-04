@@ -40,10 +40,11 @@ interface OnboardingModalProps {
   palette: Palette;
   open: boolean;
   onClose: () => void;
+  startAtInstall?: boolean; // ouvre direct sur la slide installation (leads /jeu)
 }
 
-export function OnboardingModal({ palette, open, onClose }: OnboardingModalProps) {
-  const [step, setStep] = useState(0);
+export function OnboardingModal({ palette, open, onClose, startAtInstall }: OnboardingModalProps) {
+  const [step, setStep] = useState(startAtInstall ? 999 : 0);
   const [osTab, setOsTab] = useState<'ios' | 'android'>(detectOS() === 'android' ? 'android' : 'ios');
   const alreadyInstalled = isStandalone();
 
@@ -160,7 +161,8 @@ export function OnboardingModal({ palette, open, onClose }: OnboardingModalProps
     });
   }
 
-  const isLast = step >= slides.length - 1;
+  const cur = Math.min(step, slides.length - 1);
+  const isLast = cur >= slides.length - 1;
 
   function finish() {
     markOnboardingSeen();
@@ -215,7 +217,7 @@ export function OnboardingModal({ palette, open, onClose }: OnboardingModalProps
           width: '100%',
         }}
       >
-        {slides[step].render()}
+        {slides[cur].render()}
       </div>
 
       {/* Dots */}
@@ -224,10 +226,10 @@ export function OnboardingModal({ palette, open, onClose }: OnboardingModalProps
           <div
             key={i}
             style={{
-              width: i === step ? 22 : 7,
+              width: i === cur ? 22 : 7,
               height: 7,
               borderRadius: 999,
-              background: i === step ? palette.primary : palette.line,
+              background: i === cur ? palette.primary : palette.line,
               transition: 'all .2s',
             }}
           />
@@ -236,7 +238,7 @@ export function OnboardingModal({ palette, open, onClose }: OnboardingModalProps
 
       {/* CTA */}
       <button
-        onClick={() => (isLast ? finish() : setStep((s) => s + 1))}
+        onClick={() => (isLast ? finish() : setStep((s) => Math.min(s, slides.length - 1) + 1))}
         style={{
           width: '100%',
           maxWidth: 420,
