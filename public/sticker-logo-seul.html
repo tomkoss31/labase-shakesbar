@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sticker LOGO seul — Vistaprint</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* 60 mm visible + 3 mm fond perdu tout autour = 66 mm */
+  @page { size: 66mm 66mm; margin: 0; }
+  html, body { width: 66mm; height: 66mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: radial-gradient(120% 120% at 50% 30%, #0c2521 0%, #04100f 75%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    display: flex; align-items: center; justify-content: center; }
+
+  .sticker { width: 60mm; height: 60mm; border-radius: 50%; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center;
+    padding: 7mm 5mm 9.5mm; background: radial-gradient(120% 120% at 50% 30%, #0c2521 0%, #04100f 72%); }
+  .sticker::before { content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: 0; padding: 1.2mm;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .sticker > * { position: relative; z-index: 1; }
+  .sticker img { width: 29mm; height: 29mm; border-radius: 6.5mm; box-shadow: 0 2mm 5mm rgba(0,0,0,.55); }
+  .txt .nm { font-family: 'Outfit'; font-weight: 900; font-size: 7mm; line-height: 1; }
+  .txt .tg { font-size: 2.1mm; letter-spacing: .3em; color: #5eead4; font-weight: 700; margin-top: 1.2mm; }
+  .txt .vd { font-family: 'Outfit'; font-weight: 700; font-size: 2.2mm; color: #9fc0ba; margin-top: 2mm; letter-spacing: .14em; }
+</style>
+</head>
+<body>
+  <div class="sticker">
+    <img src="icon-512.png" alt="La Base" />
+    <div class="txt">
+      <div class="nm">LA BASE</div>
+      <div class="tg">SHAKES &amp; DRINKS</div>
+      <div class="vd">★ VERDUN ★</div>
+    </div>
+  </div>
+</body>
+</html>

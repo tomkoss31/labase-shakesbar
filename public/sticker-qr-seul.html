@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sticker QR seul — Vistaprint</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* 60 mm visible + 3 mm fond perdu = 66 mm */
+  @page { size: 66mm 66mm; margin: 0; }
+  html, body { width: 66mm; height: 66mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: radial-gradient(120% 120% at 50% 35%, #0c2521 0%, #04100f 75%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    display: flex; align-items: center; justify-content: center; }
+
+  .sticker { width: 60mm; height: 60mm; border-radius: 50%; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 5mm; background: linear-gradient(160deg, #0c2521, #04100f); }
+  .sticker::before { content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: 0; padding: 1.2mm;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #5eead4);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .sticker > * { position: relative; z-index: 1; }
+  .top { font-family: 'Outfit'; font-weight: 900; font-size: 3.5mm; color: #fbbf24; text-transform: uppercase; letter-spacing: .03em; }
+  .qr { background: #fff; padding: 2mm; border-radius: 2.6mm; margin: 1.9mm 0; box-shadow: 0 2mm 6mm rgba(0,0,0,.4); }
+  .qr img { display: block; width: 28mm; height: 28mm; }
+  .bot { font-family: 'Outfit'; font-weight: 800; font-size: 3mm; }
+  .bot .ac { color: #5eead4; }
+  .ig { font-size: 2.1mm; color: #9fc0ba; margin-top: .6mm; }
+</style>
+</head>
+<body>
+  <div class="sticker">
+    <div class="top">🎰 Scanne &amp; gagne</div>
+    <div class="qr"><img src="qr-jeu.png" alt="QR jeu concours" /></div>
+    <div class="bot"><span class="ac">100% gagnant</span> 🎁</div>
+    <div class="ig">@labase_verdun</div>
+  </div>
+</body>
+</html>
