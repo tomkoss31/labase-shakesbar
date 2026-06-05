@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Carte A4 v4 (mix) — La Base</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4; margin: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5; background: #04100f;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden; }
+  .page { width: 210mm; height: 297mm; display: flex; }
+
+  /* ───── RAIL GAUCHE ───── */
+  .rail { width: 64mm; flex: none; position: relative; overflow: hidden;
+    background: linear-gradient(165deg, #0a201d 0%, #04100f 60%, #071a17 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 9mm 6mm 7mm; text-align: center; }
+  .rail .glow { position: absolute; border-radius: 50%; filter: blur(15mm); z-index: 0; }
+  .rail .glow.t { width: 62mm; height: 62mm; top: -20mm; left: -14mm; background: radial-gradient(circle, rgba(94,234,212,.30), transparent 70%); }
+  .rail .glow.b { width: 58mm; height: 58mm; bottom: 24mm; right: -20mm; background: radial-gradient(circle, rgba(245,158,11,.18), transparent 70%); }
+  .rail > * { position: relative; z-index: 1; }
+  .rbrand { display: flex; flex-direction: column; align-items: center; gap: 2.6mm; }
+  .rbrand img { width: 23mm; height: 23mm; border-radius: 5.2mm; box-shadow: 0 2.5mm 6mm rgba(0,0,0,.55); }
+  .rbrand .nm { font-family: 'Outfit'; font-weight: 900; font-size: 6.6mm; line-height: 1; }
+  .rbrand .tg { font-size: 2.4mm; letter-spacing: .24em; color: #5eead4; font-weight: 700; }
+  .rhero { display: flex; flex-direction: column; align-items: center; }
+  .hero { width: 52mm; height: 64mm; object-fit: cover; border-radius: 4.5mm;
+    box-shadow: 0 4mm 11mm rgba(0,0,0,.55); border: .4mm solid rgba(94,234,212,.25); }
+  .hero-cap { margin-top: 3.4mm; }
+  .hero-cap .t { font-family: 'Outfit'; font-weight: 900; font-size: 4.2mm; }
+  .hero-cap .s { font-size: 2.4mm; color: #9fc0ba; margin-top: .8mm; }
+  .hero-cap .badge { display: inline-block; margin-top: 2.2mm; font-family: 'Outfit'; font-weight: 800;
+    font-size: 2.2mm; letter-spacing: .07em; text-transform: uppercase; color: #04100f; background: #fbbf24; padding: 1mm 2.8mm; border-radius: 99mm; }
+
+  /* bloc app (comble le vide) */
+  .rapp { width: 100%; background: linear-gradient(135deg, rgba(94,234,212,.13), rgba(245,158,11,.08));
+    border: .3mm solid rgba(94,234,212,.32); border-radius: 3.4mm; padding: 3.4mm 3mm; }
+  .rapp .at { font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; }
+  .rapp .as { font-size: 2.2mm; color: #9fc0ba; margin: .6mm 0 2.4mm; }
+  .rapp .al { display: flex; align-items: center; gap: 1.8mm; font-size: 2.5mm; color: #e3f2ee;
+    text-align: left; padding: .4mm 0; }
+  .rapp .al b { color: #5eead4; font-weight: 700; }
+
+  .rbot { display: flex; flex-direction: column; align-items: center; }
+  .rqr { background: #fff; padding: 2.2mm; border-radius: 2.8mm; box-shadow: 0 2mm 6mm rgba(0,0,0,.45); }
+  .rqr img { display: block; width: 31mm; height: 31mm; }
+  .rqr-cap { font-family: 'Outfit'; font-weight: 800; font-size: 2.6mm; color: #ecfdf5; margin-top: 2.2mm; line-height: 1.25; }
+  .rqr-cap .ac { color: #5eead4; }
+  .raddr { font-size: 2.1mm; color: #8fb0aa; margin-top: 3mm; line-height: 1.4; }
+  .raddr b { color: #cfe7e1; }
+
+  /* ───── COLONNE DROITE ───── */
+  .main { flex: 1; min-width: 0; padding: 8.5mm 8mm 7mm; display: flex; flex-direction: column; }
+  .rainbow { height: 2.2mm; border-radius: 99mm; margin-bottom: 4mm; background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #5eead4, #fbbf24); }
+  .mtitle { display: flex; align-items: center; justify-content: space-between; gap: 4mm; }
+  .mtitle .h { font-family: 'Outfit'; font-weight: 900; font-size: 8.5mm; letter-spacing: -.02em; line-height: 1; }
+  .guide-intro { display: inline-flex; align-items: center; gap: 1.6mm; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 3.5mm; letter-spacing: .01em;
+    color: #1c1402; background: linear-gradient(90deg, #fbbf24, #f59e0b); padding: 2.2mm 4mm;
+    border-radius: 99mm; box-shadow: 0 1.5mm 4mm rgba(245,158,11,.32); }
+  .guide-intro small { font-family: 'Inter'; font-weight: 600; font-size: 2.3mm; opacity: .85; }
+  .guide { display: flex; gap: 2.4mm; margin: 4mm 0 4.4mm; }
+  .guide .g { flex: 1; display: flex; align-items: center; gap: 1.8mm; background: rgba(94,234,212,.07);
+    border: .3mm solid rgba(94,234,212,.2); border-radius: 2.4mm; padding: 2.2mm 2.4mm; }
+  .guide .g .n { width: 4.6mm; height: 4.6mm; border-radius: 50%; background: #5eead4; color: #04100f; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 2.8mm; display: flex; align-items: center; justify-content: center; }
+  .guide .g .t { font-size: 2.3mm; line-height: 1.2; color: #d7ece7; }
+  .guide .g .t b { color: #ecfdf5; }
+
+  .secs { display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 3.2mm; }
+
+  /* carte section horizontale */
+  .sc { display: flex; align-items: center; gap: 3mm; background: rgba(255,255,255,.035); border: .3mm solid rgba(255,255,255,.10);
+    border-radius: 3.4mm; padding: 3mm; }
+  .sc.energie { border-color: rgba(56,189,248,.30); background: rgba(56,189,248,.05); }
+  .sc.gourmand { border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.05); }
+  .sc.sante { border-color: rgba(52,211,153,.28); background: rgba(52,211,153,.05); }
+  .sc .thumb { width: 26mm; height: 32mm; border-radius: 2.6mm; object-fit: cover; flex: none;
+    box-shadow: 0 1.5mm 4mm rgba(0,0,0,.5); border: .3mm solid rgba(255,255,255,.12); }
+  .sc .bd { flex: 1; min-width: 0; }
+  .sc .top { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+  .sc .top .nm { font-family: 'Outfit'; font-weight: 900; font-size: 4.2mm; letter-spacing: -.01em; }
+  .price { text-align: right; white-space: nowrap; }
+  .price .p { font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; color: #fbbf24; }
+  .price .vol { font-size: 1.9mm; color: #9fc0ba; display: block; margin-top: .3mm; }
+  /* badges santé */
+  .badges { display: flex; flex-wrap: wrap; gap: 1.4mm; margin: 1.8mm 0; }
+  .b { font-size: 2.05mm; font-weight: 700; color: #062b25; background: #5eead4; border-radius: 99mm; padding: .6mm 2mm; }
+  .b.alt { color: #d7ece7; background: rgba(94,234,212,.12); border: .25mm solid rgba(94,234,212,.3); }
+  .b.warm { color: #3a2503; background: #fbbf24; }
+  .b.size { color: #04100f; background: #ffffff; font-weight: 800; }
+  /* heroes + compo */
+  .hh { font-size: 2.55mm; color: #e3f2ee; line-height: 1.5; }
+  .hh .it { white-space: nowrap; }
+  .hh b { font-family: 'Outfit'; font-weight: 700; color: #fff; }
+  .hh .cp { color: #9fc0ba; }
+  .hh .dot { color: #5eead4; margin: 0 1mm; }
+  .hh .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
+    color: #04100f; background: #fbbf24; padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
+  .hh .more { color: #5eead4; font-weight: 600; }
+
+  /* mini-cartes cafés / enfants */
+  .duo { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 3mm; }
+  .mini { background: rgba(255,255,255,.035); border: .3mm solid rgba(255,255,255,.10); border-radius: 3.4mm; padding: 3mm 3.2mm; }
+  .mini.enfants { border-color: rgba(236,72,153,.3); background: rgba(236,72,153,.05); }
+  .mini .top { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+  .mini .top .nm { font-family: 'Outfit'; font-weight: 900; font-size: 3.7mm; }
+  .mini .badges { margin: 1.4mm 0; }
+  .mini .hh { font-size: 2.45mm; }
+
+  /* bandes extra + snacks */
+  .band { background: rgba(255,255,255,.04); border: .3mm solid rgba(255,255,255,.10); border-radius: 3.2mm; padding: 2.8mm 3.4mm; }
+  .band.extra { background: rgba(245,158,11,.07); border-color: rgba(245,158,11,.26); }
+  .band .bh { display: flex; align-items: baseline; gap: 2mm; }
+  .band .bh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 3.3mm; }
+  .band .bh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 2.9mm; color: #fbbf24; }
+  .band .bh .sub { font-size: 2.2mm; color: #9fc0ba; margin-left: auto; }
+  .band .ln { font-size: 2.5mm; color: #e3f2ee; line-height: 1.5; margin-top: 1.4mm; }
+  .band .ln b { color: #fff; font-weight: 700; }
+  .band .ln .dot { color: #5eead4; margin: 0 .9mm; }
+  .band.extra .ln .dot { color: #f59e0b; }
+
+  .loy { display: flex; align-items: center; gap: 4mm; padding: 3.4mm 4mm;
+    background: linear-gradient(100deg, rgba(94,234,212,.12), rgba(245,158,11,.08));
+    border: .3mm solid rgba(94,234,212,.3); border-radius: 3.4mm; }
+  .loy .lt2 { flex: 1; }
+  .loy .sep { width: .3mm; align-self: stretch; background: rgba(94,234,212,.3); }
+  .loy .la { font-family: 'Outfit'; font-weight: 800; font-size: 3.3mm; }
+  .loy .la .em { font-size: 4mm; }
+  .loy .la b { color: #5eead4; font-weight: 900; }
+  .loy .lb { font-size: 2.4mm; color: #9fc0ba; margin-top: .8mm; }
+</style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- RAIL -->
+    <div class="rail">
+      <div class="glow t"></div>
+      <div class="glow b"></div>
+      <div class="rbrand">
+        <img src="icon-512.png" alt="La Base" />
+        <div class="nm">LA BASE</div>
+        <div class="tg">SHAKES &amp; DRINKS</div>
+      </div>
+      <div class="rhero">
+        <img class="hero" src="images/drinks/aurora.png" alt="Aurora" />
+        <div class="hero-cap">
+          <div class="t">Aurora</div>
+          <div class="s">framboise · myrtille · citron</div>
+          <div class="badge">✨ Nouveauté</div>
+        </div>
+      </div>
+
+      <div class="rapp">
+        <div class="at">📲 L'appli La Base</div>
+        <div class="as">commande, cumule, gagne</div>
+        <div class="al"><span>⭐</span><span><b>1€ = 10 XP</b></span></div>
+        <div class="al"><span>🥤</span><span><b>800 XP</b> = une boisson offerte</span></div>
+        <div class="al"><span>🎁</span><span>Roue cadeau <b>chaque semaine</b></span></div>
+      </div>
+
+      <div class="rbot">
+        <div class="rqr"><img src="qr-carte.png" alt="QR carte" /></div>
+        <div class="rqr-cap">Scanne : <span class="ac">carte complète</span> &amp; appli</div>
+        <div class="raddr"><b>11 rue Saint Pierre</b>, 55100 Verdun<br />commande.labase-nutrition.com</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="rainbow"></div>
+      <div class="mtitle">
+        <div class="h">La carte</div>
+        <div class="guide-intro">👀 Perdu·e ? Suis le guide 👇</div>
+      </div>
+      <div class="guide">
+        <div class="g"><div class="n">1</div><div class="t">Choisis ton <b>univers</b></div></div>
+        <div class="g"><div class="n">2</div><div class="t">Choisis ta <b>taille</b></div></div>
+        <div class="g"><div class="n">3</div><div class="t">Choisis tes <b>extras</b></div></div>
+      </div>
+
+      <div class="secs">
+
+        <!-- ENERGISANTES -->
+        <div class="sc energie">
+          <img class="thumb" src="images/drinks/black-panther.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🔋 Boissons énergisantes</div>
+              <div class="price"><span class="p">6,90€ · 8,90€</span></div>
+            </div>
+            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
+            <div class="hh"><b>Electric Blue</b><span class="dot">·</span><b>Black Panther</b><span class="dot">·</span><b>Perroquet</b><span class="dot">·</span><b>Phénix</b> <span class="new">New</span><span class="dot">·</span><span class="more">+9 sur l'app</span></div>
+          </div>
+        </div>
+
+        <!-- SMOOTHIES -->
+        <div class="sc gourmand">
+          <img class="thumb" src="images/shake/snikers.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🍫 Smoothies nutritionnels</div>
+              <div class="price"><span class="p">8,90€</span><span class="vol">taille unique · repas/collation</span></div>
+            </div>
+            <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
+            <div class="hh"><b>Snickers</b><span class="dot">·</span><b>Full Oréo</b><span class="dot">·</span><b>M&amp;M's</b> <span class="new">New</span><span class="dot">·</span><b>Banana Split</b><span class="dot">·</span><span class="more">+8 sur l'app</span></div>
+          </div>
+        </div>
+
+        <!-- SANTE -->
+        <div class="sc sante">
+          <img class="thumb" src="images/sante/casse-grippe.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🌿 Santé &amp; Détox</div>
+              <div class="price"><span class="p">5,90€ · 8,90€</span><span class="vol">drinks &amp; thé chaud</span></div>
+            </div>
+            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
+            <div class="hh"><b>Casse Grippe</b><span class="dot">·</span><b>Di'Geste</b><span class="dot">·</span><b>Limonade Rose</b><span class="dot">·</span><b>Hydrat'Max</b><span class="dot">·</span><b>Thé aloé vera</b></div>
+          </div>
+        </div>
+
+        <!-- CAFES + ENFANTS -->
+        <div class="duo">
+          <div class="mini">
+            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé ou chaud</span></div></div>
+            <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">dès 100 cal</span></div>
+            <div class="hh"><b>Macchiato</b><span class="dot">·</span><b>Choco Mocha</b><span class="dot">·</span><b>Latte noisette</b><span class="dot">·</span><b>Vanille latte</b></div>
+          </div>
+          <div class="mini enfants">
+            <div class="top"><div class="nm">🧒 Enfants</div><div class="price"><span class="p">5€</span><span class="vol">taille enfant</span></div></div>
+            <div class="badges"><span class="b">0 sucre</span><span class="b">0 cal</span><span class="b alt">sans énergisant</span></div>
+            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+3 sur l'app</span></div>
+          </div>
+        </div>
+
+        <!-- EXTRA -->
+        <div class="band extra">
+          <div class="bh"><div class="nm">➕ Ton Extra Santé</div><div class="pr">+2,50€</div><div class="sub">sur n'importe quelle boisson</div></div>
+          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Énergie</b><span class="dot">·</span><b>CR7 Drive</b><span class="dot">·</span><b>Hydrate 24</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Protéines +5g</b></div>
+        </div>
+
+        <!-- SNACKS -->
+        <div class="band">
+          <div class="bh"><div class="nm">🥨 Snacks protéinés</div><div class="sub">à emporter</div></div>
+          <div class="ln"><b>Chips protéinées</b> 3€<span class="dot">·</span><b>Barres protéines</b> 3€<span class="dot">·</span><b>Barre H24 · 21g</b> 4€<span class="dot">·</span><b>Barre repas F1</b> 5€</div>
+        </div>
+
+        <!-- COMBO + MARDI -->
+        <div class="loy">
+          <div class="lt2">
+            <div class="la"><span class="em">🔥</span> Le Combo : <b>boisson + smoothie = −1€</b></div>
+            <div class="lb">Remplace un repas ou une collation, futé et gourmand</div>
+          </div>
+          <div class="sep"></div>
+          <div class="lt2">
+            <div class="la"><span class="em">🗓️</span> <b>Mardi = Double XP</b></div>
+            <div class="lb">Tous tes points comptent double ce jour-là</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
