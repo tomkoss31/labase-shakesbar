@@ -1372,7 +1372,21 @@ async function loadRedemptions() {
         '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x) · ' + t.totalXp + ' XP</div>' +
         rows + '</div>';
     }
-    $('redemptions-result').innerHTML = block("Aujourd'hui", data.today) + block('Ce mois', data.month);
+    function wheelBlock(title, t) {
+      const rows = (t.byType || []).map(x =>
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
+        '<span>' + x.label + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'
+      ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
+      return '<div style="background:#04100f;border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:14px;margin-top:10px;">' +
+        '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x)</div>' +
+        rows + '</div>';
+    }
+    const w = data.wheel || { today: { total: 0, byType: [] }, month: { total: 0, byType: [] } };
+    $('redemptions-result').innerHTML =
+      block("Aujourd'hui", data.today) + block('Ce mois', data.month) +
+      '<div style="margin-top:18px;font-weight:800;font-size:13px;color:#f59e0b;">🎰 Cadeaux roue donnés au comptoir</div>' +
+      '<div class="hint" style="margin-top:2px;">Gagnés à la roue puis remis (hors XP).</div>' +
+      wheelBlock("Aujourd'hui", w.today) + wheelBlock('Ce mois', w.month);
   } catch (err) {
     $('redemptions-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
   }

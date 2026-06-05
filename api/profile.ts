@@ -397,7 +397,33 @@ export default async function handler(req: any, res: any) {
       return { total: list.length, totalXp, byType: Object.values(byType) };
     }
 
-    return res.status(200).json({ today: tally(today), month: tally(all) });
+    // ─── Cadeaux roue RÉELLEMENT donnés au comptoir (used_at) ───
+    // Suivi stock à part : ces cadeaux ne passent pas par les XP, ils sont
+    // gagnés à la roue puis remis au comptoir (used_at horodate la remise).
+    const { data: wheelRows } = await admin
+      .from('wheel_spins')
+      .select('reward_label, reward_type, used_at')
+      .gte('used_at', startOfMonth)
+      .in('reward_type', ['free_product', 'manual_pickup'])
+      .order('used_at', { ascending: false });
+
+    const wheelAll = (wheelRows ?? []) as { reward_label: string; used_at: string }[];
+    const wheelToday = wheelAll.filter((r) => r.used_at >= startOfDay);
+
+    function wheelTally(list: typeof wheelAll) {
+      const byType: Record<string, { label: string; count: number }> = {};
+      for (const r of list) {
+        if (!byType[r.reward_label]) byType[r.reward_label] = { label: r.reward_label, count: 0 };
+        byType[r.reward_label].count += 1;
+      }
+      return { total: list.length, byType: Object.values(byType) };
+    }
+
+    return res.status(200).json({
+      today: tally(today),
+      month: tally(all),
+      wheel: { today: wheelTally(wheelToday), month: wheelTally(wheelAll) },
+    });
   }
 
   // ─── GET ?action=stats (dashboard admin : compteurs business) ───

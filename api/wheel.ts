@@ -5,13 +5,13 @@
 import { createHash } from 'node:crypto';
 
 const WHEEL_SEGMENTS = [
-  { id: 'discount-5',  label: '−5% sur ta prochaine commande', weight: 27, rewardType: 'discount_percent', rewardValue: '5' },
-  { id: 'tente-encore', label: 'Tente encore la semaine prochaine', weight: 20, rewardType: 'retry', rewardValue: null },
-  { id: 'discount-10', label: '−10% sur ta prochaine commande', weight: 15, rewardType: 'discount_percent', rewardValue: '10' },
-  { id: 'xp-x2',       label: 'Boost XP ×2 pendant 24h', weight: 12, rewardType: 'xp_multiplier', rewardValue: '2' },
-  { id: 'gaufre-offerte', label: 'Gaufre healthy offerte', weight: 8, rewardType: 'free_product', rewardValue: 'Gaufre healthy' },
-  { id: 'smoothie-offert', label: '2ème smoothie offert (1 acheté = 1 offert)', weight: 8, rewardType: 'free_product', rewardValue: '2e smoothie offert' },
-  { id: 'boost-drink', label: 'Boost : 2ème drink XL offert (1 acheté = 1 offert)', weight: 7, rewardType: 'free_product', rewardValue: '2e drink XL offert' },
+  { id: 'discount-5',  label: '−5% sur ta prochaine commande', weight: 30, rewardType: 'discount_percent', rewardValue: '5' },
+  { id: 'tente-encore', label: 'Tente encore la semaine prochaine', weight: 23, rewardType: 'retry', rewardValue: null },
+  { id: 'discount-10', label: '−10% sur ta prochaine commande', weight: 17, rewardType: 'discount_percent', rewardValue: '10' },
+  { id: 'xp-x2',       label: 'Boost XP ×2 pendant 24h', weight: 14, rewardType: 'xp_multiplier', rewardValue: '2' },
+  { id: 'gaufre-offerte', label: 'Gaufre healthy offerte (dès 8€)', weight: 5, rewardType: 'free_product', rewardValue: 'Gaufre healthy (dès 8€)' },
+  { id: 'smoothie-offert', label: '2ème smoothie offert (1 acheté = 1 offert)', weight: 5, rewardType: 'free_product', rewardValue: '2e smoothie offert' },
+  { id: 'boost-drink', label: 'Boost : 2ème drink XL offert (1 acheté = 1 offert)', weight: 3, rewardType: 'free_product', rewardValue: '2e drink XL offert' },
   { id: 'goodies', label: 'Cadeau surprise au comptoir', weight: 3, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
