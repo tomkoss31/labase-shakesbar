@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vitrine V2.1 (billboard) — La Base</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A2 portrait; margin: 0; }
+  html, body { width: 420mm; height: 594mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: radial-gradient(120% 80% at 50% 38%, #0d2a26 0%, #061612 55%, #02100e 100%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; position: relative; overflow: hidden; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(34mm); z-index: 0; }
+  .glow.a { width: 260mm; height: 260mm; top: 120mm; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(94,234,212,.32), rgba(56,189,248,.12) 45%, transparent 70%); }
+  .glow.b { width: 150mm; height: 150mm; top: 70mm; right: -30mm; background: radial-gradient(circle, rgba(236,72,153,.20), transparent 70%); }
+  .glow.c { width: 150mm; height: 150mm; bottom: 60mm; left: -30mm; background: radial-gradient(circle, rgba(245,158,11,.18), transparent 70%); }
+  .page { position: relative; z-index: 1; width: 420mm; height: 594mm; padding: 18mm 18mm 16mm; display: flex; flex-direction: column; }
+
+  /* header */
+  .head { display: flex; align-items: center; gap: 6mm; }
+  .head img { width: 30mm; height: 30mm; border-radius: 7mm; box-shadow: 0 3mm 8mm rgba(0,0,0,.5); }
+  .head .nm { font-family: 'Outfit'; font-weight: 900; font-size: 11mm; line-height: 1; flex: 1; }
+  .head .nm small { display: block; font-size: 3.4mm; letter-spacing: .24em; color: #5eead4; font-weight: 700; margin-top: 1mm; }
+  .head .ig { font-family: 'Outfit'; font-weight: 800; font-size: 4.4mm; color: #9fc0ba; }
+
+  /* headline */
+  .hl { text-align: center; margin-top: 8mm; }
+  .hl .k { font-family: 'Outfit'; font-weight: 800; font-size: 5.2mm; letter-spacing: .14em; text-transform: uppercase; color: #fbbf24; }
+  .hl .big { font-family: 'Outfit'; font-weight: 900; font-size: 26mm; line-height: .98; letter-spacing: -.03em; margin: 3mm 0; }
+  .hl .big .ac { color: #5eead4; }
+  .hl .s { font-size: 6mm; color: #cbe4df; font-weight: 600; }
+  .hl .s b { color: #ecfdf5; font-family: 'Outfit'; font-weight: 800; }
+
+  /* stage avec visuels */
+  .stage { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; }
+  .drink, .shake { border-radius: 9mm; overflow: hidden; box-shadow: 0 12mm 30mm rgba(0,0,0,.6); border: 1mm solid rgba(94,234,212,.3); }
+  .drink { width: 168mm; height: 168mm; transform: rotate(-6deg) translateX(-26mm); z-index: 2; }
+  .drink img { width: 168mm; height: 168mm; display: block; object-fit: cover; }
+  .shake { width: 138mm; height: 168mm; transform: rotate(6deg) translateX(78mm); z-index: 1; }
+  .shake img { width: 138mm; height: 168mm; display: block; object-fit: cover; }
+
+  .co { position: absolute; font-family: 'Outfit'; font-weight: 800; border-radius: 99mm; padding: 2.6mm 5mm;
+    box-shadow: 0 3mm 9mm rgba(0,0,0,.4); white-space: nowrap; z-index: 5; font-size: 5mm; }
+  .co.teal { background: #5eead4; color: #04231d; }
+  .co.warm { background: #fbbf24; color: #2a1c02; }
+  .co.dark { background: rgba(4,16,15,.86); color: #ecfdf5; border: .5mm solid rgba(94,234,212,.4); }
+  .co.c1 { top: 16mm; left: 18mm; }
+  .co.c2 { bottom: 26mm; left: 30mm; }
+  .co.c3 { top: 28mm; right: 16mm; }
+  .co.price { bottom: 6mm; left: 50%; transform: translateX(-50%); font-size: 8mm; font-weight: 900; padding: 3.5mm 8mm; }
+
+  /* jeu band */
+  .jeu { display: flex; align-items: center; gap: 9mm; background: linear-gradient(100deg, rgba(94,234,212,.16), rgba(245,158,11,.10));
+    border: 1mm solid rgba(94,234,212,.42); border-radius: 10mm; padding: 8mm 10mm; margin-top: 6mm; }
+  .jeu .qr { background: #fff; padding: 4.5mm; border-radius: 50%; flex: none; box-shadow: 0 5mm 14mm rgba(0,0,0,.45); }
+  .jeu .qr img { display: block; width: 60mm; height: 60mm; border-radius: 3mm; }
+  .jeu .jt { flex: 1; text-align: center; }
+  .jeu .jb { display: inline-block; font-family: 'Outfit'; font-weight: 900; font-size: 5mm; letter-spacing: .06em; text-transform: uppercase;
+    color: #04100f; background: #fbbf24; padding: 2.2mm 5.5mm; border-radius: 99mm; }
+  .jeu .jh { font-family: 'Outfit'; font-weight: 900; font-size: 13mm; line-height: 1.02; margin: 3.5mm 0 2mm; }
+  .jeu .jh .ac { color: #5eead4; }
+  .jeu .js { font-size: 5mm; color: #d7ece7; }
+  .jeu .js b { color: #fbbf24; }
+
+  /* footer */
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: 6mm; margin-top: 7mm; font-size: 4.6mm; }
+  .foot .f { display: flex; align-items: center; gap: 2.6mm; color: #cbe4df; }
+  .foot .f .e { font-size: 5.2mm; }
+  .foot .f b { font-family: 'Outfit'; font-weight: 800; color: #ecfdf5; }
+  .foot .f .site { color: #5eead4; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="glow a"></div><div class="glow b"></div><div class="glow c"></div>
+  <div class="page">
+
+    <div class="head">
+      <img src="icon-512.png" alt="La Base" />
+      <div class="nm">LA BASE<small>SHAKES &amp; DRINKS</small></div>
+      <div class="ig">📸 @labase_verdun</div>
+    </div>
+
+    <div class="hl">
+      <div class="k">Ton spot healthy à Verdun</div>
+      <div class="big">L'énergie<br />a un <span class="ac">spot</span>.</div>
+      <div class="s">Énergisantes <b>0 sucre</b> · smoothies <b>protéinés</b> · cafés gourmets</div>
+    </div>
+
+    <div class="stage">
+      <div class="drink"><img src="images/drinks/electric-blue.png" alt="Electric Blue" /></div>
+      <div class="shake"><img src="images/shake/snikers.png" alt="Snickers" /></div>
+      <div class="co teal c1">⚡ 0 sucre · 20 cal</div>
+      <div class="co dark c2">16 recettes énergisantes</div>
+      <div class="co warm c3">💪 24g protéines</div>
+      <div class="co price warm">dès 5€</div>
+    </div>
+
+    <!-- JEU -->
+    <div class="jeu">
+      <div class="qr"><img src="qr-jeu.png" alt="QR jeu concours" /></div>
+      <div class="jt">
+        <span class="jb">🎰 Scanne &amp; gagne</span>
+        <div class="jh">Tourne la roue,<br /><span class="ac">gagne un cadeau</span></div>
+        <div class="js"><b>100% gagnant</b> — ton cadeau à récupérer en boutique 🎁</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="foot">
+      <div class="f"><span class="e">📍</span> <b>11 rue Saint Pierre, Verdun</b></div>
+      <div class="f"><span class="e">🕒</span> Ouvert mar–sam · horaires à jour <b>@labase_verdun</b></div>
+      <div class="f"><span class="e">📲</span> <span class="site">commande.labase-nutrition.com</span></div>
+    </div>
+  </div>
+</body>
+</html>

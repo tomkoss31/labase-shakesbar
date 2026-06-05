@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planche stickers gobelet — La Base</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4; margin: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5; background: #ffffff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 12mm 9mm; }
+  .grid { display: grid; grid-template-columns: repeat(3, 62mm); grid-auto-rows: 62mm; gap: 9mm 6mm; justify-content: center; }
+
+  .sticker { width: 62mm; height: 62mm; border-radius: 50%; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .sticker::before { content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: 0;
+    padding: 1.2mm; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; }
+  .sticker > * { position: relative; z-index: 1; }
+
+  /* LOGO */
+  .logo { background: radial-gradient(120% 120% at 50% 30%, #0c2521 0%, #04100f 72%);
+    justify-content: space-between; padding: 7mm 5mm 10mm; }
+  .logo::before { background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b); }
+  .logo img { width: 30mm; height: 30mm; border-radius: 7mm; box-shadow: 0 2mm 5mm rgba(0,0,0,.55); }
+  .logo .txt { text-align: center; }
+  .logo .nm { font-family: 'Outfit'; font-weight: 900; font-size: 7.2mm; line-height: 1; }
+  .logo .tg { font-size: 2.1mm; letter-spacing: .3em; color: #5eead4; font-weight: 700; margin-top: 1.2mm; }
+  .logo .vd { font-family: 'Outfit'; font-weight: 700; font-size: 2.2mm; color: #9fc0ba; margin-top: 2mm; letter-spacing: .14em; }
+
+  /* QR */
+  .qrs { background: linear-gradient(160deg, #0c2521, #04100f); padding: 5mm; }
+  .qrs::before { background: linear-gradient(135deg, #fbbf24, #f59e0b, #5eead4); }
+  .qrs .top { font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; color: #fbbf24; text-transform: uppercase; letter-spacing: .03em; }
+  .qrs .qr { background: #fff; padding: 1.8mm; border-radius: 2.4mm; margin: 1.8mm 0; }
+  .qrs .qr img { display: block; width: 27mm; height: 27mm; }
+  .qrs .bot { font-family: 'Outfit'; font-weight: 800; font-size: 2.8mm; }
+  .qrs .bot .ac { color: #5eead4; }
+  .qrs .ig { font-size: 2mm; color: #9fc0ba; margin-top: .5mm; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <!-- 6 LOGO -->
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <div class="sticker logo"><img src="icon-512.png" alt="" /><div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div></div>
+    <!-- 6 QR -->
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+    <div class="sticker qrs"><div class="top">🎰 Scanne &amp; gagne</div><div class="qr"><img src="qr-jeu.png" alt="" /></div><div class="bot"><span class="ac">100% gagnant</span> 🎁</div><div class="ig">@labase_verdun</div></div>
+  </div>
+</body>
+</html>

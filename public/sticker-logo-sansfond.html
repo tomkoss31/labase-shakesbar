@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sticker logo SANS FOND — test</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4 landscape; margin: 0; }
+  html, body { width: 297mm; height: 210mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: linear-gradient(150deg, #061a17 0%, #02100e 100%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; display: flex; align-items: center; justify-content: center; gap: 30mm; padding: 16mm; }
+  .item { text-align: center; }
+  .item .lbl { margin-top: 5mm; font-family: 'Outfit'; font-weight: 800; font-size: 4mm; color: #5eead4; }
+
+  .logo { width: 84mm; height: 84mm; border-radius: 50%; position: relative;
+    background: radial-gradient(120% 120% at 50% 32%, #0c2521 0%, #04100f 70%);
+    border: 1.4mm solid transparent; background-clip: padding-box;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 9mm 6mm 13mm; box-shadow: 0 6mm 16mm rgba(0,0,0,.5); }
+  .logo::before { content: ''; position: absolute; inset: -1.4mm; border-radius: 50%; z-index: -1;
+    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b); }
+  .logo img { width: 44mm; height: 44mm; object-fit: contain; filter: drop-shadow(0 2.5mm 5mm rgba(0,0,0,.5)); }
+  .logo .txt { text-align: center; }
+  .logo .nm { font-family: 'Outfit'; font-weight: 900; font-size: 9.5mm; line-height: 1; letter-spacing: -.01em; }
+  .logo .tg { font-size: 2.8mm; letter-spacing: .3em; color: #5eead4; font-weight: 700; margin-top: 1.6mm; }
+  .logo .vd { font-family: 'Outfit'; font-weight: 700; font-size: 3mm; color: #9fc0ba; margin-top: 2.6mm; letter-spacing: .14em; }
+
+  /* variante claire (au cas où) */
+  .logo.light { background: radial-gradient(120% 120% at 50% 32%, #ffffff 0%, #eef6f4 72%); }
+  .logo.light .nm { color: #04100f; }
+  .logo.light .tg { color: #14b8a6; }
+  .logo.light .vd { color: #5b7d77; }
+</style>
+</head>
+<body>
+  <div class="item">
+    <div class="logo">
+      <img src="images/logo-b.png" alt="B" />
+      <div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div>
+    </div>
+    <div class="lbl">Logo sans fond · cercle foncé</div>
+  </div>
+
+  <div class="item">
+    <div class="logo light">
+      <img src="images/logo-b.png" alt="B" />
+      <div class="txt"><div class="nm">LA BASE</div><div class="tg">SHAKES &amp; DRINKS</div><div class="vd">★ VERDUN ★</div></div>
+    </div>
+    <div class="lbl">Logo sans fond · cercle clair</div>
+  </div>
+</body>
+</html>
