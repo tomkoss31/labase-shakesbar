@@ -104,6 +104,14 @@
   .hh .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
     color: #04100f; background: #fbbf24; padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
   .hh .more { color: #5eead4; font-weight: 600; }
+  /* liste détaillée : nom + saveurs */
+  .hl { display: flex; flex-direction: column; gap: 1.2mm; margin-top: .6mm; }
+  .hli { line-height: 1.15; }
+  .hli .n { font-family: 'Outfit'; font-weight: 700; font-size: 2.65mm; color: #fff; }
+  .hli .f { font-size: 2.25mm; color: #9fc0ba; }
+  .hli .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
+    color: #04100f; background: #fbbf24; padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
+  .hmore { font-size: 2.4mm; color: #5eead4; font-weight: 600; margin-top: 1.4mm; }
 
   /* mini-cartes cafés / enfants */
   .duo { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 3mm; }
@@ -196,8 +204,13 @@
               <div class="nm">🔋 Boissons énergisantes</div>
               <div class="price"><span class="p">6,90€ · 8,90€</span></div>
             </div>
-            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
-            <div class="hh"><b>Electric Blue</b><span class="dot">·</span><b>Black Panther</b><span class="dot">·</span><b>Perroquet</b><span class="dot">·</span><b>Phénix</b> <span class="new">New</span><span class="dot">·</span><span class="more">+9 sur l'app</span></div>
+            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Electric Blue</span> <span class="f">— citron · framboise bleue · myrtille</span></div>
+              <div class="hli"><span class="n">Black Panther</span> <span class="f">— citron · cerise · framboise bleue</span></div>
+              <div class="hli"><span class="n">Phénix <span class="new">New</span></span> <span class="f">— fraise · pêche · ananas</span></div>
+              <div class="hmore">📲 + 13 autres parfums sur la carte</div>
+            </div>
           </div>
         </div>
 
@@ -207,10 +220,15 @@
           <div class="bd">
             <div class="top">
               <div class="nm">🍫 Smoothies nutritionnels</div>
-              <div class="price"><span class="p">8,90€</span><span class="vol">taille unique · repas/collation</span></div>
+              <div class="price"><span class="p">8,90€</span><span class="vol">650 ml · taille unique</span></div>
             </div>
-            <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
-            <div class="hh"><b>Snickers</b><span class="dot">·</span><b>Full Oréo</b><span class="dot">·</span><b>M&amp;M's</b> <span class="new">New</span><span class="dot">·</span><b>Banana Split</b><span class="dot">·</span><span class="more">+8 sur l'app</span></div>
+            <div class="badges"><span class="b size">650 ml</span><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Snickers</span> <span class="f">— chocolat · cacahuètes</span></div>
+              <div class="hli"><span class="n">Full Oréo</span> <span class="f">— cookies cream · Oréo</span></div>
+              <div class="hli"><span class="n">M&amp;M's <span class="new">New</span></span> <span class="f">— chocolat · caramel · noisette</span></div>
+              <div class="hmore">📲 + 12 autres saveurs sur la carte</div>
+            </div>
           </div>
         </div>
 
@@ -222,29 +240,34 @@
               <div class="nm">🌿 Santé &amp; Détox</div>
               <div class="price"><span class="p">5,90€ · 8,90€</span><span class="vol">drinks &amp; thé chaud</span></div>
             </div>
-            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
-            <div class="hh"><b>Casse Grippe</b><span class="dot">·</span><b>Di'Geste</b><span class="dot">·</span><b>Limonade Rose</b><span class="dot">·</span><b>Hydrat'Max</b><span class="dot">·</span><b>Thé aloé vera</b></div>
+            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Casse Grippe</span> <span class="f">— immunité · aloé vera</span></div>
+              <div class="hli"><span class="n">Di'geste</span> <span class="f">— fibres · probiotiques</span></div>
+              <div class="hli"><span class="n">Limonade Rose</span> <span class="f">— collagène · glow</span></div>
+              <div class="hli"><span class="n">Hydrat'Max</span> <span class="f">— vitamine C</span> <span class="f">· + Thé aloé vera chaud</span></div>
+            </div>
           </div>
         </div>
 
         <!-- CAFES + ENFANTS -->
         <div class="duo">
           <div class="mini">
-            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé ou chaud</span></div></div>
+            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé 650ml · ou chaud</span></div></div>
             <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">dès 100 cal</span></div>
             <div class="hh"><b>Macchiato</b><span class="dot">·</span><b>Choco Mocha</b><span class="dot">·</span><b>Latte noisette</b><span class="dot">·</span><b>Vanille latte</b></div>
           </div>
           <div class="mini enfants">
             <div class="top"><div class="nm">🧒 Enfants</div><div class="price"><span class="p">5€</span><span class="vol">taille enfant</span></div></div>
             <div class="badges"><span class="b">0 sucre</span><span class="b">0 cal</span><span class="b alt">sans énergisant</span></div>
-            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+3 sur l'app</span></div>
+            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+4 sur l'app</span></div>
           </div>
         </div>
 
         <!-- EXTRA -->
         <div class="band extra">
           <div class="bh"><div class="nm">➕ Ton Extra Santé</div><div class="pr">+2,50€</div><div class="sub">sur n'importe quelle boisson</div></div>
-          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Énergie</b><span class="dot">·</span><b>CR7 Drive</b><span class="dot">·</span><b>Hydrate 24</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Protéines +5g</b></div>
+          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Électrolytes</b><span class="dot">·</span><b>Protéines +5g</b></div>
         </div>
 
         <!-- SNACKS -->
