@@ -626,6 +626,13 @@
       <button class="primary" id="health-check">🔍 Vérifier /api/health</button>
       <pre id="health-result" style="margin-top: 14px; padding: 12px; background: #04100f; border: 1px solid rgba(94,234,212,.1); border-radius: 10px; font-family: ui-monospace, monospace; font-size: 11px; color: #94b8b1; white-space: pre-wrap; word-break: break-all; overflow-x: auto;"></pre>
     </div>
+
+    <div class="card">
+      <label>📚 Audit catalogue Square (lecture seule)</label>
+      <div class="hint" style="margin-bottom:10px;">État réel de ton catalogue Square : catégories, articles, variations et doublons. Aucune modification.</div>
+      <button class="primary" id="catalog-audit">🔍 Lancer l'audit Square</button>
+      <div id="catalog-result" style="margin-top: 14px;"></div>
+    </div>
   </div>
 
 </div>
@@ -1471,6 +1478,59 @@ async function runHealthCheck() {
     $('health-result').textContent = JSON.stringify(data, null, 2);
   } catch (err) {
     $('health-result').textContent = '❌ ' + err.message;
+  }
+}
+
+// ═══ AUDIT CATALOGUE SQUARE (lecture seule) ═══
+$('catalog-audit').addEventListener('click', loadCatalogAudit);
+async function loadCatalogAudit() {
+  const password = getPassword();
+  $('catalog-result').innerHTML = '<div class="hint">Lecture du catalogue Square…</div>';
+  try {
+    const r = await fetch('/api/square-catalog?action=audit', {
+      headers: { 'Authorization': 'Bearer ' + password },
+    });
+    const d = await r.json();
+    if (!r.ok) { $('catalog-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+
+    const esc = (s) => String(s).replace(/[&<>]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+    let html = '';
+
+    // Compteurs
+    html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">' +
+      ['categories|Catégories','items|Articles','variations|Variations','modifierLists|Listes modif.']
+        .map(x => { const [k,l] = x.split('|'); return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:10px;padding:10px;text-align:center;"><div style="font-family:Outfit;font-weight:900;font-size:22px;color:#5eead4;">' + (d.counts[k] ?? 0) + '</div><div style="font-size:11px;color:#94b8b1;">' + l + '</div></div>'; }).join('') +
+      '</div>';
+
+    // Doublons (le point sensible)
+    const dups = d.duplicates || [];
+    const dupCats = d.duplicateCategories || [];
+    if (dups.length || dupCats.length) {
+      html += '<div style="margin-top:12px;background:#1a0e04;border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:12px;">' +
+        '<div style="font-weight:800;color:#f59e0b;font-size:13px;">⚠️ Doublons détectés</div>';
+      if (dupCats.length) html += '<div style="font-size:12px;color:#fbbf24;margin-top:6px;">Catégories en double : ' + dupCats.map(c => esc(c.name) + ' ×' + c.count).join(', ') + '</div>';
+      dups.forEach(x => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-top:1px solid rgba(245,158,11,.12);"><span>' + esc(x.name) + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'; });
+      html += '</div>';
+    } else {
+      html += '<div style="margin-top:12px;color:#5eead4;font-size:13px;">✅ Aucun doublon détecté</div>';
+    }
+
+    // Catégories + nb articles
+    html += '<div style="margin-top:14px;font-weight:800;font-size:13px;color:#5eead4;">Articles par catégorie</div>';
+    (d.categories || []).forEach(c => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid rgba(94,234,212,.08);"><span>' + esc(c.name) + '</span><span style="font-weight:800;color:#ecfdf5;">' + c.itemCount + '</span></div>'; });
+
+    // Liste complète repliable
+    const items = d.items || [];
+    html += '<details style="margin-top:12px;"><summary style="cursor:pointer;color:#5eead4;font-size:13px;font-weight:700;">Voir les ' + items.length + ' articles en détail</summary><div style="margin-top:8px;">';
+    items.forEach(it => {
+      const vars = (it.variations || []).map(v => esc(v.name) + ' ' + esc(v.price)).join(' · ');
+      html += '<div style="font-size:12px;padding:5px 0;border-top:1px solid rgba(94,234,212,.06);"><b>' + esc(it.name) + '</b> <span style="color:#94b8b1;">[' + esc(it.category) + ']</span>' + (vars ? '<br><span style="color:#94b8b1;">' + vars + '</span>' : '') + '</div>';
+    });
+    html += '</div></details>';
+
+    $('catalog-result').innerHTML = html;
+  } catch (err) {
+    $('catalog-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
   }
 }
 
