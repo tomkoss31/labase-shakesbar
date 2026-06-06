@@ -256,7 +256,7 @@ export default async function handler(req: any, res: any) {
     // - Ajoute une line négative dans la commande Square
     // - Marque le code comme utilisé (used_at = now)
     let discountCents = 0;
-    let rewardLineItem: any = null;
+    let rewardDiscount: any = null;
     let rewardSpinId: string | null = null;
 
     if (rewardCode && userEmail) {
@@ -299,13 +299,18 @@ export default async function handler(req: any, res: any) {
               discountCents = Math.round((subtotal * pct) / 100);
 
               if (discountCents > 0) {
-                rewardLineItem = {
+                // Square REFUSE les line items à montant négatif → on passe par
+                // un discount au niveau commande (scope ORDER, montant fixe calculé
+                // serveur pour rester autoritatif sur l'affichage client).
+                rewardDiscount = {
+                  uid: 'reward-discount',
                   name: `🎁 Réduction ${pct}% (code ${rewardCode})`,
-                  quantity: '1',
-                  base_price_money: {
-                    amount: -discountCents,
+                  type: 'FIXED_AMOUNT',
+                  amount_money: {
+                    amount: discountCents,
                     currency: 'EUR',
                   },
+                  scope: 'ORDER',
                 };
                 rewardSpinId = spin.id;
               }
@@ -322,7 +327,7 @@ export default async function handler(req: any, res: any) {
     let xpSpent = 0;
     let xpDiscountCents = 0;
     let xpUserIdToDebit: string | null = null;
-    let xpLineItem: any = null;
+    let xpDiscount: any = null;
 
     if (requestedXpToSpend > 0 && userEmail) {
       const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -355,13 +360,15 @@ export default async function handler(req: any, res: any) {
               xpSpent = roundedXp;
               xpDiscountCents = roundedXp; // 100 XP = 100 cents
               xpUserIdToDebit = profile.id;
-              xpLineItem = {
+              xpDiscount = {
+                uid: 'xp-discount',
                 name: `⚡ Utilisation de ${roundedXp} XP`,
-                quantity: '1',
-                base_price_money: {
-                  amount: -xpDiscountCents,
+                type: 'FIXED_AMOUNT',
+                amount_money: {
+                  amount: xpDiscountCents,
                   currency: 'EUR',
                 },
+                scope: 'ORDER',
               };
             }
           }
@@ -371,18 +378,20 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Construire la liste finale (line items + reward discount + xp discount)
-    const finalLineItems = [
-      ...lineItems,
-      ...(rewardLineItem ? [rewardLineItem] : []),
-      ...(xpLineItem ? [xpLineItem] : []),
+    // Remises appliquées via order.discounts (Square REFUSE les line items
+    // négatifs). Si aucune remise/XP, `discounts` est absent → payload IDENTIQUE
+    // au flux historique sans remise (chemin prod inchangé).
+    const orderDiscounts = [
+      ...(rewardDiscount ? [rewardDiscount] : []),
+      ...(xpDiscount ? [xpDiscount] : []),
     ];
 
     const squarePayload: any = {
       idempotency_key: randomUUID(),
       order: {
         location_id: locationId,
-        line_items: finalLineItems,
+        line_items: lineItems,
+        ...(orderDiscounts.length > 0 ? { discounts: orderDiscounts } : {}),
       },
       checkout_options: {
         redirect_url: `${getRequestOrigin(req)}/?payment=success`,
