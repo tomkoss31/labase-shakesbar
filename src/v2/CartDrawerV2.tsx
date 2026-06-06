@@ -582,7 +582,10 @@ export function CartDrawerV2({
                 {rewards.map((r) => {
                   const active = selectedRewardCode === r.reward_code;
                   const rBogo = bogoInfo(r, cart);
-                  const applicable = r.reward_type === 'discount_percent' || rBogo.isBogo;
+                  // BOGO : sélectionnable UNIQUEMENT si ≥2 produits éligibles au
+                  // panier (sinon grisé + hint « ajoute un 2e … »).
+                  const bogoReady = rBogo.isBogo && rBogo.eligibleCount >= 2;
+                  const applicable = r.reward_type === 'discount_percent' || bogoReady;
                   return (
                     <button
                       key={r.id}
@@ -644,10 +647,10 @@ export function CartDrawerV2({
                           }}
                         >
                           {r.reward_code}
-                          {!applicable && ' • à présenter au comptoir'}
-                          {active && rBogo.isBogo && rBogo.eligibleCount < 2 &&
+                          {!applicable && !rBogo.isBogo && ' • à présenter au comptoir'}
+                          {rBogo.isBogo && rBogo.eligibleCount < 2 &&
                             ` • ajoute un 2e ${rBogo.kind === 'smoothie' ? 'smoothie' : 'drink XL'} pour l'activer`}
-                          {active && rBogo.isBogo && rBogo.eligibleCount >= 2 &&
+                          {rBogo.isBogo && rBogo.eligibleCount >= 2 && active &&
                             ' • le moins cher offert ✅'}
                         </div>
                       </div>
