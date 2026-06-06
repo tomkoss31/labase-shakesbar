@@ -57,6 +57,45 @@ interface CartDrawerV2Props {
   onSpinWheel?: () => void; // ouvre la roue (nudge "tente ta chance")
 }
 
+// Catégories éligibles aux cadeaux BOGO (1 acheté = 1 offert)
+const BOGO_SMOOTHIE_CAT = 'Smoothies nutritionnels';
+const BOGO_DRINK_CAT = 'Boissons énergisantes';
+
+// État d'un cadeau BOGO (2e smoothie / 2e drink XL offert) pour le panier courant.
+// Règle STRICTE : ≥2 produits du même type → le moins cher offert.
+// ⚠️ Doit rester en miroir de api/create-payment-link.ts.
+function bogoInfo(reward: UserReward | null | undefined, cart: CartItem[]) {
+  const none = {
+    isBogo: false,
+    kind: null as null | 'smoothie' | 'drink',
+    eligibleCount: 0,
+    discountCents: 0,
+  };
+  if (!reward || reward.reward_type !== 'free_product') return none;
+  const rv = (reward.reward_value ?? '').toLowerCase();
+  const kind: 'smoothie' | 'drink' | null = rv.includes('smoothie')
+    ? 'smoothie'
+    : rv.includes('drink')
+      ? 'drink'
+      : null;
+  if (!kind) return none;
+  const prices: number[] = [];
+  for (const item of cart) {
+    const isSmoothie = item.categoryName === BOGO_SMOOTHIE_CAT;
+    const isDrinkXL = item.categoryName === BOGO_DRINK_CAT && /950/.test(item.option || '');
+    const matches = kind === 'smoothie' ? isSmoothie : isDrinkXL;
+    if (!matches) continue;
+    for (let i = 0; i < Math.max(1, item.quantity); i++) prices.push(item.unitPriceCents);
+  }
+  prices.sort((a, b) => a - b);
+  return {
+    isBogo: true,
+    kind,
+    eligibleCount: prices.length,
+    discountCents: prices.length >= 2 ? prices[0] : 0,
+  };
+}
+
 // Calcule les suggestions intelligentes d'après le panier
 function computeSuggestions(cart: CartItem[]): QuickAddSuggestion[] {
   if (cart.length === 0) return [];
@@ -166,8 +205,9 @@ export function CartDrawerV2({
       const pct = parseInt(selectedReward.reward_value ?? '0', 10);
       return Math.round((totalCents * pct) / 100);
     }
-    return 0;
-  }, [selectedReward, totalCents]);
+    // BOGO (2e smoothie / drink XL offert) : le moins cher offert si ≥2 éligibles
+    return bogoInfo(selectedReward, cart).discountCents;
+  }, [selectedReward, totalCents, cart]);
 
   // Calcul max XP utilisables sur ce panier (après réduction reward)
   const cartAfterReward = Math.max(0, totalCents - rewardDiscountCents);
@@ -541,7 +581,8 @@ export function CartDrawerV2({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {rewards.map((r) => {
                   const active = selectedRewardCode === r.reward_code;
-                  const applicable = r.reward_type === 'discount_percent';
+                  const rBogo = bogoInfo(r, cart);
+                  const applicable = r.reward_type === 'discount_percent' || rBogo.isBogo;
                   return (
                     <button
                       key={r.id}
@@ -602,7 +643,12 @@ export function CartDrawerV2({
                             fontFamily: 'ui-monospace, monospace',
                           }}
                         >
-                          {r.reward_code} {!applicable && '• à présenter au comptoir'}
+                          {r.reward_code}
+                          {!applicable && ' • à présenter au comptoir'}
+                          {active && rBogo.isBogo && rBogo.eligibleCount < 2 &&
+                            ` • ajoute un 2e ${rBogo.kind === 'smoothie' ? 'smoothie' : 'drink XL'} pour l'activer`}
+                          {active && rBogo.isBogo && rBogo.eligibleCount >= 2 &&
+                            ' • le moins cher offert ✅'}
                         </div>
                       </div>
                     </button>

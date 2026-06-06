@@ -196,6 +196,18 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Produit inconnu: ${item.name}`);
     };
 
+    const extrasAmount = (item: CartItemPayload): number =>
+      Array.isArray(item.extras)
+        ? item.extras.reduce(
+            (sum: number, extra: string) =>
+              sum + (extraPrices[extra] ?? normalizedExtraPrices[normalizeKey(extra)] ?? 0),
+            0,
+          )
+        : 0;
+
+    // Prix unitaire complet (base + extras) — sert au calcul BOGO côté serveur.
+    const unitTotal = (item: CartItemPayload): number => getBaseAmount(item) + extrasAmount(item);
+
     const lineItems = cart.map((item: CartItemPayload) => {
       const quantity = Number(item.quantity || 1);
       if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
@@ -285,12 +297,13 @@ export default async function handler(req: any, res: any) {
               .eq('user_id', profile.id)
               .maybeSingle();
 
-            if (
+            const spinValid =
               spin &&
               !spin.used_at &&
-              new Date(spin.expires_at).getTime() > Date.now() &&
-              spin.reward_type === 'discount_percent'
-            ) {
+              new Date(spin.expires_at).getTime() > Date.now();
+
+            // ── Remise en pourcentage (−5 %, −10 %, −15 %) ──
+            if (spinValid && spin.reward_type === 'discount_percent') {
               const pct = parseInt(spin.reward_value ?? '0', 10);
               const subtotal = lineItems.reduce(
                 (s: number, li: any) => s + Number(li.base_price_money?.amount ?? 0) * Number(li.quantity ?? 1),
@@ -306,13 +319,58 @@ export default async function handler(req: any, res: any) {
                   uid: 'reward-discount',
                   name: `🎁 Réduction ${pct}% (code ${rewardCode})`,
                   type: 'FIXED_AMOUNT',
-                  amount_money: {
-                    amount: discountCents,
-                    currency: 'EUR',
-                  },
+                  amount_money: { amount: discountCents, currency: 'EUR' },
                   scope: 'ORDER',
                 };
                 rewardSpinId = spin.id;
+              }
+            }
+
+            // ── BOGO : 2e smoothie / 2e drink XL offert ──
+            // Règle STRICTE : ≥2 produits du MÊME type au panier → le moins cher
+            // offert. <2 → aucune remise (non bloquant), code NON consommé.
+            // Gaufre « dès 8€ »/goodies = comptoir-only → ignorés ici.
+            else if (spinValid && spin.reward_type === 'free_product') {
+              const rv = (spin.reward_value ?? '').toLowerCase();
+              const kind = rv.includes('smoothie')
+                ? 'smoothie'
+                : rv.includes('drink')
+                  ? 'drink'
+                  : null;
+
+              if (kind) {
+                const eligiblePrices: number[] = [];
+                for (const item of cart as CartItemPayload[]) {
+                  const cat = normalizeKey(item.categoryName ?? '');
+                  const isSmoothie = cat === normalizeKey('Smoothies nutritionnels');
+                  const isDrinkXL =
+                    cat === normalizeKey('Boissons énergisantes') && /950/.test(item.option ?? '');
+                  const matches = kind === 'smoothie' ? isSmoothie : isDrinkXL;
+                  if (!matches) continue;
+                  let unit = 0;
+                  try {
+                    unit = unitTotal(item);
+                  } catch {
+                    unit = Number(item.unitPriceCents) || 0;
+                  }
+                  const qty = Math.max(1, Number(item.quantity || 1));
+                  for (let i = 0; i < qty; i++) eligiblePrices.push(unit);
+                }
+
+                if (eligiblePrices.length >= 2) {
+                  eligiblePrices.sort((a, b) => a - b);
+                  discountCents = eligiblePrices[0]; // le moins cher offert
+                  if (discountCents > 0) {
+                    rewardDiscount = {
+                      uid: 'reward-bogo',
+                      name: `🎁 ${spin.reward_label ?? 'Produit offert'}`,
+                      type: 'FIXED_AMOUNT',
+                      amount_money: { amount: discountCents, currency: 'EUR' },
+                      scope: 'ORDER',
+                    };
+                    rewardSpinId = spin.id;
+                  }
+                }
               }
             }
           }
