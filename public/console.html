@@ -633,6 +633,25 @@
       <button class="primary" id="catalog-audit">🔍 Lancer l'audit Square</button>
       <div id="catalog-result" style="margin-top: 14px;"></div>
     </div>
+
+    <div class="card">
+      <label>🎨 Thème saisonnier de l'app</label>
+      <div class="hint" style="margin-bottom:10px;">Change les couleurs d'accent de l'app pour une durée, puis retour auto au thème normal.</div>
+      <div id="theme-current" class="hint" style="margin-bottom:10px;"></div>
+      <select id="theme-select" style="width:100%;padding:12px;border-radius:10px;background:#04100f;border:1px solid rgba(94,234,212,.2);color:#ecfdf5;font-size:15px;">
+        <option value="default">🟢 Par défaut (Teal × Ambre)</option>
+        <option value="coupe-monde">🇫🇷 Coupe du Monde (bleu/blanc/rouge)</option>
+        <option value="noel">🎄 Noël (rouge/vert/or)</option>
+        <option value="ete">☀️ Été (corail/turquoise)</option>
+        <option value="halloween">🎃 Halloween (orange/violet)</option>
+        <option value="printemps">🌸 Printemps (rose/vert)</option>
+      </select>
+      <label style="margin-top:12px;">Durée (jours)</label>
+      <input id="theme-days" type="number" min="1" max="365" value="3" style="width:100%;padding:12px;border-radius:10px;background:#04100f;border:1px solid rgba(94,234,212,.2);color:#ecfdf5;font-size:15px;" />
+      <button class="primary teal" id="theme-apply" style="margin-top:12px;">✅ Appliquer le thème</button>
+      <button class="primary" id="theme-reset" style="margin-top:8px;background:transparent;border:1px solid rgba(94,234,212,.25);">↩️ Revenir au thème par défaut</button>
+      <div id="theme-result" style="margin-top: 12px;"></div>
+    </div>
   </div>
 
 </div>
@@ -1533,6 +1552,60 @@ async function loadCatalogAudit() {
     $('catalog-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
   }
 }
+
+// ═══ THÈME SAISONNIER ═══
+const THEME_LABELS = {
+  'default': '🟢 Par défaut', 'coupe-monde': '🇫🇷 Coupe du Monde', 'noel': '🎄 Noël',
+  'ete': '☀️ Été', 'halloween': '🎃 Halloween', 'printemps': '🌸 Printemps',
+};
+async function loadThemeCurrent() {
+  try {
+    const r = await fetch('/api/profile?action=get-settings');
+    const d = await r.json();
+    const t = d && d.theme;
+    if (t && t.id && t.endsAt && new Date(t.endsAt).getTime() > Date.now()) {
+      const end = new Date(t.endsAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      $('theme-current').innerHTML = '🎨 Thème actif : <b style="color:#5eead4;">' + (THEME_LABELS[t.id] || t.id) + '</b> jusqu\'au <b>' + end + '</b>';
+      if ($('theme-select')) $('theme-select').value = t.id;
+    } else {
+      $('theme-current').innerHTML = 'Thème actuel : <b style="color:#5eead4;">🟢 Par défaut</b>';
+    }
+  } catch (e) { /* non bloquant */ }
+}
+$('theme-apply').addEventListener('click', async () => {
+  const password = getPassword();
+  const themeId = $('theme-select').value;
+  const durationDays = parseInt($('theme-days').value, 10) || 3;
+  $('theme-result').innerHTML = '<div class="hint">Application…</div>';
+  try {
+    const r = await fetch('/api/profile?action=set-theme', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + password, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ themeId, durationDays }),
+    });
+    const d = await r.json();
+    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">✅ Thème appliqué. Les clients le verront au prochain chargement de l\'app.</div>';
+    loadThemeCurrent();
+  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>'; }
+});
+$('theme-reset').addEventListener('click', async () => {
+  const password = getPassword();
+  $('theme-result').innerHTML = '<div class="hint">Réinitialisation…</div>';
+  try {
+    const r = await fetch('/api/profile?action=set-theme', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + password, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ themeId: 'default', durationDays: 0 }),
+    });
+    const d = await r.json();
+    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">↩️ Retour au thème par défaut.</div>';
+    if ($('theme-select')) $('theme-select').value = 'default';
+    loadThemeCurrent();
+  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>'; }
+});
+loadThemeCurrent();
 
 // Note: le loadComptoir() initial est déclenché par le gate après
 // déverrouillage réussi (voir init() / submit du gate-form).

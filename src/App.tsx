@@ -35,7 +35,8 @@ import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
-import { PALETTE_E } from './v2/palette';
+import { PALETTE_E, applyTheme } from './v2/palette';
+import { useActiveThemeId } from './v2/theme/useActiveTheme';
 import { useUserRewards } from './v2/rewards/useUserRewards';
 import { useAuth } from './v2/auth/useAuth';
 import { getSupabase, getStoredSession } from './lib/supabase';
@@ -255,6 +256,9 @@ function App() {
   const [xpToSpend, setXpToSpend] = useState(0);
   const appAuth = useAuth();
   const userXp = appAuth.profile?.xp ?? 0;
+  // Thème saisonnier actif (Coupe du Monde, Noël…) — accents seulement.
+  const activeThemeId = useActiveThemeId();
+  const activePalette = useMemo(() => applyTheme(PALETTE_E, activeThemeId), [activeThemeId]);
   const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
 
   // Après une inscription lancée depuis le panier : on rouvre le panier
@@ -2581,6 +2585,7 @@ function App() {
       {isV2 && (
         <>
           <HomeV2
+            palette={activePalette}
             cartCount={cartCount}
             onOpenCart={() => setDrawerOpen(true)}
             onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
@@ -2609,7 +2614,7 @@ function App() {
             }}
           />
           <ProductModalV2
-            palette={PALETTE_E}
+            palette={activePalette}
             open={Boolean(selected)}
             product={selected}
             selectedOption={selectedOption}
@@ -2630,7 +2635,7 @@ function App() {
             }}
           />
           <CartDrawerV2
-            palette={PALETTE_E}
+            palette={activePalette}
             open={drawerOpen}
             onClose={() => setDrawerOpen(false)}
             cart={cart}
@@ -2673,7 +2678,7 @@ function App() {
             }}
           />
           <PendingCashModal
-            palette={PALETTE_E}
+            palette={activePalette}
             open={Boolean(pendingCashCode)}
             code={pendingCashCode}
             totalCents={pendingCashTotal}
@@ -2682,7 +2687,7 @@ function App() {
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking
-            palette={PALETTE_E}
+            palette={activePalette}
             open={showThankYou}
             customerName={customerName || 'toi'}
             onClose={() => setShowThankYou(false)}
@@ -2690,7 +2695,7 @@ function App() {
           {/* Demande d'avis Google — 4 ou 5 étoiles → Google reviews,
               1-3 étoiles → mailto direct à hello@labase360.fr */}
           <ReviewPromptModal
-            palette={PALETTE_E}
+            palette={activePalette}
             open={showReviewPrompt}
             onClose={() => setShowReviewPrompt(false)}
             googleReviewUrl={googleReviewUrl}
@@ -2699,7 +2704,7 @@ function App() {
           {/* Modale "choisis ton nouveau mdp" — affichée auto quand le user
               clique sur le lien dans le mail de reset password */}
           <PasswordRecoveryModal
-            palette={PALETTE_E}
+            palette={activePalette}
             open={appAuth.inPasswordRecovery}
             email={appAuth.email}
             onUpdatePassword={appAuth.updatePassword}

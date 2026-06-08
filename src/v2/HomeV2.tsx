@@ -2,7 +2,7 @@
 // Activable via ?v2. Click produit/combo → callback vers App.tsx pour
 // réutiliser les modales et la logique panier/Square existantes.
 import React, { useMemo, useState } from 'react';
-import { PALETTE_E } from './palette';
+import { PALETTE_E, type Palette } from './palette';
 import { Header } from './Header';
 import { XpCard } from './XpCard';
 import { QuickActions } from './QuickActions';
@@ -40,6 +40,7 @@ import {
 } from './products-adapter';
 
 interface HomeV2Props {
+  palette?: Palette; // thème actif (saisonnier) injecté par App.tsx
   cartCount: number;
   onOpenCart: () => void;
   onOpenProduct: (product: V2Product) => void;
@@ -57,6 +58,7 @@ interface HomeV2Props {
 }
 
 export function HomeV2({
+  palette: paletteProp,
   cartCount,
   onOpenCart,
   onOpenProduct,
@@ -72,7 +74,7 @@ export function HomeV2({
   onInstall,
 }: HomeV2Props) {
   const [installDismissed, setInstallDismissed] = useState(false);
-  const palette = PALETTE_E;
+  const palette = paletteProp ?? PALETTE_E;
   const [tab, setTab] = useState<NavTab>('home');
   const [headerTab, setHeaderTab] = useState<HeaderTab>('home');
   const [query, setQuery] = useState('');

@@ -59,12 +59,13 @@ export default async function handler(req: any, res: any) {
   if (action === 'get-settings' && req.method === 'GET') {
     const { data } = await admin
       .from('store_settings')
-      .select('override_mode, hours')
+      .select('override_mode, hours, theme')
       .eq('id', 1)
       .maybeSingle();
     return res.status(200).json({
       override_mode: data?.override_mode ?? 'auto',
       hours: data?.hours ?? null,
+      theme: data?.theme ?? null,
     });
   }
 
@@ -123,6 +124,31 @@ export default async function handler(req: any, res: any) {
       .eq('id', 1);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ ok: true, override_mode: mode });
+  }
+
+  // ─── POST ?action=set-theme (admin : thème saisonnier programmé) ───
+  // Body: { themeId: string|null, durationDays: number }
+  // themeId null/'default' → retire le thème. Sinon stocke { id, endsAt }
+  // (endsAt = maintenant + durationDays jours) → expiration automatique.
+  if (action === 'set-theme' && req.method === 'POST') {
+    const body = await readBody(req);
+    const themeId = typeof body?.themeId === 'string' ? body.themeId.trim() : null;
+    const durationDays = Number(body?.durationDays);
+
+    let theme: { id: string; startsAt: string; endsAt: string } | null = null;
+    if (themeId && themeId !== 'default') {
+      const days = Number.isFinite(durationDays) && durationDays > 0 ? Math.min(durationDays, 365) : 3;
+      const now = new Date();
+      const endsAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      theme = { id: themeId, startsAt: now.toISOString(), endsAt: endsAt.toISOString() };
+    }
+
+    const { error } = await admin
+      .from('store_settings')
+      .update({ theme, updated_at: new Date().toISOString() })
+      .eq('id', 1);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ ok: true, theme });
   }
 
   // ─── GET ?action=lookup&id=<uuid> ─────────────────────────────
