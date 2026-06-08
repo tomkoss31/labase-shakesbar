@@ -2655,6 +2655,7 @@ function App() {
             selectedRewardCode={selectedRewardCode}
             setSelectedRewardCode={setSelectedRewardCode}
             userXp={userXp}
+            userOrders={appAuth.profile?.total_orders ?? 0}
             xpToSpend={xpToSpend}
             setXpToSpend={setXpToSpend}
             isAuthed={appAuth.status === 'authenticated'}

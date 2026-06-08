@@ -15,14 +15,15 @@ const WHEEL_SEGMENTS = [
   { id: 'goodies', label: 'Cadeau surprise au comptoir', weight: 3, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
+// Roue PUBLIQUE = acquisition (lien partagé, sans login). Uniquement des
+// remises sur la 1ère commande (+ petite surprise) : on ne donne JAMAIS de
+// produit offert / BOGO à un inconnu. Les cadeaux chers vivent dans la roue
+// in-app (fidélisation), utilisables dès la 2e commande.
 const PUBLIC_SEGMENTS = [
-  { id: 'public-discount-10', label: '−10% sur ta 1ère commande', weight: 28, rewardType: 'discount_percent', rewardValue: '10' },
-  { id: 'public-discount-5', label: '−5% sur ta 1ère commande', weight: 28, rewardType: 'discount_percent', rewardValue: '5' },
-  { id: 'public-gaufre', label: 'Gaufre healthy offerte (dès 5€)', weight: 10, rewardType: 'free_product', rewardValue: 'Gaufre healthy' },
-  { id: 'public-discount-15', label: '−15% gros gagnant !', weight: 12, rewardType: 'discount_percent', rewardValue: '15' },
-  { id: 'public-smoothie', label: '2ème smoothie offert (1 acheté = 1 offert)', weight: 10, rewardType: 'free_product', rewardValue: '2e smoothie offert' },
-  { id: 'public-boost', label: 'Boost : 2ème drink XL offert (1 acheté = 1 offert)', weight: 10, rewardType: 'free_product', rewardValue: '2e drink XL offert' },
-  { id: 'public-goodies', label: 'Cadeau surprise La Base', weight: 2, rewardType: 'manual_pickup', rewardValue: 'goodies' },
+  { id: 'public-discount-10', label: '−10% sur ta 1ère commande', weight: 38, rewardType: 'discount_percent', rewardValue: '10' },
+  { id: 'public-discount-5', label: '−5% sur ta 1ère commande', weight: 35, rewardType: 'discount_percent', rewardValue: '5' },
+  { id: 'public-discount-15', label: '−15% gros gagnant !', weight: 20, rewardType: 'discount_percent', rewardValue: '15' },
+  { id: 'public-goodies', label: 'Cadeau surprise La Base', weight: 7, rewardType: 'manual_pickup', rewardValue: 'goodies' },
 ];
 
 const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;

@@ -48,6 +48,7 @@ interface CartDrawerV2Props {
   selectedRewardCode?: string | null;
   setSelectedRewardCode?: (code: string | null) => void;
   userXp?: number;
+  userOrders?: number; // nb de commandes payées (gate BOGO « dès la 2e commande »)
   xpToSpend?: number;
   setXpToSpend?: (xp: number) => void;
   isAuthed?: boolean;
@@ -183,6 +184,7 @@ export function CartDrawerV2({
   selectedRewardCode,
   setSelectedRewardCode,
   userXp = 0,
+  userOrders = 0,
   xpToSpend = 0,
   setXpToSpend,
   isAuthed = false,
@@ -205,9 +207,11 @@ export function CartDrawerV2({
       const pct = parseInt(selectedReward.reward_value ?? '0', 10);
       return Math.round((totalCents * pct) / 100);
     }
-    // BOGO (2e smoothie / drink XL offert) : le moins cher offert si ≥2 éligibles
+    // BOGO (2e smoothie / drink XL offert) : seulement client déjà venu (≥1 cmd)
+    // ET ≥2 éligibles → le moins cher offert.
+    if (userOrders < 1) return 0;
     return bogoInfo(selectedReward, cart).discountCents;
-  }, [selectedReward, totalCents, cart]);
+  }, [selectedReward, totalCents, cart, userOrders]);
 
   // Calcul max XP utilisables sur ce panier (après réduction reward)
   const cartAfterReward = Math.max(0, totalCents - rewardDiscountCents);
@@ -582,9 +586,9 @@ export function CartDrawerV2({
                 {rewards.map((r) => {
                   const active = selectedRewardCode === r.reward_code;
                   const rBogo = bogoInfo(r, cart);
-                  // BOGO : sélectionnable UNIQUEMENT si ≥2 produits éligibles au
-                  // panier (sinon grisé + hint « ajoute un 2e … »).
-                  const bogoReady = rBogo.isBogo && rBogo.eligibleCount >= 2;
+                  // BOGO : sélectionnable UNIQUEMENT si client déjà venu (≥1 cmd)
+                  // ET ≥2 produits éligibles au panier (sinon grisé + hint).
+                  const bogoReady = rBogo.isBogo && userOrders >= 1 && rBogo.eligibleCount >= 2;
                   const applicable = r.reward_type === 'discount_percent' || bogoReady;
                   return (
                     <button
@@ -648,9 +652,11 @@ export function CartDrawerV2({
                         >
                           {r.reward_code}
                           {!applicable && !rBogo.isBogo && ' • à présenter au comptoir'}
-                          {rBogo.isBogo && rBogo.eligibleCount < 2 &&
+                          {rBogo.isBogo && userOrders < 1 &&
+                            ' • valable dès ta 2e commande'}
+                          {rBogo.isBogo && userOrders >= 1 && rBogo.eligibleCount < 2 &&
                             ` • ajoute un 2e ${rBogo.kind === 'smoothie' ? 'smoothie' : 'drink XL'} pour l'activer`}
-                          {rBogo.isBogo && rBogo.eligibleCount >= 2 && active &&
+                          {rBogo.isBogo && userOrders >= 1 && rBogo.eligibleCount >= 2 && active &&
                             ' • le moins cher offert ✅'}
                         </div>
                       </div>

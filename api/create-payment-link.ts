@@ -281,10 +281,10 @@ export default async function handler(req: any, res: any) {
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
-          // Trouver le user_id depuis l'email
+          // Trouver le user_id depuis l'email (+ total_orders pour gater le BOGO)
           const { data: profile } = await admin
             .from('profiles')
-            .select('id')
+            .select('id, total_orders')
             .eq('email', userEmail)
             .maybeSingle();
 
@@ -329,8 +329,14 @@ export default async function handler(req: any, res: any) {
             // ── BOGO : 2e smoothie / 2e drink XL offert ──
             // Règle STRICTE : ≥2 produits du MÊME type au panier → le moins cher
             // offert. <2 → aucune remise (non bloquant), code NON consommé.
+            // FIDÉLISATION : utilisable seulement dès la 2e commande (le client
+            // doit avoir ≥1 commande payée) → pas de freebie immédiat à un nouveau.
             // Gaufre « dès 8€ »/goodies = comptoir-only → ignorés ici.
-            else if (spinValid && spin.reward_type === 'free_product') {
+            else if (
+              spinValid &&
+              spin.reward_type === 'free_product' &&
+              (profile.total_orders ?? 0) >= 1
+            ) {
               const rv = (spin.reward_value ?? '').toLowerCase();
               const kind = rv.includes('smoothie')
                 ? 'smoothie'
