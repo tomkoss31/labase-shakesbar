@@ -9,10 +9,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
+  /* ════════════════════════════════════════════════════════════════
+     ★★★  RÉGLAGES FACILES — change juste les nombres ci-dessous  ★★★
+     (enregistre le fichier, puis rafraîchis la page dans le navigateur)
+     ──────────────────────────────────────────────────────────────── */
   :root{
+    --air: 5mm;          /* ESPACE entre chaque bloc → AUGMENTE pour aérer (ex: 6mm) */
+    --air-bas: 5mm;      /* ESPACE en plus avant Combos / Extra / QR (le bas) */
+    --col-gap: 10mm;     /* espace ENTRE LES 2 COLONNES */
+    --taille-nom: 3.5mm;     /* taille des noms de produits */
+    --taille-saveur: 2.85mm; /* taille des descriptions (saveurs) */
+    /* couleurs */
     --ink:#102e29; --ink2:#516f69;
     --teal:#0d9488; --tealDeep:#0f766e; --amber:#d97706; --amberDeep:#b45309; --pink:#db2777;
   }
+  /* ════════════════════════════════════════════════════════════════ */
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   @page { size: A4; margin: 0; }
   html, body { width: 210mm; height: 297mm; }
@@ -22,76 +34,74 @@
   .glow { position: absolute; border-radius: 50%; filter: blur(18mm); z-index: 0; }
   .glow.a { width: 100mm; height: 100mm; top: -34mm; left: -26mm; background: radial-gradient(circle, rgba(217,119,6,.18), transparent 70%); }
   .glow.b { width: 92mm; height: 92mm; bottom: -30mm; right: -28mm; background: radial-gradient(circle, rgba(13,148,136,.18), transparent 70%); }
-  .glow.c { width: 80mm; height: 80mm; top: 140mm; right: 52mm; background: radial-gradient(circle, rgba(219,39,119,.10), transparent 70%); }
-  .page { position: relative; z-index: 1; width: 210mm; height: 297mm; padding: 6mm 6mm 6mm; display: block; }
-  /* Hauteur DÉFINIE (pas flex:1) + space-between → répartition fiable en impression */
-  .body { height: 258mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .glow.c { width: 80mm; height: 80mm; top: 150mm; right: 52mm; background: radial-gradient(circle, rgba(219,39,119,.10), transparent 70%); }
 
-  .rainbow { height: 2.8mm; border-radius: 99mm; background: linear-gradient(90deg, #fbbf24, #5eead4, #8b5cf6, #ec4899, #f59e0b); }
-  .rainbow.top { margin-bottom: 4mm; }
-  .rainbow.bot { margin-top: 4mm; }
-  .head { display: flex; align-items: center; gap: 3mm; margin-bottom: 4mm; }
-  .head img { width: 15mm; height: 15mm; border-radius: 3mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.18); }
+  .page { position: relative; z-index: 1; width: 210mm; min-height: 297mm; padding: 6mm 6mm 6mm; display: block; }
+
+  .rainbow { height: 2.6mm; border-radius: 99mm; background: linear-gradient(90deg, #fbbf24, #5eead4, #8b5cf6, #ec4899, #f59e0b); }
+
+  .head { display: flex; align-items: center; gap: 3mm; margin: 4mm 0 var(--air); }
+  .head img { width: 14mm; height: 14mm; border-radius: 3mm; box-shadow: 0 1.2mm 3mm rgba(0,0,0,.18); }
   .head .ht { flex: 1; }
-  .head .ht .nm { font-family: 'Outfit'; font-weight: 900; font-size: 5.6mm; line-height: 1; color: var(--ink); }
-  .head .ht .tg { font-size: 2.4mm; letter-spacing: .22em; color: var(--teal); font-weight: 700; margin-top: .6mm; }
+  .head .ht .nm { font-family: 'Outfit'; font-weight: 900; font-size: 5.2mm; line-height: 1; color: var(--ink); }
+  .head .ht .tg { font-size: 2.3mm; letter-spacing: .22em; color: var(--teal); font-weight: 700; margin-top: .6mm; }
   .head .big { text-align: right; }
-  .head .big .l1 { font-family: 'Outfit'; font-weight: 900; font-size: 8mm; line-height: 1; color: var(--amberDeep); }
-  .head .big .l2 { font-size: 3mm; color: var(--ink2); margin-top: 1mm; }
+  .head .big .l1 { font-family: 'Outfit'; font-weight: 900; font-size: 7.2mm; line-height: 1; color: var(--amberDeep); }
+  .head .big .l2 { font-size: 2.8mm; color: var(--ink2); margin-top: 1mm; }
 
-  .sec { margin-bottom: 1mm; }
-  .sh { display: flex; align-items: baseline; gap: 2mm; margin-bottom: 1mm; }
-  .sh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 5mm; letter-spacing: -.01em; color: var(--ink); }
+  .sec { margin-bottom: var(--air); }
+  .sh { display: flex; align-items: baseline; gap: 2mm; margin-bottom: 1.6mm; }
+  .sh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 4.6mm; letter-spacing: -.01em; color: var(--ink); }
   .sh .ln { flex: 1; height: .4mm; background: linear-gradient(90deg, rgba(13,148,136,.45), transparent); }
-  .sh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 3.6mm; color: var(--tealDeep); white-space: nowrap; }
-  .badges { display: flex; flex-wrap: wrap; gap: 1.6mm; margin: 1.8mm 0 2.4mm; }
-  .b { font-size: 2.5mm; font-weight: 700; color: #fff; background: var(--teal); border-radius: 99mm; padding: .7mm 2.2mm; }
+  .sh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 3.3mm; color: var(--tealDeep); white-space: nowrap; }
+  .badges { display: flex; flex-wrap: wrap; gap: 1.6mm; margin: 1.6mm 0 2.2mm; }
+  .b { font-size: 2.4mm; font-weight: 700; color: #fff; background: var(--teal); border-radius: 99mm; padding: .7mm 2.2mm; }
   .b.alt { color: var(--tealDeep); background: rgba(13,148,136,.10); border: .25mm solid rgba(13,148,136,.32); }
   .b.warm { color: #fff; background: var(--amber); }
 
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 8mm; }
-  .it { line-height: 1.22; }
-  .it .n { font-family: 'Outfit'; font-weight: 800; font-size: 3.7mm; color: var(--ink); }
-  .it .f { font-size: 3mm; color: var(--ink2); margin-top: .3mm; }
-  .new { font-family: 'Outfit'; font-weight: 800; font-size: 2.1mm; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--amber); padding: .25mm 1.4mm; border-radius: 99mm; vertical-align: middle; }
-  .ico { font-family: 'Outfit'; font-weight: 800; font-size: 2.1mm; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--teal); padding: .25mm 1.4mm; border-radius: 99mm; vertical-align: middle; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); row-gap: 2.6mm; }
+  .it { line-height: 1.2; }
+  .it .n { font-family: 'Outfit'; font-weight: 800; font-size: var(--taille-nom); color: var(--ink); }
+  .it .f { font-size: var(--taille-saveur); color: var(--ink2); margin-top: .3mm; }
+  .new { font-family: 'Outfit'; font-weight: 800; font-size: 2mm; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--amber); padding: .2mm 1.3mm; border-radius: 99mm; vertical-align: middle; }
+  .ico { font-family: 'Outfit'; font-weight: 800; font-size: 2mm; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--teal); padding: .2mm 1.3mm; border-radius: 99mm; vertical-align: middle; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 1.6mm; }
-  .chip { font-size: 2.9mm; font-weight: 600; color: var(--tealDeep); background: rgba(13,148,136,.08); border: .25mm solid rgba(13,148,136,.24); border-radius: 99mm; padding: 1mm 2.8mm; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.5mm; }
+  .chip { font-size: 2.7mm; font-weight: 600; color: var(--tealDeep); background: rgba(13,148,136,.08); border: .25mm solid rgba(13,148,136,.24); border-radius: 99mm; padding: 1mm 2.6mm; }
 
-  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
-  .card { background: rgba(13,148,136,.05); border: .3mm solid rgba(13,148,136,.18); border-radius: 3.2mm; padding: 3.4mm 4mm; }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); margin-bottom: var(--air-bas); }
+  .card { background: rgba(13,148,136,.05); border: .3mm solid rgba(13,148,136,.18); border-radius: 3.2mm; padding: 3.6mm 4mm; }
 
-  /* combos */
+  /* combos (propres au verso) */
   .combos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3.2mm; }
   .cb { background: rgba(13,148,136,.055); border: .3mm solid rgba(13,148,136,.24); border-radius: 3.2mm; padding: 3.2mm 3.6mm; position: relative; }
   .cb .cn { font-family: 'Outfit'; font-weight: 900; font-size: 3.6mm; color: var(--ink); }
   .cb .cc { font-size: 2.7mm; color: var(--ink2); margin: 1mm 0 1.8mm; line-height: 1.3; min-height: 7mm; }
   .cb .cp { font-family: 'Outfit'; font-weight: 900; font-size: 4.5mm; color: var(--tealDeep); }
   .cb .co { font-size: 2.5mm; color: #9aa8a4; text-decoration: line-through; margin-left: 1.6mm; }
-  .cb .save { position: absolute; top: 2.6mm; right: 2.6mm; font-family: 'Outfit'; font-weight: 800; font-size: 2.3mm;
-    color: #3a2503; background: #fbbf24; border-radius: 99mm; padding: .5mm 2mm; }
+  .cb .save { position: absolute; top: 2.6mm; right: 2.6mm; font-family: 'Outfit'; font-weight: 800; font-size: 2.3mm; color: #3a2503; background: #fbbf24; border-radius: 99mm; padding: .5mm 2mm; }
 
-  .extra { display: flex; align-items: center; gap: 3.4mm; background: rgba(245,158,11,.11); border: .3mm solid rgba(245,158,11,.34); border-radius: 3.2mm; padding: 3.2mm 4mm; }
+  .extra { display: flex; align-items: center; gap: 3.6mm; background: rgba(245,158,11,.11); border: .3mm solid rgba(245,158,11,.34);
+    border-radius: 3.4mm; padding: 3.8mm 4.6mm; margin-bottom: var(--air-bas); }
   .extra .eh { font-family: 'Outfit'; font-weight: 900; font-size: 4mm; flex: none; color: var(--ink); }
   .extra .eh .pr { color: var(--amberDeep); }
   .extra .el { font-size: 3.1mm; color: var(--ink2); line-height: 1.45; }
   .extra .el b { color: var(--ink); } .extra .el .dot { color: var(--amber); margin: 0 .8mm; }
 
-  .foot { display: flex; align-items: center; gap: 4.4mm; }
+  .foot { display: flex; align-items: center; gap: 4.5mm; margin-bottom: var(--air); }
   .foot .qr { background: #fff; padding: 2mm; border-radius: 2.8mm; flex: none; border: .3mm solid #e5e7eb; box-shadow: 0 1.5mm 4mm rgba(0,0,0,.12); }
-  .foot .qr img { display: block; width: 28mm; height: 28mm; }
-  .foot .ft .big { font-family: 'Outfit'; font-weight: 900; font-size: 4.8mm; line-height: 1.1; color: var(--ink); }
+  .foot .qr img { display: block; width: 29mm; height: 29mm; }
+  .foot .ft .big { font-family: 'Outfit'; font-weight: 900; font-size: 4.8mm; line-height: 1.12; color: var(--ink); }
   .foot .ft .big .ac { color: var(--tealDeep); }
-  .foot .ft .sm { font-size: 3.1mm; color: var(--ink2); margin-top: 1.4mm; }
-  .foot .ft .addr { font-size: 2.9mm; color: var(--ink2); margin-top: 1.8mm; }
+  .foot .ft .sm { font-size: 3mm; color: var(--ink2); margin-top: 1.4mm; }
+  .foot .ft .addr { font-size: 2.9mm; color: var(--ink2); margin-top: 1.6mm; }
   .foot .ft .addr b { color: var(--ink); } .foot .ft .addr .site { color: var(--tealDeep); font-weight: 700; }
 </style>
 </head>
 <body>
   <div class="glow a"></div><div class="glow b"></div><div class="glow c"></div>
   <div class="page">
-    <div class="rainbow top"></div>
+    <div class="rainbow"></div>
 
     <div class="head">
       <img src="icon-512.png" alt="La Base" />
@@ -99,8 +109,7 @@
       <div class="big"><div class="l1">Gourmand &amp; Plaisir</div><div class="l2">smoothies · cafés gourmets · gaufre · combos</div></div>
     </div>
 
-    <div class="body">
-    <!-- SMOOTHIES (2 colonnes pour remplir) -->
+    <!-- SMOOTHIES (2 colonnes) -->
     <div class="sec">
       <div class="sh"><span class="nm">🥤 Smoothies nutritionnels</span><span class="ln"></span><span class="pr">650ml · 8,90€</span></div>
       <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">25 vitamines &amp; minéraux</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span><span class="b alt">remplace un repas</span></div>
@@ -139,9 +148,9 @@
     </div>
 
     <!-- COMBOS -->
-    <div class="sec">
+    <div class="sec" style="margin-bottom:var(--air-bas)">
       <div class="sh"><span class="nm">🎁 Les Combos</span><span class="ln"></span><span class="pr">économise jusqu'à −1,90€</span></div>
-      <div class="combos">
+      <div class="combos" style="margin-top:1.8mm">
         <div class="cb"><div class="save">−1€</div><div class="cn">Combo Medium</div><div class="cc">smoothie + boisson Start 550ml</div><div><span class="cp">14,80€</span><span class="co">15,80€</span></div></div>
         <div class="cb"><div class="save">−1,90€</div><div class="cn">Combo Power</div><div class="cc">smoothie + boisson Boost 950ml</div><div><span class="cp">15,90€</span><span class="co">17,80€</span></div></div>
         <div class="cb"><div class="save">−1,90€</div><div class="cn">Gourmet Break</div><div class="cc">café gourmet glacé + gaufre</div><div><span class="cp">13,90€</span><span class="co">15,80€</span></div></div>
@@ -167,8 +176,7 @@
       </div>
     </div>
 
-    <div class="rainbow bot"></div>
-    </div><!-- /body -->
+    <div class="rainbow"></div>
   </div>
 </body>
 </html>
