@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Carte A4 v6 BLANC — La Base</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#102e29; --ink2:#516f69;
+    --teal:#0d9488; --tealDeep:#0f766e; --amber:#d97706; --amberDeep:#b45309; --pink:#db2777; --sky:#0284c7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4; margin: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: #ffffff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden; }
+  .page { width: 210mm; height: 297mm; display: flex; }
+
+  /* ───── RAIL GAUCHE (clair) ───── */
+  .rail { width: 64mm; flex: none; position: relative; overflow: hidden;
+    background: linear-gradient(165deg, #effbf8 0%, #ffffff 58%, #fff7ed 100%);
+    border-right: .4mm solid rgba(13,148,136,.18);
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 9mm 6mm 7mm; text-align: center; }
+  .rail .glow { position: absolute; border-radius: 50%; filter: blur(15mm); z-index: 0; }
+  .rail .glow.t { width: 62mm; height: 62mm; top: -20mm; left: -14mm; background: radial-gradient(circle, rgba(13,148,136,.18), transparent 70%); }
+  .rail .glow.b { width: 58mm; height: 58mm; bottom: 24mm; right: -20mm; background: radial-gradient(circle, rgba(217,119,6,.14), transparent 70%); }
+  .rail > * { position: relative; z-index: 1; }
+  .rbrand { display: flex; flex-direction: column; align-items: center; gap: 2.6mm; }
+  .rbrand img { width: 23mm; height: 23mm; border-radius: 5.2mm; box-shadow: 0 2mm 5mm rgba(0,0,0,.18); }
+  .rbrand .nm { font-family: 'Outfit'; font-weight: 900; font-size: 6.6mm; line-height: 1; color: var(--ink); }
+  .rbrand .tg { font-size: 2.4mm; letter-spacing: .24em; color: var(--teal); font-weight: 700; }
+  .rhero { display: flex; flex-direction: column; align-items: center; }
+  .hero { width: 52mm; height: 64mm; object-fit: cover; border-radius: 4.5mm;
+    box-shadow: 0 3mm 9mm rgba(0,0,0,.22); border: .4mm solid rgba(13,148,136,.22); }
+  .hero-cap { margin-top: 3.4mm; }
+  .hero-cap .t { font-family: 'Outfit'; font-weight: 900; font-size: 4.2mm; color: var(--ink); }
+  .hero-cap .s { font-size: 2.4mm; color: var(--ink2); margin-top: .8mm; }
+  .hero-cap .badge { display: inline-block; margin-top: 2.2mm; font-family: 'Outfit'; font-weight: 800;
+    font-size: 2.2mm; letter-spacing: .07em; text-transform: uppercase; color: #fff; background: var(--amber); padding: 1mm 2.8mm; border-radius: 99mm; }
+
+  .rapp { width: 100%; background: linear-gradient(135deg, rgba(13,148,136,.10), rgba(245,158,11,.08));
+    border: .3mm solid rgba(13,148,136,.30); border-radius: 3.4mm; padding: 3.4mm 3mm; }
+  .rapp .at { font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; color: var(--ink); }
+  .rapp .as { font-size: 2.2mm; color: var(--ink2); margin: .6mm 0 2.4mm; }
+  .rapp .al { display: flex; align-items: center; gap: 1.8mm; font-size: 2.5mm; color: var(--ink2);
+    text-align: left; padding: .4mm 0; }
+  .rapp .al b { color: var(--tealDeep); font-weight: 700; }
+
+  .rbot { display: flex; flex-direction: column; align-items: center; }
+  .rqr { background: #fff; padding: 2.2mm; border-radius: 2.8mm; border: .3mm solid #e5e7eb; box-shadow: 0 1.5mm 4mm rgba(0,0,0,.12); }
+  .rqr img { display: block; width: 31mm; height: 31mm; }
+  .rqr-cap { font-family: 'Outfit'; font-weight: 800; font-size: 2.6mm; color: var(--ink); margin-top: 2.2mm; line-height: 1.25; }
+  .rqr-cap .ac { color: var(--tealDeep); }
+  .raddr { font-size: 2.1mm; color: var(--ink2); margin-top: 3mm; line-height: 1.4; }
+  .raddr b { color: var(--ink); }
+
+  /* ───── COLONNE DROITE ───── */
+  .main { flex: 1; min-width: 0; padding: 8.5mm 8mm 7mm; display: flex; flex-direction: column; }
+  .rainbow { height: 2.2mm; border-radius: 99mm; margin-bottom: 4mm; background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #0d9488, #fbbf24); }
+  .mtitle { display: flex; align-items: center; justify-content: space-between; gap: 4mm; }
+  .mtitle .h { font-family: 'Outfit'; font-weight: 900; font-size: 8.5mm; letter-spacing: -.02em; line-height: 1; color: var(--tealDeep); }
+  .guide-intro { display: inline-flex; align-items: center; gap: 1.6mm; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 3.5mm; letter-spacing: .01em;
+    color: #fff; background: linear-gradient(90deg, var(--amber), var(--amberDeep)); padding: 2.2mm 4mm;
+    border-radius: 99mm; box-shadow: 0 1.5mm 4mm rgba(217,119,6,.28); }
+  .guide { display: flex; gap: 2.4mm; margin: 4mm 0 4.4mm; }
+  .guide .g { flex: 1; display: flex; align-items: center; gap: 1.8mm; background: rgba(13,148,136,.06);
+    border: .3mm solid rgba(13,148,136,.2); border-radius: 2.4mm; padding: 2.2mm 2.4mm; }
+  .guide .g .n { width: 4.6mm; height: 4.6mm; border-radius: 50%; background: var(--teal); color: #fff; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 2.8mm; display: flex; align-items: center; justify-content: center; }
+  .guide .g .t { font-size: 2.3mm; line-height: 1.2; color: var(--ink2); }
+  .guide .g .t b { color: var(--ink); }
+
+  /* hauteur DÉFINIE + répartition → remplit de façon fiable en impression */
+  .secs { display: flex; flex-direction: column; height: 248mm; justify-content: space-between; gap: 3.2mm; }
+
+  .sc { display: flex; align-items: center; gap: 3mm; background: rgba(13,148,136,.05); border: .3mm solid rgba(13,148,136,.14);
+    border-radius: 3.4mm; padding: 3mm; }
+  .sc.energie { border-color: rgba(2,132,199,.30); background: rgba(2,132,199,.05); }
+  .sc.gourmand { border-color: rgba(217,119,6,.28); background: rgba(217,119,6,.05); }
+  .sc.sante { border-color: rgba(16,163,127,.28); background: rgba(16,163,127,.05); }
+  .sc .thumb { width: 26mm; height: 32mm; border-radius: 2.6mm; object-fit: cover; flex: none;
+    box-shadow: 0 1.5mm 4mm rgba(0,0,0,.2); border: .3mm solid rgba(13,148,136,.18); }
+  .sc .bd { flex: 1; min-width: 0; }
+  .sc .top { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+  .sc .top .nm { font-family: 'Outfit'; font-weight: 900; font-size: 4.2mm; letter-spacing: -.01em; color: var(--ink); }
+  .price { text-align: right; white-space: nowrap; }
+  .price .p { font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; color: var(--amberDeep); }
+  .price .vol { font-size: 1.9mm; color: var(--ink2); display: block; margin-top: .3mm; }
+  .badges { display: flex; flex-wrap: wrap; gap: 1.4mm; margin: 1.8mm 0; }
+  .b { font-size: 2.05mm; font-weight: 700; color: #fff; background: var(--teal); border-radius: 99mm; padding: .6mm 2mm; }
+  .b.alt { color: var(--tealDeep); background: rgba(13,148,136,.10); border: .25mm solid rgba(13,148,136,.30); }
+  .b.warm { color: #fff; background: var(--amber); }
+  .b.size { color: var(--ink); background: #e5e7eb; font-weight: 800; }
+  .hh { font-size: 2.55mm; color: var(--ink2); line-height: 1.5; }
+  .hh .it { white-space: nowrap; }
+  .hh b { font-family: 'Outfit'; font-weight: 700; color: var(--ink); }
+  .hh .cp { color: var(--ink2); }
+  .hh .dot { color: var(--teal); margin: 0 1mm; }
+  .hh .more { color: var(--tealDeep); font-weight: 600; }
+  .hl { display: flex; flex-direction: column; gap: 1.2mm; margin-top: .6mm; }
+  .hli { line-height: 1.15; }
+  .hli .n { font-family: 'Outfit'; font-weight: 700; font-size: 2.65mm; color: var(--ink); }
+  .hli .f { font-size: 2.25mm; color: var(--ink2); }
+  .hli .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
+    color: #fff; background: var(--amber); padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
+  .hmore { font-size: 2.4mm; color: var(--tealDeep); font-weight: 600; margin-top: 1.4mm; }
+
+  .duo { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 3mm; }
+  .mini { background: rgba(13,148,136,.05); border: .3mm solid rgba(13,148,136,.14); border-radius: 3.4mm; padding: 3mm 3.2mm; }
+  .mini.enfants { border-color: rgba(219,39,119,.3); background: rgba(219,39,119,.05); }
+  .mini .top { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+  .mini .top .nm { font-family: 'Outfit'; font-weight: 900; font-size: 3.7mm; color: var(--ink); }
+  .mini .badges { margin: 1.4mm 0; }
+  .mini .hh { font-size: 2.45mm; }
+
+  .band { background: rgba(13,148,136,.05); border: .3mm solid rgba(13,148,136,.14); border-radius: 3.2mm; padding: 2.8mm 3.4mm; }
+  .band.extra { background: rgba(245,158,11,.09); border-color: rgba(245,158,11,.30); }
+  .band .bh { display: flex; align-items: baseline; gap: 2mm; }
+  .band .bh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 3.3mm; color: var(--ink); }
+  .band .bh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 2.9mm; color: var(--amberDeep); }
+  .band .bh .sub { font-size: 2.2mm; color: var(--ink2); margin-left: auto; }
+  .band .ln { font-size: 2.5mm; color: var(--ink2); line-height: 1.5; margin-top: 1.4mm; }
+  .band .ln b { color: var(--ink); font-weight: 700; }
+  .band .ln .dot { color: var(--teal); margin: 0 .9mm; }
+  .band.extra .ln .dot { color: var(--amber); }
+
+  .loy { display: flex; align-items: center; gap: 4mm; padding: 3.4mm 4mm;
+    background: linear-gradient(100deg, rgba(13,148,136,.11), rgba(245,158,11,.09));
+    border: .3mm solid rgba(13,148,136,.3); border-radius: 3.4mm; }
+  .loy .lt2 { flex: 1; }
+  .loy .sep { width: .3mm; align-self: stretch; background: rgba(13,148,136,.3); }
+  .loy .la { font-family: 'Outfit'; font-weight: 800; font-size: 3.3mm; color: var(--ink); }
+  .loy .la .em { font-size: 4mm; }
+  .loy .la b { color: var(--tealDeep); font-weight: 900; }
+  .loy .lb { font-size: 2.4mm; color: var(--ink2); margin-top: .8mm; }
+</style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- RAIL -->
+    <div class="rail">
+      <div class="glow t"></div>
+      <div class="glow b"></div>
+      <div class="rbrand">
+        <img src="icon-512.png" alt="La Base" />
+        <div class="nm">LA BASE</div>
+        <div class="tg">SHAKES &amp; DRINKS</div>
+      </div>
+      <div class="rhero">
+        <img class="hero" src="images/drinks/aurora.png" alt="Aurora" />
+        <div class="hero-cap">
+          <div class="t">Aurora</div>
+          <div class="s">framboise · myrtille · citron</div>
+          <div class="badge">✨ Nouveauté</div>
+        </div>
+      </div>
+
+      <div class="rapp">
+        <div class="at">📲 L'appli La Base</div>
+        <div class="as">commande, cumule, gagne</div>
+        <div class="al"><span>⭐</span><span><b>1€ = 10 XP</b></span></div>
+        <div class="al"><span>🥤</span><span><b>800 XP</b> = une boisson offerte</span></div>
+        <div class="al"><span>🎁</span><span>Roue cadeau <b>chaque semaine</b></span></div>
+      </div>
+
+      <div class="rbot">
+        <div class="rqr"><img src="qr-carte.png" alt="QR carte" /></div>
+        <div class="rqr-cap">Scanne : <span class="ac">carte complète</span> &amp; appli</div>
+        <div class="raddr"><b>11 rue Saint Pierre</b>, 55100 Verdun<br />commande.labase-nutrition.com</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="rainbow"></div>
+      <div class="mtitle">
+        <div class="h">La carte</div>
+        <div class="guide-intro">👀 Perdu·e ? Suis le guide 👇</div>
+      </div>
+      <div class="guide">
+        <div class="g"><div class="n">1</div><div class="t">Choisis ton <b>univers</b></div></div>
+        <div class="g"><div class="n">2</div><div class="t">Choisis ta <b>taille</b></div></div>
+        <div class="g"><div class="n">3</div><div class="t">Choisis tes <b>extras</b></div></div>
+      </div>
+
+      <div class="secs">
+
+        <!-- ENERGISANTES -->
+        <div class="sc energie">
+          <img class="thumb" src="images/drinks/black-panther.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🔋 Boissons énergisantes</div>
+              <div class="price"><span class="p">6,90€ · 8,90€</span></div>
+            </div>
+            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Electric Blue</span> <span class="f">— citron · framboise bleue · myrtille</span></div>
+              <div class="hli"><span class="n">Black Panther</span> <span class="f">— citron · cerise · framboise bleue</span></div>
+              <div class="hli"><span class="n">Phénix <span class="new">New</span></span> <span class="f">— fraise · pêche · ananas</span></div>
+              <div class="hmore">📲 + 13 autres parfums sur la carte</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMOOTHIES -->
+        <div class="sc gourmand">
+          <img class="thumb" src="images/shake/snikers.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🍫 Smoothies nutritionnels</div>
+              <div class="price"><span class="p">8,90€</span><span class="vol">650 ml · taille unique</span></div>
+            </div>
+            <div class="badges"><span class="b size">650 ml</span><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Snickers</span> <span class="f">— chocolat · cacahuètes</span></div>
+              <div class="hli"><span class="n">Full Oréo</span> <span class="f">— cookies cream · Oréo</span></div>
+              <div class="hli"><span class="n">M&amp;M's <span class="new">New</span></span> <span class="f">— chocolat · caramel · noisette</span></div>
+              <div class="hmore">📲 + 12 autres saveurs sur la carte</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SANTE -->
+        <div class="sc sante">
+          <img class="thumb" src="images/sante/casse-grippe.png" alt="" />
+          <div class="bd">
+            <div class="top">
+              <div class="nm">🌿 Santé &amp; Détox</div>
+              <div class="price"><span class="p">5,90€ · 8,90€</span><span class="vol">drinks &amp; thé chaud</span></div>
+            </div>
+            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
+            <div class="hl">
+              <div class="hli"><span class="n">Casse Grippe</span> <span class="f">— immunité · aloé vera</span></div>
+              <div class="hli"><span class="n">Di'geste</span> <span class="f">— fibres · probiotiques</span></div>
+              <div class="hli"><span class="n">Limonade Rose</span> <span class="f">— collagène · glow</span></div>
+              <div class="hli"><span class="n">Hydrat'Max</span> <span class="f">— vitamine C</span> <span class="f">· + Thé aloé vera chaud</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAFES + ENFANTS -->
+        <div class="duo">
+          <div class="mini">
+            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé 650ml · ou chaud</span></div></div>
+            <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">dès 100 cal</span></div>
+            <div class="hh"><b>Macchiato</b><span class="dot">·</span><b>Choco Mocha</b><span class="dot">·</span><b>Latte noisette</b><span class="dot">·</span><b>Vanille latte</b></div>
+          </div>
+          <div class="mini enfants">
+            <div class="top"><div class="nm">🧒 Enfants</div><div class="price"><span class="p">5€</span><span class="vol">taille enfant</span></div></div>
+            <div class="badges"><span class="b">0 sucre</span><span class="b">0 cal</span><span class="b alt">sans énergisant</span></div>
+            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+4 sur l'app</span></div>
+          </div>
+        </div>
+
+        <!-- EXTRA -->
+        <div class="band extra">
+          <div class="bh"><div class="nm">➕ Ton Extra Santé</div><div class="pr">+2,50€</div><div class="sub">sur n'importe quelle boisson</div></div>
+          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Électrolytes</b><span class="dot">·</span><b>Protéines +5g</b></div>
+        </div>
+
+        <!-- SNACKS -->
+        <div class="band">
+          <div class="bh"><div class="nm">🥨 Snacks protéinés</div><div class="sub">à emporter</div></div>
+          <div class="ln"><b>Chips protéinées</b> 3€<span class="dot">·</span><b>Barres protéines</b> 3€<span class="dot">·</span><b>Barre H24 · 21g</b> 4€<span class="dot">·</span><b>Barre repas F1</b> 5€</div>
+        </div>
+
+        <!-- COMBO + MARDI -->
+        <div class="loy">
+          <div class="lt2">
+            <div class="la"><span class="em">🔥</span> Le Combo : <b>boisson + smoothie = −1€</b></div>
+            <div class="lb">Remplace un repas ou une collation, futé et gourmand</div>
+          </div>
+          <div class="sep"></div>
+          <div class="lt2">
+            <div class="la"><span class="em">🗓️</span> <b>Mardi = Double XP</b></div>
+            <div class="lb">Tous tes points comptent double ce jour-là</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
