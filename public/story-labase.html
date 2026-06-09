@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>LA BASE — Story</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59;
+    --amber:#d97706; --amberDeep:#b45309; --rasp:#db2777;
+    --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(700px 700px at 0% 0%, rgba(13,148,136,.20), transparent 60%),
+      radial-gradient(700px 700px at 100% 6%, rgba(217,119,6,.18), transparent 62%),
+      radial-gradient(760px 760px at 100% 100%, rgba(219,39,119,.16), transparent 60%),
+      radial-gradient(700px 700px at 0% 96%, rgba(13,148,136,.12), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px);
+    background-size:30px 30px; opacity:.5; }
+
+  .core{ position:absolute; inset:0; z-index:5;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:200px 70px 230px; }
+
+  .logo{ width:138px; height:138px; border-radius:32px; box-shadow:0 16px 34px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit',sans-serif; font-weight:900; font-size:52px; letter-spacing:11px;
+    color:var(--tealDeep); margin-top:18px; }
+
+  .title{ font-family:'Outfit',sans-serif; font-weight:900; line-height:.9; letter-spacing:-3px; margin-top:14px; }
+  .title .l1{ font-size:128px; color:var(--teal); }
+  .title .l2{ font-size:128px; color:var(--rasp); }
+  .title .amp{ color:var(--amber); }
+
+  .pill{ margin-top:30px; display:inline-flex; align-items:center; gap:12px;
+    padding:16px 38px; border-radius:999px; background:rgba(13,148,136,.10);
+    border:2px solid rgba(13,148,136,.28); color:var(--tealDeep); font-weight:700; font-size:34px; }
+
+  /* médaillons produits */
+  .meds{ position:relative; margin-top:60px; display:flex; align-items:center; justify-content:center; gap:30px; }
+  .ring{ position:absolute; border-radius:50%; border:2px dashed rgba(17,94,89,.18); width:560px; height:560px;
+    left:50%; top:50%; transform:translate(-50%,-50%); }
+  .med{ border-radius:50%; overflow:hidden; border:7px solid #fff;
+    box-shadow:0 22px 48px rgba(20,40,36,.24); outline:4px solid rgba(13,148,136,.30); position:relative; z-index:1; }
+  .med.amber{ outline-color:rgba(217,119,6,.38); }
+  .med.rasp{ outline-color:rgba(219,39,119,.38); }
+  .med img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .med.big{ width:300px; height:300px; }
+  .med.sm{ width:230px; height:230px; }
+
+  .pillars{ margin-top:64px; display:flex; flex-direction:column; gap:22px; width:100%; max-width:720px; }
+  .pillar{ display:flex; align-items:center; gap:20px; background:rgba(255,255,255,.85);
+    border:1px solid rgba(20,40,36,.08); box-shadow:0 14px 32px rgba(20,40,36,.08);
+    border-radius:26px; padding:22px 32px; }
+  .pillar .ico{ width:72px; height:72px; border-radius:20px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:38px; background:rgba(13,148,136,.12); }
+  .pillar.smoothie .ico{ background:rgba(219,39,119,.13); }
+  .pillar .tx{ display:flex; flex-direction:column; line-height:1.15; text-align:left; }
+  .pillar .tx .h{ font-family:'Outfit',sans-serif; font-weight:800; font-size:34px; color:var(--ink); }
+  .pillar .tx .s{ font-size:25px; font-weight:500; color:var(--ink2); margin-top:4px; }
+
+  .slogan{ margin-top:56px; font-family:'Outfit',sans-serif; font-weight:800; font-size:42px; color:var(--tealDeep); }
+  .slogan em{ font-style:normal; color:var(--amber); }
+
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6;
+    background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal));
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    color:#eafaf6; font-weight:600; font-size:32px; box-shadow:0 -10px 30px rgba(13,148,136,.25);
+    padding-bottom:24px; }
+  .strip .row{ display:flex; align-items:center; gap:30px; }
+  .strip b{ font-family:'Outfit',sans-serif; font-weight:800; color:#fff; }
+  .strip .sep{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="core">
+      <img class="logo" src="icon-512.png" alt="La Base" />
+      <div class="wordmark">LA&nbsp;BASE</div>
+      <h1 class="title"><div class="l1">SHAKES</div><div class="l2"><span class="amp">&amp;</span> DRINKS</div></h1>
+      <div class="pill">🌿 Ton spot healthy à Verdun</div>
+
+      <div class="meds">
+        <div class="ring"></div>
+        <div class="med sm" style="margin-top:60px;"><img src="images/shake/snikers.png" alt=""></div>
+        <div class="med big amber"><img src="images/drinks/electric-blue.png" alt=""></div>
+        <div class="med sm rasp" style="margin-top:60px;"><img src="images/drinks/aurora.png" alt=""></div>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar energy">
+          <div class="ico">⚡</div>
+          <div class="tx"><span class="h">Boissons énergisantes</span><span class="s">0 sucre · vitaminées</span></div>
+        </div>
+        <div class="pillar smoothie">
+          <div class="ico">🥤</div>
+          <div class="tx"><span class="h">Smoothies gourmands</span><span class="s">vitaminés &amp; protéinés</span></div>
+        </div>
+      </div>
+
+      <div class="slogan">Fais le plein de bienfaits,<br><em>chaque jour&nbsp;!</em></div>
+    </div>
+
+    <div class="strip">
+      <div class="row"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span></div>
+      <div class="row">
+        <span>📲 Commande en ligne</span><span class="sep"></span><span>🎁 Fidélité &amp; cadeaux</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
