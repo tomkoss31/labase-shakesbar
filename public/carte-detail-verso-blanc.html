@@ -23,8 +23,9 @@
   .glow.a { width: 100mm; height: 100mm; top: -34mm; left: -26mm; background: radial-gradient(circle, rgba(217,119,6,.18), transparent 70%); }
   .glow.b { width: 92mm; height: 92mm; bottom: -30mm; right: -28mm; background: radial-gradient(circle, rgba(13,148,136,.18), transparent 70%); }
   .glow.c { width: 80mm; height: 80mm; top: 140mm; right: 52mm; background: radial-gradient(circle, rgba(219,39,119,.10), transparent 70%); }
-  .page { position: relative; z-index: 1; width: 210mm; height: 297mm; padding: 6mm 6mm 5mm; display: flex; flex-direction: column; }
-  .body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding-top: 1mm; }
+  .page { position: relative; z-index: 1; width: 210mm; height: 297mm; padding: 6mm 6mm 6mm; display: block; }
+  /* Hauteur DÉFINIE (pas flex:1) + space-between → répartition fiable en impression */
+  .body { height: 251mm; display: flex; flex-direction: column; justify-content: space-between; padding-top: 1mm; }
 
   .rainbow { height: 2.8mm; border-radius: 99mm; background: linear-gradient(90deg, #fbbf24, #5eead4, #8b5cf6, #ec4899, #f59e0b); }
   .rainbow.top { margin-bottom: 4mm; }
