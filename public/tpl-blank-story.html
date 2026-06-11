@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Template à trou — Story</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --rasp:#db2777; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; --ph:#9aa8a4; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(13,148,136,.18), transparent 60%),
+      radial-gradient(700px 700px at 100% 6%, rgba(217,119,6,.16), transparent 62%),
+      radial-gradient(760px 760px at 100% 100%, rgba(219,39,119,.14), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:180px 80px 220px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:10px; color:var(--tealDeep); margin-top:16px; }
+  .ph{ color:var(--ph); font-family:'ui-monospace',monospace; }
+  .ph-title{ margin-top:40px; border:3px dashed rgba(13,148,136,.4); border-radius:24px; padding:30px 40px; width:100%; max-width:840px;
+    font-family:'Outfit'; font-weight:900; font-size:64px; color:var(--ph); }
+  .ph-img{ margin-top:40px; width:520px; height:520px; border-radius:50%; border:4px dashed rgba(13,148,136,.45);
+    display:flex; align-items:center; justify-content:center; background:rgba(13,148,136,.05); }
+  .ph-img span{ font-family:'ui-monospace',monospace; font-size:30px; color:var(--ph); max-width:300px; line-height:1.5; }
+  .ph-sub{ margin-top:40px; border:3px dashed rgba(217,119,6,.4); border-radius:20px; padding:24px 36px; width:100%; max-width:760px; font-size:34px; color:var(--ph); }
+  .ph-price{ margin-top:34px; border:3px dashed rgba(219,39,119,.45); border-radius:999px; padding:18px 48px; font-family:'Outfit'; font-weight:900; font-size:44px; color:var(--ph); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal));
+    display:flex; align-items:center; justify-content:center; color:#eafaf6; font-weight:600; font-size:32px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="ph-title">[ TON TITRE ICI ]</div>
+  <div class="ph-img"><span>[ GLISSE TA PHOTO / PRODUIT ICI ]</span></div>
+  <div class="ph-sub">[ sous-titre · détails · saveurs · bénéfices ]</div>
+  <div class="ph-price">[ PRIX / OFFRE ]</div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b> · 📲 commande en ligne</span></div></div></body></html>
