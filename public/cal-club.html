@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Story Le Club</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --amberDeep:#b45309; --rasp:#db2777; --purple:#7c3aed; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(124,58,237,.16), transparent 60%),
+      radial-gradient(700px 700px at 100% 6%, rgba(13,148,136,.18), transparent 62%),
+      radial-gradient(760px 760px at 100% 100%, rgba(219,39,119,.14), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:210px 80px 230px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:10px; color:var(--tealDeep); margin-top:16px; }
+  .kicker{ margin-top:30px; font-family:'Outfit'; font-weight:800; font-size:40px; color:var(--purple); }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; margin-top:6px; }
+  .head .a{ font-size:118px; color:var(--tealDeep); } .head .b{ font-size:96px; color:var(--rasp); }
+  .sub{ margin-top:30px; font-size:38px; color:var(--ink2); max-width:820px; line-height:1.45; }
+  .sub b{ color:var(--ink); font-family:'Outfit'; font-weight:800; }
+  .points{ margin-top:50px; display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:820px; }
+  .pt{ font-family:'Outfit'; font-weight:700; font-size:32px; color:var(--tealDeep); background:rgba(13,148,136,.10); border:1.5px solid rgba(13,148,136,.26); border-radius:999px; padding:14px 30px; }
+  .cta{ margin-top:60px; font-family:'Outfit'; font-weight:900; font-size:46px; color:#fff; background:linear-gradient(90deg,var(--purple),#6d28d9); padding:24px 56px; border-radius:999px; box-shadow:0 18px 40px rgba(124,58,237,.32); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; gap:30px; color:#eafaf6; font-weight:600; font-size:32px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; } .strip .sep{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="kicker">💜 Le Club</div>
+  <div class="head"><div class="a">TON BILAN</div><div class="b">offert</div></div>
+  <div class="sub">Fais le point sur ton énergie, ton alimentation, tes objectifs — avec un <b>accompagnement perso</b>, sans pression.</div>
+  <div class="points"><span class="pt">💧 Hydratation</span><span class="pt">🥤 Protéines</span><span class="pt">⚡ Énergie</span><span class="pt">😴 Sommeil</span></div>
+  <div class="cta">Réserve 👉 lien en bio</div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span><span class="sep"></span><span>commande.labase-nutrition.com</span></div></div></body></html>

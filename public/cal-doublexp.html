@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Story Double XP</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --amberDeep:#b45309; --rasp:#db2777; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(217,119,6,.22), transparent 60%),
+      radial-gradient(700px 700px at 100% 6%, rgba(219,39,119,.16), transparent 62%),
+      radial-gradient(760px 760px at 100% 100%, rgba(13,148,136,.16), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:220px 80px 230px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:10px; color:var(--tealDeep); margin-top:16px; }
+  .kicker{ margin-top:34px; font-family:'Outfit'; font-weight:800; font-size:42px; color:var(--tealDeep); }
+  .badge{ margin-top:30px; width:420px; height:420px; border-radius:50%; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(140% 140% at 50% 0%, #fcd34d, var(--amber) 60%, var(--amberDeep)); color:#fff;
+    box-shadow:0 26px 60px rgba(217,119,6,.40), inset 0 6px 18px rgba(255,255,255,.5); }
+  .badge .x{ font-family:'Outfit'; font-weight:900; font-size:240px; line-height:.8; text-shadow:0 6px 14px rgba(0,0,0,.18); }
+  .badge .l{ font-family:'Outfit'; font-weight:800; font-size:48px; letter-spacing:6px; margin-top:6px; }
+  .head{ margin-top:54px; font-family:'Outfit'; font-weight:900; font-size:96px; line-height:.95; color:var(--ink); letter-spacing:-2px; }
+  .head .ac{ color:var(--amberDeep); }
+  .sub{ margin-top:26px; font-size:40px; color:var(--ink2); font-weight:500; max-width:800px; line-height:1.4; }
+  .sub b{ color:var(--ink); font-family:'Outfit'; font-weight:800; }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; gap:30px; color:#eafaf6; font-weight:600; font-size:32px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; } .strip .sep{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="kicker">🎁 Chaque mardi</div>
+  <div class="badge"><div class="x">×2</div><div class="l">XP</div></div>
+  <div class="head">Aujourd'hui tes points<br>comptent <span class="ac">DOUBLE</span></div>
+  <div class="sub">Commande sur l'appli → <b>1 € = 20 XP</b>. Cumule plus vite, gagne tes boissons offertes 🥤</div>
+</div><div class="strip"><span>📲 <b>Commande sur l'appli</b></span><span class="sep"></span><span>📍 Verdun</span></div></div></body></html>
