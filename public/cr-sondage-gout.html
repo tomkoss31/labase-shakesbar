@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Sondage goût</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --rasp:#db2777; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(13,148,136,.18), transparent 60%),
+      radial-gradient(700px 700px at 100% 100%, rgba(219,39,119,.16), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:180px 70px 200px; }
+  .logo{ width:108px; height:108px; border-radius:26px; box-shadow:0 14px 30px rgba(13,148,136,.30); }
+  .kicker{ margin-top:24px; font-family:'Outfit'; font-weight:800; font-size:38px; color:var(--rasp); letter-spacing:1px; }
+  .q{ margin-top:10px; font-family:'Outfit'; font-weight:900; font-size:78px; line-height:1; color:var(--ink); }
+  .vs{ margin-top:40px; display:flex; align-items:center; gap:30px; }
+  .opt{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .opt .ph{ width:330px; height:330px; border-radius:50%; overflow:hidden; border:8px solid #fff; box-shadow:0 22px 48px rgba(20,40,36,.24); }
+  .opt.a .ph{ outline:5px solid var(--teal); } .opt.b .ph{ outline:5px solid var(--rasp); }
+  .opt .ph img{ width:100%; height:100%; object-fit:cover; }
+  .opt .lbl{ font-family:'Outfit'; font-weight:900; font-size:46px; color:var(--ink); }
+  .opt .lbl span{ display:inline-flex; width:54px; height:54px; border-radius:50%; align-items:center; justify-content:center; color:#fff; font-size:34px; margin-right:12px; vertical-align:middle; }
+  .opt.a .lbl span{ background:var(--teal); } .opt.b .lbl span{ background:var(--rasp); }
+  .mid{ font-family:'Outfit'; font-weight:900; font-size:56px; color:var(--amber); }
+  .note{ margin-top:48px; font-family:'Outfit'; font-weight:800; font-size:40px; color:var(--tealDeep); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:120px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; color:#eafaf6; font-weight:600; font-size:30px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" />
+  <div class="kicker">🗳️ SONDAGE</div>
+  <div class="q">Quel goût<br>ce week-end ?</div>
+  <div class="vs">
+    <div class="opt a"><div class="ph"><img src="images/shake/snikers.png" alt=""></div><div class="lbl"><span>A</span>Snickers</div></div>
+    <div class="mid">VS</div>
+    <div class="opt b"><div class="ph"><img src="images/drinks/aurora.png" alt=""></div><div class="lbl"><span>B</span>Aurora</div></div>
+  </div>
+  <div class="note">👆 Vote dans le sondage !</div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span></div></div></body></html>

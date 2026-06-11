@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Cafés gourmets</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --amberDeep:#b45309; --brown:#7c4a23; --cream:#fbf7f0; --ink:#3a2a1a; --ink2:#6b5a48; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(720px 720px at 0% 0%, rgba(124,74,35,.20), transparent 60%),
+      radial-gradient(700px 700px at 100% 100%, rgba(217,119,6,.18), transparent 60%),
+      linear-gradient(180deg,#fdf8f1 0%, #f7eede 60%, #f1e4cf 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(124,74,35,.06) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:200px 80px 230px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(124,74,35,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:10px; color:var(--brown); margin-top:16px; }
+  .emoji{ font-size:200px; line-height:1; margin:16px 0 4px; filter:drop-shadow(0 14px 26px rgba(124,74,35,.25)); }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; }
+  .head .a{ font-size:92px; color:var(--brown); } .head .b{ font-size:64px; color:var(--amberDeep); }
+  .badges{ margin-top:30px; display:flex; gap:16px; justify-content:center; }
+  .b{ font-family:'Outfit'; font-weight:800; font-size:30px; color:#fff; background:var(--amber); border-radius:999px; padding:14px 30px; }
+  .b.alt{ color:var(--brown); background:rgba(124,74,35,.12); border:1.5px solid rgba(124,74,35,.3); }
+  .list{ margin-top:46px; font-family:'Outfit'; font-weight:800; font-size:42px; color:var(--ink); line-height:1.5; max-width:840px; }
+  .list .dot{ color:var(--amber); margin:0 10px; }
+  .price{ margin-top:40px; font-family:'Outfit'; font-weight:900; font-size:64px; color:var(--amberDeep); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6; background:linear-gradient(90deg,#5a3618,var(--brown) 50%,var(--amberDeep)); display:flex; align-items:center; justify-content:center; gap:30px; color:#fff7ec; font-weight:600; font-size:32px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; } .strip .sep{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.5); }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="emoji">☕</div>
+  <div class="head"><div class="a">CAFÉS GOURMETS</div><div class="b">glacés ou chauds</div></div>
+  <div class="badges"><span class="b">24g protéines</span><span class="b alt">dès 100 cal</span></div>
+  <div class="list">Macchiato<span class="dot">·</span>Choco Mocha<br>Latte Noisettes<span class="dot">·</span>Vanille Latte</div>
+  <div class="price">650 ml · 8,90 €</div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span><span class="sep"></span><span>le café qui te fait du bien</span></div></div></body></html>

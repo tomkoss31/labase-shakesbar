@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Allez les Bleus</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --bleu:#1e40af; --bleu2:#2563eb; --rouge:#dc2626; --ink:#0f1e3a; --ink2:#5b6b8a; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(720px 720px at 0% 0%, rgba(37,99,235,.22), transparent 60%),
+      radial-gradient(720px 720px at 100% 100%, rgba(220,38,38,.18), transparent 60%),
+      linear-gradient(180deg,#ffffff 0%, #f5f8ff 55%, #fff5f5 100%); }
+  .flag{ position:absolute; top:0; left:0; right:0; height:16px; background:linear-gradient(90deg, var(--bleu) 0 33%, #fff 33% 66%, var(--rouge) 66% 100%); }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:200px 80px 230px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(30,64,175,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:42px; letter-spacing:10px; color:var(--bleu); margin-top:16px; }
+  .kicker{ margin-top:32px; font-family:'Outfit'; font-weight:800; font-size:40px; color:var(--rouge); }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.9; letter-spacing:-2px; margin-top:8px; }
+  .head .a{ font-size:118px; color:var(--bleu); } .head .b{ font-size:118px; color:var(--rouge); }
+  .match{ margin-top:30px; font-family:'Outfit'; font-weight:800; font-size:46px; color:var(--ink); background:#fff; border:2px solid rgba(30,64,175,.25); border-radius:999px; padding:16px 44px; box-shadow:0 12px 30px rgba(30,64,175,.12); }
+  .med{ width:360px; height:360px; border-radius:50%; overflow:hidden; border:9px solid #fff; margin-top:44px; box-shadow:0 24px 52px rgba(20,30,60,.26); outline:5px solid rgba(37,99,235,.4); }
+  .med img{ width:100%; height:100%; object-fit:cover; }
+  .tie{ margin-top:40px; font-family:'Outfit'; font-weight:800; font-size:42px; color:var(--ink); }
+  .tie b{ color:var(--bleu2); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:130px; z-index:6; background:linear-gradient(90deg, var(--bleu) 0 33%, #1d4ed8 33% 66%, var(--rouge) 66% 100%); display:flex; align-items:center; justify-content:center; gap:30px; color:#fff; font-weight:700; font-size:32px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:900; }
+</style></head>
+<body><div class="banner"><div class="flag"></div><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="kicker">Ce soir, on supporte les Bleus ⚽</div>
+  <div class="head"><div class="a">ALLEZ</div><div class="b">LES BLEUS</div></div>
+  <div class="match">FRANCE vs [ ADVERSAIRE · 21h ]</div>
+  <div class="med"><img src="images/drinks/electric-blue.png" alt=""></div>
+  <div class="tie">Viens vibrer avec ta <b>Electric Blue 💙</b></div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span></div></div></body></html>
