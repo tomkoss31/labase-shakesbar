@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Suppléments santé</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --amberDeep:#b45309; --rasp:#db2777; --purple:#7c3aed; --green:#16a34a; --sky:#0284c7; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(13,148,136,.20), transparent 60%),
+      radial-gradient(700px 700px at 100% 6%, rgba(217,119,6,.18), transparent 62%),
+      radial-gradient(760px 760px at 100% 100%, rgba(219,39,119,.16), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:180px 80px 200px; }
+  .logo{ width:112px; height:112px; border-radius:26px; box-shadow:0 14px 30px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:42px; letter-spacing:10px; color:var(--tealDeep); margin-top:14px; }
+  .kicker{ margin-top:24px; font-family:'Outfit'; font-weight:800; font-size:38px; color:var(--amberDeep); }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; margin-top:8px; }
+  .head .a{ font-size:106px; color:var(--tealDeep); }
+  .pill{ margin-top:20px; display:inline-flex; align-items:center; gap:12px; padding:14px 36px; border-radius:999px; background:rgba(217,119,6,.12); border:2px solid rgba(217,119,6,.30); color:var(--amberDeep); font-weight:800; font-size:34px; }
+  .grid{ margin-top:60px; display:grid; grid-template-columns:1fr 1fr; gap:18px; width:100%; max-width:880px; }
+  .item{ display:flex; align-items:center; gap:18px; background:rgba(255,255,255,.88); border:1px solid rgba(20,40,36,.08); box-shadow:0 12px 28px rgba(20,40,36,.08); border-radius:22px; padding:22px 26px; text-align:left; }
+  .item .ic{ width:64px; height:64px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:36px; flex:none; }
+  .i1 .ic{ background:rgba(13,148,136,.14); } .i2 .ic{ background:rgba(219,39,119,.14); } .i3 .ic{ background:rgba(217,119,6,.16); } .i4 .ic{ background:rgba(124,58,237,.14); } .i5 .ic{ background:rgba(22,163,74,.14); } .i6 .ic{ background:rgba(2,132,199,.14); }
+  .item .tx{ display:flex; flex-direction:column; line-height:1.15; }
+  .item .tx .n{ font-family:'Outfit'; font-weight:800; font-size:28px; color:var(--ink); }
+  .item .tx .b{ font-size:21px; color:var(--ink2); margin-top:2px; }
+  .price{ margin-top:46px; font-family:'Outfit'; font-weight:900; font-size:54px; color:var(--amberDeep); }
+  .price small{ display:block; font-family:'Inter'; font-weight:500; font-size:28px; color:var(--ink2); margin-top:6px; }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:120px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; color:#eafaf6; font-weight:600; font-size:30px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="kicker">➕ EXTRA SANTÉ</div>
+  <div class="head"><div class="a">BOOSTE TON SHAKE</div></div>
+  <div class="pill">+2,50€ sur n'importe quelle boisson</div>
+  <div class="grid">
+    <div class="item i1"><div class="ic">💪</div><div class="tx"><span class="n">Protéines +5g</span><span class="b">muscle &amp; satiété</span></div></div>
+    <div class="item i2"><div class="ic">✨</div><div class="tx"><span class="n">Collagène</span><span class="b">peau · cheveux · articulations</span></div></div>
+    <div class="item i3"><div class="ic">⚡</div><div class="tx"><span class="n">Créatine</span><span class="b">force · endurance · récup</span></div></div>
+    <div class="item i4"><div class="ic">🛡️</div><div class="tx"><span class="n">Booster immunité</span><span class="b">défenses naturelles</span></div></div>
+    <div class="item i5"><div class="ic">🌿</div><div class="tx"><span class="n">Fibres &amp; Probiotiques</span><span class="b">digestion · confort</span></div></div>
+    <div class="item i6"><div class="ic">💧</div><div class="tx"><span class="n">Électrolytes</span><span class="b">hydratation · sport</span></div></div>
+  </div>
+  <div class="price">À ajouter sur place ou via l'app<small>Demande-nous lequel te correspond 👋</small></div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span></div></div></body></html>

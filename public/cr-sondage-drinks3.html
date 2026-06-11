@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Sondage saveurs drinks</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --rasp:#db2777; --sky:#0284c7; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(720px 720px at 0% 0%, rgba(2,132,199,.18), transparent 60%),
+      radial-gradient(720px 720px at 100% 100%, rgba(217,119,6,.18), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:180px 70px 200px; }
+  .logo{ width:108px; height:108px; border-radius:26px; box-shadow:0 14px 30px rgba(13,148,136,.30); }
+  .kicker{ margin-top:24px; font-family:'Outfit'; font-weight:800; font-size:36px; color:var(--sky); letter-spacing:1px; }
+  .q{ margin-top:10px; font-family:'Outfit'; font-weight:900; font-size:72px; line-height:1.05; color:var(--ink); }
+  .q .ac{ color:var(--rasp); }
+  .opts{ margin-top:46px; display:flex; flex-direction:column; gap:24px; width:100%; max-width:820px; }
+  .o{ display:flex; align-items:center; gap:22px; background:rgba(255,255,255,.88); border:1px solid rgba(20,40,36,.08); box-shadow:0 12px 28px rgba(20,40,36,.08); border-radius:26px; padding:18px 26px; }
+  .o .img{ width:140px; height:140px; border-radius:50%; overflow:hidden; border:5px solid #fff; outline:3px solid rgba(13,148,136,.3); flex:none; }
+  .oa .img{ outline-color:var(--rasp); } .ob .img{ outline-color:var(--sky); } .oc .img{ outline-color:var(--amber); }
+  .o .img img{ width:100%; height:100%; object-fit:cover; }
+  .o .lbl{ flex:1; text-align:left; display:flex; align-items:center; gap:14px; }
+  .o .badge{ display:inline-flex; width:60px; height:60px; border-radius:50%; align-items:center; justify-content:center; color:#fff; font-family:'Outfit'; font-weight:900; font-size:34px; flex:none; }
+  .oa .badge{ background:var(--rasp); } .ob .badge{ background:var(--sky); } .oc .badge{ background:var(--amber); }
+  .o .txt{ display:flex; flex-direction:column; line-height:1.15; }
+  .o .txt .nm{ font-family:'Outfit'; font-weight:900; font-size:40px; color:var(--ink); }
+  .o .txt .desc{ font-size:24px; color:var(--ink2); font-family:'Inter'; font-weight:500; margin-top:4px; }
+  .note{ margin-top:42px; font-family:'Outfit'; font-weight:800; font-size:38px; color:var(--tealDeep); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:120px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; color:#eafaf6; font-weight:600; font-size:30px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" />
+  <div class="kicker">🗳️ SAVEURS DRINKS</div>
+  <div class="q">Tu es plutôt <span class="ac">quelle saveur</span> ?</div>
+  <div class="opts">
+    <div class="o oa"><div class="img"><img src="images/drinks/phenix.png" alt=""></div><div class="lbl"><span class="badge">A</span><div class="txt"><span class="nm">PHÉNIX</span><span class="desc">fraise · pêche · ananas</span></div></div></div>
+    <div class="o ob"><div class="img"><img src="images/drinks/aurora.png" alt=""></div><div class="lbl"><span class="badge">B</span><div class="txt"><span class="nm">AURORA</span><span class="desc">framboise · myrtille · citron</span></div></div></div>
+    <div class="o oc"><div class="img"><img src="images/drinks/pina-colada.png" alt=""></div><div class="lbl"><span class="badge">C</span><div class="txt"><span class="nm">PINA COLADA</span><span class="desc">citron · pina · ananas</span></div></div></div>
+  </div>
+  <div class="note">👆 Vote en story !</div>
+</div><div class="strip"><span>📍 <b>La Base · Verdun</b></span></div></div></body></html>

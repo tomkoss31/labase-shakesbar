@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Créatine</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDark:#0f766e; --tealDeep:#115e59; --amber:#d97706; --amberDeep:#b45309; --orange:#ea580c; --cream:#fbf7f0; --ink:#243530; --ink2:#5c6b66; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:radial-gradient(700px 700px at 0% 0%, rgba(234,88,12,.22), transparent 60%),
+      radial-gradient(700px 700px at 100% 100%, rgba(13,148,136,.16), transparent 60%),
+      linear-gradient(180deg,#fdfaf4 0%, var(--cream) 55%, #f6efe4 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:220px 80px 230px; }
+  .logo{ width:120px; height:120px; border-radius:28px; box-shadow:0 16px 34px rgba(13,148,136,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:10px; color:var(--tealDeep); margin-top:16px; }
+  .kicker{ margin-top:30px; font-family:'Outfit'; font-weight:800; font-size:40px; color:var(--orange); }
+  .emoji{ font-size:200px; line-height:1; margin:10px 0; filter:drop-shadow(0 16px 30px rgba(234,88,12,.30)); }
+  .head{ font-family:'Outfit'; font-weight:900; font-size:128px; line-height:.9; letter-spacing:-2px; color:var(--orange); }
+  .sub{ margin-top:20px; font-family:'Outfit'; font-weight:700; font-size:38px; color:var(--ink2); }
+  .benefits{ margin-top:50px; display:flex; flex-direction:column; gap:18px; width:100%; max-width:780px; }
+  .b{ display:flex; align-items:center; gap:20px; background:rgba(255,255,255,.88); border:1px solid rgba(20,40,36,.08); box-shadow:0 12px 28px rgba(20,40,36,.08); border-radius:22px; padding:22px 30px; text-align:left; }
+  .b .e{ font-size:46px; flex:none; } .b .t{ font-size:34px; color:var(--ink); font-weight:600; } .b .t b{ font-family:'Outfit'; font-weight:800; }
+  .pill{ margin-top:46px; display:inline-flex; gap:12px; padding:16px 40px; border-radius:999px; background:linear-gradient(90deg,var(--orange),var(--amberDeep)); color:#fff; font-family:'Outfit'; font-weight:900; font-size:36px; box-shadow:0 16px 36px rgba(234,88,12,.32); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:120px; z-index:6; background:linear-gradient(90deg,var(--tealDeep),var(--tealDark) 50%,var(--teal)); display:flex; align-items:center; justify-content:center; color:#eafaf6; font-weight:600; font-size:30px; }
+  .strip b{ font-family:'Outfit'; font-weight:800; color:#fff; }
+</style></head>
+<body><div class="banner"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wordmark">LA&nbsp;BASE</div>
+  <div class="kicker">⚡ EXTRA SANTÉ</div>
+  <div class="emoji">💪</div>
+  <div class="head">CRÉATINE</div>
+  <div class="sub">le supplément le plus étudié au monde</div>
+  <div class="benefits">
+    <div class="b"><span class="e">🏋️</span><span class="t"><b>Force &amp; endurance</b> à l'effort</span></div>
+    <div class="b"><span class="e">🔄</span><span class="t"><b>Récup musculaire</b> plus rapide</span></div>
+    <div class="b"><span class="e">🦴</span><span class="t">Intéressante pour <b>femmes &amp; seniors</b></span></div>
+  </div>
+  <div class="pill">+2,50€ dans ton shake</div>
+</div><div class="strip"><span>📍 <b>11 rue Saint Pierre · Verdun</b></span></div></div></body></html>
