@@ -14,7 +14,7 @@ export interface RewardTier {
 export const REWARDS_CATALOG: RewardTier[] = [
   {
     id: 'boost',
-    cost: 100,
+    cost: 150,
     emoji: '🍯',
     title: 'Un sirop / boost offert',
     desc: 'Une dose de sirop parfumé ou un boost sur ta prochaine boisson',
@@ -22,7 +22,7 @@ export const REWARDS_CATALOG: RewardTier[] = [
   },
   {
     id: 'topping',
-    cost: 250,
+    cost: 300,
     emoji: '✨',
     title: 'Topping offert',
     desc: 'Protéine, créatine ou beurre de cacahuète au choix sur ta boisson',
@@ -30,7 +30,7 @@ export const REWARDS_CATALOG: RewardTier[] = [
   },
   {
     id: 'boisson',
-    cost: 800,
+    cost: 1500,
     emoji: '🥤',
     title: 'Une boisson au choix',
     desc: 'Smoothie ou shake, petite ou grande — la boisson que tu veux',
@@ -38,7 +38,7 @@ export const REWARDS_CATALOG: RewardTier[] = [
   },
   {
     id: 'combo-gaufre',
-    cost: 1500,
+    cost: 2200,
     emoji: '🧇',
     title: 'Boisson + gaufre healthy',
     desc: 'Le combo gourmand entièrement offert',
@@ -46,7 +46,7 @@ export const REWARDS_CATALOG: RewardTier[] = [
   },
   {
     id: 'cadeau-mois',
-    cost: 2500,
+    cost: 3800,
     emoji: '🎁',
     title: 'Le cadeau du mois',
     desc: 'Une surprise premium réservée aux membres les plus fidèles',

@@ -1078,11 +1078,11 @@ function renderProfile(p, rewards) {
 
   // Catalogue cadeaux — GARDER SYNCHRO avec src/v2/rewards/catalog.ts
   const CATALOG = [
-    { id: 'boost', cost: 100, emoji: '🍯', title: 'Sirop / boost offert' },
-    { id: 'topping', cost: 250, emoji: '✨', title: 'Topping offert' },
-    { id: 'boisson', cost: 800, emoji: '🥤', title: 'Une boisson au choix' },
-    { id: 'combo-gaufre', cost: 1500, emoji: '🧇', title: 'Boisson + gaufre' },
-    { id: 'cadeau-mois', cost: 2500, emoji: '🎁', title: 'Cadeau du mois' },
+    { id: 'boost', cost: 150, emoji: '🍯', title: 'Sirop / boost offert' },
+    { id: 'topping', cost: 300, emoji: '✨', title: 'Topping offert' },
+    { id: 'boisson', cost: 1500, emoji: '🥤', title: 'Une boisson au choix' },
+    { id: 'combo-gaufre', cost: 2200, emoji: '🧇', title: 'Boisson + gaufre' },
+    { id: 'cadeau-mois', cost: 3800, emoji: '🎁', title: 'Cadeau du mois' },
   ];
   const giftButtons = CATALOG.map(c => {
     const ok = p.xp >= c.cost;

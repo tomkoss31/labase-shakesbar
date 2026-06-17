@@ -25,10 +25,10 @@
   .rail .glow.t { width: 62mm; height: 62mm; top: -20mm; left: -14mm; background: radial-gradient(circle, rgba(94,234,212,.30), transparent 70%); }
   .rail .glow.b { width: 58mm; height: 58mm; bottom: 24mm; right: -20mm; background: radial-gradient(circle, rgba(245,158,11,.18), transparent 70%); }
   .rail > * { position: relative; z-index: 1; }
-  .rbrand { display: flex; flex-direction: column; align-items: center; gap: 2.6mm; }
-  .rbrand img { width: 23mm; height: 23mm; border-radius: 5.2mm; box-shadow: 0 2.5mm 6mm rgba(0,0,0,.55); }
-  .rbrand .nm { font-family: 'Outfit'; font-weight: 900; font-size: 6.6mm; line-height: 1; }
-  .rbrand .tg { font-size: 2.4mm; letter-spacing: .24em; color: #5eead4; font-weight: 700; }
+  .rbrand { display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+  .rbrand img { width: 15mm; height: 15mm; border-radius: 3.4mm; box-shadow: 0 1.5mm 4mm rgba(0,0,0,.5); }
+  .rbrand .nm { font-family: 'Outfit'; font-weight: 900; font-size: 5.6mm; line-height: 1; }
+  .rbrand .tg { font-size: 2.1mm; letter-spacing: .24em; color: #5eead4; font-weight: 700; }
   .rhero { display: flex; flex-direction: column; align-items: center; }
   .hero { width: 52mm; height: 64mm; object-fit: cover; border-radius: 4.5mm;
     box-shadow: 0 4mm 11mm rgba(0,0,0,.55); border: .4mm solid rgba(94,234,212,.25); }
@@ -58,14 +58,11 @@
   /* ───── COLONNE DROITE ───── */
   .main { flex: 1; min-width: 0; padding: 8.5mm 8mm 7mm; display: flex; flex-direction: column; }
   .rainbow { height: 2.2mm; border-radius: 99mm; margin-bottom: 4mm; background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #5eead4, #fbbf24); }
-  .mtitle { display: flex; align-items: center; justify-content: space-between; gap: 4mm; }
-  .mtitle .h { font-family: 'Outfit'; font-weight: 900; font-size: 8.5mm; letter-spacing: -.02em; line-height: 1; }
-  .guide-intro { display: inline-flex; align-items: center; gap: 1.6mm; flex: none;
-    font-family: 'Outfit'; font-weight: 900; font-size: 3.5mm; letter-spacing: .01em;
-    color: #1c1402; background: linear-gradient(90deg, #fbbf24, #f59e0b); padding: 2.2mm 4mm;
-    border-radius: 99mm; box-shadow: 0 1.5mm 4mm rgba(245,158,11,.32); }
-  .guide-intro small { font-family: 'Inter'; font-weight: 600; font-size: 2.3mm; opacity: .85; }
-  .guide { display: flex; gap: 2.4mm; margin: 4mm 0 4.4mm; }
+  .mtitle { display: flex; align-items: baseline; justify-content: space-between; }
+  .mtitle .h { font-family: 'Outfit'; font-weight: 900; font-size: 8mm; letter-spacing: -.02em; line-height: 1; }
+  .mtitle .g { font-size: 2.5mm; color: #fbbf24; font-family: 'Outfit'; font-weight: 800; text-align: right; }
+  .mtitle .g small { display: block; color: #9fc0ba; font-weight: 500; font-family: 'Inter'; font-size: 2.2mm; margin-top: .5mm; }
+  .guide { display: flex; gap: 2.4mm; margin: 3.6mm 0 4.4mm; }
   .guide .g { flex: 1; display: flex; align-items: center; gap: 1.8mm; background: rgba(94,234,212,.07);
     border: .3mm solid rgba(94,234,212,.2); border-radius: 2.4mm; padding: 2.2mm 2.4mm; }
   .guide .g .n { width: 4.6mm; height: 4.6mm; border-radius: 50%; background: #5eead4; color: #04100f; flex: none;
@@ -73,10 +70,10 @@
   .guide .g .t { font-size: 2.3mm; line-height: 1.2; color: #d7ece7; }
   .guide .g .t b { color: #ecfdf5; }
 
-  .secs { display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 3.2mm; }
+  .secs { display: flex; flex-direction: column; gap: 3.4mm; }
 
   /* carte section horizontale */
-  .sc { display: flex; align-items: center; gap: 3mm; background: rgba(255,255,255,.035); border: .3mm solid rgba(255,255,255,.10);
+  .sc { display: flex; gap: 3mm; background: rgba(255,255,255,.035); border: .3mm solid rgba(255,255,255,.10);
     border-radius: 3.4mm; padding: 3mm; }
   .sc.energie { border-color: rgba(56,189,248,.30); background: rgba(56,189,248,.05); }
   .sc.gourmand { border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.05); }
@@ -104,14 +101,6 @@
   .hh .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
     color: #04100f; background: #fbbf24; padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
   .hh .more { color: #5eead4; font-weight: 600; }
-  /* liste détaillée : nom + saveurs */
-  .hl { display: flex; flex-direction: column; gap: 1.2mm; margin-top: .6mm; }
-  .hli { line-height: 1.15; }
-  .hli .n { font-family: 'Outfit'; font-weight: 700; font-size: 2.65mm; color: #fff; }
-  .hli .f { font-size: 2.25mm; color: #9fc0ba; }
-  .hli .new { font-family: 'Outfit'; font-weight: 800; font-size: 1.8mm; letter-spacing: .04em; text-transform: uppercase;
-    color: #04100f; background: #fbbf24; padding: .15mm 1.1mm; border-radius: 99mm; vertical-align: middle; }
-  .hmore { font-size: 2.4mm; color: #5eead4; font-weight: 600; margin-top: 1.4mm; }
 
   /* mini-cartes cafés / enfants */
   .duo { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 3mm; }
@@ -134,7 +123,7 @@
   .band .ln .dot { color: #5eead4; margin: 0 .9mm; }
   .band.extra .ln .dot { color: #f59e0b; }
 
-  .loy { display: flex; align-items: center; gap: 4mm; padding: 3.4mm 4mm;
+  .loy { margin-top: auto; display: flex; align-items: center; gap: 4mm; padding: 3.4mm 4mm;
     background: linear-gradient(100deg, rgba(94,234,212,.12), rgba(245,158,11,.08));
     border: .3mm solid rgba(94,234,212,.3); border-radius: 3.4mm; }
   .loy .lt2 { flex: 1; }
@@ -158,11 +147,11 @@
         <div class="tg">SHAKES &amp; DRINKS</div>
       </div>
       <div class="rhero">
-        <img class="hero" src="images/drinks/aurora.png" alt="Aurora" />
+        <img class="hero" src="images/drinks/electric-blue.png" alt="Electric Blue" />
         <div class="hero-cap">
-          <div class="t">Aurora</div>
-          <div class="s">framboise · myrtille · citron</div>
-          <div class="badge">✨ Nouveauté</div>
+          <div class="t">Electric Blue</div>
+          <div class="s">citron · framboise bleue · myrtille</div>
+          <div class="badge">La signature ⚡</div>
         </div>
       </div>
 
@@ -186,7 +175,7 @@
       <div class="rainbow"></div>
       <div class="mtitle">
         <div class="h">La carte</div>
-        <div class="guide-intro">👀 Perdu·e ? Suis le guide 👇</div>
+        <div class="g">Perdu·e ? Suis le guide 👇<small>3 étapes &amp; tu trouves LA boisson</small></div>
       </div>
       <div class="guide">
         <div class="g"><div class="n">1</div><div class="t">Choisis ton <b>univers</b></div></div>
@@ -204,13 +193,8 @@
               <div class="nm">🔋 Boissons énergisantes</div>
               <div class="price"><span class="p">6,90€ · 8,90€</span></div>
             </div>
-            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
-            <div class="hl">
-              <div class="hli"><span class="n">Electric Blue</span> <span class="f">— citron · framboise bleue · myrtille</span></div>
-              <div class="hli"><span class="n">Black Panther</span> <span class="f">— citron · cerise · framboise bleue</span></div>
-              <div class="hli"><span class="n">Phénix <span class="new">New</span></span> <span class="f">— fraise · pêche · ananas</span></div>
-              <div class="hmore">📲 + 13 autres parfums sur la carte</div>
-            </div>
+            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">0 sucre</span><span class="b">20 cal</span><span class="b alt">aloé vera</span></div>
+            <div class="hh"><b>Electric Blue</b><span class="dot">·</span><b>Black Panther</b><span class="dot">·</span><b>Perroquet</b><span class="dot">·</span><b>Phénix</b> <span class="new">New</span><span class="dot">·</span><span class="more">+9 sur l'app</span></div>
           </div>
         </div>
 
@@ -220,15 +204,10 @@
           <div class="bd">
             <div class="top">
               <div class="nm">🍫 Smoothies nutritionnels</div>
-              <div class="price"><span class="p">8,90€</span><span class="vol">650 ml · taille unique</span></div>
+              <div class="price"><span class="p">8,90€</span><span class="vol">taille unique · repas/collation</span></div>
             </div>
-            <div class="badges"><span class="b size">650 ml</span><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
-            <div class="hl">
-              <div class="hli"><span class="n">Snickers</span> <span class="f">— chocolat · cacahuètes</span></div>
-              <div class="hli"><span class="n">Full Oréo</span> <span class="f">— cookies cream · Oréo</span></div>
-              <div class="hli"><span class="n">M&amp;M's <span class="new">New</span></span> <span class="f">— chocolat · caramel · noisette</span></div>
-              <div class="hmore">📲 + 12 autres saveurs sur la carte</div>
-            </div>
+            <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">25 vit. &amp; min.</span><span class="b alt">250 cal</span><span class="b alt">sans lactose</span><span class="b alt">sans gluten</span></div>
+            <div class="hh"><b>Snickers</b><span class="dot">·</span><b>Full Oréo</b><span class="dot">·</span><b>M&amp;M's</b> <span class="new">New</span><span class="dot">·</span><b>Banana Split</b><span class="dot">·</span><span class="more">+8 sur l'app</span></div>
           </div>
         </div>
 
@@ -240,34 +219,29 @@
               <div class="nm">🌿 Santé &amp; Détox</div>
               <div class="price"><span class="p">5,90€ · 8,90€</span><span class="vol">drinks &amp; thé chaud</span></div>
             </div>
-            <div class="badges"><span class="b size">Start 550 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
-            <div class="hl">
-              <div class="hli"><span class="n">Casse Grippe</span> <span class="f">— immunité · aloé vera</span></div>
-              <div class="hli"><span class="n">Di'geste</span> <span class="f">— fibres · probiotiques</span></div>
-              <div class="hli"><span class="n">Limonade Rose</span> <span class="f">— collagène · glow</span></div>
-              <div class="hli"><span class="n">Hydrat'Max</span> <span class="f">— vitamine C</span> <span class="f">· + Thé aloé vera chaud</span></div>
-            </div>
+            <div class="badges"><span class="b size">Start 500 ml</span><span class="b size">Boost 950 ml</span><span class="b">fonctionnels</span><span class="b alt">aloé vera</span></div>
+            <div class="hh"><b>Casse Grippe</b><span class="dot">·</span><b>Di'Geste</b><span class="dot">·</span><b>Limonade Rose</b><span class="dot">·</span><b>Hydrat'Max</b><span class="dot">·</span><b>Thé aloé vera</b></div>
           </div>
         </div>
 
         <!-- CAFES + ENFANTS -->
         <div class="duo">
           <div class="mini">
-            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé 650ml · ou chaud</span></div></div>
+            <div class="top"><div class="nm">☕ Cafés gourmets</div><div class="price"><span class="p">6,90€·8,90€</span><span class="vol">glacé ou chaud</span></div></div>
             <div class="badges"><span class="b warm">24g protéines</span><span class="b alt">dès 100 cal</span></div>
             <div class="hh"><b>Macchiato</b><span class="dot">·</span><b>Choco Mocha</b><span class="dot">·</span><b>Latte noisette</b><span class="dot">·</span><b>Vanille latte</b></div>
           </div>
           <div class="mini enfants">
             <div class="top"><div class="nm">🧒 Enfants</div><div class="price"><span class="p">5€</span><span class="vol">taille enfant</span></div></div>
             <div class="badges"><span class="b">0 sucre</span><span class="b">0 cal</span><span class="b alt">sans énergisant</span></div>
-            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+4 sur l'app</span></div>
+            <div class="hh"><b>Licorne</b><span class="dot">·</span><b>Spiderman</b><span class="dot">·</span><b>Hulk</b><span class="dot">·</span><span class="more">+3 sur l'app</span></div>
           </div>
         </div>
 
         <!-- EXTRA -->
         <div class="band extra">
           <div class="bh"><div class="nm">➕ Ton Extra Santé</div><div class="pr">+2,50€</div><div class="sub">sur n'importe quelle boisson</div></div>
-          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Électrolytes</b><span class="dot">·</span><b>Protéines +5g</b></div>
+          <div class="ln"><b>Collagène</b><span class="dot">·</span><b>Immunité</b><span class="dot">·</span><b>Fibres</b><span class="dot">·</span><b>Probiotique</b><span class="dot">·</span><b>Énergie</b><span class="dot">·</span><b>CR7 Drive</b><span class="dot">·</span><b>Hydrate 24</b><span class="dot">·</span><b>Créatine</b><span class="dot">·</span><b>Protéines +5g</b></div>
         </div>
 
         <!-- SNACKS -->

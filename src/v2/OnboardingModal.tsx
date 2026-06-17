@@ -71,7 +71,7 @@ export function OnboardingModal({ palette, open, onClose, startAtInstall }: Onbo
           <h2 style={titleStyle}>Cumule des XP, gagne des cadeaux</h2>
           <div style={{ textAlign: 'left', width: '100%', marginTop: 8 }}>
             <Row palette={palette} emoji="💸" text="1€ dépensé = 10 XP" />
-            <Row palette={palette} emoji="🥤" text="800 XP = une boisson offerte" />
+            <Row palette={palette} emoji="🥤" text="1500 XP = une boisson offerte" />
             <Row palette={palette} emoji="🎂" text="Ton anniversaire = +500 XP" />
             <Row palette={palette} emoji="🎰" text="Une roue cadeau chaque semaine" />
           </div>
