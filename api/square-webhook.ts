@@ -182,7 +182,7 @@ export default async function handler(req: any, res: any) {
   if (userId) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded')
+      .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
       .eq('id', userId)
       .single();
 
@@ -191,7 +191,9 @@ export default async function handler(req: any, res: any) {
       const eurosSpent = Math.floor(totalCents / 100);
       // Mardi Double XP (cohérent avec le crédit comptoir)
       const isTuesday = new Date().getUTCDay() === 2;
-      const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1);
+      // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant.
+      const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
+      const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1);
       const xpFromOrder = 50;
       const xpFirstOrderBonus = isFirstOrder ? 200 : 0;
       const xpGained = xpFromEuros + xpFromOrder + xpFirstOrderBonus;

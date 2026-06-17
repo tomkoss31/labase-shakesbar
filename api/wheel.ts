@@ -137,6 +137,8 @@ export default async function handler(req: any, res: any) {
     const code = generateCode('SPIN');
     const now = new Date();
     const expiresAt = new Date(now.getTime() + EXPIRY_MS);
+    // 'retry' et 'xp_multiplier' s'appliquent AUTOMATIQUEMENT → pas de code à présenter au comptoir.
+    const autoApplied = segment.rewardType === 'retry' || segment.rewardType === 'xp_multiplier';
 
     await admin.from('wheel_spins').insert({
       user_id: userId,
@@ -145,8 +147,15 @@ export default async function handler(req: any, res: any) {
       reward_type: segment.rewardType,
       reward_value: segment.rewardValue,
       expires_at: expiresAt.toISOString(),
-      used_at: segment.rewardType === 'retry' ? now.toISOString() : null,
+      used_at: autoApplied ? now.toISOString() : null,
     });
+
+    // 🎁 Boost XP ×2 pendant 24h : on arme le multiplicateur sur le profil.
+    // Il est ensuite appliqué à chaque commande (online + comptoir) tant qu'actif.
+    if (segment.rewardType === 'xp_multiplier') {
+      const until = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      await admin.from('profiles').update({ xp_multiplier_until: until.toISOString() }).eq('id', userId);
+    }
 
     if (!isAdmin) {
       await admin.from('profiles').update({ last_spin_at: now.toISOString() }).eq('id', userId);
@@ -155,8 +164,8 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({
       ok: true,
       segment: { id: segment.id, label: segment.label, rewardType: segment.rewardType, rewardValue: segment.rewardValue },
-      code: segment.rewardType === 'retry' ? null : code,
-      expiresAt: segment.rewardType === 'retry' ? null : expiresAt.toISOString(),
+      code: autoApplied ? null : code,
+      expiresAt: autoApplied ? null : expiresAt.toISOString(),
     });
   }
 

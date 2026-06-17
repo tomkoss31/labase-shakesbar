@@ -197,7 +197,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: profile, error: profileError } = await admin
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp, first_name, email')
+      .select('total_spent_cents, total_orders, xp, first_name, email, xp_multiplier_until')
       .eq('id', userId)
       .single();
     if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
@@ -256,7 +256,9 @@ export default async function handler(req: any, res: any) {
     // Mardi Double XP (jour creux → ramène du monde). getUTCDay: 2 = mardi.
     // Le bar opère en journée → UTC = même jour qu'à Paris, fiable.
     const isTuesday = new Date().getUTCDay() === 2;
-    const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1);
+    // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant.
+    const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
+    const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1);
     const comboBonus = isCombo ? 25 : 0;
     const xpGained = xpFromEuros + 50 + comboBonus + (isFirstOrder ? 200 : 0);
 
