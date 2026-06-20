@@ -104,6 +104,63 @@ export default async function handler(req: any, res: any) {
     });
   }
 
+  // ─── POST ?action=claim-referral (CLIENT, auth JWT) ───────────
+  // Rattache le client connecté à un parrain via son code, APRÈS une
+  // inscription in-app classique (modale auth) où le ?ref= n'est pas capté
+  // par /jeu. Garde-fous : on ne rattache QUE si le client n'a pas déjà de
+  // parrain ET n'a passé aucune commande (on ne peut être parrainé qu'avant
+  // son 1er achat). Idempotent : ré-appeler après coup ne fait rien.
+  if (action === 'claim-referral' && req.method === 'POST') {
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+    const uid = userData.user.id;
+
+    const body = await readBody(req);
+    const rawCode = typeof body?.code === 'string' ? body.code.trim().toUpperCase().slice(0, 12) : '';
+    if (!rawCode) return res.status(400).json({ error: 'code requis' });
+
+    const { data: me } = await admin
+      .from('profiles')
+      .select('referred_by, total_orders, referral_code')
+      .eq('id', uid)
+      .maybeSingle();
+    if (!me) return res.status(404).json({ error: 'Profil non trouvé' });
+
+    // Déjà parrainé, ou a déjà commandé → on ne fait rien (pas une erreur).
+    if (me.referred_by || me.total_orders > 0) {
+      return res.status(200).json({ ok: true, linked: false, reason: 'not_eligible' });
+    }
+    // On ne peut pas se parrainer soi-même.
+    if (me.referral_code && me.referral_code.toUpperCase() === rawCode) {
+      return res.status(200).json({ ok: true, linked: false, reason: 'self' });
+    }
+
+    const { data: sponsor } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('referral_code', rawCode)
+      .maybeSingle();
+    if (!sponsor || sponsor.id === uid) {
+      return res.status(200).json({ ok: true, linked: false, reason: 'unknown_code' });
+    }
+
+    // Rattachement + bonus de bienvenue filleul (+200 XP), cohérent avec
+    // le flux /jeu (api/wheel.ts signup-claim).
+    const { data: cur } = await admin.from('profiles').select('xp').eq('id', uid).maybeSingle();
+    const { error: linkErr } = await admin
+      .from('profiles')
+      .update({ referred_by: sponsor.id, xp: (cur?.xp ?? 0) + 200 })
+      .eq('id', uid)
+      .is('referred_by', null); // anti-race : ne lie que si toujours non parrainé
+    if (linkErr) return res.status(500).json({ error: linkErr.message });
+
+    return res.status(200).json({ ok: true, linked: true, bonusXp: 200 });
+  }
+
   // ════ BARRIÈRE ADMIN (mot de passe) pour toutes les actions suivantes ════
   const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
   if (!expectedPassword) return res.status(500).json({ error: 'ADMIN_PASSWORD non configuré' });
@@ -197,7 +254,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: profile, error: profileError } = await admin
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp, first_name, email, xp_multiplier_until')
+      .select('total_spent_cents, total_orders, xp, first_name, email, xp_multiplier_until, referred_by, referral_rewarded')
       .eq('id', userId)
       .single();
     if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
@@ -276,6 +333,33 @@ export default async function handler(req: any, res: any) {
         level: computeMascotteLevel(newXp),
       })
       .eq('id', userId);
+
+    // ─── Récompense parrainage à la 1ère commande payée au comptoir ───
+    // Cohérent avec api/square-webhook.ts (CB) et api/orders.ts (espèces) :
+    // une vente encaissée à la caisse compte aussi comme la 1ère commande du
+    // filleul → le parrain gagne +500 XP. Bloc 100% gardé : toute erreur ici
+    // ne doit JAMAIS perturber l'encaissement (déjà fait au-dessus).
+    if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
+      try {
+        const { data: sponsor } = await admin
+          .from('profiles')
+          .select('xp')
+          .eq('id', profile.referred_by)
+          .single();
+        if (sponsor) {
+          await admin
+            .from('profiles')
+            .update({ xp: (sponsor.xp ?? 0) + 500 })
+            .eq('id', profile.referred_by);
+          await admin
+            .from('profiles')
+            .update({ referral_rewarded: true })
+            .eq('id', userId);
+        }
+      } catch (err: any) {
+        console.warn('[credit-manual] referral reward failed:', err?.message);
+      }
+    }
 
     // Marquer le code promo comme utilisé MAINTENANT (après la vente OK).
     // Si ça plante ici, on log mais on ne casse pas la réponse — la vente

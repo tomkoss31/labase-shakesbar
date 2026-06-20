@@ -91,7 +91,9 @@ export function HomeV2({
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingInstall, setOnboardingInstall] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
-  const inbox = useInbox();
+  const auth = useAuth();
+  const isAuthed = auth.status === 'authenticated';
+  const inbox = useInbox(auth.session?.access_token ?? null);
 
   // Ouvre la boîte de réception si on arrive via une notification push (?inbox=1)
   React.useEffect(() => {
@@ -106,8 +108,10 @@ export function HomeV2({
   }, []);
 
   function openInbox() {
+    // On rafraîchit à l'ouverture (sans tout marquer lu : le client coche
+    // ses messages lui-même, ou utilise « Tout marquer comme lu »).
     setInboxOpen(true);
-    inbox.markAllRead();
+    inbox.refresh();
   }
 
   // Affiche l'onboarding au tout premier lancement.
@@ -127,11 +131,53 @@ export function HomeV2({
     }
   }, []);
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
-  const auth = useAuth();
-  const isAuthed = auth.status === 'authenticated';
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);
   const mascotteLevel = computeMascotteLevel(xp);
+
+  // ─── Parrainage in-app : capture le ?ref=CODE dans l'URL ───────────
+  // Cas d'un filleul qui ouvre le lien de parrainage puis s'inscrit via la
+  // modale auth (et non la page /jeu). On mémorise le code, on l'enlève de
+  // l'URL, puis on le « consomme » une fois le compte connecté.
+  React.useEffect(() => {
+    try {
+      const ref = new URLSearchParams(window.location.search).get('ref');
+      if (ref) {
+        localStorage.setItem('labase_ref', ref.trim().toUpperCase().slice(0, 12));
+        const url = new URL(window.location.href);
+        url.searchParams.delete('ref');
+        window.history.replaceState({}, '', url.toString());
+      }
+    } catch {}
+  }, []);
+
+  // Une fois connecté, rattache le filleul à son parrain (one-shot).
+  React.useEffect(() => {
+    if (!isAuthed) return;
+    const code = (() => {
+      try { return localStorage.getItem('labase_ref'); } catch { return null; }
+    })();
+    const token = auth.session?.access_token;
+    if (!code || !token) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await fetch('/api/profile?action=claim-referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ code }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        // Consommé dans tous les cas (lié, déjà parrainé, code inconnu…) →
+        // on ne ré-essaie pas à chaque chargement.
+        try { localStorage.removeItem('labase_ref'); } catch {}
+        if (!cancelled && data?.linked) auth.refreshProfile();
+      } catch {
+        // réseau : on garde le code pour une prochaine fois
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isAuthed, auth.session?.access_token]);
 
   // Admin : roue en illimité (test des cadeaux)
   const adminEmails = String(import.meta.env.VITE_ADMIN_EMAIL || '')
@@ -797,7 +843,10 @@ export function HomeV2({
         palette={palette}
         open={inboxOpen}
         onClose={() => setInboxOpen(false)}
-        broadcasts={inbox.broadcasts}
+        items={inbox.items}
+        unread={inbox.unread}
+        onMarkRead={inbox.markRead}
+        onMarkAllRead={inbox.markAllRead}
       />
     </div>
   );

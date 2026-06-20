@@ -72,6 +72,52 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ broadcasts: data ?? [] });
   }
 
+  // ─── my-notifications (GET, auth JWT) : messages PERSONNELS du client ─
+  // Relances, anniversaires, push ciblées. Inclut l'état lu (read_at).
+  if (action === 'my-notifications' && req.method === 'GET') {
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+
+    const { data, error } = await admin
+      .from('user_notifications')
+      .select('id, title, body, url, emoji, read_at, created_at')
+      .eq('user_id', userData.user.id)
+      .order('created_at', { ascending: false })
+      .limit(40);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ notifications: data ?? [] });
+  }
+
+  // ─── mark-read (POST, auth JWT) : marque un message lu, ou tous ──────
+  // Body : { id } pour un seul, ou { all: true } pour tout marquer lu.
+  if (action === 'mark-read' && req.method === 'POST') {
+    const authHeader = req.headers?.authorization ?? '';
+    const accessToken = authHeader.replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+    const uid = userData.user.id;
+
+    const body = await readBody(req);
+    const nowIso = new Date().toISOString();
+    let q = admin
+      .from('user_notifications')
+      .update({ read_at: nowIso })
+      .eq('user_id', uid)
+      .is('read_at', null);
+    if (body?.all !== true) {
+      const id = typeof body?.id === 'string' ? body.id : null;
+      if (!id) return res.status(400).json({ error: 'id ou all requis' });
+      q = q.eq('id', id);
+    }
+    const { error } = await q;
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ ok: true });
+  }
+
   // ─── subscribe (POST = add, DELETE = remove) ─────────────────
   if (action === 'subscribe') {
     if (req.method === 'POST') {
@@ -131,8 +177,10 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ ok: true, sent: 0, total: 0, segment, note: 'Aucun client dans ce segment' });
     }
 
-    // Archive dans la boîte de réception UNIQUEMENT pour "tous" (l'inbox est
-    // partagée/publique). Une push ciblée n'apparaît pas chez les non-ciblés.
+    // Archive dans la boîte de réception. « tous » → broadcasts (boîte
+    // commune publique). Segment ciblé → une ligne personnelle par
+    // destinataire (user_notifications) pour que CHACUN la retrouve et
+    // puisse la marquer lue, sans l'exposer aux non-ciblés.
     if (segment === 'all') {
       await admin.from('broadcasts').insert({
         title: body.title,
@@ -140,6 +188,16 @@ export default async function handler(req: any, res: any) {
         url: body.url ?? null,
         emoji: body.emoji ?? null,
       });
+    } else if (targetUserIds && targetUserIds.length > 0) {
+      const rows = targetUserIds.map((uid: string) => ({
+        user_id: uid,
+        title: body.title,
+        body: body.body,
+        url: body.url ?? null,
+        emoji: body.emoji ?? null,
+        kind: 'targeted',
+      }));
+      await admin.from('user_notifications').insert(rows);
     }
 
     let subsQuery = admin

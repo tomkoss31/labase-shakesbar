@@ -1,19 +1,25 @@
-// Boîte de réception — affiche les annonces/push archivées (broadcasts).
-// Le client peut revoir les messages qu'il a reçus. Les "non-lus" sont
-// suivis en localStorage (pas besoin de table par user).
+// Boîte de réception — fusionne deux sources :
+//   • broadcasts  : annonces communes « à tous » (table publique, état lu en
+//     localStorage car partagées entre tous les clients).
+//   • personal    : messages PERSO du client (relance, anniversaire, push
+//     ciblées) avec un état lu synchronisé serveur (read_at), marquable
+//     message par message et multi-appareils.
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Palette } from '../palette';
 
-export interface Broadcast {
-  id: string;
+export interface InboxItem {
+  id: string; // clé unique d'affichage ('b:<id>' | 'n:<id>')
+  rawId: string;
+  source: 'broadcast' | 'personal';
   title: string;
   body: string;
   url: string | null;
   emoji: string | null;
   created_at: string;
+  read: boolean;
 }
 
-const READ_KEY = 'labase_inbox_read';
+const READ_KEY = 'labase_inbox_read'; // ids de broadcasts lus (local, par appareil)
 
 function getReadIds(): Set<string> {
   try {
@@ -22,43 +28,121 @@ function getReadIds(): Set<string> {
     return new Set();
   }
 }
-function setReadIds(ids: Set<string>) {
+function saveReadIds(ids: Set<string>) {
   try {
     localStorage.setItem(READ_KEY, JSON.stringify([...ids].slice(0, 200)));
   } catch {}
 }
 
-// Hook : récupère les broadcasts + compte les non-lus
-export function useInbox() {
-  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
-  const [unread, setUnread] = useState(0);
+// Hook : récupère broadcasts + messages perso, fusionne, compte les non-lus.
+export function useInbox(accessToken?: string | null) {
+  const [items, setItems] = useState<InboxItem[]>([]);
 
   const refresh = useCallback(async () => {
     try {
-      const resp = await fetch('/api/push?action=broadcasts');
-      if (!resp.ok) return;
-      const data = await resp.json();
-      const list: Broadcast[] = data.broadcasts ?? [];
-      setBroadcasts(list);
+      const reqs: Promise<Response>[] = [fetch('/api/push?action=broadcasts')];
+      if (accessToken) {
+        reqs.push(
+          fetch('/api/push?action=my-notifications', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+        );
+      }
+      const responses = await Promise.all(reqs);
+
       const read = getReadIds();
-      setUnread(list.filter((b) => !read.has(b.id)).length);
+      const merged: InboxItem[] = [];
+
+      const bResp = responses[0];
+      if (bResp?.ok) {
+        const data = await bResp.json();
+        for (const b of (data.broadcasts ?? [])) {
+          merged.push({
+            id: `b:${b.id}`,
+            rawId: b.id,
+            source: 'broadcast',
+            title: b.title,
+            body: b.body,
+            url: b.url ?? null,
+            emoji: b.emoji ?? null,
+            created_at: b.created_at,
+            read: read.has(b.id),
+          });
+        }
+      }
+
+      const nResp = responses[1];
+      if (nResp?.ok) {
+        const data = await nResp.json();
+        for (const n of (data.notifications ?? [])) {
+          merged.push({
+            id: `n:${n.id}`,
+            rawId: n.id,
+            source: 'personal',
+            title: n.title,
+            body: n.body,
+            url: n.url ?? null,
+            emoji: n.emoji ?? null,
+            created_at: n.created_at,
+            read: Boolean(n.read_at),
+          });
+        }
+      }
+
+      merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setItems(merged);
     } catch {
       // silencieux
     }
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const markAllRead = useCallback(() => {
-    const read = getReadIds();
-    broadcasts.forEach((b) => read.add(b.id));
-    setReadIds(read);
-    setUnread(0);
-  }, [broadcasts]);
+  const unread = items.filter((i) => !i.read).length;
 
-  return { broadcasts, unread, refresh, markAllRead };
+  // Marque UN message lu (broadcast → localStorage, perso → serveur).
+  const markRead = useCallback(
+    async (item: InboxItem) => {
+      if (item.read) return;
+      setItems((list) => list.map((i) => (i.id === item.id ? { ...i, read: true } : i)));
+      if (item.source === 'broadcast') {
+        const read = getReadIds();
+        read.add(item.rawId);
+        saveReadIds(read);
+      } else if (accessToken) {
+        try {
+          await fetch('/api/push?action=mark-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+            body: JSON.stringify({ id: item.rawId }),
+          });
+        } catch {
+          // best-effort : l'UI a déjà marqué lu, on resync au prochain refresh
+        }
+      }
+    },
+    [accessToken],
+  );
+
+  const markAllRead = useCallback(async () => {
+    setItems((list) => list.map((i) => ({ ...i, read: true })));
+    const read = getReadIds();
+    items.filter((i) => i.source === 'broadcast').forEach((i) => read.add(i.rawId));
+    saveReadIds(read);
+    if (accessToken && items.some((i) => i.source === 'personal' && !i.read)) {
+      try {
+        await fetch('/api/push?action=mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify({ all: true }),
+        });
+      } catch {}
+    }
+  }, [items, accessToken]);
+
+  return { items, unread, refresh, markRead, markAllRead };
 }
 
 function timeAgo(iso: string): string {
@@ -77,10 +161,13 @@ interface InboxModalProps {
   palette: Palette;
   open: boolean;
   onClose: () => void;
-  broadcasts: Broadcast[];
+  items: InboxItem[];
+  unread: number;
+  onMarkRead: (item: InboxItem) => void;
+  onMarkAllRead: () => void;
 }
 
-export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalProps) {
+export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, onMarkAllRead }: InboxModalProps) {
   if (!open) return null;
 
   return (
@@ -134,7 +221,25 @@ export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalPro
           </button>
         </div>
 
-        {broadcasts.length === 0 ? (
+        {unread > 0 && (
+          <button
+            onClick={onMarkAllRead}
+            style={{
+              alignSelf: 'flex-start',
+              marginBottom: 12,
+              padding: '6px 12px',
+              borderRadius: 999,
+              border: `1px solid ${palette.line}`,
+              background: 'rgba(0,0,0,.25)',
+              color: palette.textDim,
+              fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            ✓ Tout marquer comme lu ({unread})
+          </button>
+        )}
+
+        {items.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: palette.textDim }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: palette.text }}>Aucun message pour l'instant</div>
@@ -144,7 +249,7 @@ export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalPro
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {broadcasts.map((b) => {
+            {items.map((b) => {
               const card = (
                 <div
                   style={{
@@ -152,18 +257,29 @@ export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalPro
                     gap: 13,
                     padding: 14,
                     background: palette.card,
-                    border: `1px solid ${palette.line}`,
+                    border: `1px solid ${b.read ? palette.line : palette.accent + '88'}`,
                     borderRadius: 16,
+                    opacity: b.read ? 0.72 : 1,
                   }}
                 >
                   <div
                     style={{
+                      position: 'relative',
                       width: 44, height: 44, flexShrink: 0, borderRadius: 12,
                       background: `linear-gradient(135deg, ${palette.glow1}, ${palette.glow3})`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
                     }}
                   >
                     {b.emoji || '🔔'}
+                    {!b.read && (
+                      <span
+                        style={{
+                          position: 'absolute', top: -3, right: -3,
+                          width: 12, height: 12, borderRadius: '50%',
+                          background: palette.accent, border: `2px solid ${palette.card}`,
+                        }}
+                      />
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -171,15 +287,44 @@ export function InboxModal({ palette, open, onClose, broadcasts }: InboxModalPro
                       <span style={{ fontSize: 10, color: palette.textDim, flexShrink: 0, whiteSpace: 'nowrap' }}>{timeAgo(b.created_at)}</span>
                     </div>
                     <div style={{ fontSize: 13, color: palette.textDim, marginTop: 3, lineHeight: 1.45 }}>{b.body}</div>
+                    {!b.read && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onMarkRead(b);
+                        }}
+                        style={{
+                          marginTop: 8,
+                          padding: '5px 11px',
+                          borderRadius: 999,
+                          border: `1px solid ${palette.line}`,
+                          background: 'transparent',
+                          color: palette.textDim,
+                          fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                        }}
+                      >
+                        ✓ Marquer comme lu
+                      </button>
+                    )}
                   </div>
                 </div>
               );
+              // Un message avec lien : le clic ouvre le lien ET le marque lu.
+              // Sinon : le clic sur la carte le marque lu.
               return b.url ? (
-                <a key={b.id} href={b.url} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <a
+                  key={b.id}
+                  href={b.url}
+                  onClick={() => onMarkRead(b)}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
                   {card}
                 </a>
               ) : (
-                <div key={b.id}>{card}</div>
+                <div key={b.id} onClick={() => onMarkRead(b)} style={{ cursor: b.read ? 'default' : 'pointer' }}>
+                  {card}
+                </div>
               );
             })}
           </div>

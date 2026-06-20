@@ -153,6 +153,59 @@ function fmtDate(iso: string): string {
   }
 }
 
+// Stats de parrainage du client (nb de filleuls / validés / XP gagnés).
+// Rend les gains concrets dans le bloc parrainage.
+function ReferralStats({ palette }: { palette: Palette }) {
+  const [stats, setStats] = useState<{ filleuls: number; rewarded: number } | null>(null);
+
+  useEffect(() => {
+    const session = getStoredSession();
+    if (!session?.access_token) return;
+    let cancelled = false;
+    fetch('/api/profile?action=referral-stats', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d) return;
+        setStats({ filleuls: d.filleuls ?? 0, rewarded: d.rewarded ?? 0 });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!stats || stats.filleuls === 0) return null;
+
+  const stat = (n: number, label: string) => (
+    <div style={{ flex: 1, textAlign: 'center' as const }}>
+      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 20, color: palette.text }}>{n}</div>
+      <div style={{ fontSize: 10.5, color: palette.textDim, marginTop: 1 }}>{label}</div>
+    </div>
+  );
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 8,
+        padding: '10px 8px',
+        marginBottom: 12,
+        background: 'rgba(0,0,0,.22)',
+        border: `1px solid ${palette.line}`,
+        borderRadius: 12,
+      }}
+    >
+      {stat(stats.filleuls, 'Filleuls')}
+      <div style={{ width: 1, background: palette.line }} />
+      {stat(stats.rewarded, 'Validés')}
+      <div style={{ width: 1, background: palette.line }} />
+      {stat(stats.rewarded * 500, 'XP gagnés')}
+    </div>
+  );
+}
+
 interface RewardsModalProps {
   palette: Palette;
   open: boolean;
@@ -327,6 +380,8 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
               </div>
             ))}
           </div>
+
+          <ReferralStats palette={palette} />
 
           <div style={{ fontSize: 11, color: palette.textDim, lineHeight: 1.4, marginBottom: 12 }}>
             <b style={{ color: palette.text }}>Pourquoi ça vaut le coup ?</b> Tes amis découvrent

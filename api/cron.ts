@@ -36,7 +36,8 @@ async function sendPushToUser(
   const webpush: any = (webpushMod as any).default ?? webpushMod;
   webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
-  const payload = JSON.stringify({ title, body, url: '/', tag });
+  // url → boîte de réception : le client retrouve le message archivé.
+  const payload = JSON.stringify({ title, body, url: '/?inbox=1', tag });
 
   let success = false;
   for (const sub of subs) {
@@ -51,6 +52,29 @@ async function sendPushToUser(
     }
   }
   return success;
+}
+
+// Archive un message dans la boîte de réception PERSONNELLE du client
+// (table user_notifications). Best-effort : un échec ne casse pas le cron.
+async function archiveNotification(
+  supabase: any,
+  userId: string,
+  title: string,
+  body: string,
+  emoji: string,
+  kind: string,
+): Promise<void> {
+  try {
+    await supabase.from('user_notifications').insert({
+      user_id: userId,
+      title,
+      body,
+      emoji,
+      kind,
+    });
+  } catch (err: any) {
+    console.warn('[cron] archive notification failed:', err?.message);
+  }
 }
 
 export default async function handler(req: any, res: any) {
@@ -126,13 +150,16 @@ export default async function handler(req: any, res: any) {
           expires_at: expiresAt,
         });
 
+        const bdayTitle = '🎂 Joyeux anniversaire !';
+        const bdayBody = `${p.first_name ? p.first_name + ', t' : 'T'}u viens de gagner +500 XP et une roue cadeau bonus.`;
+
+        // Archive d'abord → visible dans « Mes messages » même sans push.
+        await archiveNotification(admin, p.id, bdayTitle, bdayBody, '🎂', 'birthday');
+
         let pushSent = false;
         if (canPush) {
           pushSent = await sendPushToUser(
-            admin, p.id,
-            '🎂 Joyeux anniversaire !',
-            `${p.first_name ? p.first_name + ', t' : 'T'}u viens de gagner +500 XP et une roue cadeau bonus.`,
-            'labase-birthday',
+            admin, p.id, bdayTitle, bdayBody, 'labase-birthday',
             vapidPublic!, vapidPrivate!, vapidSubject,
           );
         }
@@ -178,22 +205,28 @@ export default async function handler(req: any, res: any) {
 
     for (const p of eligible) {
       try {
+        const relanceTitle = `${p.first_name ? p.first_name + ', t' : 'T'}u nous manques 🩵`;
+        const relanceBody = 'Une roue bonus t\'attend pour ton retour. Viens tenter ta chance !';
+
+        // Archive dans la boîte perso → le client retrouve le message dans
+        // l'app, même s'il n'a pas autorisé les push.
+        await archiveNotification(admin, p.id, relanceTitle, relanceBody, '🩵', 'relance');
+
         let pushSent = false;
         if (canPush) {
           pushSent = await sendPushToUser(
-            admin, p.id,
-            `${p.first_name ? p.first_name + ', t' : 'T'}u nous manques 🩵`,
-            'Une roue bonus t\'attend pour ton retour. Viens tenter ta chance !',
-            'labase-relance',
+            admin, p.id, relanceTitle, relanceBody, 'labase-relance',
             vapidPublic!, vapidPrivate!, vapidSubject,
           );
         }
-        if (pushSent) {
-          await admin
-            .from('profiles')
-            .update({ last_relance_at: nowIso })
-            .eq('id', p.id);
-        }
+
+        // On pose last_relance_at dès qu'on a relancé (archive faite), même
+        // sans push : évite de ré-archiver le même message à chaque cron.
+        await admin
+          .from('profiles')
+          .update({ last_relance_at: nowIso })
+          .eq('id', p.id);
+
         results.push({ userId: p.id, pushSent });
       } catch (err: any) {
         results.push({ userId: p.id, error: err?.message });
@@ -202,7 +235,8 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json({
       ok: true,
-      relanced: results.filter((r) => r.pushSent).length,
+      relanced: results.length,
+      pushed: results.filter((r) => r.pushSent).length,
       total: eligible.length,
     });
   }
