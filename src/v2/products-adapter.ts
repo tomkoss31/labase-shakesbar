@@ -81,7 +81,9 @@ const kidsCat = categories.find((c) => c.id === 'kids');
 
 // Liste plate de tous les produits avec leur catégorie
 export const ALL_V2_PRODUCTS: V2Product[] = categories.flatMap((category) =>
-  category.items.map((item) => adaptProduct(item, category)),
+  category.items
+    .filter((item) => item.available !== false) // masque les nouveautés non lancées
+    .map((item) => adaptProduct(item, category)),
 );
 
 // Helper : trouve un produit par son nom
@@ -108,29 +110,18 @@ export const V2_POPULAR: V2Product[] = (() => {
   return [...fromFeatured, ...fallback].slice(0, 6);
 })();
 
-export const V2_SMOOTHIES: V2Product[] = smoothiesCat
-  ? smoothiesCat.items.map((p) => adaptProduct(p, smoothiesCat))
-  : [];
+// Masque les produits available:false (nouveautés préparées mais pas lancées)
+const visibleItems = (category: Category | undefined): V2Product[] =>
+  category
+    ? category.items.filter((p) => p.available !== false).map((p) => adaptProduct(p, category))
+    : [];
 
-export const V2_DRINKS: V2Product[] = drinksCat
-  ? drinksCat.items.map((p) => adaptProduct(p, drinksCat))
-  : [];
-
-export const V2_HOT: V2Product[] = hotCat
-  ? hotCat.items.map((p) => adaptProduct(p, hotCat))
-  : [];
-
-export const V2_HEALTH: V2Product[] = healthCat
-  ? healthCat.items.map((p) => adaptProduct(p, healthCat))
-  : [];
-
-export const V2_KIDS: V2Product[] = kidsCat
-  ? kidsCat.items.map((p) => adaptProduct(p, kidsCat))
-  : [];
-
-export const V2_WAFFLES: V2Product[] = wafflesCat
-  ? wafflesCat.items.map((p) => adaptProduct(p, wafflesCat))
-  : [];
+export const V2_SMOOTHIES: V2Product[] = visibleItems(smoothiesCat);
+export const V2_DRINKS: V2Product[] = visibleItems(drinksCat);
+export const V2_HOT: V2Product[] = visibleItems(hotCat);
+export const V2_HEALTH: V2Product[] = visibleItems(healthCat);
+export const V2_KIDS: V2Product[] = visibleItems(kidsCat);
+export const V2_WAFFLES: V2Product[] = visibleItems(wafflesCat);
 
 // Combos
 export const V2_COMBOS: V2Combo[] = comboOffers.map((c) => ({
