@@ -495,6 +495,35 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: 'Erreur Square', details: data });
     }
 
+    // Persiste le nb de combos sur la commande pour créditer +25 XP/combo à
+    // l'encaissement (le webhook CB ne voit pas le panier). Best-effort.
+    const comboCount = cart.reduce(
+      (n: number, it: any) =>
+        n + (it?.categoryName === 'Formule combo' ? Number(it.quantity || 1) : 0),
+      0,
+    );
+    const squareOrderId = data?.payment_link?.order_id;
+    if (comboCount > 0 && squareOrderId) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          await admin
+            .from('orders')
+            .upsert(
+              { square_order_id: squareOrderId, combo_count: comboCount },
+              { onConflict: 'square_order_id' },
+            );
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] combo_count persist failed:', err?.message);
+      }
+    }
+
     // Débiter les XP du profil (best-effort, non-bloquant)
     if (xpUserIdToDebit && xpSpent > 0) {
       try {

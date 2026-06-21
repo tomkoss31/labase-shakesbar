@@ -587,54 +587,6 @@ export const categories: Category[] = [
     ],
   },
 
-  // 🧒 BOISSONS ENFANTS (5€) — 0 sucre / 0 calorie
-  {
-    id: 'kids',
-    name: 'Boissons enfants',
-    icon: Sparkles,
-    price: '5€',
-    accent: 'from-pink-400 via-fuchsia-400 to-violet-400',
-    description: '0 sucre • 0 calorie • naturellement parfumées',
-    items: [
-      {
-        name: 'Bulle de Fée',
-        description: 'Une bulle douce et fruitée.',
-        flavors: 'Pomme • Fruit du dragon',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Spiderman',
-        description: 'Fruits rouges qui font sourire.',
-        flavors: 'Fruits rouges',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Stitch',
-        description: 'Limonade non pétillante, passion-citron.',
-        flavors: 'Passion • Limonade (non pétillant)',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Licorne',
-        description: 'Le mix coloré qui fait rêver.',
-        flavors: 'Myrtille • Fraise • Raisin',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Hulk',
-        description: 'Vert vif et acidulé.',
-        flavors: 'Pomme verte',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Tropicool',
-        description: 'Esprit vacances pour les petits.',
-        flavors: 'Melon • Ananas',
-        basePriceCents: 500,
-      },
-    ],
-  },
-
   // ☕ CAFÉS / CHOCOLATS / THÉS
   {
     id: 'hot',

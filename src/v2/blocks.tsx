@@ -193,7 +193,7 @@ export function Carousel({ children }: { children: React.ReactNode }) {
         overflowX: 'auto',
         padding: '0 16px 4px',
         scrollbarWidth: 'none',
-        scrollSnapType: 'x mandatory',
+        overscrollBehaviorX: 'contain',
       }}
     >
       {children}
