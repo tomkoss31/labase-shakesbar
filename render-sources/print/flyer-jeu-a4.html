@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Planche A4 — 4 flyers jeu concours</title>
+<meta name="robots" content="noindex" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4; margin: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sheet {
+    width: 210mm; height: 297mm;
+    display: grid;
+    grid-template-columns: 105mm 105mm;
+    grid-template-rows: 148mm 148mm;
+  }
+  .sheet img {
+    width: 105mm; height: 148mm; display: block;
+    /* repères de coupe discrets entre les tracts */
+    outline: 0.2mm dashed rgba(255,255,255,.25); outline-offset: -0.1mm;
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <img src="file:///C:/Users/tomko/Desktop/La%20Base%20-%20Affiche%20TV/FLYER-jeu-A6.png" alt="" />
+    <img src="file:///C:/Users/tomko/Desktop/La%20Base%20-%20Affiche%20TV/FLYER-jeu-A6.png" alt="" />
+    <img src="file:///C:/Users/tomko/Desktop/La%20Base%20-%20Affiche%20TV/FLYER-jeu-A6.png" alt="" />
+    <img src="file:///C:/Users/tomko/Desktop/La%20Base%20-%20Affiche%20TV/FLYER-jeu-A6.png" alt="" />
+  </div>
+</body>
+</html>

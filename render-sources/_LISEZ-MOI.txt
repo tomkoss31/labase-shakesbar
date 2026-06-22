@@ -1,0 +1,21 @@
+RENDER-SOURCES — sources de rendu (HORS de l'app)
+==================================================
+Ce dossier contient les fichiers HTML/PNG qui servaient UNIQUEMENT à fabriquer
+des visuels (réseaux sociaux, impression). Ils ont été SORTIS de `public/` pour
+ne plus encombrer l'app et ne PAS être déployés sur le site.
+
+  social/  -> stories, posts, carrousels, sondages, calendrier (brouillons de rendu)
+             (les versions finales PNG + sources à jour sont sur le Bureau :
+              "Visuels Canva - La Base")
+  print/   -> cartes A4, cartes détail, cartes vitrine, flyers, stickers, menus
+             (sources d'impression — à garder pour réimprimer)
+  dev/     -> pages de prévisualisation (mockup, logo-preview)
+
+⚠️ Rien ici n'est utilisé par l'application (vérifié : aucun import côté code,
+   aucune route dans vercel.json). Les pages VITALES sont restées dans `public/`
+   (jeu.html, console.html, comptoir.html, scanner.html, admin.html, club.html,
+   affiche-qr.html, affiche-tv.html, mentions-legales.html, confidentialite.html).
+
+ℹ️ Si un jour un QR imprimé pointe vers une de ces pages en ligne
+   (ex: /carte-a4-v5.html), préviens-moi : on la remet dans public/.
+   Les QR actuels des cartes pointent vers l'APP (commande), pas vers ces HTML.

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>LA BASE — Canicule Post Feed</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDeep:#115e59; --ice:#e8f6fb; --ice2:#cfeaf3; --sky:#2b8cff; --blue:#0284c7; --heat:#e0451b; --sun:#ffb020; --amberDeep:#b45309; --ink:#0f2e33; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1350px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .card{ width:1080px; height:1350px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(700px 700px at 100% -5%, rgba(255,176,32,.34), transparent 58%),
+      radial-gradient(720px 720px at 0% 100%, rgba(2,132,199,.22), transparent 60%),
+      linear-gradient(180deg,#f3fbfe 0%, var(--ice) 50%, var(--ice2) 100%); }
+  .card::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:80px 80px 120px; }
+  .top{ display:flex; align-items:center; gap:18px; }
+  .logo{ width:84px; height:84px; border-radius:20px; box-shadow:0 12px 26px rgba(13,148,136,.28); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:40px; letter-spacing:8px; color:var(--tealDeep); }
+  .tag{ margin-top:34px; display:inline-flex; align-items:center; gap:12px; padding:14px 36px; border-radius:999px;
+    background:rgba(224,69,27,.12); border:2.5px solid rgba(224,69,27,.42); color:var(--heat); font-family:'Outfit'; font-weight:900; font-size:34px; letter-spacing:1px; }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; margin-top:20px; }
+  .head .a{ font-size:104px; color:var(--ink); }
+  .head .b{ font-size:80px; color:var(--blue); }
+  .cards{ margin-top:50px; display:flex; gap:24px; width:100%; justify-content:center; }
+  .c{ flex:1; max-width:300px; background:rgba(255,255,255,.78); border:2px solid rgba(13,148,136,.20); border-radius:30px; padding:34px 22px;
+    box-shadow:0 14px 30px rgba(20,40,36,.10); display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .c .ic{ font-size:72px; }
+  .c .t{ font-family:'Outfit'; font-weight:900; font-size:36px; color:var(--tealDeep); }
+  .c .d{ font-size:27px; font-weight:500; color:#41545a; line-height:1.3; }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:120px; z-index:6;
+    background:linear-gradient(90deg,var(--tealDeep),var(--teal) 50%,var(--blue));
+    display:flex; align-items:center; justify-content:center; gap:24px; color:#fff; font-weight:800; font-size:36px; padding-bottom:18px; font-family:'Outfit'; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="core">
+      <div class="top"><img class="logo" src="icon-512.png" alt="La Base" /><span class="wordmark">LA&nbsp;BASE</span></div>
+      <div class="tag">☀️ CANICULE À VERDUN · 35°C+</div>
+      <div class="head"><div class="a">PLAN ANTI</div><div class="b">coup de chaud</div></div>
+      <div class="cards">
+        <div class="c"><span class="ic">💧</span><span class="t">HYDRATE</span><span class="d">Bois avant d'avoir soif. Électrolytes pour recharger.</span></div>
+        <div class="c"><span class="ic">⚡</span><span class="t">0 SUCRE</span><span class="d">Boissons énergisantes glacées, 0 sucre · 20 cal.</span></div>
+        <div class="c"><span class="ic">🍧</span><span class="t">FRAIS</span><span class="d">Smoothies &amp; shakes glacés, gourmands et légers.</span></div>
+      </div>
+    </div>
+    <div class="strip"><span>📍 11 rue Saint Pierre, Verdun · 📲 Commande en ligne</span></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Carte A4 v2 (photos) — La Base Shakes & Drinks</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @page { size: A4; margin: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ecfdf5;
+    background: linear-gradient(150deg, #04100f 0%, #0a201d 55%, #04100f 100%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    position: relative; overflow: hidden;
+  }
+  .glow { position: absolute; border-radius: 50%; filter: blur(16mm); z-index: 0; }
+  .glow.a { width: 90mm; height: 90mm; top: -30mm; right: -24mm;
+    background: radial-gradient(circle, rgba(94,234,212,.20), transparent 70%); }
+  .glow.b { width: 80mm; height: 80mm; bottom: -28mm; left: -26mm;
+    background: radial-gradient(circle, rgba(245,158,11,.14), transparent 70%); }
+
+  .page { position: relative; z-index: 1; width: 210mm; height: 297mm; padding: 9mm 9mm 7mm;
+    display: flex; flex-direction: column; }
+
+  .rainbow { height: 2.4mm; border-radius: 99mm; margin-bottom: 5mm;
+    background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #5eead4, #fbbf24); }
+
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4.5mm; }
+  .brand { display: flex; align-items: center; gap: 3mm; }
+  .brand img { width: 13mm; height: 13mm; border-radius: 3mm; display: block; box-shadow: 0 1mm 3mm rgba(0,0,0,.4); }
+  .brand .nm { font-family: 'Outfit'; font-weight: 900; font-size: 6.4mm; line-height: 1; }
+  .brand .tg { font-size: 2.3mm; letter-spacing: .24em; color: #5eead4; font-weight: 700; margin-top: 1mm; }
+  .head .guide { text-align: right; }
+  .head .guide .k { font-family: 'Outfit'; font-weight: 800; font-size: 3.4mm; color: #fbbf24; }
+  .head .guide .s { font-size: 2.5mm; color: #9fc0ba; margin-top: .6mm; }
+
+  .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin-bottom: 5mm; }
+  .stp { background: rgba(94,234,212,.07); border: .3mm solid rgba(94,234,212,.22); border-radius: 3mm;
+    padding: 3mm 3.4mm; display: flex; align-items: center; gap: 2.6mm; }
+  .stp .n { width: 6mm; height: 6mm; border-radius: 50%; background: #5eead4; color: #04100f; flex: none;
+    font-family: 'Outfit'; font-weight: 900; font-size: 3.4mm; display: flex; align-items: center; justify-content: center; }
+  .stp .t { font-size: 2.7mm; line-height: 1.25; color: #d7ece7; }
+  .stp .t b { color: #ecfdf5; font-weight: 700; }
+
+  .univers { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .uni { border-radius: 4mm; padding: 4mm 4.2mm; position: relative;
+    background: rgba(255,255,255,.035); border: .3mm solid rgba(255,255,255,.10); }
+  .uni.energie { border-color: rgba(56,189,248,.32); background: rgba(56,189,248,.05); }
+  .uni.gourmand { border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.05); }
+  .uni.sante { border-color: rgba(52,211,153,.30); background: rgba(52,211,153,.05); }
+  .uni.enfants { border-color: rgba(236,72,153,.30); background: rgba(236,72,153,.05); }
+
+  .uni .uh { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+  .uni .uh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 4.4mm; letter-spacing: -.01em; }
+  .uni .uh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 3.2mm; color: #5eead4; white-space: nowrap; }
+  .uni .meta { font-size: 2.4mm; color: #9fc0ba; margin: 1mm 0 3mm; line-height: 1.3; }
+
+  .body { display: flex; gap: 3.6mm; }
+  .hero { width: 31mm; height: 41mm; border-radius: 3mm; object-fit: cover; flex: none;
+    box-shadow: 0 1.5mm 4mm rgba(0,0,0,.5); border: .3mm solid rgba(255,255,255,.12); }
+  .herobox { width: 31mm; height: 41mm; border-radius: 3mm; flex: none; display: flex;
+    align-items: center; justify-content: center; font-size: 17mm; line-height: 1;
+    background: linear-gradient(160deg, rgba(236,72,153,.30), rgba(139,92,246,.22));
+    border: .3mm solid rgba(236,72,153,.40); box-shadow: 0 1.5mm 4mm rgba(0,0,0,.4); }
+
+  .stars { flex: 1; display: flex; flex-direction: column; gap: 1.9mm; }
+  .star { display: flex; align-items: flex-start; gap: 1.8mm; }
+  .star .ic { font-size: 2.7mm; line-height: 1.25; flex: none; }
+  .star .sn { font-family: 'Outfit'; font-weight: 700; font-size: 2.85mm; color: #ecfdf5; }
+  .star .sd { font-size: 2.3mm; color: #9fc0ba; display: block; line-height: 1.2; }
+  .new-chip { display: inline-block; font-family: 'Outfit'; font-weight: 800; font-size: 1.9mm;
+    letter-spacing: .06em; text-transform: uppercase; color: #04100f; background: #fbbf24;
+    padding: .3mm 1.4mm; border-radius: 99mm; margin-left: 1.2mm; vertical-align: middle; }
+  .more { font-size: 2.4mm; color: #5eead4; font-weight: 600; margin-top: 3mm;
+    display: flex; align-items: center; gap: 1.6mm; }
+  .more .q { font-size: 3mm; }
+
+  .band { margin-top: 4mm; border-radius: 4mm; padding: 3.4mm 4mm;
+    background: rgba(255,255,255,.04); border: .3mm solid rgba(255,255,255,.10); }
+  .band .bh { display: flex; align-items: baseline; gap: 2.5mm; margin-bottom: 2mm; }
+  .band .bh .nm { font-family: 'Outfit'; font-weight: 900; font-size: 3.6mm; }
+  .band .bh .pr { font-family: 'Outfit'; font-weight: 800; font-size: 3mm; color: #fbbf24; }
+  .band .bh .sub { font-size: 2.4mm; color: #9fc0ba; margin-left: auto; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.8mm; }
+  .chip { font-size: 2.5mm; font-weight: 600; color: #d7ece7; background: rgba(94,234,212,.10);
+    border: .25mm solid rgba(94,234,212,.22); border-radius: 99mm; padding: 1mm 2.6mm; }
+  .chip b { color: #5eead4; font-weight: 700; }
+
+  .foot { margin-top: auto; padding-top: 5mm; display: flex; align-items: center; gap: 5mm; }
+  .qr { background: #fff; padding: 2.4mm; border-radius: 3mm; flex: none; box-shadow: 0 2mm 6mm rgba(0,0,0,.4); }
+  .qr img { display: block; width: 29mm; height: 29mm; }
+  .foot .ft { flex: 1; }
+  .foot .ft .big { font-family: 'Outfit'; font-weight: 900; font-size: 4.8mm; line-height: 1.05; }
+  .foot .ft .big .ac { color: #5eead4; }
+  .foot .ft .sm { font-size: 2.7mm; color: #cbe4df; margin-top: 1.6mm; line-height: 1.35; }
+  .foot .ft .addr { font-size: 2.4mm; color: #9fc0ba; margin-top: 2.6mm; }
+  .foot .ft .addr b { color: #ecfdf5; }
+  .foot .ft .addr .site { color: #5eead4; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+
+  <div class="page">
+    <div class="rainbow"></div>
+
+    <div class="head">
+      <div class="brand">
+        <img src="icon-512.png" alt="La Base" />
+        <div>
+          <div class="nm">LA BASE</div>
+          <div class="tg">SHAKES &amp; DRINKS</div>
+        </div>
+      </div>
+      <div class="guide">
+        <div class="k">Perdu·e ? Suis le guide 👇</div>
+        <div class="s">3 étapes, et tu repars avec LA boisson qu'il te faut</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="stp"><div class="n">1</div><div class="t"><b>Choisis ton univers</b><br />ci-dessous</div></div>
+      <div class="stp"><div class="n">2</div><div class="t"><b>Ajoute un Extra Santé</b><br />+2,50€ (optionnel)</div></div>
+      <div class="stp"><div class="n">3</div><div class="t"><b>Combo &amp; économise</b><br />boisson + smoothie : −1€</div></div>
+    </div>
+
+    <div class="univers">
+      <!-- ENERGIE -->
+      <div class="uni energie">
+        <div class="uh"><div class="nm">🔋 Énergisantes</div><div class="pr">6,90€ / 8,90€</div></div>
+        <div class="meta">0 sucre · 20 cal · extraits végétaux &amp; aloé vera</div>
+        <div class="body">
+          <img class="hero" src="images/drinks/electric-blue.png" alt="" />
+          <div class="stars">
+            <div class="star"><span class="ic">⚡</span><span><span class="sn">Electric Blue</span><span class="sd">citron, framboise bleue, myrtille</span></span></div>
+            <div class="star"><span class="ic">🖤</span><span><span class="sn">Black Panther</span><span class="sd">citron, cerise, framboise bleue</span></span></div>
+            <div class="star"><span class="ic">🦜</span><span><span class="sn">Perroquet</span><span class="sd">citron, fraise, raisin, pêche</span></span></div>
+            <div class="star"><span class="ic">🔥</span><span><span class="sn">Phénix <span class="new-chip">New</span></span><span class="sd">la signature du moment</span></span></div>
+          </div>
+        </div>
+        <div class="more"><span class="q">📲</span> + 10 autres parfums sur la carte complète</div>
+      </div>
+
+      <!-- GOURMAND -->
+      <div class="uni gourmand">
+        <div class="uh"><div class="nm">🍫 Gourmands</div><div class="pr">6,90€ / 8,90€</div></div>
+        <div class="meta">Smoothies 24g protéines · cafés gourmets, glacés &amp; chauds</div>
+        <div class="body">
+          <img class="hero" src="images/shake/snikers.png" alt="" />
+          <div class="stars">
+            <div class="star"><span class="ic">🥜</span><span><span class="sn">Snickers</span><span class="sd">chocolat, cacahuètes</span></span></div>
+            <div class="star"><span class="ic">🍪</span><span><span class="sn">Full Oréo</span><span class="sd">cookies cream &amp; Oréo</span></span></div>
+            <div class="star"><span class="ic">🍫</span><span><span class="sn">M&amp;M's <span class="new-chip">New</span></span><span class="sd">caramel, noisette</span></span></div>
+            <div class="star"><span class="ic">☕</span><span><span class="sn">Cafés gourmets</span><span class="sd">macchiato, latte, mocha…</span></span></div>
+          </div>
+        </div>
+        <div class="more"><span class="q">📲</span> + Bueno, Jungle &amp; toute la gamme sur la carte</div>
+      </div>
+
+      <!-- SANTE -->
+      <div class="uni sante">
+        <div class="uh"><div class="nm">🌿 Santé &amp; Détox</div><div class="pr">5,90€ / 8,90€</div></div>
+        <div class="meta">Drinks fonctionnels · thé aloé vera chaud</div>
+        <div class="body">
+          <img class="hero" src="images/sante/casse-grippe.png" alt="" />
+          <div class="stars">
+            <div class="star"><span class="ic">🤧</span><span><span class="sn">Casse Grippe</span><span class="sd">immunité &amp; aloé vera</span></span></div>
+            <div class="star"><span class="ic">🌱</span><span><span class="sn">Di'Geste</span><span class="sd">fibres &amp; probiotiques</span></span></div>
+            <div class="star"><span class="ic">🌸</span><span><span class="sn">Limonade Rose</span><span class="sd">collagène</span></span></div>
+            <div class="star"><span class="ic">🍵</span><span><span class="sn">Thé Aloé Vera</span><span class="sd">pêche, framboise, citron</span></span></div>
+          </div>
+        </div>
+        <div class="more"><span class="q">📲</span> + Hydrat'Max sur la carte complète</div>
+      </div>
+
+      <!-- ENFANTS -->
+      <div class="uni enfants">
+        <div class="uh"><div class="nm">🧒 Enfants</div><div class="pr">5€</div></div>
+        <div class="meta">0 sucre · 0 calorie · sans énergisant</div>
+        <div class="body">
+          <div class="herobox">🦄</div>
+          <div class="stars">
+            <div class="star"><span class="ic">🦄</span><span><span class="sn">Licorne</span><span class="sd">myrtille, fraise, raisin</span></span></div>
+            <div class="star"><span class="ic">🕷️</span><span><span class="sn">Spiderman</span><span class="sd">myrtille, fruits rouges</span></span></div>
+            <div class="star"><span class="ic">💪</span><span><span class="sn">Hulk</span><span class="sd">pomme verte</span></span></div>
+            <div class="star"><span class="ic">🌺</span><span><span class="sn">Bulle de fée</span><span class="sd">pomme, fruit du dragon</span></span></div>
+          </div>
+        </div>
+        <div class="more"><span class="q">📲</span> + Tropicool &amp; Stitch sur la carte</div>
+      </div>
+    </div>
+
+    <!-- EXTRA SANTE -->
+    <div class="band">
+      <div class="bh"><div class="nm">➕ Ton Extra Santé</div><div class="pr">+2,50€</div><div class="sub">à ajouter à n'importe quelle boisson</div></div>
+      <div class="chips">
+        <span class="chip">Collagène</span>
+        <span class="chip">Booster immunité</span>
+        <span class="chip">Fibres</span>
+        <span class="chip">Probiotique</span>
+        <span class="chip">Booster énergie</span>
+        <span class="chip">CR7 Drive</span>
+        <span class="chip">Hydrate 24</span>
+        <span class="chip">Créatine</span>
+        <span class="chip">Protéines <b>+5g</b></span>
+      </div>
+    </div>
+
+    <!-- SNACKS -->
+    <div class="band">
+      <div class="bh"><div class="nm">🍫 Snacks protéinés</div><div class="sub">à emporter</div></div>
+      <div class="chips">
+        <span class="chip">Chips protéinées <b>3€</b></span>
+        <span class="chip">Barres protéines <b>3€</b></span>
+        <span class="chip">Barre H24 · 21g <b>4€</b></span>
+        <span class="chip">Barre repas F1 <b>5€</b></span>
+      </div>
+    </div>
+
+    <!-- FOOTER QR -->
+    <div class="foot">
+      <div class="qr"><img src="qr-carte.png" alt="QR carte complète" /></div>
+      <div class="ft">
+        <div class="big">Scanne pour la <span class="ac">carte complète</span> &amp; les nouveautés</div>
+        <div class="sm">Tous les parfums à jour · commande en ligne · cumule des XP et gagne des cadeaux 🎁</div>
+        <div class="addr"><b>La Base Shakes &amp; Drinks</b> · 11 rue Saint Pierre, 55100 Verdun · <span class="site">commande.labase-nutrition.com</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

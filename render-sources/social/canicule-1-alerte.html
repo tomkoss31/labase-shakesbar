@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>LA BASE — Canicule 1 Alerte</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDeep:#115e59; --ice:#e8f6fb; --amber:#f6921e; --heat:#e0451b; --sun:#ffb020; --ink:#0f2e33; --cream:#fffaf2; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(900px 900px at 50% -5%, rgba(255,176,32,.55), transparent 60%),
+      radial-gradient(760px 760px at 100% 18%, rgba(224,69,27,.30), transparent 60%),
+      linear-gradient(180deg,#fff3d6 0%, #ffe2b0 40%, #ffd089 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(224,69,27,.06) 1.6px, transparent 1.6px); background-size:34px 34px; opacity:.6; }
+  .sun{ position:absolute; top:-240px; left:50%; transform:translateX(-50%); width:440px; height:440px; border-radius:50%;
+    background:radial-gradient(circle, var(--sun), #ff8a00 70%); box-shadow:0 0 150px rgba(255,138,0,.6); opacity:.75; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:180px 80px 240px; }
+  .brand{ display:inline-flex; align-items:center; gap:20px; background:#fff; padding:16px 40px 16px 18px; border-radius:999px; box-shadow:0 18px 40px rgba(180,60,10,.26); }
+  .brand img{ width:90px; height:90px; border-radius:20px; }
+  .brand span{ font-family:'Outfit'; font-weight:900; font-size:48px; letter-spacing:8px; color:var(--heat); }
+  .tag{ margin-top:80px; display:inline-flex; align-items:center; gap:14px; padding:18px 44px; border-radius:999px;
+    background:rgba(224,69,27,.12); border:3px solid rgba(224,69,27,.45); color:var(--heat); font-family:'Outfit'; font-weight:900; font-size:44px; letter-spacing:2px; }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.9; letter-spacing:-3px; margin-top:36px; }
+  .head .a{ font-size:118px; color:var(--ink); }
+  .head .b{ font-size:84px; color:var(--heat); }
+  .big{ font-family:'Outfit'; font-weight:900; font-size:340px; line-height:.85; color:var(--heat); margin-top:30px; text-shadow:0 22px 50px rgba(224,69,27,.35); }
+  .big small{ font-size:120px; vertical-align:super; }
+  .sub{ font-family:'Outfit'; font-weight:800; font-size:54px; color:var(--ink); margin-top:6px; }
+  .pill{ margin-top:54px; display:inline-flex; align-items:center; gap:12px; padding:18px 42px; border-radius:999px;
+    background:rgba(15,46,51,.08); border:2px solid rgba(15,46,51,.18); color:var(--ink); font-weight:800; font-size:38px; }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:150px; z-index:6;
+    background:linear-gradient(90deg,var(--heat),#ff7a1a 60%,var(--sun));
+    display:flex; align-items:center; justify-content:center; gap:24px; color:#fff7ec; font-weight:700; font-size:40px; padding-bottom:26px; }
+  .strip b{ font-family:'Outfit'; font-weight:900; color:#fff; }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="sun"></div>
+    <div class="core">
+      <div class="brand"><img src="icon-512.png" alt="La Base" /><span>LA&nbsp;BASE</span></div>
+      <div class="tag">☀️ ALERTE CHALEUR</div>
+      <div class="head"><div class="a">CANICULE</div><div class="b">à Verdun</div></div>
+      <div class="big">35<small>°C+</small></div>
+      <div class="sub">cette semaine · pic les 22-23 juin</div>
+      <div class="pill">🥵 nuits étouffantes · hydratation = priorité</div>
+    </div>
+    <div class="strip"><span>👉 <b>On te dit comment tenir le coup</b> &nbsp;·&nbsp; swipe 💧</span></div>
+  </div>
+</body>
+</html>

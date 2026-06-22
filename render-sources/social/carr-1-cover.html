@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Carr 1 cover</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --amber:#f6921e; --violet:#8A3FF0; --green:#1BD47A; --blue:#2b8cff; --rose:#E0218A; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1350px; }
+  body{ font-family:'Inter',sans-serif; color:#fff; overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .c{ width:1080px; height:1350px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(600px 600px at 12% 14%, rgba(246,146,30,.30), transparent 60%),
+      radial-gradient(620px 620px at 88% 16%, rgba(138,63,240,.28), transparent 60%),
+      radial-gradient(640px 640px at 16% 86%, rgba(27,212,122,.24), transparent 60%),
+      radial-gradient(640px 640px at 86% 88%, rgba(43,140,255,.26), transparent 60%),
+      linear-gradient(160deg,#0c2a26 0%, #08191c 55%, #061417 100%); }
+  .c::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.05) 1.3px, transparent 1.3px); background-size:32px 32px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:110px 80px; }
+  .logo{ width:104px; height:104px; border-radius:24px; box-shadow:0 14px 36px rgba(0,0,0,.5); }
+  .wm{ font-family:'Outfit'; font-weight:900; font-size:40px; letter-spacing:10px; margin-top:14px; color:#eafaf6; }
+  .kick{ margin-top:48px; font-family:'Outfit'; font-weight:800; letter-spacing:4px; font-size:36px;
+    background:linear-gradient(90deg,var(--amber),var(--rose) 50%,var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .head{ font-family:'Outfit'; font-weight:900; font-size:138px; line-height:.9; letter-spacing:-4px; margin-top:8px; }
+  .sub{ font-size:40px; color:#bcd6cf; margin-top:26px; font-weight:500; }
+  .dots{ margin-top:70px; display:flex; gap:26px; }
+  .d{ width:188px; height:188px; border-radius:50%; overflow:hidden; border:5px solid #fff; box-shadow:0 16px 40px rgba(0,0,0,.45); }
+  .d:nth-child(1){ outline:5px solid var(--amber); }
+  .d:nth-child(2){ outline:5px solid var(--violet); }
+  .d:nth-child(3){ outline:5px solid var(--green); }
+  .d:nth-child(4){ outline:5px solid var(--blue); }
+  .d img{ width:100%; height:100%; object-fit:cover; }
+  .swipe{ margin-top:auto; font-family:'Outfit'; font-weight:800; font-size:42px; color:#fff;
+    display:inline-flex; align-items:center; gap:16px; padding:20px 50px; border-radius:999px; background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.22); }
+</style></head>
+<body><div class="c"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" /><div class="wm">LA&nbsp;BASE</div>
+  <div class="kick">★ LES PLUS COMMANDÉS ★</div>
+  <div class="head">LES BEST-<br>SELLERS</div>
+  <div class="sub">vos chouchous à Verdun 💚</div>
+  <div class="dots">
+    <div class="d"><img src="images/drinks/l-exotic.png"></div>
+    <div class="d"><img src="images/drinks/black-panther.png"></div>
+    <div class="d"><img src="images/drinks/perroquet.png"></div>
+    <div class="d"><img src="images/drinks/aurora.png"></div>
+  </div>
+  <div class="swipe">Swipe pour découvrir →</div>
+</div></div></body></html>

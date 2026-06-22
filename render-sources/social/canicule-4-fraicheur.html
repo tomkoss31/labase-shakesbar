@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>LA BASE — Canicule 4 Fraîcheur gourmande</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDeep:#115e59; --ice:#e8f6fb; --ice2:#cfeaf3; --sky:#2b8cff; --rasp:#db2777; --amber:#d97706; --amberDeep:#b45309; --ink:#0f2e33; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(820px 820px at 0% 0%, rgba(219,39,119,.18), transparent 60%),
+      radial-gradient(760px 760px at 100% 10%, rgba(13,148,136,.20), transparent 62%),
+      linear-gradient(180deg,#f4fbfd 0%, var(--ice) 48%, var(--ice2) 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:175px 78px 220px; }
+  .logo{ width:110px; height:110px; border-radius:26px; box-shadow:0 16px 34px rgba(13,148,136,.28); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:40px; letter-spacing:9px; color:var(--tealDeep); margin-top:14px; }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; margin-top:24px; }
+  .head .a{ font-size:96px; color:var(--ink); }
+  .head .b{ font-size:84px; color:var(--rasp); }
+  .meds{ margin-top:50px; display:flex; gap:38px; justify-content:center; }
+  .med{ width:360px; height:360px; border-radius:50%; overflow:hidden; border:9px solid #fff;
+    box-shadow:0 24px 52px rgba(20,40,36,.24); outline:5px solid rgba(219,39,119,.28); }
+  .med img{ width:100%; height:100%; object-fit:cover; }
+  .facts{ margin-top:54px; display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:840px; }
+  .f{ font-family:'Outfit'; font-weight:700; font-size:32px; color:var(--tealDeep);
+    background:rgba(13,148,136,.10); border:1.5px solid rgba(13,148,136,.26); border-radius:999px; padding:14px 30px; }
+  .saveurs{ margin-top:42px; font-size:36px; color:#41545a; font-weight:500; max-width:840px; line-height:1.4; }
+  .saveurs b{ color:var(--ink); font-family:'Outfit'; font-weight:800; }
+  .price{ margin-top:30px; font-family:'Outfit'; font-weight:900; font-size:46px; color:var(--amberDeep); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:140px; z-index:6;
+    background:linear-gradient(90deg,var(--tealDeep),var(--teal) 55%,var(--rasp));
+    display:flex; align-items:center; justify-content:center; gap:24px; color:#eafaf6; font-weight:700; font-size:38px; padding-bottom:24px; }
+  .strip b{ font-family:'Outfit'; font-weight:900; color:#fff; }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="core">
+      <img class="logo" src="icon-512.png" alt="La Base" />
+      <div class="wordmark">LA&nbsp;BASE</div>
+      <div class="head"><div class="a">TROP CHAUD ?</div><div class="b">on te rafraîchit 🍧</div></div>
+      <div class="meds">
+        <div class="med"><img src="images/shake/tropical.png" alt=""></div>
+        <div class="med"><img src="images/shake/pina-colada.png" alt=""></div>
+      </div>
+      <div class="facts">
+        <span class="f">smoothies &amp; shakes glacés</span>
+        <span class="f">recette équilibrée</span>
+        <span class="f">protéines</span>
+        <span class="f">gourmand &amp; léger</span>
+      </div>
+      <div class="saveurs">Le plein de <b>fraîcheur</b> qui fait du bien — sans culpabiliser 💪</div>
+    </div>
+    <div class="strip"><span>😎 <b>Ta pause fraîcheur</b> · La Base · Verdun</span></div>
+  </div>
+</body>
+</html>

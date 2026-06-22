@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>menu s1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: radial-gradient(circle at 50% -5%, #0e2c28 0%, transparent 55%), linear-gradient(160deg, #04100f, #0a1f1c 55%, #04100f); }
+  .slide { position: fixed; inset: 0; padding: 4vh 3.6vw; display: none; flex-direction: column; }
+  .slide.on { display: flex; }
+  .bg-glow { position: fixed; border-radius: 50%; filter: blur(45px); z-index: 0; }
+  .bg-glow.t { width: 38vw; height: 38vw; top: -15vw; right: -10vw; background: radial-gradient(circle, rgba(94,234,212,.12), transparent 70%); }
+  .bg-glow.o { width: 34vw; height: 34vw; bottom: -15vw; left: -12vw; background: radial-gradient(circle, rgba(245,158,11,.1), transparent 70%); }
+  .top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 2vw; margin-bottom: 2vh; }
+  .brand { display: flex; align-items: center; gap: 1vw; flex: none; }
+  .logo-img { width: 7.6vh; height: 7.6vh; border-radius: 1.5vh; object-fit: cover; box-shadow: 0 0 3vh rgba(94,234,212,.3); }
+  .bname { font-family: 'Outfit'; font-weight: 900; font-size: 2.7vh; line-height: 1; }
+  .btag { font-size: 1.2vh; letter-spacing: .25em; color: #5eead4; font-weight: 700; }
+  .title { font-family: 'Outfit'; font-weight: 900; font-size: 4.8vh; text-align: center; flex: 1; }
+  .title small { display: block; font-size: 1.9vh; color: #5eead4; font-weight: 700; margin-top: .3vh; }
+  .pricebar { flex: none; text-align: right; }
+  .pricebar .p { font-family: 'Outfit'; font-weight: 800; font-size: 2vh; color: #04100f; background: #5eead4; padding: .9vh 1.4vw; border-radius: 99vh; white-space: nowrap; display: inline-block; }
+  .pricebar .up { display: block; margin-top: .8vh; font-family: 'Outfit'; font-weight: 800; font-size: 1.5vh; color: #f59e0b; white-space: nowrap; }
+  .accent { color: #f59e0b; }
+  .cards { position: relative; z-index: 2; flex: 1; display: grid; gap: 2vw; align-items: stretch; margin-top: .5vh; }
+  .cards.c3 { grid-template-columns: repeat(3, 1fr); }
+  .cards.c4 { grid-template-columns: repeat(4, 1fr); }
+  .card { position: relative; border-radius: 2.4vh; padding: 2.2vh 1.2vw 2.4vh; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid rgba(94,234,212,.16); display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+  .chalo { position: absolute; top: -12%; left: 50%; transform: translateX(-50%); width: 78%; height: 50%; border-radius: 50%; filter: blur(26px); z-index: 0; background: radial-gradient(circle, var(--c, rgba(94,234,212,.5)), transparent 70%); }
+  .badge { position: relative; z-index: 1; align-self: flex-start; font-family: 'Outfit'; font-weight: 900; font-size: 1.3vh; letter-spacing: .08em; text-transform: uppercase; color: #04100f; background: #f59e0b; padding: .4vh .8vw; border-radius: 99vh; margin-bottom: .6vh; }
+  .pic { position: relative; z-index: 1; height: 28vh; display: flex; align-items: center; justify-content: center; }
+  .pic img { height: 100%; object-fit: contain; filter: drop-shadow(0 1.2vh 3vh rgba(0,0,0,.6)); }
+  .emoji { position: relative; z-index: 1; font-size: 13vh; line-height: 1; height: 24vh; display: flex; align-items: center; }
+  .name { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 3.2vh; margin-top: .8vh; }
+  .flav { position: relative; z-index: 1; font-size: 1.75vh; color: #cbe4df; margin-top: .5vh; line-height: 1.3; }
+  .tagline { position: relative; z-index: 1; margin-top: auto; padding-top: 1.2vh; font-family: 'Outfit'; font-weight: 800; font-size: 1.85vh; color: #5eead4; }
+  .price-s { position: relative; z-index: 1; margin-top: .6vh; font-family: 'Outfit'; font-weight: 900; font-size: 2.2vh; color: #f59e0b; }
+  .herolayout { position: relative; z-index: 2; flex: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 2.8vw; align-items: center; }
+  .herobig { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .herobig::before { content: ''; position: absolute; top: 2%; left: 50%; transform: translateX(-50%); width: 70%; height: 60%; border-radius: 50%; filter: blur(40px); z-index: 0; background: radial-gradient(circle, var(--hc, rgba(94,234,212,.55)), transparent 70%); }
+  .herobig img { height: 52vh; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 2.2vh 5vh rgba(0,0,0,.65)); }
+  .htag { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 1.5vh; letter-spacing: .1em; text-transform: uppercase; color: #04100f; background: #f59e0b; padding: .6vh 1.2vw; border-radius: 99vh; margin-bottom: 1.2vh; }
+  .hname { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 5vh; margin-top: 1.4vh; }
+  .hdesc { position: relative; z-index: 1; font-size: 2.3vh; color: #cbe4df; margin-top: .9vh; max-width: 34vw; line-height: 1.35; }
+  .minilist { columns: 2; column-gap: 2vw; }
+  .mi { break-inside: avoid; margin-bottom: 1.4vh; }
+  .mi b { font-family: 'Outfit'; font-weight: 800; font-size: 2.1vh; }
+  .mi span { display: block; font-size: 1.5vh; color: #9fc4bd; margin-top: .1vh; }
+  .foot { position: relative; z-index: 2; text-align: center; margin-top: 1.5vh; font-size: 1.75vh; color: #94b8b1; }
+  .foot b { color: #ecfdf5; }
+  .foot .boost { color: #f59e0b; font-family: 'Outfit'; font-weight: 800; }
+  /* Nouveautés : images plus grandes + contenu centré (moins de vide) */
+  .slide[data-n="1"] .card { justify-content: center; }
+  .slide[data-n="1"] .badge { position: absolute; top: 2.2vh; left: 1.3vw; margin: 0; }
+  .slide[data-n="1"] .pic { height: 46vh; }
+  .slide[data-n="1"] .name { font-size: 4.6vh; margin-top: 1.6vh; }
+  .slide[data-n="1"] .flav { font-size: 2.2vh; }
+  .slide[data-n="1"] .tagline { margin-top: 1.8vh; }
+  /* v5 — textes agrandis pour lecture TV à distance */
+  .title { font-size: 5.4vh; }
+  .title small { font-size: 2.2vh; }
+  .hname { font-size: 5.6vh; }
+  .hdesc { font-size: 2.8vh; max-width: 36vw; }
+  .minilist .mi b { font-size: 3vh; }
+  .minilist .mi span { font-size: 2.1vh; }
+  .minilist .mi { margin-bottom: 1.9vh; }
+  .name { font-size: 3.7vh; }
+  .flav { font-size: 2.15vh; }
+  .tagline { font-size: 2.2vh; }
+  .price-s { font-size: 2.5vh; }
+  .block h3 { font-size: 3.2vh; }
+  .foot { font-size: 2.15vh; }
+  .pricebar .p { font-size: 2.3vh; }
+  .pricebar .up { font-size: 1.85vh; }
+  /* v6 — calibrage type Nouveautés : héros + texte plus gros, écran rempli */
+  .title { font-size: 5.7vh; }
+  .herolayout { align-items: stretch; }
+  .herobig { justify-content: center; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); border-radius: 3vh; padding: 1.5vh 1vw; }
+  .herobig img { height: 57vh; }
+  .hname { font-size: 6.2vh; }
+  .hdesc { font-size: 3vh; max-width: 38vw; }
+  .minilist .mi b { font-size: 3.5vh; }
+  .minilist .mi span { font-size: 2.5vh; }
+  .minilist .mi { margin-bottom: 3vh; }
+  /* Santé : grandes cartes centrées façon Nouveautés */
+  .slide[data-n="5"] .pic { height: 37vh; }
+  .slide[data-n="5"] .card { justify-content: center; }
+  .slide[data-n="5"] .name { font-size: 3.8vh; }
+  .slide[data-n="5"] .flav { font-size: 2.1vh; }
+  .slide[data-n="5"] .tagline { font-size: 2.4vh; }
+</style>
+</head>
+<body>
+  <div class="bg-glow t"></div>
+  <div class="bg-glow o"></div>
+
+  <section class="slide" data-n="1">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">✨</span> Nouveautés signature</div>
+      <div class="pricebar"><span class="p">Start 6,90€ · Boost 8,90€</span><span class="up">🔥 +400 ml pour +2€ en Boost</span></div></div>
+    <div class="cards c3">
+      <div class="card"><div class="chalo" style="--c:rgba(245,158,11,.5)"></div><div class="badge">Nouveau</div><div class="pic"><img src="images/drinks/phenix.png"></div><div class="name">Phénix</div><div class="flav">Coucher de soleil<br>Fraise · Pêche · Ananas</div><div class="tagline">0 sucre · 20 kcal · vegan</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(124,92,255,.5)"></div><div class="badge">Nouveau</div><div class="pic"><img src="images/drinks/aurora.png"></div><div class="name">Aurora</div><div class="flav">Aurore boréale<br>Framboise · Myrtille · Citron</div><div class="tagline">0 sucre · 20 kcal · vegan</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.45)"></div><div class="badge">Nouveau</div><div class="pic"><img src="images/drinks/jungle.png"></div><div class="name">Jungle</div><div class="flav">Énergisante &amp; naturelle<br>Melon · Ananas</div><div class="tagline">version enfant dispo</div></div>
+    </div>
+    <div class="foot"><b>Ginseng · Guarana · Vitamines B &amp; C · Aloé vera</b> — sans sucre, 20 calories</div>
+  </section>
+
+  <section class="slide ener" data-n="2"></section>
+  <section class="slide ener" data-n="3"></section>
+  <section class="slide ener" data-n="4"></section>
+
+  <section class="slide" data-n="5">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">💪</span> Boissons santé</div>
+      <div class="pricebar"><span class="p">Start 6,90€ · Boost 8,90€</span><span class="up">🔥 +400 ml pour +2€ en Boost</span></div></div>
+    <div class="cards c4">
+      <div class="card"><div class="chalo" style="--c:rgba(245,158,11,.45)"></div><div class="pic"><img src="images/sante/hydrat-max.png"></div><div class="name">Hydrat'Max</div><div class="flav">Vitamines C · Orange · Mandarine</div><div class="tagline">hydratation</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(124,92,255,.4)"></div><div class="pic"><img src="images/sante/casse-grippe.png"></div><div class="name">Casse Grippe</div><div class="flav">Épicor · Vitamines · thé vert · aloé</div><div class="tagline">immunité</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(244,114,182,.45)"></div><div class="pic"><img src="images/sante/limonade-rose.png"></div><div class="name">Limonade Rose</div><div class="flav">Collagène · Aloé vera · Fraise · Citron</div><div class="tagline">beauté de la peau</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.4)"></div><div class="pic"><img src="images/sante/di-gest.png"></div><div class="name">Di'geste</div><div class="flav">Fibres · Probiotiques · thé vert · aloé</div><div class="tagline">digestion</div></div>
+    </div>
+    <div class="foot"><b>Des boissons saines qui veulent du bien à ta santé</b></div>
+  </section>
+
+  <section class="slide" data-n="6">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">🧒</span> Boissons enfants<small>0 sucre · 0 calorie · SANS énergisant</small></div><div class="pricebar"><span class="p">5€</span></div></div>
+    <div class="cards c4">
+      <div class="card"><div class="chalo" style="--c:rgba(244,114,182,.4)"></div><div class="emoji">🧚</div><div class="name">Bulle de Fée</div><div class="flav">Pomme · Fruit du dragon</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(239,68,68,.4)"></div><div class="emoji">🕷️</div><div class="name">Spiderman</div><div class="flav">Fruits rouges</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(56,189,248,.4)"></div><div class="emoji">💙</div><div class="name">Stitch</div><div class="flav">Passion · Limonade</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(168,85,247,.4)"></div><div class="emoji">🦄</div><div class="name">Licorne</div><div class="flav">Myrtille · Fraise · Raisin</div></div>
+    </div>
+    <div class="cards c4" style="margin-top:1.6vh">
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.4)"></div><div class="emoji">💚</div><div class="name">Hulk</div><div class="flav">Pomme verte</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(245,158,11,.4)"></div><div class="emoji">🌴</div><div class="name">Tropicool</div><div class="flav">Melon · Ananas</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(20,184,166,.4)"></div><div class="emoji">🐯</div><div class="name">Jungle Kid</div><div class="flav">Melon · Ananas</div></div>
+      <div class="card" style="justify-content:center"><div class="name" style="font-size:2.4vh">On pense aussi<br>aux plus petits 🧡</div><div class="flav">même goût,<br>sans énergisant</div></div>
+    </div>
+  </section>
+
+  <section class="slide" data-n="7">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">➕</span> Personnalise ta boisson</div><div class="pricebar"><span class="p">+2,50€ l'extra</span></div></div>
+    <div class="cards c4">
+      <div class="card"><div class="chalo" style="--c:rgba(244,114,182,.4)"></div><div class="emoji">✨</div><div class="name">Collagène</div><div class="flav">peau · cheveux · ongles</div><div class="price-s">+2,50€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(245,158,11,.4)"></div><div class="emoji">🛡️</div><div class="name">Booster Immunité</div><div class="flav">défenses naturelles</div><div class="price-s">+2,50€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.4)"></div><div class="emoji">🍏</div><div class="name">Fibres à la pomme</div><div class="flav">transit · satiété</div><div class="price-s">+2,50€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(20,184,166,.4)"></div><div class="emoji">🦠</div><div class="name">Probiotiques</div><div class="flav">flore intestinale</div><div class="price-s">+2,50€</div></div>
+    </div>
+    <div class="cards c3" style="margin-top:1.6vh">
+      <div class="card"><div class="chalo" style="--c:rgba(56,189,248,.4)"></div><div class="emoji">💧</div><div class="name">Électrolytes</div><div class="flav">hydratation · sport</div><div class="price-s">+2,50€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(239,68,68,.4)"></div><div class="emoji">💪</div><div class="name">Créatine</div><div class="flav">force · muscle · os</div><div class="price-s">+2,50€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(124,92,255,.4)"></div><div class="emoji">🥛</div><div class="name">Protéines</div><div class="flav">+ de satiété &amp; muscle</div><div class="price-s">+2,50€</div></div>
+    </div>
+    <div class="foot"><b>Compose ta boisson sur-mesure</b> — ajoute l'extra santé qu'il te faut</div>
+  </section>
+
+  <script>
+    var ENER_LIST = [['Pomelon','Melon · Framboise · Pomme'],['Soleil','Pêche · Mandarine · Ananas'],['L\'Exotic','Passion · Fruit du dragon · Ananas'],['T\'Coco','Coco · Pêche · Mandarine'],['Pina Colada','Pina colada · Ananas'],['Elf','Framboise bleue · Pêche · Pomme'],['La vie en Rose','Fruit du dragon · Framboise · Pomme'],['Sortilège noir','Cerise · Framboise · Fraise · Myrtille'],['Apple Kiss','Pomme verte'],['Tonic Mandarine','Mandarine']];
+    var ENER_HEROES = {
+      2: { img:'electric-blue', name:'Electric Blue', tag:"⭐ L'iconique", hc:'rgba(56,189,248,.6)', desc:'La plus visuelle du bar — fruits bleus & raisin, l\'effet waouh garanti.' },
+      3: { img:'black-panther', name:'Black Panther', tag:'⭐ La mystérieuse', hc:'rgba(124,92,255,.55)', desc:'Cerise & framboise bleue — élégante et puissante, la chouchoute des connaisseurs.' },
+      4: { img:'perroquet', name:'Perroquet', tag:'⭐ La colorée', hc:'rgba(245,158,11,.5)', desc:'Fraise, framboise bleue, raisin & pêche — un festival de fruits ultra fun.' }
+    };
+    function brandTop(){ return '<div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES & DRINKS</div></div></div>'; }
+    function priceTop(){ return '<div class="pricebar"><span class="p">Start 6,90€ · Boost 8,90€</span><span class="up">🔥 +400 ml pour +2€ en Boost</span></div>'; }
+    function listHtml(arr){ return arr.map(function(x){ return '<div class="mi"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'; }).join(''); }
+    var n = new URLSearchParams(location.search).get('slide') || '1';
+    var el = document.querySelector('.slide[data-n="' + n + '"]');
+    if (el) {
+      if (ENER_HEROES[n]) { var h=ENER_HEROES[n]; el.innerHTML = '<div class="top">'+brandTop()+'<div class="title"><span class="accent">⚡</span> Boissons énergisantes<small>0 sucre · 20 calories · 100% energy</small></div>'+priceTop()+'</div><div class="herolayout"><div class="herobig" style="--hc:'+h.hc+'"><div class="htag">'+h.tag+'</div><img src="images/drinks/'+h.img+'.png"><div class="hname">'+h.name+'</div><div class="hdesc">'+h.desc+'</div></div><div class="minilist">'+listHtml(ENER_LIST)+'</div></div><div class="foot"><b class="boost">🔥 Passe en Boost : 550 ml → 950 ml pour +2€ seulement</b></div>'; }
+      el.classList.add('on');
+    }
+  </script>
+</body>
+</html>

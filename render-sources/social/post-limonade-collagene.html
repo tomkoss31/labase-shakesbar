@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Limonade Rose Collagène</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --rose:#e6447f; --roseDeep:#c01f5e; --gold:#d9a441; --ink:#4a1230; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1350px; }
+  body{ font-family:'Inter',sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .c{ width:1080px; height:1350px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(720px 720px at 88% 6%, rgba(217,164,65,.28), transparent 58%),
+      radial-gradient(760px 760px at 6% 96%, rgba(230,68,127,.30), transparent 60%),
+      linear-gradient(165deg,#fff4f8 0%, #ffe1ec 50%, #ffcfe0 100%); }
+  .c::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(192,31,94,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:80px 78px 110px; }
+  .top{ display:flex; align-items:center; gap:16px; }
+  .logo{ width:80px; height:80px; border-radius:20px; box-shadow:0 12px 26px rgba(192,31,94,.22); }
+  .wm{ font-family:'Outfit'; font-weight:900; font-size:36px; letter-spacing:8px; color:var(--roseDeep); }
+  .badge{ margin-top:30px; display:inline-flex; align-items:center; gap:12px; font-family:'Outfit'; font-weight:900; font-size:34px; letter-spacing:1px;
+    color:#fff; background:linear-gradient(90deg,var(--gold),#e9b85a); padding:14px 38px; border-radius:999px; box-shadow:0 14px 30px rgba(217,164,65,.4); }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-1px; margin-top:18px; }
+  .head .a{ font-size:104px; color:var(--roseDeep); }
+  .head .b{ font-size:50px; color:var(--ink); font-weight:800; letter-spacing:1px; }
+  .row{ margin-top:36px; display:flex; align-items:center; gap:34px; width:100%; justify-content:center; }
+  .med{ width:380px; height:380px; border-radius:50%; overflow:hidden; border:9px solid #fff; flex:none;
+    box-shadow:0 24px 54px rgba(192,31,94,.28); outline:5px solid rgba(230,68,127,.34); }
+  .med img{ width:100%; height:100%; object-fit:cover; }
+  .bens{ display:flex; flex-direction:column; gap:16px; text-align:left; }
+  .b1{ display:flex; align-items:center; gap:18px; background:rgba(255,255,255,.78); border:2px solid rgba(230,68,127,.22);
+    border-radius:24px; padding:22px 28px; box-shadow:0 10px 24px rgba(192,31,94,.10); }
+  .b1 .ic{ font-size:50px; } .b1 .tx{ font-family:'Outfit'; font-weight:800; font-size:34px; color:var(--ink); }
+  .foot{ margin-top:auto; }
+  .tagl{ font-family:'Outfit'; font-weight:900; font-size:50px; color:var(--roseDeep); }
+  .price{ margin-top:14px; font-family:'Outfit'; font-weight:800; font-size:38px; color:var(--gold); }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:108px; z-index:6;
+    background:linear-gradient(90deg,var(--roseDeep),var(--rose) 60%,var(--gold));
+    display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Outfit'; font-weight:800; font-size:34px; padding-bottom:14px; }
+</style></head>
+<body><div class="c"><div class="core">
+  <div class="top"><img class="logo" src="icon-512.png" alt="La Base" /><span class="wm">LA&nbsp;BASE</span></div>
+  <div class="badge">✨ ENRICHIE EN COLLAGÈNE</div>
+  <div class="head"><div class="a">Limonade Rose</div><div class="b">LA BEAUTÉ SE BOIT 💗</div></div>
+  <div class="row">
+    <div class="med"><img src="images/sante/limonade-rose.png"></div>
+    <div class="bens">
+      <div class="b1"><span class="ic">✨</span><span class="tx">Peau éclatante</span></div>
+      <div class="b1"><span class="ic">💪</span><span class="tx">Articulations</span></div>
+      <div class="b1"><span class="ic">💅</span><span class="tx">Cheveux &amp; ongles</span></div>
+      <div class="b1"><span class="ic">🫧</span><span class="tx">Pétillante &amp; fraîche</span></div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="tagl">Fraîcheur + bien-être, dans un verre</div>
+    <div class="price">à découvrir à Verdun</div>
+  </div>
+</div><div class="strip">📍 11 rue Saint Pierre, Verdun · 📲 Commande en ligne</div></div></body></html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Sondage ingrédient 1</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDeep:#115e59; --ink:#0f2e33; --amber:#d97706; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .c{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(820px 820px at 100% 0%, rgba(217,119,6,.16), transparent 60%),
+      radial-gradient(820px 820px at 0% 14%, rgba(13,148,136,.20), transparent 62%),
+      linear-gradient(180deg,#fdfbf5 0%, #f4f8f4 55%, #eaf3ef 100%); }
+  .c::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:200px 80px 240px; }
+  .logo{ width:104px; height:104px; border-radius:26px; box-shadow:0 14px 32px rgba(13,148,136,.26); }
+  .kick{ margin-top:34px; display:inline-flex; align-items:center; gap:12px; font-family:'Outfit'; font-weight:900; font-size:40px; letter-spacing:3px;
+    color:#fff; background:var(--teal); padding:16px 44px; border-radius:999px; box-shadow:0 14px 30px rgba(13,148,136,.34); }
+  .q{ font-family:'Outfit'; font-weight:900; font-size:84px; line-height:1.02; letter-spacing:-1px; margin-top:46px; color:var(--ink); max-width:900px; }
+  .q b{ color:var(--tealDeep); }
+  .grid{ margin-top:70px; display:grid; grid-template-columns:1fr 1fr; gap:34px; width:920px; }
+  .opt{ background:#fff; border:3px solid rgba(13,148,136,.25); border-radius:36px; padding:52px 24px;
+    box-shadow:0 16px 36px rgba(20,40,36,.10); display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .opt .ic{ font-size:96px; line-height:1; }
+  .opt .t{ font-family:'Outfit'; font-weight:900; font-size:48px; color:var(--ink); }
+  .hint{ margin-top:auto; font-family:'Outfit'; font-weight:800; font-size:44px; color:var(--amber); }
+</style></head>
+<body><div class="c"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" />
+  <div class="kick">📊 SONDAGE</div>
+  <div class="q">Le prochain <b>supplément</b><br>que tu veux tester ?</div>
+  <div class="grid">
+    <div class="opt"><span class="ic">✨</span><span class="t">Collagène</span></div>
+    <div class="opt"><span class="ic">💧</span><span class="t">Électrolytes</span></div>
+    <div class="opt"><span class="ic">💪</span><span class="t">Créatine</span></div>
+    <div class="opt"><span class="ic">🥚</span><span class="t">Protéines</span></div>
+  </div>
+  <div class="hint">👇 Vote avec le sticker sondage</div>
+</div></div></body></html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Sondage ingrédient 2 quiz</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --rose:#e6447f; --roseDeep:#c01f5e; --ink:#4a1230; --gold:#d9a441; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .c{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(820px 820px at 0% 0%, rgba(217,164,65,.20), transparent 60%),
+      radial-gradient(820px 820px at 100% 12%, rgba(230,68,127,.22), transparent 62%),
+      linear-gradient(180deg,#fff5f9 0%, #ffe6ef 55%, #ffd5e2 100%); }
+  .c::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(192,31,94,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:200px 80px 240px; }
+  .logo{ width:104px; height:104px; border-radius:26px; box-shadow:0 14px 32px rgba(192,31,94,.22); }
+  .kick{ margin-top:34px; display:inline-flex; align-items:center; gap:12px; font-family:'Outfit'; font-weight:900; font-size:40px; letter-spacing:3px;
+    color:#fff; background:var(--rose); padding:16px 44px; border-radius:999px; box-shadow:0 14px 30px rgba(230,68,127,.34); }
+  .q{ font-family:'Outfit'; font-weight:900; font-size:92px; line-height:1.0; letter-spacing:-1px; margin-top:48px; color:var(--roseDeep); }
+  .card{ margin-top:70px; background:rgba(255,255,255,.82); border:3px solid rgba(230,68,127,.24); border-radius:42px; padding:64px 50px; width:920px;
+    box-shadow:0 18px 40px rgba(192,31,94,.12); }
+  .stmt{ font-family:'Outfit'; font-weight:800; font-size:52px; line-height:1.25; color:var(--ink); }
+  .stmt b{ color:var(--roseDeep); }
+  .vf{ margin-top:54px; display:flex; gap:30px; justify-content:center; }
+  .v{ font-family:'Outfit'; font-weight:900; font-size:60px; padding:30px 64px; border-radius:28px; }
+  .vrai{ background:#2fb56a; color:#fff; } .faux{ background:#fff; color:var(--roseDeep); border:3px solid rgba(192,31,94,.3); }
+  .hint{ margin-top:auto; font-family:'Outfit'; font-weight:800; font-size:44px; color:var(--gold); }
+</style></head>
+<body><div class="c"><div class="core">
+  <img class="logo" src="icon-512.png" alt="La Base" />
+  <div class="kick">🧠 VRAI ou FAUX</div>
+  <div class="q">Le collagène…</div>
+  <div class="card">
+    <div class="stmt">« Le <b>collagène</b> aide la <b>peau</b>, les <b>cheveux</b> et les <b>articulations</b> »</div>
+    <div class="vf"><span class="v vrai">VRAI ✅</span><span class="v faux">FAUX ❌</span></div>
+  </div>
+  <div class="hint">👇 Réponds avec le sticker quiz</div>
+</div></div></body></html>

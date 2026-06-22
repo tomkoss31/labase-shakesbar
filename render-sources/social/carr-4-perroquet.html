@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8" /><title>Carr 4 perroquet</title><meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --acc:#1BD47A; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1350px; }
+  body{ font-family:'Inter',sans-serif; color:#fff; overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .c{ width:1080px; height:1350px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(760px 760px at 50% 30%, rgba(27,212,122,.30), transparent 62%),
+      linear-gradient(160deg,#0c2a26 0%, #08191c 55%, #061417 100%); }
+  .c::before{ content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.05) 1.3px, transparent 1.3px); background-size:32px 32px; opacity:.45; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; text-align:center; padding:96px 80px; }
+  .rank{ position:absolute; top:70px; left:74px; font-family:'Outfit'; font-weight:900; font-size:150px; line-height:.8;
+    color:transparent; -webkit-text-stroke:4px rgba(27,212,122,.7); }
+  .badge{ position:absolute; top:96px; right:74px; font-family:'Outfit'; font-weight:900; font-size:30px; letter-spacing:1px;
+    background:var(--acc); color:#003318; padding:14px 26px; border-radius:999px; box-shadow:0 12px 26px rgba(27,212,122,.4); }
+  .logo{ width:84px; height:84px; border-radius:20px; opacity:.95; }
+  .med{ width:560px; height:560px; border-radius:50%; overflow:hidden; border:10px solid #fff; margin-top:30px;
+    box-shadow:0 30px 70px rgba(0,0,0,.5); outline:8px solid rgba(27,212,122,.55); }
+  .med img{ width:100%; height:100%; object-fit:cover; }
+  .name{ font-family:'Outfit'; font-weight:900; font-size:114px; letter-spacing:-2px; margin-top:36px; color:var(--acc); line-height:.9; }
+  .tag{ font-size:42px; color:#dfeee9; font-weight:500; margin-top:10px; }
+  .pills{ margin-top:34px; display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:840px; }
+  .p{ font-family:'Outfit'; font-weight:700; font-size:30px; color:#fff; background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.2); border-radius:999px; padding:13px 28px; }
+  .price{ margin-top:auto; font-family:'Outfit'; font-weight:900; font-size:46px; color:#fff; }
+</style></head>
+<body><div class="c">
+  <div class="rank">#3</div>
+  <div class="badge">🦜 ICONIQUE</div>
+  <div class="core">
+    <img class="logo" src="icon-512.png" alt="La Base" />
+    <div class="med"><img src="images/drinks/perroquet.png"></div>
+    <div class="name">Perroquet</div>
+    <div class="tag">fraise · raisin · pêche · framboise</div>
+    <div class="pills"><span class="p">0 sucre · 20 cal</span><span class="p">vitamines B &amp; C</span><span class="p">servie glacée 🧊</span></div>
+  </div>
+</div></body></html>

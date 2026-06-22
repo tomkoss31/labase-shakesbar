@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>LA BASE — Canicule 5 CTA</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --teal:#0d9488; --tealDeep:#115e59; --ice:#e8f6fb; --ice2:#cfeaf3; --sky:#2b8cff; --blue:#0284c7; --amber:#d97706; --amberDeep:#b45309; --ink:#0f2e33; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; }
+  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink); overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .banner{ width:1080px; height:1920px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(900px 900px at 50% 0%, rgba(2,132,199,.26), transparent 60%),
+      radial-gradient(760px 760px at 100% 100%, rgba(13,148,136,.22), transparent 60%),
+      linear-gradient(180deg,#eef9fe 0%, var(--ice) 48%, var(--ice2) 100%); }
+  .banner::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(17,94,89,.05) 1.4px, transparent 1.4px); background-size:30px 30px; opacity:.5; }
+  .core{ position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 80px 200px; }
+  .logo{ width:150px; height:150px; border-radius:34px; box-shadow:0 18px 40px rgba(2,132,199,.30); }
+  .wordmark{ font-family:'Outfit'; font-weight:900; font-size:54px; letter-spacing:12px; color:var(--tealDeep); margin-top:22px; }
+  .sub{ font-family:'Outfit'; font-weight:700; font-size:38px; color:#41545a; letter-spacing:6px; margin-top:4px; }
+  .head{ font-family:'Outfit'; font-weight:900; line-height:.92; letter-spacing:-2px; margin-top:60px; }
+  .head .a{ font-size:118px; color:var(--blue); }
+  .head .b{ font-size:78px; color:var(--ink); }
+  .emoji{ font-size:120px; margin-top:30px; }
+  .info{ margin-top:60px; display:flex; flex-direction:column; gap:26px; width:860px; }
+  .row{ display:flex; align-items:center; gap:26px; justify-content:center; background:rgba(255,255,255,.74);
+    border:2px solid rgba(13,148,136,.20); border-radius:30px; padding:30px 40px; box-shadow:0 12px 28px rgba(20,40,36,.08); }
+  .row .ic{ font-size:56px; }
+  .row .tx{ font-size:42px; font-weight:700; color:var(--ink); font-family:'Outfit'; }
+  .row .tx span{ font-weight:500; color:#41545a; font-family:'Inter'; }
+  .strip{ position:absolute; left:0; right:0; bottom:0; height:150px; z-index:6;
+    background:linear-gradient(90deg,var(--tealDeep),var(--teal) 50%,var(--blue));
+    display:flex; align-items:center; justify-content:center; gap:24px; color:#fff; font-weight:800; font-size:44px; padding-bottom:26px; font-family:'Outfit'; }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="core">
+      <img class="logo" src="icon-512.png" alt="La Base" />
+      <div class="wordmark">LA&nbsp;BASE</div>
+      <div class="sub">SHAKES &amp; DRINKS</div>
+      <div class="head"><div class="a">VIENS TE</div><div class="b">rafraîchir 🧊</div></div>
+      <div class="info">
+        <div class="row"><span class="ic">📍</span><span class="tx">11 rue Saint Pierre<br><span>Verdun</span></span></div>
+        <div class="row"><span class="ic">📲</span><span class="tx">Commande en ligne<br><span>prête à emporter</span></span></div>
+      </div>
+    </div>
+    <div class="strip"><span>🥤 Ta pause fraîcheur t'attend</span></div>
+  </div>
+</body>
+</html>

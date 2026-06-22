@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>menu s2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #ecfdf5;
+    background: radial-gradient(circle at 50% -5%, #0e2c28 0%, transparent 55%), linear-gradient(160deg, #04100f, #0a1f1c 55%, #04100f); }
+  .slide { position: fixed; inset: 0; padding: 4vh 3.6vw; display: none; flex-direction: column; }
+  .slide.on { display: flex; }
+  .bg-glow { position: fixed; border-radius: 50%; filter: blur(45px); z-index: 0; }
+  .bg-glow.t { width: 38vw; height: 38vw; top: -15vw; right: -10vw; background: radial-gradient(circle, rgba(94,234,212,.12), transparent 70%); }
+  .bg-glow.o { width: 34vw; height: 34vw; bottom: -15vw; left: -12vw; background: radial-gradient(circle, rgba(245,158,11,.1), transparent 70%); }
+  .top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 2vw; margin-bottom: 2vh; }
+  .brand { display: flex; align-items: center; gap: 1vw; flex: none; }
+  .logo-img { width: 7.6vh; height: 7.6vh; border-radius: 1.5vh; object-fit: cover; box-shadow: 0 0 3vh rgba(94,234,212,.3); }
+  .bname { font-family: 'Outfit'; font-weight: 900; font-size: 2.7vh; line-height: 1; }
+  .btag { font-size: 1.2vh; letter-spacing: .25em; color: #5eead4; font-weight: 700; }
+  .title { font-family: 'Outfit'; font-weight: 900; font-size: 4.8vh; text-align: center; flex: 1; }
+  .title small { display: block; font-size: 1.9vh; color: #5eead4; font-weight: 700; margin-top: .3vh; }
+  .pricebar { flex: none; text-align: right; }
+  .pricebar .p { font-family: 'Outfit'; font-weight: 800; font-size: 2vh; color: #04100f; background: #5eead4; padding: .9vh 1.4vw; border-radius: 99vh; white-space: nowrap; display: inline-block; }
+  .accent { color: #f59e0b; }
+  .cards { position: relative; z-index: 2; flex: 1; display: grid; gap: 2vw; align-items: stretch; margin-top: .5vh; }
+  .cards.c3 { grid-template-columns: repeat(3, 1fr); }
+  .card { position: relative; border-radius: 2.4vh; padding: 2.2vh 1.2vw 2.4vh; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid rgba(94,234,212,.16); display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+  .chalo { position: absolute; top: -12%; left: 50%; transform: translateX(-50%); width: 78%; height: 50%; border-radius: 50%; filter: blur(26px); z-index: 0; background: radial-gradient(circle, var(--c, rgba(94,234,212,.5)), transparent 70%); }
+  .pic { position: relative; z-index: 1; height: 28vh; display: flex; align-items: center; justify-content: center; }
+  .pic img { height: 100%; object-fit: contain; filter: drop-shadow(0 1.2vh 3vh rgba(0,0,0,.6)); }
+  .name { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 3.2vh; margin-top: .8vh; }
+  .flav { position: relative; z-index: 1; font-size: 1.75vh; color: #cbe4df; margin-top: .5vh; line-height: 1.3; }
+  .tagline { position: relative; z-index: 1; margin-top: auto; padding-top: 1.2vh; font-family: 'Outfit'; font-weight: 800; font-size: 1.85vh; color: #5eead4; }
+  .price-s { position: relative; z-index: 1; margin-top: .6vh; font-family: 'Outfit'; font-weight: 900; font-size: 2.2vh; color: #f59e0b; }
+  .herolayout { position: relative; z-index: 2; flex: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 2.8vw; align-items: center; }
+  .herobig { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .herobig::before { content: ''; position: absolute; top: 2%; left: 50%; transform: translateX(-50%); width: 70%; height: 60%; border-radius: 50%; filter: blur(40px); z-index: 0; background: radial-gradient(circle, var(--hc, rgba(94,234,212,.55)), transparent 70%); }
+  .herobig img { height: 52vh; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 2.2vh 5vh rgba(0,0,0,.65)); }
+  .htag { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 1.5vh; letter-spacing: .1em; text-transform: uppercase; color: #04100f; background: #f59e0b; padding: .6vh 1.2vw; border-radius: 99vh; margin-bottom: 1.2vh; }
+  .hname { position: relative; z-index: 1; font-family: 'Outfit'; font-weight: 900; font-size: 5vh; margin-top: 1.4vh; }
+  .hdesc { position: relative; z-index: 1; font-size: 2.3vh; color: #cbe4df; margin-top: .9vh; max-width: 34vw; line-height: 1.35; }
+  .minilist { columns: 2; column-gap: 2vw; }
+  .mi { break-inside: avoid; margin-bottom: 1.4vh; }
+  .mi b { font-family: 'Outfit'; font-weight: 800; font-size: 2.1vh; }
+  .mi span { display: block; font-size: 1.5vh; color: #9fc4bd; margin-top: .1vh; }
+  .info { position: relative; z-index: 2; flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 2.2vw; align-content: center; }
+  .block { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid rgba(94,234,212,.16); border-radius: 2.2vh; padding: 2.6vh 1.8vw; }
+  .block h3 { font-family: 'Outfit'; font-weight: 900; font-size: 2.8vh; color: #f59e0b; margin-bottom: 1.4vh; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 1vw; margin-bottom: 1.1vh; }
+  .row .n { font-family: 'Outfit'; font-weight: 800; font-size: 2.2vh; }
+  .row .d { font-size: 1.55vh; color: #9fc4bd; }
+  .row .pr { font-family: 'Outfit'; font-weight: 800; font-size: 2vh; color: #5eead4; white-space: nowrap; }
+  .foot { position: relative; z-index: 2; text-align: center; margin-top: 1.5vh; font-size: 1.75vh; color: #94b8b1; }
+  .foot b { color: #ecfdf5; }
+  /* v5 — textes agrandis pour lecture TV à distance */
+  .title { font-size: 5.4vh; }
+  .title small { font-size: 2.2vh; }
+  .hname { font-size: 5.6vh; }
+  .hdesc { font-size: 2.8vh; max-width: 36vw; }
+  .minilist .mi b { font-size: 3vh; }
+  .minilist .mi span { font-size: 2.1vh; }
+  .minilist .mi { margin-bottom: 1.9vh; }
+  .name { font-size: 3.7vh; }
+  .flav { font-size: 2.15vh; }
+  .tagline { font-size: 2.2vh; }
+  .price-s { font-size: 2.5vh; }
+  .row .n { font-size: 2.6vh; }
+  .row .d { font-size: 1.95vh; }
+  .row .pr { font-size: 2.4vh; }
+  .block h3 { font-size: 3.2vh; }
+  .foot { font-size: 2.15vh; }
+  .pricebar .p { font-size: 2.3vh; }
+  /* v6 — calibrage type Nouveautés : héros + texte plus gros, écran rempli */
+  .title { font-size: 5.7vh; }
+  .herolayout { align-items: stretch; }
+  .herobig { justify-content: center; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); border-radius: 3vh; padding: 1.5vh 1vw; }
+  .herobig img { height: 57vh; }
+  .hname { font-size: 6.2vh; }
+  .hdesc { font-size: 3vh; max-width: 38vw; }
+  .minilist .mi b { font-size: 3.5vh; }
+  .minilist .mi span { font-size: 2.5vh; }
+  .minilist .mi { margin-bottom: 3vh; }
+  /* Combos : corrige le débordement du bas */
+  .slide[data-n="13"] .pic { height: 19vh; }
+  .slide[data-n="13"] .card { padding: 1.3vh 1vw 1.5vh; }
+  .slide[data-n="13"] .name { font-size: 2.9vh; }
+  .slide[data-n="13"] .flav { font-size: 1.9vh; }
+  .slide[data-n="13"] .price-s { font-size: 2.3vh; margin-top: .3vh; }
+  .slide[data-n="13"] .cards { gap: 1.5vw; }
+  /* Sportifs : Electro'lyte plein la place */
+  .slide[data-n="14"] .herobig img { height: 64vh; }
+  /* Gaufre : gros plan gourmand + toppings en gros */
+  .slide[data-n="15"] .herobig img { height: 62vh; }
+  .slide[data-n="15"] .minilist .mi b { font-size: 4.2vh; }
+  .slide[data-n="15"] .minilist .mi { margin-bottom: 3.4vh; }
+</style>
+</head>
+<body>
+  <div class="bg-glow t"></div>
+  <div class="bg-glow o"></div>
+
+  <section class="slide smoo" data-n="8"></section>
+  <section class="slide smoo" data-n="9"></section>
+  <section class="slide smoo" data-n="10"></section>
+
+  <section class="slide" data-n="11">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">☕</span> Cafés · Chocolats · Thés</div><div class="pricebar"><span class="p">Petit 3,90€ · Grand 5,90€</span></div></div>
+    <div class="cards c3">
+      <div class="card"><div class="chalo" style="--c:rgba(180,120,60,.45)"></div><div class="pic"><img src="images/hot/cafe-classique.png"></div><div class="name">Café chaud</div><div class="flav">6 à 11g de protéines</div><div class="tagline">3,90€ / 5,90€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(150,80,40,.45)"></div><div class="pic"><img src="images/hot/chocolat-chaud.png"></div><div class="name">Chocolat chaud</div><div class="flav">25g protéines · sans gluten · BCAA<br>+0,50€ : Noisette · Spéculoos · Caramel…</div><div class="tagline">5,90€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.4)"></div><div class="pic"><img src="images/hot/the-aloe-vera.png"></div><div class="name">Thé Aloé Vera</div><div class="flav">50 extraits végétaux<br>Pêche · Framboise · Citron</div><div class="tagline">3,90€ / 5,90€</div></div>
+    </div>
+    <div class="foot"><b>N°1 au monde de nutrition pour le bien-être</b></div>
+  </section>
+
+  <section class="slide" data-n="12">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">🧊</span> Cafés glacés</div><div class="pricebar"><span class="p">6,90€ · 8,90€</span></div></div>
+    <div class="herolayout">
+      <div class="herobig" style="--hc:rgba(180,120,60,.5)"><div class="htag">⭐ Gourmet glacé</div><img src="images/hot/cafe-gourmet.png"><div class="hname">Café gourmet glacé</div><div class="hdesc">24g de protéines, 190 calories — le café gourmand qui fait du bien.</div></div>
+      <div class="minilist" style="columns:1">
+        <div class="mi"><b>Macchiato</b><span>8,90€ · gourmet glacé</span></div>
+        <div class="mi"><b>Choco Mocha</b><span>8,90€ · gourmet glacé</span></div>
+        <div class="mi"><b>Latte aux Noisettes</b><span>8,90€ · gourmet glacé</span></div>
+        <div class="mi"><b>Vanille Latte</b><span>8,90€ · gourmet glacé</span></div>
+        <div class="mi" style="margin-top:1.5vh"><b>Café glacé Macchiato</b><span>6,90€ · 15g protéines · 100 cal</span></div>
+      </div>
+    </div>
+    <div class="foot"><b>Gourmand &amp; protéiné</b> — le plaisir sans culpabilité</div>
+  </section>
+
+  <section class="slide" data-n="13">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">🎯</span> Formules combo<small>Économise jusqu'à 1,90€</small></div><div class="pricebar"><span class="p">dès 10,90€</span></div></div>
+    <div class="cards c3">
+      <div class="card"><div class="chalo" style="--c:rgba(245,158,11,.4)"></div><div class="pic"><img src="images/combo/combo-power.png"></div><div class="name">Combo Power</div><div class="flav">Smoothie + boisson Boost</div><div class="price-s">15,90€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(94,234,212,.4)"></div><div class="pic"><img src="images/combo/combo-medium.png"></div><div class="name">Combo Medium</div><div class="flav">Smoothie + boisson Start</div><div class="price-s">14,80€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(180,120,60,.4)"></div><div class="pic"><img src="images/combo/combo-gourmet-break.png"></div><div class="name">Gourmet Break</div><div class="flav">Café gourmet glacé + gaufre</div><div class="price-s">13,90€</div></div>
+    </div>
+    <div class="cards c3" style="margin-top:1.4vh">
+      <div class="card"><div class="chalo" style="--c:rgba(150,80,40,.4)"></div><div class="pic"><img src="images/combo/combo-choco-cocoon.png"></div><div class="name">Choco Cocoon</div><div class="flav">Chocolat chaud + gaufre</div><div class="price-s">11,90€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(180,120,60,.4)"></div><div class="pic"><img src="images/combo/combo-coffee-break.png"></div><div class="name">Coffee Break</div><div class="flav">Café grand + gaufre topping</div><div class="price-s">10,90€</div></div>
+      <div class="card"><div class="chalo" style="--c:rgba(34,197,94,.4)"></div><div class="pic"><img src="images/combo/combo-tea-time.png"></div><div class="name">Tea Time</div><div class="flav">Thé grand + gaufre topping</div><div class="price-s">10,90€</div></div>
+    </div>
+    <div class="foot"><b>La gaufre healthy en bonus gourmand</b> 🧇</div>
+  </section>
+
+  <section class="slide" data-n="14">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">🏋️</span> Sportifs</div><div class="pricebar"><span class="p">dès 5,90€</span></div></div>
+    <div class="herolayout">
+      <div class="herobig" style="--hc:rgba(56,189,248,.55)"><div class="htag">⚡ Performance</div><img src="images/sport/electro-lyte.png"><div class="hname">Electro'lyte</div><div class="hdesc">Boisson glucidique &amp; électrolytique — l'énergie pour tenir l'effort. +extra Créatine.</div></div>
+      <div class="minilist" style="columns:1">
+        <div class="mi"><b>Electro'lyte</b><span>Start 6,90€ · Boost 8,90€</span></div>
+        <div class="mi"><b>Post Workout</b><span>5,90€ · 25g protéines · 6,3mg fer · BCAA</span></div>
+        <div class="mi" style="margin-top:2vh"><b>➕ Extra Créatine</b><span>+2,50€ · force &amp; récupération</span></div>
+      </div>
+    </div>
+    <div class="foot"><b>Avant ou après l'effort</b> — récupère &amp; performe</div>
+  </section>
+
+  <section class="slide" data-n="15">
+    <div class="top"><div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES &amp; DRINKS</div></div></div>
+      <div class="title"><span class="accent">🧇</span> Gaufre healthy</div><div class="pricebar"><span class="p">6,90€</span></div></div>
+    <div class="herolayout">
+      <div class="herobig" style="--hc:rgba(245,158,11,.55)"><div class="htag">⭐ Le bonus gourmand</div><img src="images/waffle/gaufre-healthy.png"><div class="hname">Gaufre healthy</div><div class="hdesc">Gourmande &amp; healthy — croustillante, avec le topping de ton choix.</div></div>
+      <div class="minilist" style="columns:1">
+        <div class="mi"><b>🍯 Miel</b></div>
+        <div class="mi"><b>🍫 Chocolat</b></div>
+        <div class="mi"><b>🤍 Chocolat blanc</b></div>
+        <div class="mi"><b>🍮 Caramel</b></div>
+        <div class="mi"><b>🧂 Caramel beurre salé</b></div>
+        <div class="mi"><b>🍪 Spéculoos</b></div>
+      </div>
+    </div>
+    <div class="foot"><b>Topping au choix</b> — parfaite en combo avec ta boisson 🧇</div>
+  </section>
+
+  <script>
+    var SMOO_LIST = [['Fraise Bonbon','Vanille · Fraise'],['Bueno','Chocolat · Noisette · topping gaufrette'],['Speculoos','Chocolat · Spéculoos'],['Banana Split','Banane · Caramel · Cerise'],['Banana Noisette','Banane · Caramel · Noisette'],['Cappuccino','Café latte · Chocolat'],['Casse Noisette','Café latte · Noisette'],['Pim\'s','Chocolat · Framboise'],['Tarte à la pomme','Vanille · Pomme'],['Pina Colada','Vanille · Ananas · Coco'],['Cookies','Cookies cream · Chocolat blanc'],['Tropical','Vanille · Fraise · Banane']];
+    var SMOO_HEROES = {
+      8: { img:'snikers', name:'Snickers', tag:'⭐ Le best-seller', hc:'rgba(180,120,60,.55)', desc:'Chocolat & cacahuètes — le plaisir d\'une barre choco, version protéinée et saine.' },
+      9: { img:'full-oreo', name:'Full Oréo', tag:"⭐ L'iconique", hc:'rgba(120,120,140,.5)', desc:'Cookies cream & Oréo — l\'incontournable, crémeux à souhait, 24g de protéines.' },
+      10:{ img:'mm', name:'M&M\'s', tag:'⭐ Le fun', hc:'rgba(245,158,11,.55)', desc:'Chocolat, caramel & topping M&M\'s — le plus gourmand et coloré, 24g de protéines.' }
+    };
+    function brandTop(){ return '<div class="brand"><img class="logo-img" src="icon-512.png"><div><div class="bname">LA BASE</div><div class="btag">SHAKES & DRINKS</div></div></div>'; }
+    function priceTop(){ return '<div class="pricebar"><span class="p">Start 6,90€ · Boost 8,90€</span></div>'; }
+    function listHtml(arr){ return arr.map(function(x){ return '<div class="mi"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'; }).join(''); }
+    var n = new URLSearchParams(location.search).get('slide') || '8';
+    var el = document.querySelector('.slide[data-n="' + n + '"]');
+    if (el) {
+      if (SMOO_HEROES[n]) { var h=SMOO_HEROES[n]; el.innerHTML = '<div class="top">'+brandTop()+'<div class="title"><span class="accent">🥤</span> Smoothies nutritionnels<small>24g protéines · 25 vitamines & minéraux · 250 cal</small></div>'+priceTop()+'</div><div class="herolayout"><div class="herobig" style="--hc:'+h.hc+'"><div class="htag">'+h.tag+'</div><img src="images/shake/'+h.img+'.png"><div class="hname">'+h.name+'</div><div class="hdesc">'+h.desc+'</div></div><div class="minilist">'+listHtml(SMOO_LIST)+'</div></div><div class="foot"><b>Sans lactose · Sans gluten</b> — Déjeuner · Collation · Post-Workout</div>'; }
+      el.classList.add('on');
+    }
+  </script>
+</body>
+</html>
