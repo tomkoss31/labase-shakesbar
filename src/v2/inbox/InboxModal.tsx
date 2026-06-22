@@ -170,6 +170,9 @@ interface InboxModalProps {
 export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, onMarkAllRead }: InboxModalProps) {
   if (!open) return null;
 
+  // Une fois lu, le message disparaît de la boîte → on n'affiche que le non-lu.
+  const visibleItems = items.filter((i) => !i.read);
+
   return (
     <div
       onClick={onClose}
@@ -239,7 +242,7 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
           </button>
         )}
 
-        {items.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: palette.textDim }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: palette.text }}>Aucun message pour l'instant</div>
@@ -249,7 +252,7 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {items.map((b) => {
+            {visibleItems.map((b) => {
               const card = (
                 <div
                   style={{
