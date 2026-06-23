@@ -74,6 +74,100 @@ async function notifyAdminsNewOrder(admin: any, title: string, body: string): Pr
 
 const ALLOWED_STATUSES = ['paid', 'preparing', 'ready', 'cancelled', 'refunded'];
 
+// Notifie le CLIENT (push + boîte de réception) quand SA commande passe en
+// préparation / prête — façon Uber Eats. Best-effort : aucune erreur ici ne
+// doit empêcher la mise à jour du statut.
+async function notifyCustomerStatus(
+  admin: any,
+  order: { user_id?: string | null; customer_name?: string | null } | null,
+  status: string,
+): Promise<void> {
+  const userId = order?.user_id;
+  if (!userId) return; // commande non liée à un compte → pas de destinataire
+
+  const MESSAGES: Record<
+    string,
+    { emoji: string; title: string; body: (name: string) => string; urgent: boolean }
+  > = {
+    preparing: {
+      emoji: '👨‍🍳',
+      title: 'Ta commande est en préparation',
+      body: (n) =>
+        `${n ? n + ', on' : 'On'} prépare ta commande 🥤 On te prévient dès qu'elle est prête !`,
+      urgent: false,
+    },
+    ready: {
+      emoji: '✅',
+      title: 'Ta commande est prête !',
+      body: (n) => `${n ? n + ', ta' : 'Ta'} commande t'attend au comptoir. À tout de suite 🎉`,
+      urgent: true,
+    },
+  };
+  const msg = MESSAGES[status];
+  if (!msg) return; // on ne notifie que preparing / ready
+
+  const firstName = (order?.customer_name || '').trim().split(' ')[0] || '';
+  const title = `${msg.emoji} ${msg.title}`;
+  const body = msg.body(firstName);
+
+  // 1) Archive dans la boîte de réception (persistant, multi-appareils) — même
+  //    si la push échoue ou si le client n'a pas activé les notifications.
+  try {
+    await admin.from('user_notifications').insert({
+      user_id: userId,
+      title,
+      body,
+      url: '/',
+      emoji: msg.emoji,
+      kind: 'order',
+    });
+  } catch {
+    /* best-effort */
+  }
+
+  // 2) Push web (si VAPID configuré + abonnements existants)
+  const vapidPublic = process.env.VITE_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:tom@labase-nutrition.com';
+  if (!vapidPublic || !vapidPrivate) return;
+
+  const { data: subs } = await admin
+    .from('push_subscriptions')
+    .select('endpoint, p256dh_key, auth_key')
+    .eq('user_id', userId);
+  if (!subs || subs.length === 0) return;
+
+  const webpushMod = await import('web-push');
+  const webpush: any = (webpushMod as any).default ?? webpushMod;
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  const payload = JSON.stringify({
+    title,
+    body,
+    url: '/',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag: 'labase-order-status',
+    requireInteraction: msg.urgent,
+  });
+
+  const expired: string[] = [];
+  await Promise.all(
+    subs.map(async (sub: any) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh_key, auth: sub.auth_key } },
+          payload,
+        );
+      } catch (err: any) {
+        if (err?.statusCode === 404 || err?.statusCode === 410) expired.push(sub.endpoint);
+      }
+    }),
+  );
+  if (expired.length > 0) {
+    await admin.from('push_subscriptions').delete().in('endpoint', expired);
+  }
+}
+
 async function readBody(req: any): Promise<any> {
   if (typeof req.body === 'object' && req.body !== null) return req.body;
   if (typeof req.body === 'string') {
@@ -637,6 +731,13 @@ export default async function handler(req: any, res: any) {
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });
+    // Notifie le client (push + boîte de réception) sur les transitions
+    // visibles (préparation / prête). Best-effort, ne bloque pas la réponse.
+    try {
+      await notifyCustomerStatus(clients.admin, data, status);
+    } catch {
+      /* noop : la notif client ne doit jamais casser la mise à jour de statut */
+    }
     return res.status(200).json({ ok: true, order: data });
   }
 
