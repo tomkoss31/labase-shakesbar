@@ -263,6 +263,13 @@ export default async function handler(req: any, res: any) {
       Number.isFinite(Number(bodyPayload?.xpToSpend)) && Number(bodyPayload.xpToSpend) > 0
         ? Math.floor(Number(bodyPayload.xpToSpend) / 100) * 100 // arrondi à 100
         : 0;
+    // Heure de retrait choisie par le client (ex. "12:15"). On la conserve pour
+    // l'afficher dans la console comptoir ET sur Square (sinon on ne sait pas
+    // pour quand préparer la commande).
+    const pickupTime =
+      typeof bodyPayload?.pickupTime === 'string' && bodyPayload.pickupTime.trim().length > 0
+        ? bodyPayload.pickupTime.trim().slice(0, 10)
+        : null;
 
     // Application du reward code roue (discount_percent uniquement pour l'instant)
     // - Vérifie en DB que le code existe, n'est pas utilisé, n'est pas expiré
@@ -467,8 +474,11 @@ export default async function handler(req: any, res: any) {
     if (userEmail) {
       squarePayload.pre_populated_data = { buyer_email: userEmail };
     }
-    if (customerName) {
-      squarePayload.order.metadata = { customer_name: customerName };
+    const orderMetadata: Record<string, string> = {};
+    if (customerName) orderMetadata.customer_name = customerName;
+    if (pickupTime) orderMetadata.pickup_time = pickupTime;
+    if (Object.keys(orderMetadata).length > 0) {
+      squarePayload.order.metadata = orderMetadata;
     }
 
     const squareResponse = await fetch(
@@ -505,7 +515,10 @@ export default async function handler(req: any, res: any) {
       0,
     );
     const squareOrderId = data?.payment_link?.order_id;
-    if (comboCount > 0 && squareOrderId) {
+    // On pré-crée la ligne de commande dès la création du lien pour y stocker
+    // l'heure de retrait (+ le nb de combos). Le webhook Square (au paiement)
+    // ne renvoie PAS ces colonnes, donc elles survivent à son upsert.
+    if (squareOrderId && (comboCount > 0 || pickupTime)) {
       try {
         const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -514,15 +527,15 @@ export default async function handler(req: any, res: any) {
           const admin = createClient(supabaseUrl, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
+          const orderRow: Record<string, any> = { square_order_id: squareOrderId };
+          if (comboCount > 0) orderRow.combo_count = comboCount;
+          if (pickupTime) orderRow.pickup_time = pickupTime;
           await admin
             .from('orders')
-            .upsert(
-              { square_order_id: squareOrderId, combo_count: comboCount },
-              { onConflict: 'square_order_id' },
-            );
+            .upsert(orderRow, { onConflict: 'square_order_id' });
         }
       } catch (err: any) {
-        console.warn('[create-payment-link] combo_count persist failed:', err?.message);
+        console.warn('[create-payment-link] order pre-persist failed:', err?.message);
       }
     }
 

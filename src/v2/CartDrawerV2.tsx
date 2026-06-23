@@ -669,10 +669,15 @@ export function CartDrawerV2({
 
           {/* 🎁 Offre-toi un extra avec tes XP (catalogue, pas de réduction cash) */}
           {!empty && isAuthed && onClaimGift && (() => {
+            // ⚠️ Coûts STRICTEMENT alignés sur le backend (api/orders.ts REWARDS).
+            // Le débit réel se fait côté serveur via l'id : si les coûts diffèrent,
+            // le client voit un faux prix et le claim échoue en silence.
             const GIFTS = [
-              { id: 'boost', title: 'Sirop / boost offert', emoji: '🍯', cost: 100, sub: 'Une dose de sirop parfumé ou un boost' },
-              { id: 'topping', title: 'Topping offert', emoji: '✨', cost: 250, sub: 'Protéine, créatine, beurre de cacahuète…' },
-              { id: 'boisson', title: 'Une boisson au choix', emoji: '🥤', cost: 800, sub: 'Smoothie ou shake offert' },
+              { id: 'boost', title: 'Sirop / boost offert', emoji: '🍯', cost: 150, sub: 'Une dose de sirop parfumé ou un boost' },
+              { id: 'topping', title: 'Topping offert', emoji: '✨', cost: 300, sub: 'Protéine, créatine, beurre de cacahuète…' },
+              { id: 'boisson', title: 'Une boisson au choix', emoji: '🥤', cost: 1500, sub: 'Smoothie ou shake offert' },
+              { id: 'combo-gaufre', title: 'Boisson + gaufre healthy', emoji: '🧇', cost: 2200, sub: 'Le combo gourmand offert' },
+              { id: 'cadeau-mois', title: 'Cadeau du mois', emoji: '🎁', cost: 3800, sub: 'La récompense premium' },
             ];
             const affordable = GIFTS.filter((g) => userXp >= g.cost);
             if (claimedGift) {
