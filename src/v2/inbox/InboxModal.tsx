@@ -165,9 +165,23 @@ interface InboxModalProps {
   unread: number;
   onMarkRead: (item: InboxItem) => void;
   onMarkAllRead: () => void;
+  // Affiche un message épinglé invitant à activer les notifications, tant
+  // qu'elles ne le sont pas. Au clic → onEnableNotifs (ouvre la fiche compte).
+  showEnableNotifs?: boolean;
+  onEnableNotifs?: () => void;
 }
 
-export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, onMarkAllRead }: InboxModalProps) {
+export function InboxModal({
+  palette,
+  open,
+  onClose,
+  items,
+  unread,
+  onMarkRead,
+  onMarkAllRead,
+  showEnableNotifs = false,
+  onEnableNotifs,
+}: InboxModalProps) {
   if (!open) return null;
 
   // Une fois lu, le message disparaît de la boîte → on n'affiche que le non-lu.
@@ -242,7 +256,40 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
           </button>
         )}
 
-        {visibleItems.length === 0 ? (
+        {/* Message épinglé : activer les notifications (tant que pas activées) */}
+        {showEnableNotifs && (
+          <button
+            onClick={onEnableNotifs}
+            style={{
+              width: '100%',
+              textAlign: 'left',
+              display: 'flex',
+              gap: 13,
+              alignItems: 'center',
+              padding: 14,
+              marginBottom: 10,
+              borderRadius: 16,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              color: palette.text,
+              background: `linear-gradient(135deg, ${palette.accent}22, ${palette.primary}14)`,
+              border: `1.5px solid ${palette.accent}99`,
+            }}
+          >
+            <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>🔔</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 14.5, display: 'block' }}>
+                Active les notifications
+              </span>
+              <span style={{ fontSize: 12, color: palette.textDim, lineHeight: 1.4, display: 'block', marginTop: 2 }}>
+                Sois prévenu quand ta commande est prête 🥤 et reçois les offres. Touche ici pour activer.
+              </span>
+            </span>
+            <span style={{ fontSize: 18, color: palette.accent, flexShrink: 0 }}>→</span>
+          </button>
+        )}
+
+        {visibleItems.length === 0 && !showEnableNotifs ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: palette.textDim }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: palette.text }}>Aucun message pour l'instant</div>
@@ -250,7 +297,7 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
               Active les notifications dans ton profil pour ne rien rater des nouveautés et offres ✨
             </div>
           </div>
-        ) : (
+        ) : visibleItems.length === 0 ? null : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {visibleItems.map((b) => {
               const card = (

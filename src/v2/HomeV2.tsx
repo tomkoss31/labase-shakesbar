@@ -23,6 +23,7 @@ import { RewardsModal } from './rewards/RewardsModal';
 import { MyCodeModal } from './auth/MyCodeModal';
 import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
+import { usePushNotifications } from './notifications/usePushNotifications';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -91,8 +92,16 @@ export function HomeV2({
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingInstall, setOnboardingInstall] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  // Surbrillance du bouton notifs dans la fiche compte (quand on y arrive via
+  // le message « Active les notifications » de la boîte de réception).
+  const [notifHighlight, setNotifHighlight] = useState(false);
+  // Instance push UNIQUE, partagée avec ProfileSheet → l'état reste synchro.
+  const push = usePushNotifications();
   const auth = useAuth();
   const isAuthed = auth.status === 'authenticated';
+  // Invite à activer les notifs : seulement si connecté, supporté et pas encore
+  // abonné. Reste affichée tant que ce n'est pas activé.
+  const showEnableNotifs = isAuthed && push.supported && !push.subscribed && !push.loading;
   const inbox = useInbox(auth.session?.access_token ?? null);
 
   // Ouvre la boîte de réception si on arrive via une notification push (?inbox=1)
@@ -346,7 +355,7 @@ export function HomeV2({
         onCart={onOpenCart}
         onProfile={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
         onNotifications={openInbox}
-        notifBadge={inbox.unread}
+        notifBadge={inbox.unread + (showEnableNotifs ? 1 : 0)}
         activeTab={headerTab}
         onTabChange={handleHeaderTab}
         isAuthed={isAuthed}
@@ -793,12 +802,17 @@ export function HomeV2({
       <ProfileSheet
         palette={palette}
         open={profileOpen && isAuthed}
-        onClose={() => setProfileOpen(false)}
+        onClose={() => {
+          setProfileOpen(false);
+          setNotifHighlight(false);
+        }}
         profile={auth.profile}
         email={auth.email}
         userId={auth.session?.user?.id ?? null}
         onUpdateProfile={auth.updateProfile}
         onSignOut={auth.signOut}
+        push={push}
+        highlightNotifications={notifHighlight}
         onShowOnboarding={() => {
           setProfileOpen(false);
           setOnboardingOpen(true);
@@ -847,6 +861,12 @@ export function HomeV2({
         unread={inbox.unread}
         onMarkRead={inbox.markRead}
         onMarkAllRead={inbox.markAllRead}
+        showEnableNotifs={showEnableNotifs}
+        onEnableNotifs={() => {
+          setInboxOpen(false);
+          setNotifHighlight(true);
+          setProfileOpen(true);
+        }}
       />
     </div>
   );

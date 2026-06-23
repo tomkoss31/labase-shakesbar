@@ -1,5 +1,5 @@
 // Bottom sheet du profil — édition prénom/anniv + statut + déconnexion
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
@@ -9,6 +9,9 @@ import { WheelModal } from '../wheel/WheelModal';
 import { getWheelCooldown } from '../wheel/segments';
 import { useUserOrders } from '../orders/useUserOrders';
 import { MyCodeModal } from './MyCodeModal';
+
+// État push partagé (instance unique tenue par HomeV2) — voir usePushNotifications.
+type PushState = ReturnType<typeof usePushNotifications>;
 
 // Liste des emails admin (séparés par virgule dans VITE_ADMIN_EMAIL).
 // Ex : "tomkoss31@gmail.com,milmel55@gmail.com"
@@ -32,6 +35,10 @@ interface ProfileSheetProps {
   onUpdateProfile: (patch: { first_name?: string; birthday?: string }) => Promise<{ ok: boolean; error?: string }>;
   onSignOut: () => Promise<void>;
   onShowOnboarding?: () => void;
+  // Instance push partagée (depuis HomeV2) — évite un 2e état désynchronisé.
+  push: PushState;
+  // Quand true à l'ouverture : on défile jusqu'au bouton notifs + surbrillance.
+  highlightNotifications?: boolean;
 }
 
 function fmtEuro(cents: number): string {
@@ -48,6 +55,8 @@ export function ProfileSheet({
   onUpdateProfile,
   onSignOut,
   onShowOnboarding,
+  push,
+  highlightNotifications = false,
 }: ProfileSheetProps) {
   const [firstName, setFirstName] = useState(profile?.first_name ?? '');
   const [birthday, setBirthday] = useState(profile?.birthday ?? '');
@@ -57,7 +66,22 @@ export function ProfileSheet({
   const [signingOut, setSigningOut] = useState(false);
   const [wheelOpen, setWheelOpen] = useState(false);
   const [myCodeOpen, setMyCodeOpen] = useState(false);
-  const push = usePushNotifications();
+  // Surbrillance du bouton notifs quand on arrive depuis le message « Active
+  // les notifications » de la boîte de réception.
+  const notifBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [notifGlow, setNotifGlow] = useState(false);
+  useEffect(() => {
+    if (!open || !highlightNotifications || !push.supported || push.subscribed) return;
+    setNotifGlow(true);
+    const scrollTimer = setTimeout(() => {
+      notifBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+    const offTimer = setTimeout(() => setNotifGlow(false), 4200);
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(offTimer);
+    };
+  }, [open, highlightNotifications, push.supported, push.subscribed]);
   const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
   // Admin : roue dispo en permanence (test illimité des cadeaux)
   const isAdmin = isAdminEmail(email);
@@ -576,12 +600,21 @@ export function ProfileSheet({
 
         {/* Push notifications */}
         {push.supported && (
+          <>
+          {notifGlow && (
+            <style>{`@keyframes notifGlowPulse {
+              0%,100% { box-shadow: 0 0 0 0 ${palette.accent}00; }
+              50% { box-shadow: 0 0 0 5px ${palette.accent}66; }
+            }`}</style>
+          )}
           <button
+            ref={notifBtnRef}
             onClick={async () => {
               if (push.subscribed) {
                 const res = await push.disable();
                 if (!res.ok) window.alert('Impossible de désactiver les notifications.');
               } else {
+                setNotifGlow(false);
                 const res = await push.enable();
                 if (!res.ok) {
                   window.alert(
@@ -596,8 +629,8 @@ export function ProfileSheet({
               width: '100%',
               marginBottom: 12,
               padding: '14px 16px',
-              background: push.subscribed ? palette.primary + '20' : palette.bg,
-              border: `1px solid ${push.subscribed ? palette.primary : palette.line}`,
+              background: push.subscribed ? palette.primary + '20' : notifGlow ? palette.accent + '1f' : palette.bg,
+              border: `${notifGlow ? 2 : 1}px solid ${push.subscribed ? palette.primary : notifGlow ? palette.accent : palette.line}`,
               borderRadius: 14,
               color: palette.text,
               fontSize: 13,
@@ -609,6 +642,7 @@ export function ProfileSheet({
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 10,
+              animation: notifGlow ? 'notifGlowPulse 1.1s ease-in-out infinite' : undefined,
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -647,6 +681,7 @@ export function ProfileSheet({
               />
             </span>
           </button>
+          </>
         )}
 
         {push.error && (
