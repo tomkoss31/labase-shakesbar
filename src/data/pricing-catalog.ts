@@ -50,6 +50,8 @@ const productPriceEntries: Array<[string, number]> = [
   ['Banana Noisette', 890],
   ['Cookies', 890],
   ['Tropical', 890],
+  // Nouveautés 2026 smoothies (lancement échelonné)
+  ['Dubaï', 890], ['Bali', 890], ['Tiramisu', 890], ['Ruby', 890], ['Ube', 890], ['Zen', 890],
   // Boissons enfants (500 = 5€, sans énergisant)
   ['Bulle de Fée', 500],
   ['Spiderman', 500],

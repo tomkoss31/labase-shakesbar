@@ -491,6 +491,11 @@ export default async function handler(req: any, res: any) {
     const shortCode = String(Math.floor(1000 + Math.random() * 9000));
     const orderId = randomUUID();
 
+    const comboCount = cart.reduce(
+      (n, it) => n + (it?.categoryName === 'Formule combo' ? Number(it.quantity || 1) : 0),
+      0,
+    );
+
     const { error: orderError } = await clients.admin.from('orders').insert({
       id: orderId,
       user_id: userId,
@@ -498,6 +503,7 @@ export default async function handler(req: any, res: any) {
       status: 'pending_cash',
       payment_method: 'cash',
       total_cents: totalCents,
+      combo_count: comboCount,
       customer_name: customerName,
       pickup_time: pickupTime,
       created_at: new Date().toISOString(),
@@ -543,7 +549,7 @@ export default async function handler(req: any, res: any) {
 
     const { data: order, error: orderError } = await clients.admin
       .from('orders')
-      .select('id, user_id, status, total_cents')
+      .select('id, user_id, status, total_cents, combo_count')
       .eq('id', orderId)
       .single();
 
@@ -558,7 +564,7 @@ export default async function handler(req: any, res: any) {
     if (order.user_id) {
       const { data: profile } = await clients.admin
         .from('profiles')
-        .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded')
+        .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
         .eq('id', order.user_id)
         .single();
       if (profile) {
@@ -566,7 +572,12 @@ export default async function handler(req: any, res: any) {
         const eurosSpent = Math.floor(order.total_cents / 100);
         // Mardi Double XP (cohérent avec le webhook Square carte)
         const isTuesday = new Date().getUTCDay() === 2;
-        const xpGained = eurosSpent * 10 * (isTuesday ? 2 : 1) + 50 + (isFirstOrder ? 200 : 0);
+        // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant
+        // (cohérent avec square-webhook.ts et credit-manual ; cumulable avec mardi)
+        const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
+        // Bonus combo +25 XP / combo (posé sur la commande par create-pending)
+        const comboBonus = ((order as any).combo_count ?? 0) * 25;
+        const xpGained = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1) + 50 + (isFirstOrder ? 200 : 0) + comboBonus;
         const newTotalSpent = profile.total_spent_cents + order.total_cents;
         const newTotalOrders = profile.total_orders + 1;
         const newXp = profile.xp + xpGained;
@@ -645,11 +656,11 @@ export default async function handler(req: any, res: any) {
     const userId = userData.user.id;
 
     const REWARDS: Record<string, { cost: number; label: string }> = {
-      boost: { cost: 100, label: 'Sirop / boost offert' },
-      topping: { cost: 250, label: 'Topping offert' },
-      boisson: { cost: 800, label: 'Une boisson au choix' },
-      'combo-gaufre': { cost: 1500, label: 'Boisson + gaufre healthy' },
-      'cadeau-mois': { cost: 2500, label: 'Cadeau du mois' },
+      boost: { cost: 150, label: 'Sirop / boost offert' },
+      topping: { cost: 300, label: 'Topping offert' },
+      boisson: { cost: 1500, label: 'Une boisson au choix' },
+      'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy' },
+      'cadeau-mois': { cost: 3800, label: 'Cadeau du mois' },
     };
     const body = await readBody(req);
     const rewardId = typeof body?.rewardId === 'string' ? body.rewardId : null;

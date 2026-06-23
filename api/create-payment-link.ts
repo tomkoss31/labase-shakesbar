@@ -41,6 +41,8 @@ const PRODUCT_PRICE_ENTRIES: Array<[string, number]> = [
   ['Fraise bonbon', 890], ["Pim's", 890], ['Tarte à la pomme', 890],
   ['Snickers', 890], ['Full Oréo', 890], ['Speculoos', 890],
   ['Banana Split', 890], ['Banana Noisette', 890], ['Cookies', 890], ['Tropical', 890],
+  // Nouveautés 2026 (lancement échelonné)
+  ['Dubaï', 890], ['Bali', 890], ['Tiramisu', 890], ['Ruby', 890], ['Ube', 890], ['Zen', 890],
   // Enfants (5€, sans énergisant)
   ['Bulle de Fée', 500], ['Spiderman', 500], ['Stitch', 500],
   ['Licorne', 500], ['Hulk', 500], ['Tropicool', 500], ['Jungle Kid', 500],
@@ -493,6 +495,35 @@ export default async function handler(req: any, res: any) {
     if (!squareResponse.ok) {
       console.error('Square API error', data);
       return res.status(500).json({ error: 'Erreur Square', details: data });
+    }
+
+    // Persiste le nb de combos sur la commande pour créditer +25 XP/combo à
+    // l'encaissement (le webhook CB ne voit pas le panier). Best-effort.
+    const comboCount = cart.reduce(
+      (n: number, it: any) =>
+        n + (it?.categoryName === 'Formule combo' ? Number(it.quantity || 1) : 0),
+      0,
+    );
+    const squareOrderId = data?.payment_link?.order_id;
+    if (comboCount > 0 && squareOrderId) {
+      try {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (supabaseUrl && serviceKey) {
+          const { createClient } = await import('@supabase/supabase-js');
+          const admin = createClient(supabaseUrl, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          await admin
+            .from('orders')
+            .upsert(
+              { square_order_id: squareOrderId, combo_count: comboCount },
+              { onConflict: 'square_order_id' },
+            );
+        }
+      } catch (err: any) {
+        console.warn('[create-payment-link] combo_count persist failed:', err?.message);
+      }
     }
 
     // Débiter les XP du profil (best-effort, non-bloquant)

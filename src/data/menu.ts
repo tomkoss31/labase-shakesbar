@@ -28,6 +28,7 @@ export type Product = {
   image?: string;
   basePriceCents?: number;
   options?: ProductOption[];
+  available?: boolean; // false = préparé mais MASQUÉ (lancement échelonné). Défaut = visible.
 };
 
 export type Category = {
@@ -351,6 +352,61 @@ export const categories: Category[] = [
         basePriceCents: 890,
         image: '/images/shake/tropical.png',
       },
+      // ─── NOUVEAUTÉS 2026 (lancement échelonné) — available:false = masquées ───
+      {
+        name: 'Dubaï',
+        description: "L'iconique chocolat-pistache façon Dubaï, croquant gaufrette.",
+        flavors: 'Chocolat • Pistache • Gaufrette • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/dubai.png',
+      },
+      {
+        name: 'Bali',
+        description: 'Mangue & coco sur base vanille, évasion tropicale.',
+        flavors: 'Mangue • Coco • Vanille • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/bali.png',
+      },
+      {
+        name: 'Tiramisu',
+        description: 'Café, spéculoos & vanille — le dessert italien en smoothie.',
+        flavors: 'Café • Spéculoos • Vanille • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/tiramisu.png',
+      },
+      {
+        name: 'Ruby',
+        description: 'Chocolat Ruby & fraise-framboise, rose gourmand et fruité.',
+        flavors: 'Chocolat Ruby • Fraise • Framboise • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/ruby.png',
+      },
+      {
+        name: 'Ube',
+        description: 'Igname pourpre & coco, douceur vanillée, violet naturel.',
+        flavors: 'Ube • Coco • Vanille • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/ube.png',
+      },
+      {
+        name: 'Zen',
+        description: 'Matcha & chocolat blanc, doux et végétal.',
+        flavors: 'Matcha • Chocolat blanc • Vanille • 24g protéines • 250 cal',
+        badge: 'Nouveau',
+        available: false,
+        basePriceCents: 890,
+        image: '/images/shake/zen.png',
+      },
     ],
   },
 
@@ -583,54 +639,6 @@ export const categories: Category[] = [
           { label: 'Boost 950ml — 8,90€', priceCents: 890 },
         ],
         image: '/images/sante/di-gest.png',
-      },
-    ],
-  },
-
-  // 🧒 BOISSONS ENFANTS (5€) — 0 sucre / 0 calorie
-  {
-    id: 'kids',
-    name: 'Boissons enfants',
-    icon: Sparkles,
-    price: '5€',
-    accent: 'from-pink-400 via-fuchsia-400 to-violet-400',
-    description: '0 sucre • 0 calorie • naturellement parfumées',
-    items: [
-      {
-        name: 'Bulle de Fée',
-        description: 'Une bulle douce et fruitée.',
-        flavors: 'Pomme • Fruit du dragon',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Spiderman',
-        description: 'Fruits rouges qui font sourire.',
-        flavors: 'Fruits rouges',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Stitch',
-        description: 'Limonade non pétillante, passion-citron.',
-        flavors: 'Passion • Limonade (non pétillant)',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Licorne',
-        description: 'Le mix coloré qui fait rêver.',
-        flavors: 'Myrtille • Fraise • Raisin',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Hulk',
-        description: 'Vert vif et acidulé.',
-        flavors: 'Pomme verte',
-        basePriceCents: 500,
-      },
-      {
-        name: 'Tropicool',
-        description: 'Esprit vacances pour les petits.',
-        flavors: 'Melon • Ananas',
-        basePriceCents: 500,
       },
     ],
   },

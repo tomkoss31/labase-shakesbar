@@ -196,7 +196,9 @@ export default async function handler(req: any, res: any) {
       const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1);
       const xpFromOrder = 50;
       const xpFirstOrderBonus = isFirstOrder ? 200 : 0;
-      const xpGained = xpFromEuros + xpFromOrder + xpFirstOrderBonus;
+      // Bonus combo +25 XP / combo (posé sur la commande par create-payment-link)
+      const comboBonus = ((order as any).combo_count ?? 0) * 25;
+      const xpGained = xpFromEuros + xpFromOrder + xpFirstOrderBonus + comboBonus;
 
       const newTotalSpent = profile.total_spent_cents + totalCents;
       const newTotalOrders = profile.total_orders + 1;
