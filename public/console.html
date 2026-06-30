@@ -544,6 +544,19 @@
     </div>
 
     <div class="card">
+      <label>⚡ Notifs express (1 clic)</label>
+      <div class="hint" style="margin-top:4px;margin-bottom:10px;">Clique une notif prête → vérifie l'aperçu plus bas → « Envoyer ». Pas besoin de tout retaper.</div>
+      <style>.preset-btn{padding:9px 14px;border-radius:999px;border:1px solid rgba(245,158,11,.45);background:#04100f;color:#f5b94a;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}.preset-btn:hover{background:rgba(245,158,11,.14);}</style>
+      <div id="push-presets" style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="preset-btn" data-title="⚡ Aujourd'hui : Double XP !" data-body="Tes points comptent DOUBLE aujourd'hui 🔥 Profites-en, passe vite à La Base !" data-url="/">⚡ Double XP</button>
+        <button type="button" class="preset-btn" data-title="🆕 6 nouveaux smoothies sont là !" data-body="Dubaï · Bali · Tiramisu · Ruby · Ube · Zen 🤤 Commande sur l'app, prêt en 5-10 min !" data-url="/">🆕 Nouveautés</button>
+        <button type="button" class="preset-btn" data-title="🎰 Tente la Roue cadeaux !" data-body="Un cadeau t'attend 🎁 Tourne la roue et récupère ta surprise à La Base !" data-url="/jeu">🎰 Roue</button>
+        <button type="button" class="preset-btn" data-title="🥵 Coup de chaud ?" data-body="Viens te rafraîchir 🧊 Smoothies & boissons bien glacées. À La Base, Verdun !" data-url="/">🧊 Fraîcheur</button>
+        <button type="button" class="preset-btn" data-title="🥤 Le smoothie du jour" data-body="Viens découvrir notre sélection du moment 😍 Commande sur l'app !" data-url="/">🥤 Du jour</button>
+      </div>
+    </div>
+
+    <div class="card">
       <label>Titre</label>
       <input type="text" id="push-title" placeholder="Nouveau shake dispo 🍓" maxlength="60" />
 
@@ -1326,6 +1339,17 @@ function updatePreview() {
 }
 $('push-title').addEventListener('input', updatePreview);
 $('push-body').addEventListener('input', updatePreview);
+
+// Notifs express : presets en 1 clic → pré-remplit, l'admin n'a plus qu'à Envoyer
+document.querySelectorAll('.preset-btn').forEach((b) => {
+  b.addEventListener('click', () => {
+    $('push-title').value = b.dataset.title || '';
+    $('push-body').value = b.dataset.body || '';
+    $('push-url').value = b.dataset.url || '/';
+    updatePreview();
+    $('push-send').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
 
 // Sélection du segment cible
 let pushSegment = 'all';
