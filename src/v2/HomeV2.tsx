@@ -23,6 +23,8 @@ import { RewardsModal } from './rewards/RewardsModal';
 import { MyCodeModal } from './auth/MyCodeModal';
 import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
+import { usePushNotifications } from './notifications/usePushNotifications';
+import { PushActivationModal } from './PushActivationModal';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -94,6 +96,8 @@ export function HomeV2({
   const auth = useAuth();
   const isAuthed = auth.status === 'authenticated';
   const inbox = useInbox(auth.session?.access_token ?? null);
+  const push = usePushNotifications();
+  const [pushModalOpen, setPushModalOpen] = useState(false);
 
   // Ouvre la boîte de réception si on arrive via une notification push (?inbox=1)
   React.useEffect(() => {
@@ -130,6 +134,26 @@ export function HomeV2({
       return () => window.clearTimeout(t);
     }
   }, []);
+
+  // Pop-up d'activation des notifications : s'affiche à CHAQUE session tant que
+  // l'utilisateur n'a pas activé les push (règle : activation "obligatoire").
+  // 1×/session (sessionStorage), jamais en même temps que l'onboarding, et
+  // même sans compte (un abonnement anonyme reçoit les annonces « à tous »).
+  React.useEffect(() => {
+    if (push.loading || push.subscribed) return;
+    if (onboardingOpen) return;
+    try {
+      if (sessionStorage.getItem('labase_push_prompt') === '1') return;
+    } catch {}
+    const t = window.setTimeout(() => {
+      setPushModalOpen(true);
+      try {
+        sessionStorage.setItem('labase_push_prompt', '1');
+      } catch {}
+    }, 1600);
+    return () => window.clearTimeout(t);
+  }, [push.loading, push.subscribed, onboardingOpen]);
+
   const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);
@@ -847,6 +871,19 @@ export function HomeV2({
         unread={inbox.unread}
         onMarkRead={inbox.markRead}
         onMarkAllRead={inbox.markAllRead}
+      />
+
+      {/* Pop-up d'activation des notifications (à chaque session tant que non activé) */}
+      <PushActivationModal
+        palette={palette}
+        open={pushModalOpen}
+        onClose={() => setPushModalOpen(false)}
+        permission={push.permission}
+        supported={push.supported}
+        loading={push.loading}
+        onEnable={push.enable}
+        canInstall={canInstall}
+        onInstall={onInstall}
       />
     </div>
   );
