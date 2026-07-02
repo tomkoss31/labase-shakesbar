@@ -2,6 +2,12 @@
 // GET  ?action=lookup&id=<uuid> → récupère un profil + rewards actifs
 // POST ?action=credit-manual    → crédite XP après paiement caisse
 
+// Imports STATIQUES des helpers locaux : un import() dynamique sans extension
+// (./_lib/email) échoue à l'exécution sur Vercel (ERR_MODULE_NOT_FOUND). En
+// statique, le bundler trace et embarque bien les fichiers dans la fonction.
+import { sendPushToUser } from './_lib/push';
+import { sendEmail, buildWelcomeEmail } from './_lib/email';
+
 const VIP_TIERS = [
   { id: 'starter', minSpentCents: 0 },
   { id: 'regulier', minSpentCents: 5000 },
@@ -87,15 +93,8 @@ export default async function handler(req: any, res: any) {
     if (!prof) return res.status(404).json({ error: 'Profil introuvable' });
     if (prof.welcome_sent) return res.status(200).json({ ok: true, already: true });
 
-    // Marque tout de suite → évite un double envoi si deux logins se croisent.
-    await admin
-      .from('profiles')
-      .update({ welcome_sent: true, welcome_sent_at: new Date().toISOString() })
-      .eq('id', uid);
-
     // Push + boîte de réception de bienvenue (best-effort)
     try {
-      const { sendPushToUser } = await import('./_lib/push');
       await sendPushToUser(admin, uid, {
         title: 'Bienvenue à La Base 💚',
         body: 'Ton club bien-être à Verdun. Gagne des XP à chaque visite et débloque des cadeaux 🎁',
@@ -108,9 +107,22 @@ export default async function handler(req: any, res: any) {
     const email = prof.email ?? userData.user.email ?? null;
     let emailResult: { ok: boolean; error?: string } = { ok: false, error: 'aucune adresse email' };
     if (email) {
-      const { sendEmail, buildWelcomeEmail } = await import('./_lib/email');
-      const { subject, html } = buildWelcomeEmail(prof.first_name);
-      emailResult = await sendEmail({ to: email, subject, html });
+      try {
+        const { subject, html } = buildWelcomeEmail(prof.first_name);
+        emailResult = await sendEmail({ to: email, subject, html });
+      } catch (e: any) {
+        emailResult = { ok: false, error: e?.message ?? 'Erreur envoi email' };
+      }
+    }
+
+    // On ne marque « accueilli » QUE si l'email est parti (ou s'il n'y a pas
+    // d'adresse). Sinon on laisse welcome_sent=false → nouvel essai au prochain
+    // login (évite de « brûler » le compte sur un échec temporaire de config).
+    if (emailResult.ok || !email) {
+      await admin
+        .from('profiles')
+        .update({ welcome_sent: true, welcome_sent_at: new Date().toISOString() })
+        .eq('id', uid);
     }
     return res.status(200).json({
       ok: true,
