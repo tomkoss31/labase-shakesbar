@@ -876,6 +876,11 @@ function renderComptoirList(orders) {
     const buttons = [];
     // ℹ️ Détail complet (articles + client + XP/cadeau) — toujours dispo.
     buttons.push('<button class="btn-row" data-detail="' + o.id + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(94,234,212,.35);color:#5eead4;padding:8px 12px;">ℹ️ Infos</button>');
+    // ✏️ Heure de retrait modifiable TANT QUE pas « en prépa » (verrouillé après).
+    if (o.status === 'pending_cash' || o.status === 'paid') {
+      const pt = o.pickup_time || '';
+      buttons.push('<button class="btn-row" data-pickup="' + o.id + '" data-time="' + pt + '" title="Modifier l\'heure de retrait" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbe4df;padding:8px 10px;">✏️ ' + (pt ? pt : 'heure') + '</button>');
+    }
     if (o.status === 'pending_cash') {
       const code = (o.square_order_id || '').replace('CASH-', '');
       buttons.push('<button class="btn-row btn-ambre" data-action="cash" data-id="' + o.id + '">💵 Encaisser ' + code + '</button>');
@@ -928,6 +933,27 @@ function renderComptoirList(orders) {
   document.querySelectorAll('[data-detail]').forEach(btn => {
     btn.addEventListener('click', () => showOrderDetail(btn.dataset.detail));
   });
+  document.querySelectorAll('[data-pickup]').forEach(btn => {
+    btn.addEventListener('click', () => editPickup(btn.dataset.pickup, btn.dataset.time));
+  });
+}
+
+// ✏️ Modifier l'heure de retrait (tant que pas « en prépa »).
+async function editPickup(orderId, current) {
+  const t = prompt('Nouvelle heure de retrait (ex : 14:30). Laisse vide pour enlever.', current || '');
+  if (t === null) return; // annulé
+  try {
+    const res = await fetch('/api/orders?action=update-pickup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getPassword() },
+      body: JSON.stringify({ orderId, pickupTime: t.trim() }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { alert(d.error || 'Erreur'); return; }
+    loadComptoir();
+  } catch (e) {
+    alert('Erreur réseau');
+  }
 }
 
 // ─── Détail commande (ℹ️) : articles + client + XP/cadeaux ───────────

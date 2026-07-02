@@ -168,6 +168,98 @@ async function notifyCustomerStatus(
   }
 }
 
+// Lien avis Google (cf. src/data/menu.ts googleReviewUrl) + barème cadeaux
+// (cf. claim-reward REWARDS) pour la deadline « prochain cadeau ».
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
+const REWARD_TIERS = [
+  { cost: 150, label: 'un boost offert' },
+  { cost: 300, label: 'un topping offert' },
+  { cost: 1500, label: 'une boisson offerte' },
+  { cost: 2200, label: 'une boisson + gaufre' },
+  { cost: 3800, label: 'le cadeau du mois' },
+];
+
+// Push « merci pour ta visite » ~à la fin d'un paiement : récap commande + XP
+// gagnés + deadline prochain cadeau + lien avis Google EN ÉVIDENCE. Best-effort.
+async function notifyThanks(
+  admin: any,
+  order: { id: string; user_id?: string | null } | null,
+  opts: { xpTotal: number; xpGained: number; firstName?: string | null },
+): Promise<void> {
+  const userId = order?.user_id;
+  if (!userId) return;
+
+  const { data: items } = await admin
+    .from('order_items')
+    .select('product_name, quantity')
+    .eq('order_id', order!.id);
+  const recap = (items ?? [])
+    .map((it: any) => `${it.quantity > 1 ? it.quantity + '× ' : ''}${it.product_name}`)
+    .join(', ');
+
+  const first = (opts.firstName || '').trim().split(' ')[0] || '';
+  const next = REWARD_TIERS.find((t) => t.cost > opts.xpTotal);
+  const xpLine = next
+    ? `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — plus que ${next.cost - opts.xpTotal} avant ${next.label} !`
+    : `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — tu peux tout débloquer 🎁`;
+
+  const title = `💚 Merci${first ? ' ' + first : ''} pour ta visite !`;
+  const body = `${recap ? 'Ta commande : ' + recap + '. ' : ''}${xpLine}  ⭐ Laisse-nous un avis, ça aide énormément le club !`;
+
+  // 1) Boîte de réception (url = page d'avis → l'avis reste « en évidence »)
+  try {
+    await admin.from('user_notifications').insert({
+      user_id: userId,
+      title,
+      body,
+      url: GOOGLE_REVIEW_URL,
+      emoji: '💚',
+      kind: 'order',
+    });
+  } catch {
+    /* best-effort */
+  }
+
+  // 2) Push web
+  const vapidPublic = process.env.VITE_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:tom@labase-nutrition.com';
+  if (!vapidPublic || !vapidPrivate) return;
+  const { data: subs } = await admin
+    .from('push_subscriptions')
+    .select('endpoint, p256dh_key, auth_key')
+    .eq('user_id', userId);
+  if (!subs || subs.length === 0) return;
+  const webpushMod = await import('web-push');
+  const webpush: any = (webpushMod as any).default ?? webpushMod;
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  const payload = JSON.stringify({
+    title,
+    body,
+    url: GOOGLE_REVIEW_URL,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag: 'labase-thanks',
+    requireInteraction: false,
+  });
+  const expired: string[] = [];
+  await Promise.all(
+    subs.map(async (sub: any) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh_key, auth: sub.auth_key } },
+          payload,
+        );
+      } catch (err: any) {
+        if (err?.statusCode === 404 || err?.statusCode === 410) expired.push(sub.endpoint);
+      }
+    }),
+  );
+  if (expired.length > 0) {
+    await admin.from('push_subscriptions').delete().in('endpoint', expired);
+  }
+}
+
 async function readBody(req: any): Promise<any> {
   if (typeof req.body === 'object' && req.body !== null) return req.body;
   if (typeof req.body === 'string') {
@@ -759,7 +851,7 @@ export default async function handler(req: any, res: any) {
     if (order.user_id) {
       const { data: profile } = await clients.admin
         .from('profiles')
-        .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
+        .select('first_name, total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
         .eq('id', order.user_id)
         .single();
       if (profile) {
@@ -786,6 +878,17 @@ export default async function handler(req: any, res: any) {
             level: computeMascotteLevel(newXp),
           })
           .eq('id', order.user_id);
+
+        // 💚 Push « merci pour ta visite » (récap + XP + avis) — best-effort
+        try {
+          await notifyThanks(clients.admin, order, {
+            xpTotal: newXp,
+            xpGained,
+            firstName: (profile as any).first_name,
+          });
+        } catch {
+          /* ne bloque jamais l'encaissement */
+        }
 
         // Récompense parrainage à la 1ère commande payée (gardé)
         if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
@@ -840,6 +943,35 @@ export default async function handler(req: any, res: any) {
       /* noop : la notif client ne doit jamais casser la mise à jour de statut */
     }
     return res.status(200).json({ ok: true, order: data });
+  }
+
+  // ─── POST ?action=update-pickup (admin) : change l'heure de retrait ───
+  // Autorisé UNIQUEMENT tant que la commande n'est pas « en prépa » (règle :
+  // verrouillé dès qu'on clique En prépa). Ne touche QUE l'heure — pas le
+  // contenu ni Square (changer le contenu d'une commande payée = casse Square).
+  if (action === 'update-pickup' && req.method === 'POST') {
+    if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });
+    const body = await readBody(req);
+    const orderId = typeof body?.orderId === 'string' ? body.orderId : null;
+    const pickupTime = typeof body?.pickupTime === 'string' ? body.pickupTime.trim() : '';
+    if (!orderId) return res.status(400).json({ error: 'orderId requis' });
+
+    const { data: order } = await clients.admin
+      .from('orders')
+      .select('status')
+      .eq('id', orderId)
+      .single();
+    if (!order) return res.status(404).json({ error: 'Commande introuvable' });
+    if (!['pending_cash', 'paid'].includes(order.status)) {
+      return res.status(409).json({ error: 'Commande déjà en préparation — heure verrouillée' });
+    }
+
+    const { error } = await clients.admin
+      .from('orders')
+      .update({ pickup_time: pickupTime || null })
+      .eq('id', orderId);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ ok: true, pickup_time: pickupTime || null });
   }
 
   // ─── POST ?action=claim-reward (CLIENT, auth JWT) ─────────────────
