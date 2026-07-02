@@ -184,6 +184,14 @@ function getActionFromQuery(req: any): string | null {
   return new URLSearchParams(qs).get('action');
 }
 
+function getQueryParam(req: any, key: string): string | null {
+  if (typeof req.query?.[key] === 'string') return req.query[key];
+  const url = req.url || '';
+  const qs = url.split('?')[1];
+  if (!qs) return null;
+  return new URLSearchParams(qs).get(key);
+}
+
 function requireAdmin(req: any): boolean {
   const expectedPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PUSH_PASSWORD;
   if (!expectedPassword) return false;
@@ -553,6 +561,55 @@ export default async function handler(req: any, res: any) {
       items: itemsByOrder[o.id] ?? [],
     }));
     return res.status(200).json({ orders: withItems });
+  }
+
+  // ─── GET ?action=order-detail&orderId=... (ADMIN) : détail complet ───
+  // Articles + infos client (prénom, XP, nb commandes, VIP) + cadeaux récents
+  // du client (reward_redemptions — pas liés à la commande, mais donnent le
+  // contexte « a utilisé une boisson offerte »). Chargé au clic sur l'icône ℹ️.
+  if (action === 'order-detail' && req.method === 'GET') {
+    if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });
+    const orderId = getQueryParam(req, 'orderId');
+    if (!orderId) return res.status(400).json({ error: 'orderId requis' });
+
+    const { data: order, error: oErr } = await clients.admin
+      .from('orders')
+      .select('id, square_order_id, status, total_cents, customer_name, pickup_time, paid_at, created_at, payment_method, user_id, combo_count')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (oErr) return res.status(500).json({ error: oErr.message });
+    if (!order) return res.status(404).json({ error: 'Commande introuvable' });
+
+    const { data: items } = await clients.admin
+      .from('order_items')
+      .select('product_name, option_label, category_name, quantity, unit_price_cents')
+      .eq('order_id', orderId);
+
+    let client: any = null;
+    let rewards: any[] = [];
+    if (order.user_id) {
+      const { data: prof } = await clients.admin
+        .from('profiles')
+        .select('first_name, email, xp, total_orders, total_spent_cents, vip_tier, created_at')
+        .eq('id', order.user_id)
+        .maybeSingle();
+      client = prof ?? null;
+      // Cadeaux récents du client (contexte « boisson offerte utilisée »).
+      const { data: reds } = await clients.admin
+        .from('reward_redemptions')
+        .select('reward_label, xp_cost, source, created_at')
+        .eq('user_id', order.user_id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      rewards = reds ?? [];
+    }
+
+    // XP gagnés sur cette commande : non stockés → estimation (10 XP/€ + 50 de
+    // bonus commande). Les multiplicateurs (mardi/roue) ne sont pas connus a
+    // posteriori, d'où le « ≈ ».
+    const xpEstimate = Math.round((order.total_cents || 0) / 10) + 50;
+
+    return res.status(200).json({ order, items: items ?? [], client, rewards, xpEstimate });
   }
 
   // ─── POST ?action=create-pending ─────────────────────────────

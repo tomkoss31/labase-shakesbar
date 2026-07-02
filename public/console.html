@@ -874,6 +874,8 @@ function renderComptoirList(orders) {
     }[o.status] || o.status;
 
     const buttons = [];
+    // ℹ️ Détail complet (articles + client + XP/cadeau) — toujours dispo.
+    buttons.push('<button class="btn-row" data-detail="' + o.id + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(94,234,212,.35);color:#5eead4;padding:8px 12px;">ℹ️ Infos</button>');
     if (o.status === 'pending_cash') {
       const code = (o.square_order_id || '').replace('CASH-', '');
       buttons.push('<button class="btn-row btn-ambre" data-action="cash" data-id="' + o.id + '">💵 Encaisser ' + code + '</button>');
@@ -923,6 +925,114 @@ function renderComptoirList(orders) {
   document.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => updateOrderStatus(btn.dataset.id, btn.dataset.action, btn));
   });
+  document.querySelectorAll('[data-detail]').forEach(btn => {
+    btn.addEventListener('click', () => showOrderDetail(btn.dataset.detail));
+  });
+}
+
+// ─── Détail commande (ℹ️) : articles + client + XP/cadeaux ───────────
+function ensureDetailOverlay() {
+  let overlay = document.getElementById('order-detail-overlay');
+  if (overlay) return overlay;
+  overlay = document.createElement('div');
+  overlay.id = 'order-detail-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+  const box = document.createElement('div');
+  box.id = 'order-detail-box';
+  box.style.cssText = 'width:100%;max-width:440px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#13302c,#0e1f1d);border:1px solid rgba(94,234,212,.2);border-radius:20px;padding:20px;color:#ecfdf5;font-family:system-ui,sans-serif;';
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+async function showOrderDetail(orderId) {
+  const overlay = ensureDetailOverlay();
+  const box = document.getElementById('order-detail-box');
+  box.innerHTML = '<div style="text-align:center;padding:34px 10px;color:#7f8a88;">Chargement…</div>';
+  overlay.style.display = 'flex';
+  try {
+    const res = await fetch('/api/orders?action=order-detail&orderId=' + encodeURIComponent(orderId), {
+      headers: { 'Authorization': 'Bearer ' + getPassword() },
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    box.innerHTML = renderOrderDetail(d);
+    const closeBtn = document.getElementById('order-detail-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+  } catch (e) {
+    box.innerHTML = '<div style="color:#ff9b9b;padding:20px;">Erreur : ' + (e && e.message ? e.message : e) + '</div>';
+  }
+}
+
+function renderOrderDetail(d) {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const o = d.order || {};
+  const c = d.client;
+  const total = ((o.total_cents || 0) / 100).toFixed(2).replace('.', ',');
+  const pay = o.payment_method === 'cash' ? '💵 Espèces' : (o.payment_method === 'card' ? '💳 Carte' : (o.payment_method || '—'));
+  const dt = new Date(o.paid_at || o.created_at);
+  const when = isNaN(dt) ? '' : dt.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const statusLabel = { pending_cash: 'Espèces (à encaisser)', paid: 'Payée', preparing: 'En prépa', ready: 'Prête', cancelled: 'Annulée' }[o.status] || o.status;
+
+  let itemsHtml;
+  if (d.items && d.items.length) {
+    itemsHtml = d.items.map((it) => {
+      const qty = (it.quantity > 1 ? it.quantity + '× ' : '');
+      const opt = it.option_label ? ' · ' + esc(it.option_label) : '';
+      const price = it.unit_price_cents ? '<span style="color:#94b8b1;font-size:12px;">' + ((it.unit_price_cents * (it.quantity || 1)) / 100).toFixed(2).replace('.', ',') + '€</span>' : '';
+      return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:3px 0;">' +
+        '<span>🥤 <b>' + esc(qty) + '</b>' + esc(it.product_name) + opt + '</span>' + price + '</div>';
+    }).join('');
+  } else {
+    itemsHtml = '<div style="font-size:12px;color:#7f8a88;font-style:italic;">Détail des articles non disponible (vente Square/CB non détaillée).</div>';
+  }
+
+  let clientHtml;
+  if (c) {
+    const vip = c.vip_tier && c.vip_tier !== 'starter' ? ' · ' + esc(c.vip_tier).toUpperCase() : '';
+    clientHtml =
+      '<div style="font-size:14px;font-weight:700;">' + esc(c.first_name || c.email || 'Client') + '</div>' +
+      (c.email ? '<div style="font-size:12px;color:#94b8b1;">' + esc(c.email) + '</div>' : '') +
+      '<div style="display:flex;gap:14px;margin-top:8px;font-size:13px;">' +
+        '<span>⭐ <b>' + (c.xp != null ? c.xp : '—') + '</b> XP</span>' +
+        '<span>🧾 <b>' + (c.total_orders != null ? c.total_orders : '—') + '</b> cmd' + vip + '</span>' +
+      '</div>';
+  } else {
+    clientHtml = '<div style="font-size:12px;color:#7f8a88;font-style:italic;">Commande non liée à un compte (client non enregistré).</div>';
+  }
+
+  let rewardsHtml = '';
+  if (d.rewards && d.rewards.length) {
+    rewardsHtml =
+      '<div style="margin-top:14px;">' +
+      '<div style="font-size:11px;letter-spacing:.08em;color:#f59e0b;font-weight:800;text-transform:uppercase;margin-bottom:6px;">🎁 Cadeaux récents du client</div>' +
+      d.rewards.map((r) => {
+        const rdt = new Date(r.created_at);
+        const rd = isNaN(rdt) ? '' : rdt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+        return '<div style="font-size:13px;padding:2px 0;">• ' + esc(r.reward_label) + ' <span style="color:#94b8b1;">(−' + (r.xp_cost || 0) + ' XP · ' + rd + ')</span></div>';
+      }).join('') +
+      '</div>';
+  }
+
+  const sec = (title, inner) => '<div style="margin-top:16px;"><div style="font-size:11px;letter-spacing:.08em;color:#5eead4;font-weight:800;text-transform:uppercase;margin-bottom:6px;">' + title + '</div>' + inner + '</div>';
+
+  return '' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+      '<div style="font-family:sans-serif;font-weight:900;font-size:20px;">🧾 Détail commande</div>' +
+      '<button id="order-detail-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:#ecfdf5;cursor:pointer;font-size:16px;">✕</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:#cbe4df;">' +
+      '<span><b style="color:#ecfdf5;font-size:16px;">' + total + '€</b></span>' +
+      '<span>' + pay + '</span>' +
+      '<span>' + esc(statusLabel) + '</span>' +
+      (o.pickup_time ? '<span>⏰ retrait ' + esc(o.pickup_time) + '</span>' : '') +
+      (when ? '<span>' + when + '</span>' : '') +
+    '</div>' +
+    sec('Articles', itemsHtml) +
+    sec('Client', clientHtml) +
+    rewardsHtml +
+    sec('XP', '<div style="font-size:13px;color:#cbe4df;">≈ <b style="color:#ecfdf5;">+' + (d.xpEstimate || 0) + ' XP</b> gagnés sur cette commande <span style="color:#7f8a88;">(estimation, hors multiplicateurs mardi/roue)</span></div>');
 }
 
 async function updateOrderStatus(orderId, action, btn) {
