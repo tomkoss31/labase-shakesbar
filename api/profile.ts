@@ -7,7 +7,9 @@
 // embarqué dans la fonction). On garde donc tout ici. NB : l'import dynamique
 // d'un PACKAGE ('web-push') fonctionne, lui — seul le relatif local casse.
 
-const WELCOME_FROM = process.env.RESEND_FROM ?? 'La Base <bonjour@labase-nutrition.com>';
+// Domaine VÉRIFIÉ dans Resend = labase360.fr (labase-nutrition.com ne l'est pas →
+// Resend renvoyait 403). Surchargeable via RESEND_FROM si besoin.
+const WELCOME_FROM = process.env.RESEND_FROM ?? 'La Base <bonjour@labase360.fr>';
 const WELCOME_PUSH = {
   title: 'Bienvenue à La Base 💚',
   body: 'Ton club bien-être à Verdun. Gagne des XP à chaque visite et débloque des cadeaux 🎁',
