@@ -63,9 +63,12 @@ export default async function handler(req: any, res: any) {
 
   // ─── broadcasts (GET, public) : liste des messages pour la boîte de réception ─
   if (action === 'broadcasts' && req.method === 'GET') {
+    // Règle : une notif disparaît de la boîte à J+1 (24 h après l'envoi).
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await admin
       .from('broadcasts')
       .select('id, title, body, url, emoji, created_at')
+      .gte('created_at', cutoff)
       .order('created_at', { ascending: false })
       .limit(30);
     if (error) return res.status(500).json({ error: error.message });
@@ -81,10 +84,13 @@ export default async function handler(req: any, res: any) {
     const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
     if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
 
+    // Règle : une notif disparaît de la boîte à J+1 (24 h après l'envoi).
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await admin
       .from('user_notifications')
       .select('id, title, body, url, emoji, read_at, created_at')
       .eq('user_id', userData.user.id)
+      .gte('created_at', cutoff)
       .order('created_at', { ascending: false })
       .limit(40);
     if (error) return res.status(500).json({ error: error.message });
