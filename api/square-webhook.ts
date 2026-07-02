@@ -38,6 +38,72 @@ function computeMascotteLevel(xp: number): string {
   return 'apprenti';
 }
 
+// Push « merci pour ta visite » après paiement CB (récap + XP + avis Google).
+// Copie locale (les imports cross-fichier api/ cassent sur Vercel). Best-effort.
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
+const REWARD_TIERS = [
+  { cost: 150, label: 'un boost offert' },
+  { cost: 300, label: 'un topping offert' },
+  { cost: 1500, label: 'une boisson offerte' },
+  { cost: 2200, label: 'une boisson + gaufre' },
+  { cost: 3800, label: 'le cadeau du mois' },
+];
+
+async function notifyThanks(
+  admin: any,
+  orderId: string,
+  userId: string,
+  opts: { xpTotal: number; xpGained: number; firstName?: string | null },
+): Promise<void> {
+  if (!userId) return;
+  const { data: items } = await admin
+    .from('order_items')
+    .select('product_name, quantity')
+    .eq('order_id', orderId);
+  const recap = (items ?? [])
+    .map((it: any) => `${it.quantity > 1 ? it.quantity + '× ' : ''}${it.product_name}`)
+    .join(', ');
+  const first = (opts.firstName || '').trim().split(' ')[0] || '';
+  const next = REWARD_TIERS.find((t) => t.cost > opts.xpTotal);
+  const xpLine = next
+    ? `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — plus que ${next.cost - opts.xpTotal} avant ${next.label} !`
+    : `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — tu peux tout débloquer 🎁`;
+  const title = `💚 Merci${first ? ' ' + first : ''} pour ta visite !`;
+  const body = `${recap ? 'Ta commande : ' + recap + '. ' : ''}${xpLine}  ⭐ Laisse-nous un avis, ça aide énormément le club !`;
+  try {
+    await admin.from('user_notifications').insert({
+      user_id: userId, title, body, url: GOOGLE_REVIEW_URL, emoji: '💚', kind: 'order',
+    });
+  } catch { /* best-effort */ }
+  const vapidPublic = process.env.VITE_VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:tom@labase-nutrition.com';
+  if (!vapidPublic || !vapidPrivate) return;
+  const { data: subs } = await admin
+    .from('push_subscriptions')
+    .select('endpoint, p256dh_key, auth_key')
+    .eq('user_id', userId);
+  if (!subs || subs.length === 0) return;
+  const webpushMod = await import('web-push');
+  const webpush: any = (webpushMod as any).default ?? webpushMod;
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  const payload = JSON.stringify({
+    title, body, url: GOOGLE_REVIEW_URL, icon: '/icon-192.png', badge: '/icon-192.png', tag: 'labase-thanks',
+  });
+  const expired: string[] = [];
+  await Promise.all((subs as any[]).map(async (sub: any) => {
+    try {
+      await webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh_key, auth: sub.auth_key } },
+        payload,
+      );
+    } catch (err: any) {
+      if (err?.statusCode === 404 || err?.statusCode === 410) expired.push(sub.endpoint);
+    }
+  }));
+  if (expired.length > 0) await admin.from('push_subscriptions').delete().in('endpoint', expired);
+}
+
 async function readBody(req: any): Promise<string> {
   if (typeof req.body === 'string') return req.body;
   if (req.body && typeof req.body === 'object') return JSON.stringify(req.body);
@@ -182,7 +248,7 @@ export default async function handler(req: any, res: any) {
   if (userId) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
+      .select('first_name, total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
       .eq('id', userId)
       .single();
 
@@ -219,6 +285,17 @@ export default async function handler(req: any, res: any) {
 
       if (updateError) {
         console.error('[square-webhook] profile update failed:', updateError.message);
+      }
+
+      // 💚 Push « merci pour ta visite » (récap + XP + avis) — best-effort
+      try {
+        await notifyThanks(supabase, order.id, userId, {
+          xpTotal: newXp,
+          xpGained,
+          firstName: (profile as any).first_name,
+        });
+      } catch (err: any) {
+        console.warn('[square-webhook] thanks push failed:', err?.message);
       }
 
       // ─── Récompense parrainage ───────────────────────────────────
