@@ -69,6 +69,56 @@ export default async function handler(req: any, res: any) {
     });
   }
 
+  // ─── POST ?action=welcome (CLIENT, auth JWT) : bienvenue 1er login ───
+  // Envoie l'email + la push de bienvenue UNE SEULE fois (flag welcome_sent).
+  // Appelé par l'app à chaque SIGNED_IN → idempotent : ne fait rien si déjà envoyé.
+  if (action === 'welcome' && req.method === 'POST') {
+    const accessToken = (req.headers?.authorization ?? '').replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Token manquant' });
+    const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
+    if (userError || !userData?.user) return res.status(401).json({ error: 'Session invalide' });
+    const uid = userData.user.id;
+
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('email, first_name, welcome_sent')
+      .eq('id', uid)
+      .maybeSingle();
+    if (!prof) return res.status(404).json({ error: 'Profil introuvable' });
+    if (prof.welcome_sent) return res.status(200).json({ ok: true, already: true });
+
+    // Marque tout de suite → évite un double envoi si deux logins se croisent.
+    await admin
+      .from('profiles')
+      .update({ welcome_sent: true, welcome_sent_at: new Date().toISOString() })
+      .eq('id', uid);
+
+    // Push + boîte de réception de bienvenue (best-effort)
+    try {
+      const { sendPushToUser } = await import('./_lib/push');
+      await sendPushToUser(admin, uid, {
+        title: 'Bienvenue à La Base 💚',
+        body: 'Ton club bien-être à Verdun. Gagne des XP à chaque visite et débloque des cadeaux 🎁',
+        url: '/',
+        emoji: '🎉',
+      });
+    } catch { /* non bloquant */ }
+
+    // Email de bienvenue (best-effort)
+    const email = prof.email ?? userData.user.email ?? null;
+    let emailResult: { ok: boolean; error?: string } = { ok: false, error: 'aucune adresse email' };
+    if (email) {
+      const { sendEmail, buildWelcomeEmail } = await import('./_lib/email');
+      const { subject, html } = buildWelcomeEmail(prof.first_name);
+      emailResult = await sendEmail({ to: email, subject, html });
+    }
+    return res.status(200).json({
+      ok: true,
+      emailSent: emailResult.ok,
+      emailError: emailResult.ok ? undefined : emailResult.error,
+    });
+  }
+
   // ─── GET ?action=referral-stats (CLIENT, auth JWT) ────────────
   // Renvoie le code de parrainage du client + nb de filleuls / validés.
   if (action === 'referral-stats' && req.method === 'GET') {

@@ -252,6 +252,14 @@ function useAuthState(): AuthContextValue {
       }
       const profile = await fetchProfile(session.user.id);
       if (cancelled) return;
+      // Bienvenue (email + push) au 1er login. Idempotent côté serveur via le
+      // flag welcome_sent → on peut l'appeler à chaque SIGNED_IN sans risque.
+      if (event === 'SIGNED_IN') {
+        fetch('/api/profile?action=welcome', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }).catch(() => {});
+      }
       // PASSWORD_RECOVERY = user a cliqué le lien "reset password" dans le mail
       // → on lui propose direct l'UI "choisis un nouveau mot de passe"
       const isRecovery = event === 'PASSWORD_RECOVERY';
