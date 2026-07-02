@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import type { Palette } from './palette';
 import type { CartItem } from './cart/useCart';
 import { getStoredSession } from '../lib/supabase';
+import { OrderHistoryModal } from './orders/OrderHistoryModal';
 
 interface RawItem {
   product_name: string;
@@ -47,6 +48,7 @@ function rebuildItem(it: RawItem): CartItem {
 
 export function ReorderCard({ palette, isAuthed, onReorder }: ReorderCardProps) {
   const [items, setItems] = useState<CartItem[] | null>(null);
+  const [histOpen, setHistOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthed) {
@@ -130,6 +132,25 @@ export function ReorderCard({ palette, isAuthed, onReorder }: ReorderCardProps) 
           + Panier
         </div>
       </button>
+
+      <button
+        onClick={() => setHistOpen(true)}
+        style={{
+          display: 'block',
+          margin: '8px auto 0',
+          background: 'transparent',
+          border: 'none',
+          color: palette.textDim,
+          fontSize: 12.5,
+          fontWeight: 700,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+        }}
+      >
+        🧾 Voir tout mon historique →
+      </button>
+
+      <OrderHistoryModal palette={palette} open={histOpen} onClose={() => setHistOpen(false)} />
     </div>
   );
 }

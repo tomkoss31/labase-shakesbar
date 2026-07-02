@@ -271,6 +271,50 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ order: null, items: [] });
   }
 
+  // ─── GET ?action=history (CLIENT, auth JWT) : historique + XP ─────────
+  // Renvoie les 10 dernières commandes (avec articles + XP gagnés estimés) et
+  // les 10 derniers cadeaux réclamés (XP dépensés). Sert l'écran « Mon historique ».
+  if (action === 'history' && req.method === 'GET') {
+    if (!clients.public) return res.status(500).json({ error: 'Anon key manquante' });
+    const accessToken = (req.headers?.authorization ?? '').replace(/^Bearer\s+/, '').trim();
+    if (!accessToken) return res.status(401).json({ error: 'Auth requise' });
+    const { data: userData, error: userError } = await clients.public.auth.getUser(accessToken);
+    if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
+    const uid = userData.user.id;
+
+    const { data: orders } = await clients.admin
+      .from('orders')
+      .select('id, total_cents, status, payment_method, created_at, paid_at')
+      .eq('user_id', uid)
+      .in('status', ['paid', 'preparing', 'ready'])
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const orderIds = (orders ?? []).map((o: any) => o.id);
+    const itemsByOrder: Record<string, any[]> = {};
+    if (orderIds.length) {
+      const { data: items } = await clients.admin
+        .from('order_items')
+        .select('order_id, product_name, option_label, quantity, unit_price_cents')
+        .in('order_id', orderIds);
+      for (const it of items ?? []) (itemsByOrder[it.order_id] ||= []).push(it);
+    }
+    const withItems = (orders ?? []).map((o: any) => ({
+      ...o,
+      items: itemsByOrder[o.id] ?? [],
+      xpEstimate: Math.round((o.total_cents || 0) / 10) + 50,
+    }));
+
+    const { data: rewards } = await clients.admin
+      .from('reward_redemptions')
+      .select('reward_label, xp_cost, source, created_at')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    return res.status(200).json({ orders: withItems, rewards: rewards ?? [] });
+  }
+
   // ─── GET ?action=challenges (CLIENT, JWT) : défis de la semaine ───
   // Défis basés sur le nb de commandes payées de la semaine (lundi→). On
   // crédite les XP dès qu'un palier est atteint (1×/semaine via contrainte unique).
