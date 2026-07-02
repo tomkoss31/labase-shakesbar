@@ -71,6 +71,20 @@ function useAuthState(): AuthContextValue {
     const token = stored?.access_token;
     if (!token) return null;
 
+    // Déclenche la bienvenue (email + push) au 1er login. On l'appelle ICI
+    // (et non sur l'événement SIGNED_IN, trop fragile : souvent raté au clic
+    // du magic link car l'abonnement arrive après → on reçoit INITIAL_SESSION)
+    // car fetchProfile tourne à CHAQUE chargement authentifié. Idempotent :
+    // on n'appelle que si welcome_sent === false, et le serveur re-vérifie.
+    const maybeWelcome = (p: any) => {
+      if (p && p.welcome_sent === false) {
+        fetch('/api/profile?action=welcome', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      }
+    };
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -92,7 +106,10 @@ function useAuthState(): AuthContextValue {
         return null;
       }
       const rows = (await resp.json()) as Profile[];
-      if (rows.length > 0) return rows[0];
+      if (rows.length > 0) {
+        maybeWelcome(rows[0]);
+        return rows[0];
+      }
 
       // Pas de profile → on en crée un (trigger handle_new_user a peut-être raté)
       const createResp = await fetch(`${envUrl}/rest/v1/profiles`, {
@@ -107,6 +124,7 @@ function useAuthState(): AuthContextValue {
       });
       if (createResp.ok) {
         const created = (await createResp.json()) as Profile[];
+        maybeWelcome(created[0]);
         return created[0] ?? null;
       }
       return null;
@@ -252,14 +270,7 @@ function useAuthState(): AuthContextValue {
       }
       const profile = await fetchProfile(session.user.id);
       if (cancelled) return;
-      // Bienvenue (email + push) au 1er login. Idempotent côté serveur via le
-      // flag welcome_sent → on peut l'appeler à chaque SIGNED_IN sans risque.
-      if (event === 'SIGNED_IN') {
-        fetch('/api/profile?action=welcome', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }).catch(() => {});
-      }
+      // (La bienvenue est déclenchée dans fetchProfile si welcome_sent=false.)
       // PASSWORD_RECOVERY = user a cliqué le lien "reset password" dans le mail
       // → on lui propose direct l'UI "choisis un nouveau mot de passe"
       const isRecovery = event === 'PASSWORD_RECOVERY';
