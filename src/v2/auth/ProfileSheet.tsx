@@ -8,6 +8,7 @@ import { usePushNotifications } from '../notifications/usePushNotifications';
 import { WheelModal } from '../wheel/WheelModal';
 import { getWheelCooldown } from '../wheel/segments';
 import { useUserOrders } from '../orders/useUserOrders';
+import { OrderHistoryModal } from '../orders/OrderHistoryModal';
 import { MyCodeModal } from './MyCodeModal';
 
 // Liste des emails admin (séparés par virgule dans VITE_ADMIN_EMAIL).
@@ -58,6 +59,7 @@ export function ProfileSheet({
   const [wheelOpen, setWheelOpen] = useState(false);
   const [myCodeOpen, setMyCodeOpen] = useState(false);
   const push = usePushNotifications();
+  const [histOpen, setHistOpen] = useState(false);
   const wheelCooldown = React.useMemo(() => getWheelCooldown(), [wheelOpen]);
   // Admin : roue dispo en permanence (test illimité des cadeaux)
   const isAdmin = isAdminEmail(email);
@@ -654,6 +656,41 @@ export function ProfileSheet({
             ⚠️ {push.error}
           </div>
         )}
+
+        {/* Mon historique & mes XP (écran détaillé : articles + XP gagnés/dépensés) */}
+        <button
+          onClick={() => setHistOpen(true)}
+          style={{
+            width: '100%',
+            marginBottom: 12,
+            padding: '14px 16px',
+            background: palette.bg,
+            border: `1px solid ${palette.line}`,
+            borderRadius: 14,
+            color: palette.text,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🧾</span>
+            <span>
+              Mon historique &amp; mes XP
+              <div style={{ fontSize: 11, color: palette.textDim, fontWeight: 500, marginTop: 2 }}>
+                Tes commandes en détail, XP gagnés et cadeaux
+              </div>
+            </span>
+          </span>
+          <span style={{ fontSize: 18 }}>→</span>
+        </button>
+        <OrderHistoryModal palette={palette} open={histOpen} onClose={() => setHistOpen(false)} />
 
         {/* Historique commandes */}
         {orders.length > 0 && (

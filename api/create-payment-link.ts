@@ -516,9 +516,11 @@ export default async function handler(req: any, res: any) {
     );
     const squareOrderId = data?.payment_link?.order_id;
     // On pré-crée la ligne de commande dès la création du lien pour y stocker
-    // l'heure de retrait (+ le nb de combos). Le webhook Square (au paiement)
-    // ne renvoie PAS ces colonnes, donc elles survivent à son upsert.
-    if (squareOrderId && (comboCount > 0 || pickupTime)) {
+    // l'heure de retrait, le nb de combos ET le détail des articles. Le webhook
+    // Square (au paiement) ne voit pas le panier, donc sans ça les commandes
+    // CARTE n'ont aucun détail (historique client, comptoir, récap merci vides).
+    // Ces colonnes/lignes survivent à l'upsert du webhook (clé = square_order_id).
+    if (squareOrderId) {
       try {
         const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -530,9 +532,37 @@ export default async function handler(req: any, res: any) {
           const orderRow: Record<string, any> = { square_order_id: squareOrderId };
           if (comboCount > 0) orderRow.combo_count = comboCount;
           if (pickupTime) orderRow.pickup_time = pickupTime;
-          await admin
+          const { data: upserted } = await admin
             .from('orders')
-            .upsert(orderRow, { onConflict: 'square_order_id' });
+            .upsert(orderRow, { onConflict: 'square_order_id' })
+            .select('id')
+            .maybeSingle();
+
+          // Détail des articles (une seule fois — garde anti-doublon si le lien
+          // est régénéré pour la même commande Square).
+          if (upserted?.id) {
+            const { count } = await admin
+              .from('order_items')
+              .select('id', { count: 'exact', head: true })
+              .eq('order_id', upserted.id);
+            if (!count) {
+              const itemsToInsert = (cart as CartItemPayload[]).map((item) => {
+                const extrasLabel =
+                  Array.isArray(item.extras) && item.extras.length > 0
+                    ? ` + ${item.extras.join(', ')}`
+                    : '';
+                return {
+                  order_id: upserted.id,
+                  product_name: `${item.name ?? ''}${extrasLabel}`,
+                  option_label: item.option ?? null,
+                  category_name: item.categoryName ?? null,
+                  quantity: Number(item.quantity || 1),
+                  unit_price_cents: unitTotal(item),
+                };
+              });
+              await admin.from('order_items').insert(itemsToInsert);
+            }
+          }
         }
       } catch (err: any) {
         console.warn('[create-payment-link] order pre-persist failed:', err?.message);
