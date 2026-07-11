@@ -26,9 +26,9 @@ export function HeroCarousel({ palette, onSlideClick }: HeroCarouselProps) {
     <div style={{ padding: '0 16px 16px' }}>
       <div
         onClick={() => onSlideClick?.(s)}
+        className="v2-hero-banner"
         style={{
           position: 'relative',
-          height: 280,
           borderRadius: 20,
           overflow: 'hidden',
           background: `linear-gradient(135deg, ${palette.glow1}, ${palette.glow2} 50%, ${palette.accent})`,
@@ -206,6 +206,13 @@ export function HeroCarousel({ palette, onSlideClick }: HeroCarouselProps) {
           ))}
         </div>
       </div>
+
+      <style>{`
+        /* Hero moins imposant sur mobile (les produits remontent), un peu plus
+           haut sur desktop où il partage la ligne avec la colonne XP. */
+        .v2-hero-banner { height: 216px; }
+        @media (min-width: 960px) { .v2-hero-banner { height: 256px; } }
+      `}</style>
     </div>
   );
 }
