@@ -748,6 +748,42 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ order, items: items ?? [], client, rewards, xpEstimate });
   }
 
+  // ─── GET ?action=client-history&userId=... (ADMIN) : historique complet ───
+  // Pour le scanner comptoir : toutes les commandes (avec articles) + tous les
+  // cadeaux/points consommés d'un client, avec dates. Admin-authed par mdp.
+  if (action === 'client-history' && req.method === 'GET') {
+    if (!requireAdmin(req)) return res.status(401).json({ error: 'Non autorisé' });
+    const userId = getQueryParam(req, 'userId');
+    if (!userId) return res.status(400).json({ error: 'userId requis' });
+
+    const { data: orders } = await clients.admin
+      .from('orders')
+      .select('id, total_cents, status, payment_method, created_at, paid_at')
+      .eq('user_id', userId)
+      .in('status', ['paid', 'preparing', 'ready'])
+      .order('created_at', { ascending: false })
+      .limit(30);
+    const orderIds = (orders ?? []).map((o: any) => o.id);
+    const itemsByOrder: Record<string, any[]> = {};
+    if (orderIds.length) {
+      const { data: items } = await clients.admin
+        .from('order_items')
+        .select('order_id, product_name, option_label, quantity, unit_price_cents')
+        .in('order_id', orderIds);
+      for (const it of items ?? []) (itemsByOrder[it.order_id] ||= []).push(it);
+    }
+    const withItems = (orders ?? []).map((o: any) => ({ ...o, items: itemsByOrder[o.id] ?? [] }));
+
+    const { data: rewards } = await clients.admin
+      .from('reward_redemptions')
+      .select('reward_label, xp_cost, source, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    return res.status(200).json({ orders: withItems, rewards: rewards ?? [] });
+  }
+
   // ─── POST ?action=create-pending ─────────────────────────────
   if (action === 'create-pending' && req.method === 'POST') {
     const body = await readBody(req);

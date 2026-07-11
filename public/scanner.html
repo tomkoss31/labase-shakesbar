@@ -313,30 +313,165 @@
         '</div>';
     }
 
+    // Catalogue cadeaux (déduit les XP) — SYNCHRO console.html / catalog.ts
+    const CATALOG = [
+      { id: 'boost', cost: 150, emoji: '🍯', title: 'Sirop / boost offert' },
+      { id: 'topping', cost: 300, emoji: '✨', title: 'Topping offert' },
+      { id: 'boisson', cost: 1500, emoji: '🥤', title: 'Une boisson au choix' },
+      { id: 'combo-gaufre', cost: 2200, emoji: '🧇', title: 'Boisson + gaufre' },
+      { id: 'cadeau-mois', cost: 3800, emoji: '🎁', title: 'Cadeau du mois' },
+    ];
+    const giftButtons = CATALOG.map((c) => {
+      const ok = p.xp >= c.cost;
+      return '<button class="gift-btn" data-rid="' + c.id + '" data-cost="' + c.cost + '" data-label="' + c.title + '"' + (ok ? '' : ' disabled') +
+        ' style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:13px 14px;border-radius:12px;border:1px solid ' +
+        (ok ? '#14b8a6' : 'rgba(94,234,212,.12)') + ';background:' + (ok ? 'rgba(20,184,166,.12)' : '#04100f') +
+        ';color:' + (ok ? '#ecfdf5' : '#5e7a73') + ';font-family:inherit;font-size:14px;font-weight:700;cursor:' +
+        (ok ? 'pointer' : 'not-allowed') + ';text-align:left;">' +
+        '<span style="font-size:22px;">' + c.emoji + '</span>' +
+        '<span style="flex:1;">' + c.title + '</span>' +
+        '<span style="font-weight:800;color:' + (ok ? '#5eead4' : '#5e7a73') + ';">' + (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
+    }).join('');
+
     $('result').innerHTML =
       '<div class="card" style="border-color: #14b8a6;">' +
-        '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
-        '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
-        '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+          '<div style="min-width:0;">' +
+            '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
+            '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
+            '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+          '</div>' +
+          '<button id="historyBtn" class="btn-secondary" style="padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;">🧾 Historique</button>' +
+        '</div>' +
         '<div class="stats">' +
           '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + p.xp + '</div></div>' +
           '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + p.vip_tier + '</div></div>' +
           '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
           '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
         '</div>' +
+        '<div id="history-box"></div>' +
       '</div>' +
       '<div class="card">' +
         '<label>💳 Encaissement Square caisse + crédit XP</label>' +
         rewardsBlock +
-        (active.length ? '<div style="font-size:11.5px; color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:8px 10px; margin-bottom:10px; line-height:1.45;">⚠️ Applique la remise/le cadeau <b>sur la tablette Square</b> d\'abord, PUIS coche-la ici et encaisse → elle sera marquée utilisée (non réutilisable).</div>' : '') +
+        (active.length ? '<div style="font-size:11.5px; color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:8px 10px; margin-bottom:10px; line-height:1.45;">⚠️ Applique la remise <b>sur la tablette Square</b> d\'abord, PUIS coche-la ici → marquée utilisée.</div>' : '') +
         '<input type="number" id="amount" placeholder="Montant encaissé en € (ex: 8.90)" step="0.10" min="0" />' +
+        '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#ecfdf5;">' +
+          '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:#14b8a6;" />' +
+          '⚡ Commande combo (boisson + smoothie) <b style="color:#5eead4;">+25 XP</b>' +
+        '</label>' +
+        '<input type="text" id="saleNote" placeholder="Détail vente (ex: 2 smoothies + gaufre) — optionnel" maxlength="120" style="margin-top:10px;" />' +
         '<button class="btn btn-teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
-        '<div style="font-size: 11px; color: #94b8b1; margin-top: 8px; line-height: 1.5;">' +
-          'Montant total encaissé sur Square. XP crédités auto (10 XP / € + 50 XP / cmd). La remise cochée est marquée utilisée.' +
-        '</div>' +
+        '<div style="font-size: 11px; color: #94b8b1; margin-top: 8px; line-height: 1.5;">Montant encaissé sur Square. XP auto : 10 XP/€ + 50 XP/cmd (+25 combo, ×2 mardi). La remise cochée est marquée utilisée.</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<label>🎁 Offrir un cadeau (déduit les XP)</label>' +
+        '<div style="font-size:11px;color:#94b8b1;margin:4px 0 2px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
+        giftButtons +
+      '</div>' +
+      '<div class="card" style="border-color:rgba(94,234,212,.25);">' +
+        '<label>📋 Migration carte fidélité papier</label>' +
+        '<div style="font-size:11px;color:#94b8b1;margin:4px 0 8px;line-height:1.45;">Client qui passait par la carte papier ? Ajoute ses points en XP ici. Ne touche pas au CA ni au nombre de commandes.</div>' +
+        '<input type="number" id="manualXp" placeholder="XP à créditer (ex: 230)" step="1" min="1" max="100000" />' +
+        '<input type="text" id="manualReason" placeholder="Raison (ex: Carte papier — 230 points)" maxlength="280" style="margin-top:8px;" />' +
+        '<button class="btn btn-teal" id="manualXpBtn" style="margin-top:10px;">📋 Créditer XP manuellement</button>' +
       '</div>';
 
     $('creditBtn').addEventListener('click', () => creditXP(p.id));
+    $('manualXpBtn').addEventListener('click', () => creditXpManual(p.id));
+    $('historyBtn').addEventListener('click', () => showClientHistory(p.id));
+    document.querySelectorAll('.gift-btn').forEach((btn) => {
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => redeemReward(p.id, btn.dataset.rid, btn.dataset.label, btn.dataset.cost));
+    });
+  }
+
+  // ─── Offrir un cadeau (déduit les XP) ─────────────────────────────
+  async function redeemReward(userId, rewardId, label, cost) {
+    if (!confirm('Offrir « ' + label + ' » et déduire ' + cost + ' XP ?')) return;
+    try {
+      const resp = await fetch('/api/profile?action=redeem-reward', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + $('password').value.trim() },
+        body: JSON.stringify({ userId, rewardId }),
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        showResult('ok', '🎁 « ' + data.rewardLabel + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
+        lookupUser(userId);
+      } else {
+        showResult('err', '❌ ' + (data.error || 'Erreur'));
+      }
+    } catch (err) {
+      showResult('err', '❌ ' + (err && err.message ? err.message : err));
+    }
+  }
+
+  // ─── Migration carte papier : crédit XP manuel (pas une vente) ─────
+  async function creditXpManual(userId) {
+    const xpAmount = parseInt(($('manualXp').value || '').trim(), 10);
+    const reason = ($('manualReason').value || '').trim();
+    if (!Number.isFinite(xpAmount) || xpAmount <= 0 || xpAmount > 100000) { alert('XP invalide (1 à 100000)'); return; }
+    if (reason.length < 3) { alert('Raison requise (ex: « Carte papier 230 points »)'); return; }
+    if (!confirm('Créditer ' + xpAmount + ' XP à ce client ?\n\nRaison : ' + reason + '\n\nCrédit manuel, pas une vente — ne touche pas au CA ni au nb de commandes.')) return;
+    const btn = $('manualXpBtn');
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      const resp = await fetch('/api/profile?action=credit-xp-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + $('password').value.trim() },
+        body: JSON.stringify({ userId, xpAmount, reason }),
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        showResult('ok', '✅ +' + data.xpAdded + ' XP crédités manuellement. Nouveau total : ' + data.newXp + ' XP.');
+        lookupUser(userId);
+      } else {
+        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
+      }
+    } catch (err) {
+      showResult('err', '❌ ' + (err && err.message ? err.message : err));
+      btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
+    }
+  }
+
+  // ─── Historique du client (commandes + points consommés) ──────────
+  async function showClientHistory(userId) {
+    const box = $('history-box');
+    if (!box) return;
+    if (box.dataset.open === '1') { box.innerHTML = ''; box.dataset.open = '0'; return; }
+    box.innerHTML = '<div style="padding:12px 2px;color:#7f8a88;font-size:12px;">Chargement de l\'historique…</div>';
+    box.dataset.open = '1';
+    try {
+      const resp = await fetch('/api/orders?action=client-history&userId=' + encodeURIComponent(userId), {
+        headers: { 'Authorization': 'Bearer ' + $('password').value.trim() },
+      });
+      const d = await resp.json();
+      if (!resp.ok) { box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const fmt = (iso) => { const dt = new Date(iso); return isNaN(dt) ? '' : dt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }); };
+      const orders = (d.orders || []).map((o) => {
+        const items = (o.items || []).map((it) => (it.quantity > 1 ? it.quantity + '× ' : '') + esc(it.product_name)).join(', ');
+        const eur = (o.total_cents / 100).toFixed(2).replace('.', ',');
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(94,234,212,.08);">' +
+          '<span style="flex:1;min-width:0;"><b style="color:#94b8b1;">' + fmt(o.paid_at || o.created_at) + '</b> · ' + (items || '<i style="color:#7f8a88;">détail non dispo</i>') + '</span>' +
+          '<span style="color:#5eead4;white-space:nowrap;">' + eur + '€</span></div>';
+      }).join('');
+      const reds = (d.rewards || []).map((r) =>
+        '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 0;">' +
+          '<span>🎁 ' + esc(r.reward_label) + ' <span style="color:#7f8a88;">(' + fmt(r.created_at) + ')</span></span>' +
+          '<span style="color:#f59e0b;white-space:nowrap;">−' + (r.xp_cost || 0) + ' XP</span></div>'
+      ).join('');
+      box.innerHTML =
+        '<div style="margin-top:12px;border-top:1px solid rgba(94,234,212,.15);padding-top:10px;">' +
+          '<div class="stat-label" style="margin-bottom:6px;">🧾 COMMANDES (' + (d.orders || []).length + ')</div>' +
+          (orders || '<div style="font-size:12px;color:#7f8a88;">Aucune commande.</div>') +
+          (reds ? '<div class="stat-label" style="margin:12px 0 4px;color:#f59e0b;">🎁 POINTS CONSOMMÉS</div>' + reds : '') +
+        '</div>';
+    } catch (err) {
+      box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + (err && err.message ? err.message : err) + '</div>';
+    }
   }
 
   async function creditXP(userId) {
@@ -352,6 +487,8 @@
     // Remise/cadeau coché(e) → on l'envoie pour la marquer utilisée atomiquement.
     const selected = document.querySelector('input[name="applyReward"]:checked');
     const wheelSpinId = selected && selected.value ? selected.value : null;
+    const combo = $('comboCheck') ? $('comboCheck').checked : false;
+    const note = $('saleNote') ? $('saleNote').value.trim().slice(0, 120) : '';
 
     const btn = $('creditBtn');
     btn.disabled = true;
@@ -360,7 +497,7 @@
       const resp = await fetch('/api/profile?action=credit-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-        body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', wheelSpinId }),
+        body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', wheelSpinId, combo, note }),
       });
       const data = await resp.json();
       if (resp.ok) {
