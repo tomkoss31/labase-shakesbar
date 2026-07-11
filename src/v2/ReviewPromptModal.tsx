@@ -4,7 +4,7 @@
 //   voir sa commande live, puis on demande l'avis discrètement)
 // - Persiste en localStorage : ne re-prompte pas le même appareil avant 30 jours
 // - Lien direct vers la page Google reviews (ouvre nouvel onglet)
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { Palette } from './palette';
 import { track } from '../lib/analytics';
 
@@ -45,35 +45,26 @@ export function ReviewPromptModal({
   googleReviewUrl,
   customerName,
 }: ReviewPromptModalProps) {
-  const [rating, setRating] = useState<number>(0);
-
-  useEffect(() => {
-    if (!open) setRating(0);
-  }, [open]);
-
   if (!open) return null;
 
-  function handleStarClick(stars: number) {
-    setRating(stars);
-    // Analytics : track le rating donné
-    if (stars === 5) track('review_5_stars');
-    else if (stars === 4) track('review_4_stars');
-    else track('review_low');
-    // Si 4 ou 5 étoiles → on envoie sur Google review
-    // Si 1-3 étoiles → on ouvre un mailto privé (feedback direct, pas public)
-    window.setTimeout(() => {
-      if (stars >= 4) {
-        window.open(googleReviewUrl, '_blank', 'noopener');
-      } else {
-        const subject = encodeURIComponent(`Retour ${stars}/5 — La Base Shakes`);
-        const body = encodeURIComponent(
-          `Salut ${customerName || ''} !\n\nDis-moi ce qui n'a pas été, j'apprécie le retour pour m'améliorer.\n\nTom`,
-        );
-        window.location.href = `mailto:hello@labase360.fr?subject=${subject}&body=${body}`;
-      }
-      markReviewPromptShown();
-      onClose();
-    }, 400);
+  // Conforme Google : on invite TOUT LE MONDE à laisser un avis (pas de filtre
+  // par note = fini le "review-gating" interdit). Le canal privé reste dispo
+  // pour ceux qui préfèrent, mais ne conditionne PAS l'accès à Google.
+  function handleReview() {
+    track('review_google_click');
+    markReviewPromptShown();
+    onClose();
+  }
+
+  function handleFeedback() {
+    track('review_feedback');
+    const subject = encodeURIComponent('Un retour sur ma visite — La Base');
+    const body = encodeURIComponent(
+      `Salut ${customerName || ''} !\n\nDis-moi ce que je peux améliorer, ton retour compte beaucoup.\n\nTom`,
+    );
+    window.location.href = `mailto:hello@labase360.fr?subject=${subject}&body=${body}`;
+    markReviewPromptShown();
+    onClose();
   }
 
   function handleSkip() {
@@ -145,64 +136,54 @@ export function ReviewPromptModal({
             lineHeight: 1.15,
           }}
         >
-          {customerName ? `Merci ${customerName} !` : 'Merci !'}
+          {customerName ? `Merci ${customerName} !` : 'Merci pour ta visite !'}
         </h2>
-        <div style={{ fontSize: 14, color: palette.textDim, marginBottom: 22, lineHeight: 1.5 }}>
-          Comment t'as trouvé ta commande ?<br />
-          Ton avis nous aide énormément 🙏
+        <div style={{ fontSize: 14, color: palette.textDim, marginBottom: 20, lineHeight: 1.5 }}>
+          Ton avis nous aide énormément à faire connaître le club 🙏<br />
+          Ça te prend 20 secondes.
         </div>
 
-        {/* 5 étoiles cliquables */}
-        <div
+        <a
+          href={googleReviewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleReview}
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 6,
-            marginBottom: 18,
+            display: 'block',
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: '15px',
+            background: palette.cta,
+            color: palette.ctaText,
+            borderRadius: 14,
+            fontFamily: 'Outfit, sans-serif',
+            fontWeight: 900,
+            fontSize: 16,
+            textDecoration: 'none',
+            marginBottom: 12,
           }}
         >
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => handleStarClick(star)}
-              onMouseEnter={() => setRating(star)}
-              onMouseLeave={() => setRating(0)}
-              aria-label={`${star} étoile${star > 1 ? 's' : ''}`}
-              style={{
-                background: 'transparent',
-                border: 0,
-                cursor: 'pointer',
-                padding: 4,
-                fontSize: 38,
-                lineHeight: 1,
-                filter: star <= rating ? 'none' : 'grayscale(1) opacity(.4)',
-                transform: star <= rating ? 'scale(1.1)' : 'scale(1)',
-                transition: 'transform .15s, filter .15s',
-              }}
-            >
-              ⭐
-            </button>
-          ))}
-        </div>
+          ⭐ Laisser un avis Google
+        </a>
 
-        <div
+        <button
+          onClick={handleFeedback}
           style={{
-            padding: 10,
-            background: palette.bg,
-            border: `1px solid ${palette.line}`,
-            borderRadius: 10,
-            fontSize: 11,
+            width: '100%',
+            padding: '8px',
+            background: 'transparent',
             color: palette.textDim,
-            lineHeight: 1.4,
-            marginBottom: 16,
+            border: 'none',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 600,
+            fontSize: 12.5,
+            cursor: 'pointer',
+            marginBottom: 6,
+            textDecoration: 'underline',
           }}
         >
-          {rating >= 4
-            ? '✨ Top ! On t\'envoie sur Google pour partager ça'
-            : rating > 0 && rating < 4
-              ? "💬 On t'envoie un mail direct pour qu'on s'améliore"
-              : 'Clique sur une étoile'}
-        </div>
+          Un souci ? Dis-le-nous en privé
+        </button>
 
         <button
           onClick={handleSkip}

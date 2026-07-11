@@ -388,6 +388,36 @@ function App() {
     }
   }, []);
 
+  // Avis in-app pour les clients COMPTOIR (90% du volume) : ils ouvrent l'app à
+  // chaque visite pour montrer leur QR. Quand leur nombre de commandes augmente
+  // depuis la dernière ouverture (= ils viennent de passer au comptoir), on
+  // propose l'avis au retour dans l'app. Conforme Google : demande à leur rythme,
+  // sans récompense, et sans filtrer par note (cf. ReviewPromptModal).
+  useEffect(() => {
+    const orders = appAuth.profile?.total_orders;
+    if (typeof orders !== 'number') return;
+    const KEY = 'labase_last_seen_orders';
+    let lastSeen: number | null = null;
+    try {
+      const raw = window.localStorage.getItem(KEY);
+      lastSeen = raw == null ? null : parseInt(raw, 10);
+    } catch {}
+    // Première fois sur cet appareil → on pose juste la référence, pas de prompt.
+    if (lastSeen == null || Number.isNaN(lastSeen)) {
+      try { window.localStorage.setItem(KEY, String(orders)); } catch {}
+      return;
+    }
+    if (orders > lastSeen) {
+      try { window.localStorage.setItem(KEY, String(orders)); } catch {}
+      // Pas en même temps que l'écran de remerciement du paiement en ligne.
+      if (shouldShowReviewPrompt() && !showThankYou) {
+        window.setTimeout(() => setShowReviewPrompt(true), 1600);
+      }
+    } else if (orders !== lastSeen) {
+      try { window.localStorage.setItem(KEY, String(orders)); } catch {}
+    }
+  }, [appAuth.profile?.total_orders, showThankYou]);
+
   useEffect(() => {
     if (!toastMessage) return;
     const timer = window.setTimeout(() => setToastMessage(null), 2400);

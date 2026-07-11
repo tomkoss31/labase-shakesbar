@@ -11,10 +11,9 @@ type EventName =
   | 'wheel_spun'         // roue cadeau utilisée
   | 'wheel_public_spun'  // roue publique utilisée
   | 'auth_signed_in'     // connexion réussie
-  | 'review_5_stars'     // 5 étoiles cliquées (redirection Google)
-  | 'review_4_stars'     // 4 étoiles
-  | 'review_low'         // 1-3 étoiles
-  | 'review_skipped'     // user a fermé le prompt
+  | 'review_google_click' // clic « Laisser un avis Google » (redirection)
+  | 'review_feedback'     // clic « Un souci ? Dis-le-nous » (mail privé)
+  | 'review_skipped'      // user a fermé le prompt
   | 'admin_console_open' // /console.html déverrouillée
   | 'qr_my_code_open'    // user ouvre son QR au comptoir
   | 'install_prompt_show'// PWA install banner shown
