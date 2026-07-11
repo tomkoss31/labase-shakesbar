@@ -273,26 +273,30 @@ export default async function handler(req: any, res: any) {
     if (!prof) return res.status(404).json({ error: 'Profil introuvable' });
     if (prof.welcome_sent) return res.status(200).json({ ok: true, already: true });
 
-    // Push + boîte de réception de bienvenue (best-effort, inline)
+    // CLAIM ATOMIQUE du flag AVANT d'envoyer. fetchProfile est appelé plusieurs
+    // fois au login (boot + onAuthStateChange) → sans ça, les appels concurrents
+    // passent tous le test « welcome_sent=false » et envoient N emails (bug des
+    // 3 mails). Le WHERE welcome_sent=false garantit qu'UN SEUL appel obtient une
+    // ligne (verrou ligne Postgres) → un seul envoi.
+    const { data: claimed } = await admin
+      .from('profiles')
+      .update({ welcome_sent: true, welcome_sent_at: new Date().toISOString() })
+      .eq('id', uid)
+      .eq('welcome_sent', false)
+      .select('id');
+    if (!claimed || claimed.length === 0) {
+      return res.status(200).json({ ok: true, already: true });
+    }
+
+    // On a « claim » le flag → on est le seul à envoyer (push + email).
     await sendWelcomePush(admin, uid);
 
-    // Email de bienvenue (best-effort, inline)
     const email = prof.email ?? userData.user.email ?? null;
     let emailResult: { ok: boolean; error?: string } = { ok: false, error: 'aucune adresse email' };
     if (email) emailResult = await sendWelcomeEmail(email, prof.first_name);
 
-    // Log de diagnostic (visible dans les logs Vercel)
     console.log('[welcome]', JSON.stringify({ uid, email, emailSent: emailResult.ok, emailError: emailResult.error ?? null }));
 
-    // On ne marque « accueilli » QUE si l'email est parti (ou s'il n'y a pas
-    // d'adresse). Sinon on laisse welcome_sent=false → nouvel essai au prochain
-    // login (évite de « brûler » le compte sur un échec temporaire de config).
-    if (emailResult.ok || !email) {
-      await admin
-        .from('profiles')
-        .update({ welcome_sent: true, welcome_sent_at: new Date().toISOString() })
-        .eq('id', uid);
-    }
     return res.status(200).json({
       ok: true,
       emailSent: emailResult.ok,
