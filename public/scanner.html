@@ -30,7 +30,16 @@
     background-clip: text;
   }
   .sub { color: #94b8b1; font-size: 13px; margin-bottom: 16px; }
-  .container { max-width: 540px; margin: 0 auto; }
+  .container { max-width: 980px; margin: 0 auto; }
+  /* Tablette (iPad 10") : on prend la largeur — 2 colonnes au lieu du format iPhone. */
+  .top-grid { display: flex; flex-direction: column; }
+  @media (min-width: 760px) {
+    .top-grid { display: grid; grid-template-columns: 300px 1fr; gap: 14px; align-items: start; }
+    #result { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+    #result > .scan-client-card { grid-column: 1 / -1; }
+    video { max-height: 520px; }
+    h1 { font-size: 34px; }
+  }
   .card {
     background: linear-gradient(135deg, #13302c, #0e1f1d);
     border: 1px solid rgba(94,234,212,.10);
@@ -107,6 +116,7 @@
   <h1>📷 Scanner comptoir</h1>
   <div class="sub">Scanne le QR du client pour voir ses XP et créditer une commande Square en caisse.</div>
 
+  <div class="top-grid">
   <div class="card">
     <label>Mot de passe admin</label>
     <input type="password" id="password" placeholder="ADMIN_PUSH_PASSWORD" autocomplete="current-password" />
@@ -129,6 +139,7 @@
       <input type="text" id="manualId" placeholder="UUID utilisateur ou code CASH-XXXX" />
       <button class="btn" id="manualLookup" style="margin-top: 8px;">Rechercher</button>
     </div>
+  </div>
   </div>
 
   <div id="result"></div>
@@ -334,7 +345,7 @@
     }).join('');
 
     $('result').innerHTML =
-      '<div class="card" style="border-color: #14b8a6;">' +
+      '<div class="card scan-client-card" style="border-color: #14b8a6;">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
           '<div style="min-width:0;">' +
             '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
