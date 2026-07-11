@@ -270,12 +270,48 @@
     }
   }
 
+  // Détail visuel d'une remise/cadeau selon son type (comme dans l'app).
+  function rewardMeta(r) {
+    if (r.reward_type === 'discount_percent') return { icon: '💸', big: '−' + r.reward_value + '%', sub: 'Remise à appliquer sur la tablette Square' };
+    if (r.reward_type === 'free_product') return { icon: '🥤', big: (r.reward_value || r.reward_label), sub: 'Produit OFFERT à donner' };
+    if (r.reward_type === 'manual_pickup') return { icon: '🎁', big: r.reward_label, sub: 'Cadeau à remettre au comptoir' };
+    if (r.reward_type === 'xp_multiplier') return { icon: '🚀', big: 'XP ×' + r.reward_value, sub: 'Automatique — rien à faire' };
+    return { icon: '🎁', big: r.reward_label, sub: '' };
+  }
+
   function renderProfile(p, rewards) {
     const name = p.first_name || '(prénom non renseigné)';
     const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
-    const rewardsHtml = (rewards || []).map(r =>
-      '<span class="reward-pill">🎁 ' + r.reward_label + ' · ' + r.reward_code + '</span>'
-    ).join('');
+    const active = rewards || [];
+
+    // Remises/cadeaux SÉLECTIONNABLES : celui coché est marqué "utilisé"
+    // atomiquement à l'encaissement (credit-manual → wheelSpinId).
+    let rewardsBlock = '';
+    if (active.length) {
+      rewardsBlock =
+        '<div style="margin: 2px 0 12px;">' +
+        '<div class="stat-label" style="margin-bottom: 8px; color:#f59e0b;">🎟️ REMISES / CADEAUX ACTIFS — coche celle que tu appliques</div>' +
+        active.map((r) => {
+          const m = rewardMeta(r);
+          const exp = r.expires_at ? new Date(r.expires_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '';
+          return (
+            '<label style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid rgba(245,158,11,.35); border-radius:12px; margin-bottom:8px; cursor:pointer; background:#04100f;">' +
+              '<input type="radio" name="applyReward" value="' + r.id + '" style="width:22px; height:22px; flex:none; accent-color:#f59e0b;" />' +
+              '<span style="font-size:26px;">' + m.icon + '</span>' +
+              '<span style="flex:1; min-width:0;">' +
+                '<span style="font-family:Outfit; font-weight:900; font-size:22px; color:#f59e0b;">' + m.big + '</span>' +
+                '<span style="display:block; font-size:12px; color:#ecfdf5; margin-top:1px;">' + r.reward_label + '</span>' +
+                '<span style="display:block; font-size:10.5px; color:#94b8b1;">' + m.sub + (exp ? ' · exp. ' + exp : '') + ' · ' + r.reward_code + '</span>' +
+              '</span>' +
+            '</label>'
+          );
+        }).join('') +
+        '<label style="display:flex; align-items:center; gap:12px; padding:8px 12px; cursor:pointer;">' +
+          '<input type="radio" name="applyReward" value="" checked style="width:22px; height:22px; flex:none; accent-color:#94b8b1;" />' +
+          '<span style="font-size:13px; color:#94b8b1;">Aucune remise sur cette commande</span>' +
+        '</label>' +
+        '</div>';
+    }
 
     $('result').innerHTML =
       '<div class="card" style="border-color: #14b8a6;">' +
@@ -288,15 +324,15 @@
           '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
           '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
         '</div>' +
-        (rewardsHtml ? '<div style="margin-top: 12px;"><div class="stat-label" style="margin-bottom: 6px;">CODES ACTIFS</div>' + rewardsHtml + '</div>' : '') +
       '</div>' +
       '<div class="card">' +
-        '<label>💳 Crédit XP après paiement Square caisse</label>' +
-        '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
+        '<label>💳 Encaissement Square caisse + crédit XP</label>' +
+        rewardsBlock +
+        (active.length ? '<div style="font-size:11.5px; color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:8px 10px; margin-bottom:10px; line-height:1.45;">⚠️ Applique la remise/le cadeau <b>sur la tablette Square</b> d\'abord, PUIS coche-la ici et encaisse → elle sera marquée utilisée (non réutilisable).</div>' : '') +
+        '<input type="number" id="amount" placeholder="Montant encaissé en € (ex: 8.90)" step="0.10" min="0" />' +
         '<button class="btn btn-teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
         '<div style="font-size: 11px; color: #94b8b1; margin-top: 8px; line-height: 1.5;">' +
-          'Saisis le montant total que tu viens d\'encaisser sur Square en caisse pour ce client.' +
-          ' Ses XP seront crédités automatiquement (10 XP / € + 50 XP / cmd).' +
+          'Montant total encaissé sur Square. XP crédités auto (10 XP / € + 50 XP / cmd). La remise cochée est marquée utilisée.' +
         '</div>' +
       '</div>';
 
@@ -313,6 +349,10 @@
     }
     const amountCents = Math.round(euros * 100);
 
+    // Remise/cadeau coché(e) → on l'envoie pour la marquer utilisée atomiquement.
+    const selected = document.querySelector('input[name="applyReward"]:checked');
+    const wheelSpinId = selected && selected.value ? selected.value : null;
+
     const btn = $('creditBtn');
     btn.disabled = true;
     btn.textContent = '…';
@@ -320,11 +360,11 @@
       const resp = await fetch('/api/profile?action=credit-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-        body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos' }),
+        body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', wheelSpinId }),
       });
       const data = await resp.json();
       if (resp.ok) {
-        showResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.');
+        showResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.' + (wheelSpinId ? ' 🎟️ Remise marquée utilisée.' : ''));
         lookupUser(userId); // refresh
       } else {
         showResult('err', '❌ ' + (data.error || 'Erreur'));
