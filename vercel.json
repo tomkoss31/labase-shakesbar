@@ -3,6 +3,8 @@
   "rewrites": [
     { "source": "/jeu", "destination": "/jeu.html" },
     { "source": "/console", "destination": "/console.html" },
+    { "source": "/scanner", "destination": "/scanner.html" },
+    { "source": "/comptoir", "destination": "/comptoir.html" },
     { "source": "/mentions-legales", "destination": "/mentions-legales.html" },
     { "source": "/confidentialite", "destination": "/confidentialite.html" },
     { "source": "/club", "destination": "/club.html" },

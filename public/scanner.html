@@ -113,9 +113,12 @@
   </div>
 
   <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <label style="margin-bottom: 0;">📷 Caméra arrière</label>
-      <button class="btn-secondary" id="toggleCam" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Démarrer</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px;">
+      <label style="margin-bottom: 0;" id="camLabel">📷 Caméra</label>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-secondary" id="flipCam" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;" title="Basculer avant / arrière">🔄 Avant/Arrière</button>
+        <button class="btn-secondary" id="toggleCam" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Démarrer</button>
+      </div>
     </div>
     <div class="scanner-zone" id="scannerZone" style="display: none;">
       <video id="video" autoplay playsinline muted></video>
@@ -146,10 +149,26 @@
   let lastScanned = '';
   let lastScannedAt = 0;
 
+  // Caméra avant (client, ex: iPad posé dans le socle Square) ou arrière (téléphone).
+  // Mémorisé par appareil : l'iPad du comptoir garde "avant", ton tel garde "arrière".
+  const FACING_KEY = 'labase-scanner-facing';
+  let currentFacing = 'environment';
+  try { currentFacing = localStorage.getItem(FACING_KEY) || 'environment'; } catch {}
+
+  function updateCamLabel() {
+    $('camLabel').textContent = currentFacing === 'user'
+      ? '📷 Caméra avant (face au client)'
+      : '📷 Caméra arrière';
+    // Miroir visuel pour la caméra avant (n'affecte pas le décodage, qui lit l'image brute)
+    $('video').style.transform = currentFacing === 'user' ? 'scaleX(-1)' : 'none';
+  }
+  updateCamLabel();
+
   async function startCamera() {
     try {
+      if (stream) stream.getTracks().forEach((t) => t.stop());
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode: currentFacing },
         audio: false,
       });
       const video = $('video');
@@ -162,6 +181,14 @@
       showResult('err', '❌ Accès caméra refusé : ' + err.message);
     }
   }
+
+  // Bascule avant/arrière (redémarre le flux si la caméra tourne déjà)
+  $('flipCam').addEventListener('click', async () => {
+    currentFacing = currentFacing === 'user' ? 'environment' : 'user';
+    try { localStorage.setItem(FACING_KEY, currentFacing); } catch {}
+    updateCamLabel();
+    if (stream) { await startCamera(); }
+  });
 
   function stopCamera() {
     if (stream) stream.getTracks().forEach((t) => t.stop());
