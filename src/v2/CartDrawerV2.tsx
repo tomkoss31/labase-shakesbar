@@ -1091,7 +1091,7 @@ export function CartDrawerV2({
             {onPayOnSite && (
               <button
                 onClick={onPayOnSite}
-                disabled={!hasRequiredPickupInfo}
+                disabled={customerName.trim().length === 0}
                 style={{
                   width: '100%',
                   marginTop: 8,
@@ -1104,7 +1104,7 @@ export function CartDrawerV2({
                   fontSize: 13,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  opacity: !hasRequiredPickupInfo ? 0.4 : 1,
+                  opacity: customerName.trim().length === 0 ? 0.4 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1124,7 +1124,9 @@ export function CartDrawerV2({
                   textAlign: 'center',
                 }}
               >
-                Renseigne ton prénom et l'heure de retrait
+                {customerName.trim().length === 0
+                  ? 'Renseigne ton prénom pour commander'
+                  : "Ajoute une heure de retrait pour payer en ligne — pas besoin pour les espèces sur place"}
               </div>
             )}
           </div>

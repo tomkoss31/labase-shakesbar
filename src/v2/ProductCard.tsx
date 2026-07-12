@@ -128,7 +128,7 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
               e.stopPropagation();
               onAdd(e);
             }}
-            aria-label={`Ajouter ${product.name} au panier`}
+            aria-label={`Choisir ${product.name}`}
             style={{
               width: 34,
               height: 34,

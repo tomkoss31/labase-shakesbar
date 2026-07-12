@@ -1013,8 +1013,10 @@ function App() {
       window.alert('Ton panier est vide.');
       return;
     }
-    if (!hasRequiredPickupInfo) {
-      window.alert('Merci de renseigner ton prénom et l\'heure de retrait.');
+    // Espèces sur place : le prénom suffit (on encaisse au comptoir). L'heure de
+    // retrait reste optionnelle — inutile de bloquer un paiement immédiat.
+    if (customerName.trim().length === 0) {
+      window.alert('Merci de renseigner ton prénom.');
       return;
     }
     setIsCreatingPendingCash(true);

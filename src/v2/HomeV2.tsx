@@ -14,7 +14,6 @@ import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
 import { WheelModal } from './wheel/WheelModal';
 import type { HeaderTab } from './Header';
-import { useFlyAnimation, colorForCategory } from './FlyAnimation';
 import { useAuth } from './auth/useAuth';
 import { AuthModal } from './auth/AuthModal';
 import { ProfileSheet } from './auth/ProfileSheet';
@@ -159,7 +158,6 @@ export function HomeV2({
     return () => window.clearTimeout(t);
   }, [push.loading, push.subscribed, onboardingOpen]);
 
-  const { overlay: flyOverlay, trigger: triggerFly } = useFlyAnimation(palette);
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);
   const mascotteLevel = computeMascotteLevel(xp);
@@ -335,13 +333,10 @@ export function HomeV2({
 
   function handleAddProduct(product: V2Product) {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
-      const btn = e.currentTarget;
-      // Anim signature : gouttelette + éclaboussures depuis le bouton vers le panier
-      triggerFly(btn, colorForCategory(product.categoryId, palette));
-      // Léger délai pour laisser apparaître l'animation avant la modale
-      window.setTimeout(() => {
-        onAddProduct(product, btn);
-      }, 320);
+      // Le « + » ouvre la modale d'options (taille / extras) : c'est là que
+      // l'ajout au panier se fait vraiment. Pas d'animation « vole vers le
+      // panier » ici — elle laissait croire à un ajout direct qui n'a pas lieu.
+      onAddProduct(product, e.currentTarget);
     };
   }
 
@@ -841,9 +836,6 @@ export function HomeV2({
 
       {/* Roue cadeau (ouverte depuis les actions rapides) */}
       <WheelModal palette={palette} open={wheelOpen} onClose={() => setWheelOpen(false)} isAdmin={isAdmin} />
-
-      {/* Animation FlyingDrop signature ajout panier */}
-      {flyOverlay}
 
       {/* Modale auth — email + mot de passe */}
       <AuthModal
