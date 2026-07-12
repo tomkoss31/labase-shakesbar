@@ -78,14 +78,18 @@ async function archiveNotification(
 }
 
 export default async function handler(req: any, res: any) {
-  // Auth optionnelle via CRON_SECRET (auto-envoyé par Vercel Cron)
+  // Auth OBLIGATOIRE via CRON_SECRET. Vercel Cron l'envoie automatiquement en
+  // Bearer quand la variable est définie côté Vercel. Fail-closed : sans secret
+  // configuré, on refuse — sinon /api/cron?type=relance|birthday serait ouvert à
+  // tous = déclenchement de push + emails de masse (spam clients, quotas explosés).
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers?.authorization ?? '';
-    const provided = authHeader.replace(/^Bearer\s+/, '').trim();
-    if (provided !== cronSecret) {
-      return res.status(401).json({ error: 'Non autorisé' });
-    }
+  if (!cronSecret) {
+    return res.status(500).json({ error: 'CRON_SECRET non configuré côté serveur' });
+  }
+  const authHeader = req.headers?.authorization ?? '';
+  const provided = authHeader.replace(/^Bearer\s+/, '').trim();
+  if (provided !== cronSecret) {
+    return res.status(401).json({ error: 'Non autorisé' });
   }
 
   const type = getQuery(req, 'type');
