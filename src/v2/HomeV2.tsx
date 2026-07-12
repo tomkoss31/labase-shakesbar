@@ -439,6 +439,7 @@ export function HomeV2({
             level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
             xp={xp}
             xpNext={next.xp}
+            nextLevel={next.name}
             onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
             onOpenRewards={() => setRewardsOpen(true)}
           />

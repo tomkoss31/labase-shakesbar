@@ -8,6 +8,7 @@ interface XpCardProps {
   level?: string;
   xp?: number;
   xpNext?: number;
+  nextLevel?: string;
   firstName?: string;
   connected?: boolean;
   onConnect?: () => void;
@@ -19,12 +20,14 @@ export function XpCard({
   level = 'Apprenti',
   xp = 0,
   xpNext = 500,
+  nextLevel = 'Régulier',
   firstName,
   connected = false,
   onConnect,
   onOpenRewards,
 }: XpCardProps) {
   const pct = Math.min(100, (xp / xpNext) * 100);
+  const maxed = xp >= xpNext; // palier le plus haut atteint
   const mascotteLevel = pct > 80 ? 'pro' : pct > 40 ? 'regulier' : 'apprenti';
 
   return (
@@ -59,7 +62,7 @@ export function XpCard({
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, color: palette.textDim, fontWeight: 500 }}>
-              Salut {firstName ?? ''} 👋
+              Salut{firstName ? ` ${firstName}` : ''} 👋
             </div>
             <div
               style={{
@@ -161,8 +164,16 @@ export function XpCard({
               }}
             >
               <span>
-                {xpNext - xp} XP avant{' '}
-                <b style={{ color: palette.text, fontWeight: 700 }}>Régulier</b>
+                {maxed ? (
+                  <>
+                    Palier max <b style={{ color: palette.text, fontWeight: 700 }}>{nextLevel}</b> 🔥
+                  </>
+                ) : (
+                  <>
+                    {xpNext - xp} XP avant{' '}
+                    <b style={{ color: palette.text, fontWeight: 700 }}>{nextLevel}</b>
+                  </>
+                )}
               </span>
               <span style={{ color: palette.primary, fontWeight: 700 }}>
                 Mes récompenses →
