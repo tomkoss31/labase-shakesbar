@@ -394,7 +394,7 @@ export default async function handler(req: any, res: any) {
     const withItems = (orders ?? []).map((o: any) => ({
       ...o,
       items: itemsByOrder[o.id] ?? [],
-      xpEstimate: Math.round((o.total_cents || 0) / 10) + 50,
+      xpEstimate: Math.floor((o.total_cents || 0) / 100) * 10 + 50,
     }));
 
     const { data: rewards } = await clients.admin
@@ -743,7 +743,7 @@ export default async function handler(req: any, res: any) {
     // XP gagnés sur cette commande : non stockés → estimation (10 XP/€ + 50 de
     // bonus commande). Les multiplicateurs (mardi/roue) ne sont pas connus a
     // posteriori, d'où le « ≈ ».
-    const xpEstimate = Math.round((order.total_cents || 0) / 10) + 50;
+    const xpEstimate = Math.floor((order.total_cents || 0) / 100) * 10 + 50;
 
     return res.status(200).json({ order, items: items ?? [], client, rewards, xpEstimate });
   }

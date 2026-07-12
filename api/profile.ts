@@ -543,7 +543,11 @@ export default async function handler(req: any, res: any) {
     }
 
     const isFirstOrder = profile.total_orders === 0;
-    const isCombo = body?.combo === true;
+    // Nombre de combos (cohérent avec CB/espèces = combo_count × 25). Accepte un
+    // comboCount explicite ; sinon le booléen combo historique compte pour 1.
+    const comboCount = Number.isFinite(Number(body?.comboCount)) && Number(body?.comboCount) > 0
+      ? Math.floor(Number(body.comboCount))
+      : (body?.combo === true ? 1 : 0);
     const eurosSpent = Math.floor(amountCents / 100);
     // Mardi Double XP (jour creux → ramène du monde). getUTCDay: 2 = mardi.
     // Le bar opère en journée → UTC = même jour qu'à Paris, fiable.
@@ -551,7 +555,7 @@ export default async function handler(req: any, res: any) {
     // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant.
     const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
     const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1);
-    const comboBonus = isCombo ? 25 : 0;
+    const comboBonus = comboCount * 25;
     const xpGained = xpFromEuros + 50 + comboBonus + (isFirstOrder ? 200 : 0);
 
     const newTotalSpent = profile.total_spent_cents + amountCents;
