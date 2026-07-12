@@ -926,23 +926,19 @@ export default async function handler(req: any, res: any) {
           /* ne bloque jamais l'encaissement */
         }
 
-        // Récompense parrainage à la 1ère commande payée (gardé)
+        // Récompense parrainage à la 1ère commande payée. Claim ATOMIQUE du flag
+        // (WHERE referral_rewarded=false) : un seul appel concurrent gagne → pas
+        // de double +500. Crédit parrain via add_xp (incrément atomique).
         if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
           try {
-            const { data: sponsor } = await clients.admin
+            const { data: claimedRef } = await clients.admin
               .from('profiles')
-              .select('xp')
-              .eq('id', profile.referred_by)
-              .single();
-            if (sponsor) {
-              await clients.admin
-                .from('profiles')
-                .update({ xp: (sponsor.xp ?? 0) + 500 })
-                .eq('id', profile.referred_by);
-              await clients.admin
-                .from('profiles')
-                .update({ referral_rewarded: true })
-                .eq('id', order.user_id);
+              .update({ referral_rewarded: true })
+              .eq('id', order.user_id)
+              .eq('referral_rewarded', false)
+              .select('id');
+            if (claimedRef && claimedRef.length > 0) {
+              await clients.admin.rpc('add_xp', { p_user: profile.referred_by, p_amount: 500 });
             }
           } catch (err: any) {
             console.warn('[mark-paid] referral reward failed:', err?.message);
@@ -1037,22 +1033,15 @@ export default async function handler(req: any, res: any) {
     const reward = rewardId ? REWARDS[rewardId] : null;
     if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
 
-    const { data: profile, error: pErr } = await clients.admin
-      .from('profiles')
-      .select('xp')
-      .eq('id', userId)
-      .single();
-    if (pErr || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
-    if (profile.xp < reward.cost) {
-      return res.status(400).json({ error: `XP insuffisants (${profile.xp}/${reward.cost})` });
+    // Débit ATOMIQUE (anti double-cadeau en concurrence). NULL = XP insuffisants.
+    const { data: newXp, error: spendErr } = await clients.admin.rpc('spend_xp', {
+      p_user: userId,
+      p_cost: reward.cost,
+    });
+    if (spendErr) return res.status(500).json({ error: spendErr.message });
+    if (newXp === null || typeof newXp !== 'number') {
+      return res.status(400).json({ error: 'XP insuffisants' });
     }
-
-    const newXp = profile.xp - reward.cost;
-    const { error: uErr } = await clients.admin
-      .from('profiles')
-      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
-      .eq('id', userId);
-    if (uErr) return res.status(500).json({ error: uErr.message });
 
     await clients.admin.from('reward_redemptions').insert({
       user_id: userId,

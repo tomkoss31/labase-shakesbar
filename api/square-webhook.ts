@@ -246,6 +246,19 @@ export default async function handler(req: any, res: any) {
 
   // Crédit XP si utilisateur identifié
   if (userId) {
+    // Claim ATOMIQUE du crédit : on ne crédite que si xp_credited bascule
+    // false→true. Si un autre event Square (created/updated) l'a déjà fait en
+    // parallèle, ce claim renvoie 0 ligne → on ne double PAS les XP.
+    const { data: claimedCredit } = await supabase
+      .from('orders')
+      .update({ xp_credited: true })
+      .eq('id', order.id)
+      .eq('xp_credited', false)
+      .select('id');
+    if (!claimedCredit || claimedCredit.length === 0) {
+      return res.status(200).json({ ok: true, alreadyCredited: true });
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('first_name, total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
@@ -304,20 +317,15 @@ export default async function handler(req: any, res: any) {
       // l'enregistrement du paiement (déjà fait au-dessus).
       if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
         try {
-          const { data: sponsor } = await supabase
+          // Claim ATOMIQUE du flag (anti double +500) + crédit parrain atomique.
+          const { data: claimedRef } = await supabase
             .from('profiles')
-            .select('xp')
-            .eq('id', profile.referred_by)
-            .single();
-          if (sponsor) {
-            await supabase
-              .from('profiles')
-              .update({ xp: (sponsor.xp ?? 0) + 500 })
-              .eq('id', profile.referred_by);
-            await supabase
-              .from('profiles')
-              .update({ referral_rewarded: true })
-              .eq('id', userId);
+            .update({ referral_rewarded: true })
+            .eq('id', userId)
+            .eq('referral_rewarded', false)
+            .select('id');
+          if (claimedRef && claimedRef.length > 0) {
+            await supabase.rpc('add_xp', { p_user: profile.referred_by, p_amount: 500 });
           }
         } catch (err: any) {
           console.warn('[square-webhook] referral reward failed:', err?.message);

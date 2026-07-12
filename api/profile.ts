@@ -587,20 +587,15 @@ export default async function handler(req: any, res: any) {
     // ne doit JAMAIS perturber l'encaissement (déjà fait au-dessus).
     if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
       try {
-        const { data: sponsor } = await admin
+        // Claim ATOMIQUE du flag (anti double +500) + crédit parrain atomique.
+        const { data: claimedRef } = await admin
           .from('profiles')
-          .select('xp')
-          .eq('id', profile.referred_by)
-          .single();
-        if (sponsor) {
-          await admin
-            .from('profiles')
-            .update({ xp: (sponsor.xp ?? 0) + 500 })
-            .eq('id', profile.referred_by);
-          await admin
-            .from('profiles')
-            .update({ referral_rewarded: true })
-            .eq('id', userId);
+          .update({ referral_rewarded: true })
+          .eq('id', userId)
+          .eq('referral_rewarded', false)
+          .select('id');
+        if (claimedRef && claimedRef.length > 0) {
+          await admin.rpc('add_xp', { p_user: profile.referred_by, p_amount: 500 });
         }
       } catch (err: any) {
         console.warn('[credit-manual] referral reward failed:', err?.message);
@@ -695,23 +690,16 @@ export default async function handler(req: any, res: any) {
     const reward = REWARDS[rewardId];
     if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
 
-    const { data: profile, error: profileError } = await admin
-      .from('profiles')
-      .select('xp')
-      .eq('id', userId)
-      .single();
-    if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
-
-    if (profile.xp < reward.cost) {
-      return res.status(400).json({ error: `XP insuffisants (${profile.xp}/${reward.cost})` });
+    // Débit ATOMIQUE (anti double-cadeau en concurrence). Renvoie NULL si XP
+    // insuffisants ou user inconnu → on ne journalise PAS le cadeau.
+    const { data: newXp, error: spendErr } = await admin.rpc('spend_xp', {
+      p_user: userId,
+      p_cost: reward.cost,
+    });
+    if (spendErr) return res.status(500).json({ error: spendErr.message });
+    if (newXp === null || typeof newXp !== 'number') {
+      return res.status(400).json({ error: 'XP insuffisants' });
     }
-
-    const newXp = profile.xp - reward.cost;
-    const { error: updateError } = await admin
-      .from('profiles')
-      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
-      .eq('id', userId);
-    if (updateError) return res.status(500).json({ error: updateError.message });
 
     // Journalise le cadeau offert (suivi stock, séparé du CA Square)
     const source = typeof body?.source === 'string' ? body.source : 'comptoir';
