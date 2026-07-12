@@ -31,6 +31,7 @@ import { useCart, type CartItem } from './v2/cart/useCart';
 import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
+import { tryAcquirePrompt, releasePrompt } from './v2/promptLock';
 import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
@@ -379,7 +380,11 @@ function App() {
         // (laisse au user le temps de voir le live tracking d'abord),
         // avec cooldown 30j pour ne pas re-demander trop souvent.
         if (shouldShowReviewPrompt()) {
-          window.setTimeout(() => setShowReviewPrompt(true), 8000);
+          window.setTimeout(() => {
+            // Une seule pop-up auto à la fois (cf. push d'activation).
+            if (!shouldShowReviewPrompt() || !tryAcquirePrompt('review')) return;
+            setShowReviewPrompt(true);
+          }, 8000);
         }
       }
 
@@ -411,7 +416,11 @@ function App() {
       try { window.localStorage.setItem(KEY, String(orders)); } catch {}
       // Pas en même temps que l'écran de remerciement du paiement en ligne.
       if (shouldShowReviewPrompt() && !showThankYou) {
-        window.setTimeout(() => setShowReviewPrompt(true), 1600);
+        window.setTimeout(() => {
+          // Une seule pop-up auto à la fois (cf. push d'activation).
+          if (!shouldShowReviewPrompt() || !tryAcquirePrompt('review')) return;
+          setShowReviewPrompt(true);
+        }, 1600);
       }
     } else if (orders !== lastSeen) {
       try { window.localStorage.setItem(KEY, String(orders)); } catch {}
@@ -2735,7 +2744,10 @@ function App() {
           <ReviewPromptModal
             palette={activePalette}
             open={showReviewPrompt}
-            onClose={() => setShowReviewPrompt(false)}
+            onClose={() => {
+              setShowReviewPrompt(false);
+              releasePrompt('review');
+            }}
             googleReviewUrl={googleReviewUrl}
             customerName={customerName}
           />

@@ -205,7 +205,11 @@ export function ProfileSheet({
               />
             </div>
             <div style={{ fontSize: 10, color: palette.textDim, marginTop: 6 }}>
-              {next.xp - xp} XP avant <b style={{ color: palette.text }}>{next.name}</b>
+              {xp >= next.xp ? (
+                <>Palier max <b style={{ color: palette.text }}>{next.name}</b> 🔥</>
+              ) : (
+                <>{next.xp - xp} XP avant <b style={{ color: palette.text }}>{next.name}</b></>
+              )}
             </div>
           </div>
 

@@ -23,6 +23,7 @@ import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
 import { usePushNotifications } from './notifications/usePushNotifications';
 import { PushActivationModal } from './PushActivationModal';
+import { tryAcquirePrompt, releasePrompt } from './promptLock';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
 import {
   V2_POPULAR,
@@ -150,6 +151,9 @@ export function HomeV2({
       if (sessionStorage.getItem('labase_push_prompt') === '1') return;
     } catch {}
     const t = window.setTimeout(() => {
+      // Une seule pop-up auto à la fois : si l'avis Google occupe déjà l'écran,
+      // on laisse tomber le push pour cette session (il revient chaque session).
+      if (!tryAcquirePrompt('push')) return;
       setPushModalOpen(true);
       try {
         sessionStorage.setItem('labase_push_prompt', '1');
@@ -913,7 +917,10 @@ export function HomeV2({
       <PushActivationModal
         palette={palette}
         open={pushModalOpen}
-        onClose={() => setPushModalOpen(false)}
+        onClose={() => {
+          setPushModalOpen(false);
+          releasePrompt('push');
+        }}
         permission={push.permission}
         supported={push.supported}
         loading={push.loading}
