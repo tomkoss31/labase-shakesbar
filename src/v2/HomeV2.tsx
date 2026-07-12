@@ -465,6 +465,28 @@ export function HomeV2({
             >
               🥤 Commander
             </button>
+            {/* Preuve sociale : note Google (ouvre les avis). Pas de récompense. */}
+            {onLeaveReview && (
+              <div
+                onClick={onLeaveReview}
+                role="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 7,
+                  marginTop: 11,
+                  cursor: 'pointer',
+                  fontSize: 12.5,
+                  color: palette.textDim,
+                }}
+              >
+                <span style={{ color: '#fbbf24', letterSpacing: 1, fontSize: 13 }}>★★★★★</span>
+                <span>
+                  <b style={{ color: palette.text }}>4,9</b> sur Google · avis vérifiés
+                </span>
+              </div>
+            )}
           </div>
           {onReorder && (
             <ReorderCard palette={palette} isAuthed={isAuthed} onReorder={onReorder} />
