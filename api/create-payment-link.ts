@@ -271,6 +271,33 @@ export default async function handler(req: any, res: any) {
         ? bodyPayload.pickupTime.trim().slice(0, 10)
         : null;
 
+    // ── AUTH ── Pour dépenser des XP ou utiliser un code roue, on EXIGE le JWT
+    // du client et on dérive son identité du token VÉRIFIÉ — jamais du userEmail
+    // du body (sinon on pourrait brûler les XP/codes d'un AUTRE client). Un
+    // paiement sans XP ni code (invité) reste possible sans token.
+    let authUserId: string | null = null;
+    {
+      const token = (req.headers?.authorization ?? '').replace(/^Bearer\s+/, '').trim();
+      if (token) {
+        const sUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+        const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+        if (sUrl && anonKey) {
+          try {
+            const { createClient } = await import('@supabase/supabase-js');
+            const pub = createClient(sUrl, anonKey, {
+              auth: { persistSession: false, autoRefreshToken: false },
+            });
+            const { data: u } = await pub.auth.getUser(token);
+            if (u?.user) authUserId = u.user.id;
+          } catch { /* token invalide → authUserId reste null */ }
+        }
+      }
+    }
+    const wantsToSpend = requestedXpToSpend > 0 || !!rewardCode;
+    if (wantsToSpend && !authUserId) {
+      return res.status(401).json({ error: 'Connexion requise pour utiliser tes XP ou un code cadeau.' });
+    }
+
     // Application du reward code roue (discount_percent uniquement pour l'instant)
     // - Vérifie en DB que le code existe, n'est pas utilisé, n'est pas expiré
     // - Calcule la réduction
@@ -280,7 +307,7 @@ export default async function handler(req: any, res: any) {
     let rewardDiscount: any = null;
     let rewardSpinId: string | null = null;
 
-    if (rewardCode && userEmail) {
+    if (rewardCode && authUserId) {
       const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
       const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       if (supabaseUrl && serviceKey) {
@@ -294,7 +321,7 @@ export default async function handler(req: any, res: any) {
           const { data: profile } = await admin
             .from('profiles')
             .select('id, total_orders')
-            .eq('email', userEmail)
+            .eq('id', authUserId)
             .maybeSingle();
 
           if (profile?.id) {
@@ -402,7 +429,7 @@ export default async function handler(req: any, res: any) {
     let xpUserIdToDebit: string | null = null;
     let xpDiscount: any = null;
 
-    if (requestedXpToSpend > 0 && userEmail) {
+    if (requestedXpToSpend > 0 && authUserId) {
       const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
       const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       if (supabaseUrl && serviceKey) {
@@ -415,7 +442,7 @@ export default async function handler(req: any, res: any) {
           const { data: profile } = await admin
             .from('profiles')
             .select('id, xp')
-            .eq('email', userEmail)
+            .eq('id', authUserId)
             .maybeSingle();
 
           if (profile?.id) {
@@ -579,16 +606,8 @@ export default async function handler(req: any, res: any) {
           const admin = createClient(supabaseUrl, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
-          // Refetch puis update (évite race condition)
-          const { data: prof } = await admin
-            .from('profiles')
-            .select('xp')
-            .eq('id', xpUserIdToDebit)
-            .single();
-          if (prof) {
-            const newXp = Math.max(0, prof.xp - xpSpent);
-            await admin.from('profiles').update({ xp: newXp }).eq('id', xpUserIdToDebit);
-          }
+          // Débit ATOMIQUE via spend_xp (décrément conditionnel en une requête).
+          await admin.rpc('spend_xp', { p_user: xpUserIdToDebit, p_cost: xpSpent });
         }
       } catch (err: any) {
         console.warn('[create-payment-link] xp debit failed:', err?.message);
@@ -605,10 +624,13 @@ export default async function handler(req: any, res: any) {
           const admin = createClient(supabaseUrl, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
+          // Garde .is('used_at', null) : ne marque (et donc ne "consomme") le code
+          // que s'il n'est pas déjà utilisé → pas de double-consommation en course.
           await admin
             .from('wheel_spins')
             .update({ used_at: new Date().toISOString() })
-            .eq('id', rewardSpinId);
+            .eq('id', rewardSpinId)
+            .is('used_at', null);
         }
       } catch (err: any) {
         console.warn('[create-payment-link] mark used failed:', err?.message);

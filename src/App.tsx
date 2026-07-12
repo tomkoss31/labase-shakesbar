@@ -1071,9 +1071,15 @@ function App() {
       const userEmail: string | undefined =
         appAuth.email ?? getStoredSession()?.user.email ?? undefined;
 
+      // Token du client authentifié : le serveur EXIGE ce JWT pour dépenser des
+      // XP / utiliser un code (il en dérive l'identité au lieu du userEmail).
+      const sessionToken = getStoredSession()?.access_token;
       const response = await fetch('/api/create-payment-link', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+        },
         body: JSON.stringify({
           cart,
           customerName,
