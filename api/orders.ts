@@ -794,12 +794,33 @@ export default async function handler(req: any, res: any) {
     const pickupTime = typeof body?.pickupTime === 'string' ? body.pickupTime : null;
     const userEmail = typeof body?.userEmail === 'string' ? body.userEmail.trim().toLowerCase() : null;
 
+    // Le prix vient du panier client. On ne duplique pas le catalogue serveur
+    // (il change souvent → dérive), mais on borne les valeurs aberrantes : aucun
+    // article du menu ne dépasse ~16€ (combos) ni ~10 unités raisonnables. Ça
+    // bloque une inflation grossière du total (donc de l'XP créditée au mark-paid)
+    // sans jamais refuser une vraie commande. Le vrai garde-fou reste l'encaissement
+    // physique : le comptoir encaisse le montant affiché.
+    const MAX_UNIT_CENTS = 2500; // 25€ : au-dessus de tout article réel
+    const MAX_QTY = 30;
+    const MAX_TOTAL_CENTS = 30000; // 300€ : au-dessus de toute commande plausible
+    for (const item of cart) {
+      const qty = Number(item.quantity || 1);
+      const unit = Number(item.unitPriceCents || 0);
+      if (!Number.isFinite(qty) || qty <= 0 || qty > MAX_QTY) {
+        return res.status(400).json({ error: 'Quantité invalide' });
+      }
+      if (!Number.isFinite(unit) || unit <= 0 || unit > MAX_UNIT_CENTS) {
+        return res.status(400).json({ error: 'Prix article invalide' });
+      }
+    }
     const totalCents = cart.reduce((sum, item) => {
       const qty = Number(item.quantity || 1);
       const unit = Number(item.unitPriceCents || 0);
       return sum + qty * unit;
     }, 0);
-    if (totalCents <= 0) return res.status(400).json({ error: 'Total invalide' });
+    if (totalCents <= 0 || totalCents > MAX_TOTAL_CENTS) {
+      return res.status(400).json({ error: 'Total invalide' });
+    }
 
     let userId: string | null = null;
     if (userEmail) {
