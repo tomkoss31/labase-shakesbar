@@ -878,6 +878,12 @@ export default async function handler(req: any, res: any) {
 
     if (orderError || !order) return res.status(404).json({ error: 'Order non trouvée' });
     if (order.status === 'paid') return res.status(200).json({ ok: true, alreadyPaid: true });
+    // On ne crédite QUE depuis « espèces en attente ». Une commande annulée /
+    // remboursée / déjà en prépa ne doit pas être (re)transformée en payée +
+    // créditée en XP.
+    if (order.status !== 'pending_cash') {
+      return res.status(409).json({ error: `Commande non encaissable (statut : ${order.status})` });
+    }
 
     await clients.admin
       .from('orders')
@@ -894,7 +900,7 @@ export default async function handler(req: any, res: any) {
         const isFirstOrder = profile.total_orders === 0;
         const eurosSpent = Math.floor(order.total_cents / 100);
         // Mardi Double XP (cohérent avec le webhook Square carte)
-        const isTuesday = new Date().getUTCDay() === 2;
+        const isTuesday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getDay() === 2;
         // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant
         // (cohérent avec square-webhook.ts et credit-manual ; cumulable avec mardi)
         const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();

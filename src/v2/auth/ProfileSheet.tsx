@@ -217,7 +217,7 @@ export function ProfileSheet({
               {vipTier.label}
             </div>
             <div style={{ fontSize: 11, color: palette.textDim, marginTop: 6 }}>
-              {vipTier.discount > 0 ? `−${vipTier.discount}% permanent` : 'Pas d\'avantage actif'}
+              Plus tu viens, plus tu montes en grade 💚
             </div>
             {nextVip && (
               <div style={{ fontSize: 10, color: palette.textDim, marginTop: 4 }}>

@@ -269,7 +269,7 @@ export default async function handler(req: any, res: any) {
       const isFirstOrder = profile.total_orders === 0;
       const eurosSpent = Math.floor(totalCents / 100);
       // Mardi Double XP (cohérent avec le crédit comptoir)
-      const isTuesday = new Date().getUTCDay() === 2;
+      const isTuesday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getDay() === 2;
       // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant.
       const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
       const xpFromEuros = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1);
