@@ -9,7 +9,6 @@ import { QuickActions } from './QuickActions';
 import { ReorderCard } from './ReorderCard';
 import { WellnessChallenge } from './wellness/WellnessChallenge';
 import type { CartItem } from './cart/useCart';
-import { HeroCarousel } from './HeroCarousel';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
 import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
@@ -38,7 +37,6 @@ import {
   V2_WAFFLES,
   type V2Product,
   type V2Combo,
-  type V2HeroSlide,
 } from './products-adapter';
 
 interface HomeV2Props {
@@ -116,6 +114,13 @@ export function HomeV2({
     // ses messages lui-même, ou utilise « Tout marquer comme lu »).
     setInboxOpen(true);
     inbox.refresh();
+  }
+
+  // Bouton « Commander » du hero → défile jusqu'au menu (recherche + carrousels).
+  function scrollToMenu() {
+    document
+      .querySelector('[data-v2-section="menu"]')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // Affiche l'onboarding au tout premier lancement.
@@ -328,16 +333,6 @@ export function HomeV2({
   const kids = useMemo(() => V2_KIDS.filter(matchesQuery), [filteredQuery]);
   const waffles = useMemo(() => V2_WAFFLES.filter(matchesQuery), [filteredQuery]);
 
-  function handleSlideClick(slide: V2HeroSlide) {
-    if (slide.combo) {
-      onOpenCombo(slide.combo);
-    } else if (slide.product) {
-      onOpenProduct(slide.product);
-    } else if (slide.type === 'review' && onLeaveReview) {
-      onLeaveReview();
-    }
-  }
-
   function handleAddProduct(product: V2Product) {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
       const btn = e.currentTarget;
@@ -424,7 +419,10 @@ export function HomeV2({
         </div>
       )}
 
-      {/* Hero grid : carousel à gauche (col 1), XP + adresse à droite (col 2) en desktop */}
+      {/* Hero FONCTIONNEL : Salut + XP → bouton Commander → Reprendre (col 1),
+          actions rapides (col 2 en desktop). Sur mobile tout s'empile dans cet
+          ordre = « agir d'abord ». Remplace l'ancienne bannière carousel promo
+          (le Combo Power reste visible dans « Formules combo » plus bas). */}
       <div
         className="v2-hero-grid"
         style={{
@@ -434,9 +432,6 @@ export function HomeV2({
         }}
       >
         <div className="v2-hero-main">
-          <HeroCarousel palette={palette} onSlideClick={handleSlideClick} />
-        </div>
-        <div className="v2-hero-aside">
           <XpCard
             palette={palette}
             connected={isAuthed}
@@ -447,6 +442,35 @@ export function HomeV2({
             onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
             onOpenRewards={() => setRewardsOpen(true)}
           />
+          <div style={{ padding: '2px 16px 12px' }}>
+            <button
+              onClick={scrollToMenu}
+              style={{
+                width: '100%',
+                padding: '17px',
+                borderRadius: 18,
+                border: 'none',
+                background: palette.cta,
+                color: palette.ctaText,
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 900,
+                fontSize: 18,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                boxShadow: `0 14px 34px ${palette.cta}44`,
+              }}
+            >
+              🥤 Commander
+            </button>
+          </div>
+          {onReorder && (
+            <ReorderCard palette={palette} isAuthed={isAuthed} onReorder={onReorder} />
+          )}
+        </div>
+        <div className="v2-hero-aside">
           <QuickActions
             palette={palette}
             onRewards={() => (isAuthed ? setRewardsOpen(true) : setAuthOpen(true))}
@@ -454,9 +478,6 @@ export function HomeV2({
             onRefer={shareReferral}
             onClub={() => (window.location.href = '/club')}
           />
-          {onReorder && (
-            <ReorderCard palette={palette} isAuthed={isAuthed} onReorder={onReorder} />
-          )}
         </div>
       </div>
 
