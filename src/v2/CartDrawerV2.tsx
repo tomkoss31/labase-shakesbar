@@ -273,6 +273,7 @@ export function CartDrawerV2({
         {/* Header */}
         <div
           style={{
+            flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -320,9 +321,10 @@ export function CartDrawerV2({
         <div
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: 'auto',
             padding: '12px 20px',
-            paddingBottom: empty ? 20 : 240,
+            paddingBottom: empty ? 20 : 24,
             // Centre verticalement le message quand le panier est vide
             display: empty ? 'flex' : undefined,
             alignItems: empty ? 'center' : undefined,
@@ -879,10 +881,9 @@ export function CartDrawerV2({
         {!empty && (
           <div
             style={{
-              position: 'sticky',
-              bottom: 0,
-              background: `linear-gradient(180deg, transparent, ${palette.card} 15%)`,
-              padding: '20px 20px calc(20px + env(safe-area-inset-bottom, 0px))',
+              flexShrink: 0,
+              background: palette.card,
+              padding: '16px 20px calc(16px + env(safe-area-inset-bottom, 0px))',
               borderTop: `1px solid ${palette.line}`,
             }}
           >
