@@ -122,9 +122,10 @@ async function sendWelcomePush(admin: any, userId: string): Promise<void> {
 // Push « merci pour ta visite » après crédit caisse (récap + XP + avis Google).
 // Copie locale (imports cross-fichier api/ cassent sur Vercel). Best-effort.
 const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
+// Barème « prochain cadeau » (push). GARDER SYNCHRO (cost) avec
+// src/v2/rewards/catalog.ts et les REWARDS de redeem-reward ci-dessous.
 const REWARD_TIERS = [
-  { cost: 150, label: 'un boost offert' },
-  { cost: 300, label: 'un topping offert' },
+  { cost: 500, label: 'un extra offert' },
   { cost: 1500, label: 'une boisson offerte' },
   { cost: 2200, label: 'une boisson + gaufre' },
   { cost: 3800, label: 'le cadeau du mois' },
@@ -675,10 +676,10 @@ export default async function handler(req: any, res: any) {
   // tricher en envoyant un coût faux). Garder synchro avec
   // src/v2/rewards/catalog.ts côté front.
   if (action === 'redeem-reward' && req.method === 'POST') {
+    // GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG).
     const REWARDS: Record<string, { cost: number; label: string }> = {
-      boost: { cost: 150, label: 'Sirop / boost offert' },
-      topping: { cost: 300, label: 'Topping offert' },
-      boisson: { cost: 1500, label: 'Une boisson au choix' },
+      extra: { cost: 500, label: 'Un extra offert' },
+      boisson: { cost: 1500, label: 'Boisson energy ou smoothie' },
       'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy' },
       'cadeau-mois': { cost: 3800, label: 'Cadeau du mois' },
     };

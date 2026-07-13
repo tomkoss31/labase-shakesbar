@@ -6,6 +6,7 @@ import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
+import { REWARDS_CATALOG } from './rewards/catalog';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 import { useOpenStatus } from './openingHours';
 import { getWheelCooldown } from './wheel/segments';
@@ -669,16 +670,17 @@ export function CartDrawerV2({
 
           {/* 🎁 Offre-toi un extra avec tes XP (catalogue, pas de réduction cash) */}
           {!empty && isAuthed && onClaimGift && (() => {
-            // ⚠️ Coûts STRICTEMENT alignés sur le backend (api/orders.ts REWARDS).
-            // Le débit réel se fait côté serveur via l'id : si les coûts diffèrent,
+            // Source unique = REWARDS_CATALOG (src/v2/rewards/catalog.ts).
+            // ⚠️ Coûts STRICTEMENT alignés sur le backend (api/orders.ts REWARDS_LIST) :
+            // le débit réel se fait côté serveur via l'id ; si les coûts diffèrent,
             // le client voit un faux prix et le claim échoue en silence.
-            const GIFTS = [
-              { id: 'boost', title: 'Sirop / boost offert', emoji: '🍯', cost: 150, sub: 'Une dose de sirop parfumé ou un boost' },
-              { id: 'topping', title: 'Topping offert', emoji: '✨', cost: 300, sub: 'Protéine, créatine, beurre de cacahuète…' },
-              { id: 'boisson', title: 'Une boisson au choix', emoji: '🥤', cost: 1500, sub: 'Smoothie ou shake offert' },
-              { id: 'combo-gaufre', title: 'Boisson + gaufre healthy', emoji: '🧇', cost: 2200, sub: 'Le combo gourmand offert' },
-              { id: 'cadeau-mois', title: 'Cadeau du mois', emoji: '🎁', cost: 3800, sub: 'La récompense premium' },
-            ];
+            const GIFTS = REWARDS_CATALOG.map((r) => ({
+              id: r.id,
+              title: r.title,
+              emoji: r.emoji,
+              cost: r.cost,
+              sub: r.short,
+            }));
             const affordable = GIFTS.filter((g) => userXp >= g.cost);
             if (claimedGift) {
               return (

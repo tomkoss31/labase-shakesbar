@@ -168,15 +168,18 @@ async function notifyCustomerStatus(
   }
 }
 
-// Lien avis Google (cf. src/data/menu.ts googleReviewUrl) + barème cadeaux
-// (cf. claim-reward REWARDS) pour la deadline « prochain cadeau ».
 const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
-const REWARD_TIERS = [
-  { cost: 150, label: 'un boost offert' },
-  { cost: 300, label: 'un topping offert' },
-  { cost: 1500, label: 'une boisson offerte' },
-  { cost: 2200, label: 'une boisson + gaufre' },
-  { cost: 3800, label: 'le cadeau du mois' },
+
+// ⚠️ SOURCE UNIQUE CÔTÉ SERVEUR pour les cadeaux XP. Sert à la fois :
+//   - la deadline « prochain cadeau » des push (`tier`, phrase minuscule)
+//   - le débit réel des XP au claim (`label`, casse propre — cf. action claim-reward)
+// GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG),
+// sinon le client affiche un faux prix et le claim échoue en silence.
+const REWARDS_LIST = [
+  { id: 'extra', cost: 500, label: 'Un extra offert', tier: 'un extra offert' },
+  { id: 'boisson', cost: 1500, label: 'Boisson energy ou smoothie', tier: 'une boisson offerte' },
+  { id: 'combo-gaufre', cost: 2200, label: 'Boisson + gaufre healthy', tier: 'une boisson + gaufre' },
+  { id: 'cadeau-mois', cost: 3800, label: 'Cadeau du mois', tier: 'le cadeau du mois' },
 ];
 
 // Push « merci pour ta visite » ~à la fin d'un paiement : récap commande + XP
@@ -198,9 +201,9 @@ async function notifyThanks(
     .join(', ');
 
   const first = (opts.firstName || '').trim().split(' ')[0] || '';
-  const next = REWARD_TIERS.find((t) => t.cost > opts.xpTotal);
+  const next = REWARDS_LIST.find((t) => t.cost > opts.xpTotal);
   const xpLine = next
-    ? `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — plus que ${next.cost - opts.xpTotal} avant ${next.label} !`
+    ? `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — plus que ${next.cost - opts.xpTotal} avant ${next.tier} !`
     : `+${opts.xpGained} XP 🎉 Te voilà à ${opts.xpTotal} XP — tu peux tout débloquer 🎁`;
 
   const title = `💚 Merci${first ? ' ' + first : ''} pour ta visite !`;
@@ -989,13 +992,10 @@ export default async function handler(req: any, res: any) {
     if (userError || !userData.user) return res.status(401).json({ error: 'Token invalide' });
     const userId = userData.user.id;
 
-    const REWARDS: Record<string, { cost: number; label: string }> = {
-      boost: { cost: 150, label: 'Sirop / boost offert' },
-      topping: { cost: 300, label: 'Topping offert' },
-      boisson: { cost: 1500, label: 'Une boisson au choix' },
-      'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy' },
-      'cadeau-mois': { cost: 3800, label: 'Cadeau du mois' },
-    };
+    // Dérivé de REWARDS_LIST (source unique serveur, cf. haut du fichier).
+    const REWARDS: Record<string, { cost: number; label: string }> = Object.fromEntries(
+      REWARDS_LIST.map((r) => [r.id, { cost: r.cost, label: r.label }]),
+    );
     const body = await readBody(req);
     const rewardId = typeof body?.rewardId === 'string' ? body.rewardId : null;
     const reward = rewardId ? REWARDS[rewardId] : null;
