@@ -407,7 +407,7 @@ export function HomeV2({
               onClick={() => setInstallDismissed(true)}
               aria-label="Fermer"
               style={{
-                flex: 'none', width: 28, height: 28, borderRadius: '50%',
+                flex: 'none', width: 40, height: 40, borderRadius: '50%',
                 background: 'transparent', border: `1px solid ${palette.line}`,
                 color: palette.textDim, cursor: 'pointer', fontSize: 14,
               }}

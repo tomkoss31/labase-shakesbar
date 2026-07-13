@@ -10,6 +10,7 @@ import { REWARDS_CATALOG, XP_RULES, nextReward } from './catalog';
 import { useUserRewards } from './useUserRewards';
 import { computeMascotteLevel } from '../auth/types';
 import { getStoredSession } from '../../lib/supabase';
+import { useModalA11y } from '../useModalA11y';
 
 interface Challenge {
   id: string;
@@ -221,6 +222,8 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
   // Codes gagnés à la roue, actifs et utilisables (on exclut les "tente encore")
   const activeCodes = rewards.filter((r) => r.reward_type !== 'retry');
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   const next = nextReward(xp);
@@ -252,6 +255,10 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mes récompenses"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -285,7 +292,7 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
             onClick={onClose}
             aria-label="Fermer"
             style={{
-              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
               background: 'rgba(0,0,0,.3)', border: `1px solid ${palette.line}`,
               color: palette.text, cursor: 'pointer', fontSize: 18,
             }}

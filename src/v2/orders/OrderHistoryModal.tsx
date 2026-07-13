@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Palette } from '../palette';
 import { getStoredSession } from '../../lib/supabase';
+import { useModalA11y } from '../useModalA11y';
 
 interface HistItem {
   product_name: string;
@@ -67,6 +68,8 @@ export function OrderHistoryModal({ palette, open, onClose }: Props) {
     };
   }, [open]);
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   const totalSpentXp = rewards.reduce((s, r) => s + (r.xp_cost || 0), 0);
@@ -88,6 +91,10 @@ export function OrderHistoryModal({ palette, open, onClose }: Props) {
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mes commandes"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -109,7 +116,7 @@ export function OrderHistoryModal({ palette, open, onClose }: Props) {
             onClick={onClose}
             aria-label="Fermer"
             style={{
-              width: 36, height: 36, borderRadius: '50%',
+              width: 44, height: 44, borderRadius: '50%',
               background: 'rgba(0,0,0,.3)', border: `1px solid ${palette.line}`,
               color: palette.text, cursor: 'pointer', fontSize: 18,
             }}

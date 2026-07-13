@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
+import { useModalA11y } from '../useModalA11y';
 
 interface AuthModalProps {
   palette: Palette;
@@ -35,6 +36,8 @@ export function AuthModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const dialogRef = useModalA11y<HTMLDivElement>(open, () => handleClose());
 
   if (!open) return null;
 
@@ -119,6 +122,10 @@ export function AuthModal({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Connexion"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -161,8 +168,8 @@ export function AuthModal({
             onClick={handleClose}
             aria-label="Fermer"
             style={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: 'transparent',
               border: `1px solid ${palette.line}`,

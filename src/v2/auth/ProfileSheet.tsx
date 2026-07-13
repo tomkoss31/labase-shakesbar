@@ -4,6 +4,7 @@ import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { VIP_TIERS, computeMascotteLevel, nextLevelThreshold } from './types';
+import { useModalA11y } from '../useModalA11y';
 import { usePushNotifications } from '../notifications/usePushNotifications';
 import { WheelModal } from '../wheel/WheelModal';
 import { getWheelCooldown } from '../wheel/segments';
@@ -73,6 +74,8 @@ export function ProfileSheet({
     setBirthday(profile?.birthday ?? '');
   }, [profile?.first_name, profile?.birthday]);
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   const xp = profile?.xp ?? 0;
@@ -123,6 +126,10 @@ export function ProfileSheet({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mon compte"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -162,8 +169,8 @@ export function ProfileSheet({
             onClick={onClose}
             aria-label="Fermer"
             style={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: 'transparent',
               border: `1px solid ${palette.line}`,

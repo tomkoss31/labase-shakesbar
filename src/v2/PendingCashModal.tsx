@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import type { Palette } from './palette';
+import { useModalA11y } from './useModalA11y';
 
 interface PendingCashModalProps {
   palette: Palette;
@@ -47,6 +48,8 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
     );
   }, [open, code]);
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open && !!code, onClose);
+
   if (!open || !code) return null;
 
   return (
@@ -66,6 +69,10 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Paiement en espèces"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -85,10 +92,10 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
           aria-label="Fermer"
           style={{
             position: 'absolute',
-            top: 14,
-            right: 14,
-            width: 36,
-            height: 36,
+            top: 12,
+            right: 12,
+            width: 44,
+            height: 44,
             borderRadius: '50%',
             background: 'rgba(0,0,0,.3)',
             border: `1px solid ${palette.line}`,
