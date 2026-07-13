@@ -257,6 +257,15 @@ function App() {
   const [xpToSpend, setXpToSpend] = useState(0);
   const appAuth = useAuth();
   const userXp = appAuth.profile?.xp ?? 0;
+
+  // Préremplit le prénom depuis le profil : plus besoin de le retaper à chaque
+  // commande une fois qu'il a été renseigné (au 1er passage, cf. maybeSaveFirstName).
+  // On ne remplit que si le champ est encore vide (ne pas écraser une saisie).
+  useEffect(() => {
+    const fn = appAuth.profile?.first_name;
+    if (fn && customerName.trim().length === 0) setCustomerName(fn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appAuth.profile?.first_name]);
   // Thème saisonnier actif (Coupe du Monde, Noël…) — accents seulement.
   const activeThemeId = useActiveThemeId();
   const activePalette = useMemo(() => applyTheme(PALETTE_E, activeThemeId), [activeThemeId]);
@@ -997,11 +1006,24 @@ function App() {
     cartTotalCents,
   )}`;
 
+  // Capture le prénom au 1er passage : si l'utilisateur est connecté et n'a pas
+  // encore de prénom au profil, on le sauve (best-effort, non bloquant) → le
+  // « Salut … » et les prochaines commandes seront personnalisés. Ne touche jamais
+  // le paiement (fire-and-forget).
+  function maybeSaveFirstName() {
+    const name = customerName.trim();
+    if (!name || !appAuth.session || appAuth.profile?.first_name) return;
+    try {
+      void appAuth.updateProfile({ first_name: name.slice(0, 60) });
+    } catch {}
+  }
+
   function handleWhatsAppOrder() {
     if (!hasRequiredPickupInfo) {
       window.alert('Merci de renseigner ton prénom / nom et ton heure de retrait.');
       return;
     }
+    maybeSaveFirstName();
 
     if (cart.length === 0) {
       window.alert('Ton panier est vide.');
@@ -1028,6 +1050,7 @@ function App() {
       window.alert('Merci de renseigner ton prénom.');
       return;
     }
+    maybeSaveFirstName();
     setIsCreatingPendingCash(true);
     try {
       // Lecture directe localStorage (bypass getSession hang iOS PWA)
@@ -1073,6 +1096,7 @@ function App() {
         return;
       }
 
+      maybeSaveFirstName();
       setIsCreatingPayment(true);
 
       // Récupère email du user authentifié pour permettre au webhook Square

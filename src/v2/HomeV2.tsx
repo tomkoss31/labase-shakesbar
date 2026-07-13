@@ -465,6 +465,31 @@ export function HomeV2({
             >
               🥤 Commander
             </button>
+            {/* Accès direct au QR fidélité : 90% des clients ouvrent l'app AU
+                comptoir pour le montrer → 1 tap depuis l'accueil (avant : caché
+                sous Récompenses → Mon code). Non connecté → ouvre l'auth. */}
+            <button
+              onClick={() => (isAuthed ? setMyCodeOpen(true) : setAuthOpen(true))}
+              style={{
+                width: '100%',
+                marginTop: 11,
+                padding: '15px',
+                borderRadius: 16,
+                border: `1.5px solid ${palette.primary}`,
+                background: `${palette.primary}14`,
+                color: palette.primary,
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 800,
+                fontSize: 16,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 9,
+              }}
+            >
+              📷 Mon QR fidélité
+            </button>
             {/* Preuve sociale : note Google (ouvre les avis). Pas de récompense. */}
             {onLeaveReview && (
               <div
