@@ -3,17 +3,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
-import type { Product, ProductExtra, ComboOffer } from '../data/menu';
+import type { ProductExtra, ComboOffer } from '../data/menu';
 import { EXTRAS, CATEGORIES_WITH_EXTRAS, comboOffers } from '../data/menu';
 import { colorForProduct } from './FlyAnimation';
 import { useModalA11y } from './useModalA11y';
-
-type SelectedProduct = Product & {
-  categoryId: string;
-  categoryName: string;
-  categoryAccent: string;
-  categoryPriceLabel: string;
-};
+import type { SelectedProduct } from '../data/product-helpers';
 
 interface ProductModalV2Props {
   palette: Palette;

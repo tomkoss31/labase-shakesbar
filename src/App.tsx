@@ -3,6 +3,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, X } from 'lucide-react';
 import { BRAND, categories, comboOffers, googleReviewUrl } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
+import {
+  type SelectedProduct,
+  getConfiguredBasePrice,
+  getOptionSectionLabel,
+  getDefaultOptionForComboProduct,
+} from './data/product-helpers';
 import { HomeV2 } from './v2/HomeV2';
 import { useCart, type CartItem } from './v2/cart/useCart';
 import { ProductModalV2 } from './v2/ProductModalV2';
@@ -18,13 +24,6 @@ import { useActiveThemeId } from './v2/theme/useActiveTheme';
 import { useUserRewards } from './v2/rewards/useUserRewards';
 import { useAuth } from './v2/auth/useAuth';
 import { getSupabase, getStoredSession } from './lib/supabase';
-
-type SelectedProduct = Product & {
-  categoryId: string;
-  categoryName: string;
-  categoryAccent: string;
-  categoryPriceLabel: string;
-};
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const PENDING_GIFT_KEY = 'labase-pending-gift';
@@ -477,14 +476,6 @@ function App() {
   const hasRequiredPickupInfo =
     customerName.trim().length > 0 && pickupTime.trim().length > 0;
 
-  function getConfiguredBasePrice(product: Product, optionLabel = '') {
-    if (optionLabel && product.options?.length) {
-      const option = product.options.find((opt) => opt.label === optionLabel);
-      if (option) return option.priceCents;
-    }
-    return product.basePriceCents ?? product.options?.[0]?.priceCents ?? 0;
-  }
-
   function addPreparedProductToCart(
     product: SelectedProduct,
     optionLabel = '',
@@ -524,14 +515,6 @@ function App() {
     setToastMessage(`${toastLabel} ajouté au panier`);
   }
 
-  function getOptionSectionLabel(product: SelectedProduct) {
-    if (product.categoryId === 'waffles') return 'Choix du topping';
-    if (product.categoryId === 'hot' && product.name === 'Café gourmet') {
-      return 'Choix de la recette';
-    }
-    return 'Choix de format';
-  }
-
   function getComboCandidates(config: ComboSelectionConfig) {
     return allProducts.filter((product) => {
       if (product.categoryId !== config.categoryId) return false;
@@ -553,15 +536,6 @@ function App() {
       }
       return true;
     });
-  }
-
-  function getDefaultOptionForComboProduct(
-    product: SelectedProduct | undefined,
-    config: ComboSelectionConfig,
-  ) {
-    if (config.fixedOptionLabel) return config.fixedOptionLabel;
-    if (product?.options?.length) return product.options[0].label;
-    return '';
   }
 
   function openProductFromCategory(category: Category, item: Product) {
