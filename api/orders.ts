@@ -176,7 +176,7 @@ const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
 // GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG),
 // sinon le client affiche un faux prix et le claim échoue en silence.
 const REWARDS_LIST = [
-  { id: 'extra', cost: 500, label: 'Un extra offert', tier: 'un extra offert' },
+  { id: 'extra', cost: 750, label: 'Un extra offert', tier: 'un extra offert' },
   { id: 'boisson', cost: 1500, label: 'Boisson energy ou smoothie', tier: 'une boisson offerte' },
   { id: 'combo-gaufre', cost: 2200, label: 'Boisson + gaufre healthy', tier: 'une boisson + gaufre' },
   { id: 'cadeau-mois', cost: 3800, label: 'Cadeau du mois', tier: 'le cadeau du mois' },

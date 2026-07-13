@@ -44,7 +44,7 @@ const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
 // Barème « prochain cadeau » (push). GARDER SYNCHRO (cost) avec
 // src/v2/rewards/catalog.ts et les REWARDS de redeem-reward (api/profile.ts).
 const REWARD_TIERS = [
-  { cost: 500, label: 'un extra offert' },
+  { cost: 750, label: 'un extra offert' },
   { cost: 1500, label: 'une boisson offerte' },
   { cost: 2200, label: 'une boisson + gaufre' },
   { cost: 3800, label: 'le cadeau du mois' },

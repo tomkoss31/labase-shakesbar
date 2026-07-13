@@ -125,7 +125,7 @@ const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
 // Barème « prochain cadeau » (push). GARDER SYNCHRO (cost) avec
 // src/v2/rewards/catalog.ts et les REWARDS de redeem-reward ci-dessous.
 const REWARD_TIERS = [
-  { cost: 500, label: 'un extra offert' },
+  { cost: 750, label: 'un extra offert' },
   { cost: 1500, label: 'une boisson offerte' },
   { cost: 2200, label: 'une boisson + gaufre' },
   { cost: 3800, label: 'le cadeau du mois' },
@@ -678,7 +678,7 @@ export default async function handler(req: any, res: any) {
   if (action === 'redeem-reward' && req.method === 'POST') {
     // GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG).
     const REWARDS: Record<string, { cost: number; label: string }> = {
-      extra: { cost: 500, label: 'Un extra offert' },
+      extra: { cost: 750, label: 'Un extra offert' },
       boisson: { cost: 1500, label: 'Boisson energy ou smoothie' },
       'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy' },
       'cadeau-mois': { cost: 3800, label: 'Cadeau du mois' },

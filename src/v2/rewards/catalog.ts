@@ -21,7 +21,7 @@ export interface RewardTier {
 export const REWARDS_CATALOG: RewardTier[] = [
   {
     id: 'extra',
-    cost: 500,
+    cost: 750,
     emoji: '✨',
     title: 'Un extra offert',
     desc: 'Un extra santé au choix (+2,50€) : créatine, protéines, collagène, électrolytes, fibres, probiotiques ou booster immunité.',
