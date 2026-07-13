@@ -137,3 +137,6 @@ dist
 
 # Fichiers de rendu menu TV (locaux, non déployés)
 public/_*.html
+
+# Config locale Claude Code (preview, sessions)
+.claude/
