@@ -130,8 +130,8 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
             }}
             aria-label={`Choisir ${product.name}`}
             style={{
-              width: 34,
-              height: 34,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: palette.cta,
               color: palette.ctaText,

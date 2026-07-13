@@ -6,6 +6,7 @@ import { ProductImage } from './ProductImage';
 import type { Product, ProductExtra, ComboOffer } from '../data/menu';
 import { EXTRAS, CATEGORIES_WITH_EXTRAS, comboOffers } from '../data/menu';
 import { colorForProduct } from './FlyAnimation';
+import { useModalA11y } from './useModalA11y';
 
 type SelectedProduct = Product & {
   categoryId: string;
@@ -71,6 +72,8 @@ export function ProductModalV2({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.name]);
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open && !!product, onClose);
+
   if (!open || !product) return null;
 
   const basePriceCents = getPrice(product);
@@ -110,6 +113,10 @@ export function ProductModalV2({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={product.name}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -142,8 +149,8 @@ export function ProductModalV2({
             onClick={onClose}
             aria-label="Fermer"
             style={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: 'rgba(0,0,0,.4)',
               border: `1px solid ${palette.line}`,

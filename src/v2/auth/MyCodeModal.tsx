@@ -7,6 +7,7 @@ import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { computeMascotteLevel, VIP_TIERS } from './types';
+import { useModalA11y } from '../useModalA11y';
 
 interface MyCodeModalProps {
   palette: Palette;
@@ -45,6 +46,8 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
     );
   }, [open, userId]);
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   return (
@@ -64,6 +67,10 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mon code La Base"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -83,10 +90,10 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
           aria-label="Fermer"
           style={{
             position: 'absolute',
-            top: 14,
-            right: 14,
-            width: 36,
-            height: 36,
+            top: 12,
+            right: 12,
+            width: 44,
+            height: 44,
             borderRadius: '50%',
             background: 'rgba(0,0,0,.3)',
             border: `1px solid ${palette.line}`,

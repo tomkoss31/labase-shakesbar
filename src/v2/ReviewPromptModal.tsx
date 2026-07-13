@@ -7,6 +7,7 @@
 import React from 'react';
 import type { Palette } from './palette';
 import { track } from '../lib/analytics';
+import { useModalA11y } from './useModalA11y';
 
 const REVIEW_PROMPT_KEY = 'labase_review_prompt_last';
 const REVIEW_PROMPT_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
@@ -45,6 +46,8 @@ export function ReviewPromptModal({
   googleReviewUrl,
   customerName,
 }: ReviewPromptModalProps) {
+  // Échap = « Plus tard » (marque comme vu → respecte le cooldown 30j).
+  const dialogRef = useModalA11y<HTMLDivElement>(open, () => handleSkip());
   if (!open) return null;
 
   // Conforme Google : on invite TOUT LE MONDE à laisser un avis (pas de filtre
@@ -90,6 +93,10 @@ export function ReviewPromptModal({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Laisser un avis"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',

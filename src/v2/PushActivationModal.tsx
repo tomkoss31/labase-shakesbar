@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import type { Palette } from './palette';
 import type { PushPermission } from './notifications/usePushNotifications';
+import { useModalA11y } from './useModalA11y';
 
 interface PushActivationModalProps {
   palette: Palette;
@@ -31,6 +32,7 @@ export function PushActivationModal({
 }: PushActivationModalProps) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
   if (!open) return null;
 
   const denied = permission === 'denied';
@@ -72,6 +74,10 @@ export function PushActivationModal({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Activer les notifications"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',

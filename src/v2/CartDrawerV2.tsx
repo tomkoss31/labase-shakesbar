@@ -7,6 +7,7 @@ import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
 import { REWARDS_CATALOG } from './rewards/catalog';
+import { useModalA11y } from './useModalA11y';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 import { useOpenStatus } from './openingHours';
 import { getWheelCooldown } from './wheel/segments';
@@ -224,6 +225,8 @@ export function CartDrawerV2({
   const finalTotalCents = Math.max(0, totalCents - discountCents);
   const openStatus = useOpenStatus();
 
+  const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   const empty = cart.length === 0;
@@ -244,6 +247,10 @@ export function CartDrawerV2({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Ton panier"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -294,14 +301,15 @@ export function CartDrawerV2({
             onClick={onClose}
             aria-label="Fermer"
             style={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               background: 'transparent',
               border: `1px solid ${palette.line}`,
               color: palette.textDim,
               cursor: 'pointer',
               fontSize: 18,
+              flexShrink: 0,
             }}
           >
             ✕
@@ -521,8 +529,8 @@ export function CartDrawerV2({
                       onClick={() => onUpdateQty(item.key, -1)}
                       aria-label="Diminuer"
                       style={{
-                        width: 28,
-                        height: 28,
+                        width: 36,
+                        height: 36,
                         borderRadius: '50%',
                         background: 'transparent',
                         border: 0,
@@ -549,8 +557,8 @@ export function CartDrawerV2({
                       onClick={() => onUpdateQty(item.key, 1)}
                       aria-label="Augmenter"
                       style={{
-                        width: 28,
-                        height: 28,
+                        width: 36,
+                        height: 36,
                         borderRadius: '50%',
                         background: palette.primary,
                         border: 0,
