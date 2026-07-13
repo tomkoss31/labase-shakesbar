@@ -1,30 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ShoppingCart,
-  MessageCircle,
-  MapPin,
-  Clock3,
-  Search,
-  Plus,
-  Minus,
-  ChevronRight,
-  Instagram,
-  Star,
-  CheckCircle2,
-  X,
-  Flame,
-  LayoutGrid,
-  List,
-} from 'lucide-react';
-import {
-  BRAND,
-  categories,
-  comboOffers,
-  googleReviewUrl,
-  instagramUrl,
-  socialProofStats,
-} from './data/menu';
+import { CheckCircle2, X } from 'lucide-react';
+import { BRAND, categories, comboOffers, googleReviewUrl } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 import { HomeV2 } from './v2/HomeV2';
 import { useCart, type CartItem } from './v2/cart/useCart';
@@ -52,11 +29,8 @@ type SelectedProduct = Product & {
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
 const PENDING_GIFT_KEY = 'labase-pending-gift';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
-const VIEW_MODE_KEY = 'labase-menu-view-mode';
 // Flag : rouvrir le panier après une inscription lancée depuis le panier
 const REOPEN_CART_KEY = 'labase-reopen-cart';
-
-type MenuViewMode = 'magazine' | 'list';
 
 type DeferredInstallPrompt = Event & {
   prompt: () => Promise<void>;
@@ -243,8 +217,6 @@ function FilterPill({
 }
 
 function App() {
-  const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
   const { cart, setCart, cartCount, cartTotalCents, updateQuantity, clearCart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Modale auth + roue partagées entre HomeV2 et le panier (nudges)
@@ -347,23 +319,6 @@ function App() {
   const [selectedComboSecondaryName, setSelectedComboSecondaryName] = useState('');
   const [selectedComboPrimaryOption, setSelectedComboPrimaryOption] = useState('');
   const [selectedComboSecondaryOption, setSelectedComboSecondaryOption] = useState('');
-  const [viewMode, setViewMode] = useState<MenuViewMode>('magazine');
-  const [cartBumpKey, setCartBumpKey] = useState(0);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem(VIEW_MODE_KEY);
-    if (stored === 'magazine' || stored === 'list') {
-      setViewMode(stored);
-    }
-  }, []);
-
-  function changeViewMode(mode: MenuViewMode) {
-    setViewMode(mode);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(VIEW_MODE_KEY, mode);
-    }
-  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -442,15 +397,6 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
 
-  const previousCartCountRef = React.useRef(0);
-  useEffect(() => {
-    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
-    if (total > previousCartCountRef.current) {
-      setCartBumpKey((k) => k + 1);
-    }
-    previousCartCountRef.current = total;
-  }, [cart]);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -509,15 +455,6 @@ function App() {
     setDeferredInstallPrompt(null);
   }
 
-  function dismissInstallBanner() {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(INSTALL_BANNER_DISMISS_KEY, '1');
-    }
-
-    setShowInstallBanner(false);
-    setDeferredInstallPrompt(null);
-    setIsIosInstallHint(false);
-  }
 
   const allProducts = useMemo(() => {
     return categories.flatMap((category) =>
@@ -537,59 +474,8 @@ function App() {
     return new Set(cart.filter((i) => names.has(i.name)).map((i) => i.key));
   }, [cart, allProducts]);
 
-  const bestCombo = useMemo(
-    () => comboOffers.find((combo) => combo.id === 'combo-power') ?? comboOffers[0],
-    [],
-  );
-
-  const filteredCategories = useMemo(() => {
-    const normalizedQuery = query.toLowerCase().trim();
-
-    return categories
-      .map((category) => {
-        const matchesCategory =
-          activeCategory === 'all' || activeCategory === category.id;
-
-        if (!matchesCategory) {
-          return { ...category, items: [] };
-        }
-
-        if (!normalizedQuery) {
-          return category;
-        }
-
-        return {
-          ...category,
-          items: category.items.filter((item) => {
-            return (
-              item.name.toLowerCase().includes(normalizedQuery) ||
-              item.description.toLowerCase().includes(normalizedQuery) ||
-              item.flavors.toLowerCase().includes(normalizedQuery) ||
-              category.name.toLowerCase().includes(normalizedQuery)
-            );
-          }),
-        };
-      })
-      .filter((category) => category.items.length > 0);
-  }, [activeCategory, query]);
-
   const hasRequiredPickupInfo =
     customerName.trim().length > 0 && pickupTime.trim().length > 0;
-
-  const firstSmoothieInCart = cart.find(
-    (item) => item.categoryName === 'Smoothies nutritionnels',
-  );
-  const firstDrinkInCart = cart.find(
-    (item) => item.categoryName === 'Boissons énergisantes',
-  );
-  const firstHotInCart = cart.find((item) => item.categoryName === 'Café / Thé');
-  const firstWaffleInCart = cart.find((item) => item.categoryName === 'Gaufre');
-  const hasComboUpgradeOpportunity = Boolean(
-    (firstSmoothieInCart && !firstDrinkInCart) ||
-      (!firstSmoothieInCart && firstDrinkInCart) ||
-      (firstHotInCart && !firstWaffleInCart) ||
-      (!firstHotInCart && firstWaffleInCart),
-  );
 
   function getConfiguredBasePrice(product: Product, optionLabel = '') {
     if (optionLabel && product.options?.length) {
@@ -597,23 +483,6 @@ function App() {
       if (option) return option.priceCents;
     }
     return product.basePriceCents ?? product.options?.[0]?.priceCents ?? 0;
-  }
-
-  function getSelectedBasePrice(product: SelectedProduct) {
-    return getConfiguredBasePrice(product, selectedOption);
-  }
-
-  function getDefaultOptionLabel(product: Product, preferredOptionLabel?: string) {
-    if (!product.options?.length) return '';
-
-    if (preferredOptionLabel) {
-      const preferred = product.options.find(
-        (option) => option.label === preferredOptionLabel,
-      );
-      if (preferred) return preferred.label;
-    }
-
-    return product.options[0]?.label ?? '';
   }
 
   function addPreparedProductToCart(
@@ -655,18 +524,6 @@ function App() {
     setToastMessage(`${toastLabel} ajouté au panier`);
   }
 
-  function getStartingPriceLabel(product: Product) {
-    if (product.options?.length) {
-      return euroFromCents(Math.min(...product.options.map((opt) => opt.priceCents)));
-    }
-
-    if (typeof product.basePriceCents === 'number') {
-      return euroFromCents(product.basePriceCents);
-    }
-
-    return '';
-  }
-
   function getOptionSectionLabel(product: SelectedProduct) {
     if (product.categoryId === 'waffles') return 'Choix du topping';
     if (product.categoryId === 'hot' && product.name === 'Café gourmet') {
@@ -705,16 +562,6 @@ function App() {
     if (config.fixedOptionLabel) return config.fixedOptionLabel;
     if (product?.options?.length) return product.options[0].label;
     return '';
-  }
-
-  function openProduct(productName: string) {
-    const product = allProducts.find((entry) => entry.name === productName);
-    if (!product) return;
-    setEditingKey(null);
-    setEditingExtras([]);
-    setSelectedCombo(null);
-    setSelected(product);
-    setSelectedOption(product.options?.[0]?.label ?? '');
   }
 
   function openProductFromCategory(category: Category, item: Product) {
@@ -856,14 +703,6 @@ function App() {
     });
   }
 
-  function addSuggestedProduct(productName: string, preferredOptionLabel?: string) {
-    const product = allProducts.find((entry) => entry.name === productName);
-    if (!product) return;
-
-    const resolvedOption = getDefaultOptionLabel(product, preferredOptionLabel);
-    addPreparedProductToCart(product, resolvedOption, product.name);
-  }
-
   function addComboToCart() {
     if (!selectedCombo || !selectedComboPrimaryName || !selectedComboSecondaryName) {
       return;
@@ -921,83 +760,6 @@ function App() {
     setSelectedComboPrimaryOption('');
     setSelectedComboSecondaryOption('');
   }
-
-  function getHotComboSuggestions(productName?: string) {
-    if (!productName) return [];
-    if (productName === 'Thé') {
-      return comboOffers.filter((combo) => combo.id === 'combo-tea-time');
-    }
-    if (productName === 'Café') {
-      return comboOffers.filter((combo) => combo.id === 'combo-coffee-break');
-    }
-    if (productName === 'Chocolat chaud protéiné') {
-      return comboOffers.filter((combo) => combo.id === 'combo-choco-cocoon');
-    }
-    if (productName === 'Café gourmet') {
-      return comboOffers.filter((combo) => combo.id === 'combo-gourmet-break');
-    }
-    return comboOffers.filter((combo) =>
-      [
-        'combo-tea-time',
-        'combo-coffee-break',
-        'combo-choco-cocoon',
-        'combo-gourmet-break',
-      ].includes(combo.id),
-    );
-  }
-
-  const drawerQuickAdds = useMemo(() => {
-    if (cart.length === 0) return [];
-
-    const cartNames = new Set(cart.map((item) => item.name));
-    const suggestions: Array<{
-      title: string;
-      text: string;
-      productName: string;
-      optionLabel?: string;
-      badge: string;
-    }> = [];
-
-    if (!firstWaffleInCart && !firstHotInCart) {
-      suggestions.push({
-        title: 'Ajoute une pause gourmande',
-        text: 'La gaufre healthy complète très bien une commande drink sans l’alourdir.',
-        productName: 'Gaufre healthy',
-        optionLabel: 'Caramel beurre salé — 6,90€',
-        badge: 'Ajout facile',
-      });
-    }
-
-    if (!firstHotInCart && cartTotalCents >= 890) {
-      suggestions.push({
-        title: 'Ajoute une pause premium',
-        text: 'Le café gourmet ajoute une vraie touche plaisir, idéale pour compléter la commande.',
-        productName: 'Café gourmet',
-        optionLabel: 'Macchiato — 8,90€',
-        badge: 'Pause premium',
-      });
-    }
-
-    if (!firstDrinkInCart && !firstSmoothieInCart && !cartNames.has('Electro’Lyte')) {
-      suggestions.push({
-        title: 'Ajoute une boisson performance',
-        text: 'Electro’Lyte complète très bien une pause chaude ou gourmande avec une vraie logique énergie.',
-        productName: 'Electro’Lyte',
-        optionLabel: 'Large 950ml — 8,90€',
-        badge: 'Boost énergie',
-      });
-    }
-
-    return suggestions.slice(0, hasComboUpgradeOpportunity ? 1 : 2);
-  }, [
-    cart,
-    cartTotalCents,
-    hasComboUpgradeOpportunity,
-    firstDrinkInCart,
-    firstHotInCart,
-    firstSmoothieInCart,
-    firstWaffleInCart,
-  ]);
 
   const whatsappLink = `https://wa.me/${BRAND.whatsappNumber}?text=${buildWhatsAppMessage(
     cart,
@@ -1158,14 +920,6 @@ function App() {
     }
   }
 
-  // Mode V2 — devenu défaut depuis la bascule du 2026-05-26
-  // ?legacy dans l'URL permet de revenir temporairement à l'ancien design
-  // pour comparaison ou en cas de souci.
-  const isV2 =
-    typeof window === 'undefined' ||
-    !new URLSearchParams(window.location.search).has('legacy');
-
-  const selectedTotal = selected ? getSelectedBasePrice(selected) : 0;
   const selectedComboPrimaryCandidates = selectedCombo
     ? getComboCandidates(selectedCombo.primary)
     : [];
