@@ -1,6 +1,12 @@
 // Catalogue de récompenses XP — modèle Starbucks/McDo adapté à La Base.
 // Paliers PAR TYPE (pas par produit) : "une boisson au choix", pas
 // "boisson Snickers". Calé sur la carte tampon actuelle (≈10 visites = 1 boisson).
+//
+// ⚠️ SOURCE UNIQUE CÔTÉ FRONT. Importée par RewardsModal ET CartDrawerV2 :
+//    ne PAS re-hardcoder les paliers ailleurs dans src/.
+// ⚠️ Le serveur (api/orders.ts → REWARDS_LIST) garde sa propre copie (isolation
+//    serverless / bundling Vercel). Les COÛTS + IDS doivent rester IDENTIQUES
+//    entre ce fichier et api/orders.ts, sinon le débit d'XP échoue en silence.
 
 export interface RewardTier {
   id: string;
@@ -8,32 +14,27 @@ export interface RewardTier {
   emoji: string;
   title: string;
   desc: string;
+  short: string; // libellé compact (panier)
   perceivedValue: string; // valeur perçue affichée au client
 }
 
 export const REWARDS_CATALOG: RewardTier[] = [
   {
-    id: 'boost',
-    cost: 150,
-    emoji: '🍯',
-    title: 'Un sirop / boost offert',
-    desc: 'Une dose de sirop parfumé ou un boost sur ta prochaine boisson',
-    perceivedValue: 'offert',
-  },
-  {
-    id: 'topping',
-    cost: 300,
+    id: 'extra',
+    cost: 750,
     emoji: '✨',
-    title: 'Topping offert',
-    desc: 'Protéine, créatine ou beurre de cacahuète au choix sur ta boisson',
-    perceivedValue: 'offert',
+    title: 'Un extra offert',
+    desc: 'Un extra santé au choix (+2,50€) : créatine, protéines, collagène, électrolytes, fibres, probiotiques ou booster immunité.',
+    short: 'Un extra santé au choix',
+    perceivedValue: '2,50€',
   },
   {
     id: 'boisson',
     cost: 1500,
     emoji: '🥤',
-    title: 'Une boisson au choix',
-    desc: 'Smoothie ou shake, petite ou grande — la boisson que tu veux',
+    title: 'Boisson energy ou smoothie',
+    desc: 'Offerte — valable pour l’achat d’une boisson équivalente, le jour même.',
+    short: 'Boisson energy ou smoothie offerte',
     perceivedValue: "jusqu'à 8,90€",
   },
   {
@@ -41,7 +42,8 @@ export const REWARDS_CATALOG: RewardTier[] = [
     cost: 2200,
     emoji: '🧇',
     title: 'Boisson + gaufre healthy',
-    desc: 'Le combo gourmand entièrement offert',
+    desc: 'Le combo gourmand entièrement offert.',
+    short: 'Le combo gourmand offert',
     perceivedValue: '15€',
   },
   {
@@ -49,7 +51,8 @@ export const REWARDS_CATALOG: RewardTier[] = [
     cost: 3800,
     emoji: '🎁',
     title: 'Le cadeau du mois',
-    desc: 'Une surprise premium réservée aux membres les plus fidèles',
+    desc: 'Une surprise premium réservée aux membres les plus fidèles.',
+    short: 'La récompense premium',
     perceivedValue: 'surprise',
   },
 ];

@@ -1227,11 +1227,10 @@ function renderProfile(p, rewards) {
       '<div id="rewardHint" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:10px;font-size:12px;color:#f59e0b;font-weight:600;"></div>' +
     '</div>';
 
-  // Catalogue cadeaux — GARDER SYNCHRO avec src/v2/rewards/catalog.ts
+  // Catalogue cadeaux — GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts
   const CATALOG = [
-    { id: 'boost', cost: 150, emoji: '🍯', title: 'Sirop / boost offert' },
-    { id: 'topping', cost: 300, emoji: '✨', title: 'Topping offert' },
-    { id: 'boisson', cost: 1500, emoji: '🥤', title: 'Une boisson au choix' },
+    { id: 'extra', cost: 750, emoji: '✨', title: 'Un extra offert' },
+    { id: 'boisson', cost: 1500, emoji: '🥤', title: 'Boisson energy ou smoothie' },
     { id: 'combo-gaufre', cost: 2200, emoji: '🧇', title: 'Boisson + gaufre' },
     { id: 'cadeau-mois', cost: 3800, emoji: '🎁', title: 'Cadeau du mois' },
   ];

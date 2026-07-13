@@ -689,7 +689,7 @@ export function CartDrawerV2({
               title: r.title,
               emoji: r.emoji,
               cost: r.cost,
-              sub: r.desc,
+              sub: r.short,
             }));
             const affordable = GIFTS.filter((g) => userXp >= g.cost);
             if (claimedGift) {
