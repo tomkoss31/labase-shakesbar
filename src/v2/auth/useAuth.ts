@@ -135,6 +135,70 @@ function useAuthState(): AuthContextValue {
     }
   }, []);
 
+  // Rafraîchit la session via REST direct (bypass supabase-js autoRefreshToken,
+  // désactivé car il hang sur iOS PWA — cf. lib/supabase.ts). Écrit la nouvelle
+  // session en localStorage + state, comme callAuthEndpoint. Retourne false si
+  // le refresh_token est invalide/révoqué (déconnexion réellement nécessaire).
+  const refreshingRef = React.useRef(false);
+  const refreshSession = useCallback(async (refreshToken: string): Promise<boolean> => {
+    if (refreshingRef.current) return true; // un refresh est déjà en cours
+    refreshingRef.current = true;
+    const envUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!envUrl || !anonKey) {
+      refreshingRef.current = false;
+      return false;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const resp = await fetch(`${envUrl}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`,
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok || !data?.access_token || !data?.refresh_token) {
+        console.warn('[useAuth] refreshSession échoué', resp.status);
+        return false;
+      }
+
+      const projectRef = envUrl.replace(/^https?:\/\//, '').split('.')[0];
+      const storageKey = `sb-${projectRef}-auth-token`;
+      const sessionData = {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type || 'bearer',
+        expires_in: data.expires_in,
+        expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+        user: data.user,
+      };
+      window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
+      setState((s) => ({
+        ...s,
+        status: 'authenticated',
+        session: sessionData as unknown as Session,
+        email: sessionData.user?.email ?? s.email,
+      }));
+      console.log('[useAuth] session rafraîchie, nouvelle expiration:', sessionData.expires_at);
+      return true;
+    } catch (e: any) {
+      clearTimeout(timeoutId);
+      console.warn('[useAuth] refreshSession error:', e?.message ?? e);
+      return false;
+    } finally {
+      refreshingRef.current = false;
+    }
+  }, []);
+
   useEffect(() => {
     if (!isSupabaseConfigured()) {
       setState({ status: 'unconfigured', session: null, profile: null, email: null, inPasswordRecovery: false });
@@ -193,7 +257,24 @@ function useAuthState(): AuthContextValue {
         console.log('[useAuth] BOOT — session expires_at:', expiresAt, 'now:', now);
 
         if (!expiresAt || expiresAt <= now) {
-          console.log('[useAuth] BOOT — session expirée, suppression');
+          // Session expirée (token statique 1h, autoRefreshToken désactivé —
+          // cf. lib/supabase.ts) : on tente un rafraîchissement REST direct
+          // avant de déconnecter. C'est ce qui évitait auparavant TOUTE
+          // reconnexion automatique après 1h d'inactivité de l'app.
+          const refreshToken = parsed.refresh_token as string | undefined;
+          if (refreshToken) {
+            console.log('[useAuth] BOOT — session expirée, tentative de rafraîchissement');
+            const refreshed = await refreshSession(refreshToken);
+            if (refreshed) {
+              const userId = parsed.user?.id;
+              if (userId && !cancelled) {
+                const profile = await fetchProfile(userId);
+                if (!cancelled && profile) setState((s) => ({ ...s, profile }));
+              }
+              return;
+            }
+          }
+          console.log('[useAuth] BOOT — rafraîchissement impossible, déconnexion');
           window.localStorage.removeItem(key);
           setState({
             status: 'anonymous',
@@ -287,7 +368,35 @@ function useAuthState(): AuthContextValue {
       cancelled = true;
       sub.subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, refreshSession]);
+
+  // Rafraîchit la session AVANT expiration tant que l'app reste ouverte
+  // (remplace autoRefreshToken, désactivé — cf. lib/supabase.ts). Sans ça,
+  // toute session mourait exactement 1h après connexion, sans exception :
+  // c'était la déconnexion « systématique » observée en usage réel.
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const envUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!envUrl) return;
+      let parsed: any;
+      try {
+        const projectRef = envUrl.replace(/^https?:\/\//, '').split('.')[0];
+        const raw = window.localStorage.getItem(`sb-${projectRef}-auth-token`);
+        if (!raw) return;
+        parsed = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      const expiresAt = parsed?.expires_at as number | undefined;
+      const refreshToken = parsed?.refresh_token as string | undefined;
+      if (!expiresAt || !refreshToken) return;
+      const now = Math.floor(Date.now() / 1000);
+      // Rafraîchit dès qu'il reste moins de 10 min avant expiration —
+      // l'utilisateur ne voit jamais la session mourir en cours d'usage.
+      if (expiresAt - now < 600) void refreshSession(refreshToken);
+    }, 4 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [refreshSession]);
 
   const sendMagicLink = useCallback(
     async (email: string): Promise<{ ok: boolean; error?: string }> => {
