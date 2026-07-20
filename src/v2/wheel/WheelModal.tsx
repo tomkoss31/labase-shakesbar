@@ -32,6 +32,13 @@ const WHEEL_RADIUS = WHEEL_SIZE / 2;
 const SEGMENT_COUNT = WHEEL_SEGMENTS.length;
 const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
 
+// Palette harmonisée teal + or de la roue (rendu premium cohérent) — override
+// visuel des couleurs segments.ts, sans toucher aux données ni au tirage.
+const WHEEL_COLORS = [
+  '#17b8a8', '#3f625c', '#f59e0b', '#0d9488',
+  '#e0870a', '#0f766e', '#fbbf24', '#b45309',
+];
+
 export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelModalProps) {
   const [phase, setPhase] = useState<'idle' | 'loading' | 'spinning' | 'result'>('idle');
   const [rotation, setRotation] = useState(0);
@@ -126,8 +133,6 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
     onClose();
   }
 
-  const segmentColors = WHEEL_SEGMENTS.map((s) => s.color(palette));
-
   return (
     <div
       onClick={handleClose}
@@ -215,88 +220,164 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
         </div>
 
         {/* Wheel container */}
+        <style>{`
+          @keyframes wmHalo { 0%,100% { transform: scale(.95); opacity: .7; } 50% { transform: scale(1.06); opacity: 1; } }
+          @keyframes wmPeg { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+        `}</style>
         <div
           style={{
             position: 'relative',
             width: WHEEL_SIZE,
-            height: WHEEL_SIZE + 28,
+            height: WHEEL_SIZE + 24,
             margin: '0 auto 24px',
           }}
         >
-          {/* Pointer en haut */}
+          {/* Halo doré pulsant */}
           <div
             style={{
               position: 'absolute',
-              top: 0,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '14px solid transparent',
-              borderRight: '14px solid transparent',
-              borderTop: `22px solid ${palette.accent}`,
-              filter: `drop-shadow(0 4px 8px ${palette.accent}99)`,
-              zIndex: 3,
+              top: 24,
+              left: 0,
+              width: WHEEL_SIZE,
+              height: WHEEL_SIZE,
+              borderRadius: '50%',
+              background:
+                'radial-gradient(circle, rgba(245,158,11,.38), rgba(20,184,166,.14) 42%, transparent 66%)',
+              filter: 'blur(9px)',
+              animation: 'wmHalo 2.9s ease-in-out infinite',
+              zIndex: 0,
             }}
           />
-          {/* Roue SVG */}
+          {/* Pointeur doré en relief */}
+          <svg
+            width={44}
+            height={52}
+            viewBox="0 0 46 54"
+            style={{
+              position: 'absolute',
+              top: 2,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 6,
+              filter: 'drop-shadow(0 5px 9px rgba(0,0,0,.55))',
+            }}
+          >
+            <defs>
+              <linearGradient id="wm-ptr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fff2b0" />
+                <stop offset="45%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#92400e" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M23 52 C10 34 2 28 2 18 A21 21 0 1 1 44 18 C44 28 36 34 23 52 Z"
+              fill="url(#wm-ptr)"
+              stroke="#fff"
+              strokeWidth="2.5"
+            />
+            <circle cx="23" cy="18" r="7.5" fill="#fff" />
+            <circle cx="23" cy="18" r="3.4" fill="#f59e0b" />
+          </svg>
+          {/* Roue SVG (tourne) */}
           <svg
             width={WHEEL_SIZE}
             height={WHEEL_SIZE}
-            viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
+            viewBox="0 0 400 400"
             style={{
               position: 'absolute',
-              top: 28,
+              top: 24,
               left: 0,
               transform: `rotate(${rotation}deg)`,
               transition:
                 phase === 'spinning'
-                  ? `transform 4200ms cubic-bezier(.17,.67,.18,1)`
+                  ? `transform 4200ms cubic-bezier(.13,.72,.12,1)`
                   : 'none',
-              filter: `drop-shadow(0 12px 40px rgba(0,0,0,.6))`,
+              filter: `drop-shadow(0 16px 44px rgba(0,0,0,.6))`,
+              zIndex: 2,
             }}
           >
             <defs>
-              {segmentColors.map((c, i) => (
+              {WHEEL_COLORS.map((c, i) => (
                 <linearGradient key={i} id={`wheel-grad-${i}`} x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor={c} />
-                  <stop offset="100%" stopColor={shade(c, -25)} />
+                  <stop offset="0%" stopColor={shade(c, 18)} />
+                  <stop offset="100%" stopColor={shade(c, -28)} />
                 </linearGradient>
               ))}
+              <linearGradient id="wm-gold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fff0c2" />
+                <stop offset="40%" stopColor="#f0b74a" />
+                <stop offset="72%" stopColor="#d4881a" />
+                <stop offset="100%" stopColor="#8a5a12" />
+              </linearGradient>
+              <clipPath id="wm-hub">
+                <circle cx="200" cy="200" r="31" />
+              </clipPath>
+              <radialGradient id="wm-hubshine" cx="38%" cy="28%" r="70%">
+                <stop offset="0%" stopColor="rgba(255,255,255,.32)" />
+                <stop offset="45%" stopColor="rgba(255,255,255,0)" />
+              </radialGradient>
             </defs>
+            {/* Anneau doré + bande crème + liseré sombre */}
+            <circle cx="200" cy="200" r="178" fill="url(#wm-gold)" />
+            <circle cx="200" cy="200" r="170" fill="#fbf7ee" />
+            <circle cx="200" cy="200" r="153" fill="#0a1a17" />
+            {/* Billes scintillantes (or + blanc alternées) */}
+            {Array.from({ length: 24 }).map((_, k) => {
+              const a = ((k * (360 / 24) - 90) * Math.PI) / 180;
+              const px = 200 + 166 * Math.cos(a);
+              const py = 200 + 166 * Math.sin(a);
+              const gold = k % 2 === 0;
+              return (
+                <circle
+                  key={k}
+                  cx={px}
+                  cy={py}
+                  r={4.6}
+                  fill={gold ? '#ffe08a' : '#fffef2'}
+                  style={{
+                    animation: 'wmPeg 1.7s ease-in-out infinite',
+                    animationDelay: `${(k * 0.08).toFixed(2)}s`,
+                    filter: `drop-shadow(0 0 5px ${gold ? 'rgba(255,190,70,.9)' : 'rgba(255,240,180,.85)'})`,
+                  }}
+                />
+              );
+            })}
+            {/* Segments */}
             {WHEEL_SEGMENTS.map((seg, i) => {
               const startAngle = i * SEGMENT_ANGLE - SEGMENT_ANGLE / 2 - 90;
               const endAngle = startAngle + SEGMENT_ANGLE;
-              const path = describeSegment(WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_RADIUS - 4, startAngle, endAngle);
+              const path = describeSegment(200, 200, 150, startAngle, endAngle);
               const midAngle = (startAngle + endAngle) / 2;
-              const labelR = WHEEL_RADIUS - 56;
-              const lx = WHEEL_RADIUS + labelR * Math.cos((midAngle * Math.PI) / 180);
-              const ly = WHEEL_RADIUS + labelR * Math.sin((midAngle * Math.PI) / 180);
+              const labelR = 150 - 50;
+              const lx = 200 + labelR * Math.cos((midAngle * Math.PI) / 180);
+              const ly = 200 + labelR * Math.sin((midAngle * Math.PI) / 180);
 
               return (
                 <g key={seg.id}>
-                  <path d={path} fill={`url(#wheel-grad-${i})`} stroke="rgba(0,0,0,.3)" strokeWidth="2" />
+                  <path
+                    d={path}
+                    fill={`url(#wheel-grad-${i % WHEEL_COLORS.length})`}
+                    stroke="rgba(255,255,255,.16)"
+                    strokeWidth="1.5"
+                  />
                   <g transform={`translate(${lx},${ly}) rotate(${midAngle + 90})`}>
                     <text
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill="#fff"
-                      fontFamily="Outfit, sans-serif"
-                      fontWeight={900}
-                      fontSize={16}
+                      fontSize={18}
                       style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.55))' }}
                     >
                       {seg.emoji}
                     </text>
                     <text
-                      y={20}
+                      y={19}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill="#fff"
                       fontFamily="Outfit, sans-serif"
                       fontWeight={800}
                       fontSize={11}
-                      style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.7))' }}
+                      style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.75))' }}
                     >
                       {seg.short}
                     </text>
@@ -304,28 +385,53 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
                 </g>
               );
             })}
-            {/* Centre */}
-            <circle
-              cx={WHEEL_RADIUS}
-              cy={WHEEL_RADIUS}
-              r={28}
-              fill={palette.bg}
-              stroke={palette.accent}
-              strokeWidth={3}
+            {/* Moyeu — vrai logo B */}
+            <circle cx="200" cy="200" r="38" fill="url(#wm-gold)" />
+            <image
+              href="/icon-192.png"
+              x="169"
+              y="169"
+              width="62"
+              height="62"
+              clipPath="url(#wm-hub)"
+              preserveAspectRatio="xMidYMid slice"
             />
-            <text
-              x={WHEEL_RADIUS}
-              y={WHEEL_RADIUS}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill={palette.accent}
-              fontFamily="Outfit, sans-serif"
-              fontWeight={900}
-              fontSize={24}
-            >
-              B
-            </text>
+            <circle cx="200" cy="200" r="31" fill="url(#wm-hubshine)" />
           </svg>
+          {/* Reflet glossy (fixe, ne tourne pas) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              left: 0,
+              width: WHEEL_SIZE,
+              height: WHEEL_SIZE,
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 4,
+              background:
+                'radial-gradient(circle at 33% 24%, rgba(255,255,255,.26), rgba(255,255,255,.05) 30%, transparent 46%)',
+            }}
+          />
+          {/* Projecteur sur le lot gagnant (à l'arrêt) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 34,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: WHEEL_SIZE * 0.34,
+              height: WHEEL_SIZE * 0.44,
+              pointerEvents: 'none',
+              zIndex: 5,
+              opacity: phase === 'result' ? 1 : 0,
+              transition: 'opacity .4s',
+              mixBlendMode: 'screen',
+              filter: 'blur(2px)',
+              background:
+                'radial-gradient(ellipse at 50% 20%, rgba(255,238,170,.5), rgba(255,210,120,.16) 45%, transparent 70%)',
+            }}
+          />
 
           {phase === 'result' && <ResultConfetti palette={palette} />}
         </div>
