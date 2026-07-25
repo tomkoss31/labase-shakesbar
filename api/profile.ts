@@ -467,24 +467,30 @@ export default async function handler(req: any, res: any) {
       .gt('expires_at', nowIso)
       .neq('reward_type', 'retry');
 
-    // Garde-fou anti-doublon : ce client a-t-il déjà une commande CRÉDITÉE dans
-    // les 45 dernières minutes ? (via l'app « espèces » OU un scan précédent).
-    // Sert à afficher un avertissement au comptoir avant de re-créditer.
+    // Garde-fou anti-doublon (scan en double) : ce client a-t-il déjà une
+    // commande RÉELLEMENT CRÉDITÉE dans les 45 dernières minutes ?
+    // ⚠️ On IGNORE les pré-commandes « espèces » de l'app (square_order_id =
+    // CASH-xxxx) : depuis le fix, leur validation ne crédite plus d'XP — seul le
+    // scan crédite. Ne restent donc « créditées » que les commandes de scan
+    // (square_order_id NULL) ou carte Square (square_order_id réel).
     const since = new Date(Date.now() - 45 * 60 * 1000).toISOString();
     const { data: recentOrders } = await admin
       .from('orders')
-      .select('total_cents, created_at, payment_method')
+      .select('total_cents, created_at, payment_method, square_order_id')
       .eq('user_id', userId)
       .in('status', ['paid', 'ready', 'preparing'])
       .gte('created_at', since)
       .order('created_at', { ascending: false })
-      .limit(1);
+      .limit(5);
+    const credited = (recentOrders ?? []).filter(
+      (o: any) => !(typeof o.square_order_id === 'string' && o.square_order_id.startsWith('CASH-')),
+    );
     const recentOrder =
-      recentOrders && recentOrders.length > 0
+      credited.length > 0
         ? {
-            total_cents: recentOrders[0].total_cents,
-            minutes_ago: Math.max(0, Math.round((Date.now() - new Date(recentOrders[0].created_at).getTime()) / 60000)),
-            payment_method: recentOrders[0].payment_method,
+            total_cents: credited[0].total_cents,
+            minutes_ago: Math.max(0, Math.round((Date.now() - new Date(credited[0].created_at).getTime()) / 60000)),
+            payment_method: credited[0].payment_method,
           }
         : null;
 

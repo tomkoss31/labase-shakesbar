@@ -914,71 +914,14 @@ export default async function handler(req: any, res: any) {
       .update({ status: 'paid', paid_at: new Date().toISOString() })
       .eq('id', orderId);
 
-    if (order.user_id) {
-      const { data: profile } = await clients.admin
-        .from('profiles')
-        .select('first_name, total_spent_cents, total_orders, xp, referred_by, referral_rewarded, xp_multiplier_until')
-        .eq('id', order.user_id)
-        .single();
-      if (profile) {
-        const isFirstOrder = profile.total_orders === 0;
-        const eurosSpent = Math.floor(order.total_cents / 100);
-        // Mardi Double XP (cohérent avec le webhook Square carte)
-        const isTuesday = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getDay() === 2;
-        // 🎁 Boost XP ×2 (roue) : actif tant que xp_multiplier_until > maintenant
-        // (cohérent avec square-webhook.ts et credit-manual ; cumulable avec mardi)
-        const xpBoostActive = !!profile.xp_multiplier_until && new Date(profile.xp_multiplier_until).getTime() > Date.now();
-        // Bonus combo +25 XP / combo (posé sur la commande par create-pending)
-        const comboBonus = ((order as any).combo_count ?? 0) * 25;
-        const xpGained = eurosSpent * 10 * (isTuesday ? 2 : 1) * (xpBoostActive ? 2 : 1) + 50 + (isFirstOrder ? 200 : 0) + comboBonus;
-        const newTotalSpent = profile.total_spent_cents + order.total_cents;
-        const newTotalOrders = profile.total_orders + 1;
-        const newXp = profile.xp + xpGained;
-        await clients.admin
-          .from('profiles')
-          .update({
-            total_spent_cents: newTotalSpent,
-            total_orders: newTotalOrders,
-            xp: newXp,
-            vip_tier: computeVipTier(newTotalSpent),
-            level: computeMascotteLevel(newXp),
-          })
-          .eq('id', order.user_id);
-
-        // 💚 Push « merci pour ta visite » (récap + XP + avis) — best-effort
-        try {
-          await notifyThanks(clients.admin, order, {
-            xpTotal: newXp,
-            xpGained,
-            firstName: (profile as any).first_name,
-          });
-        } catch {
-          /* ne bloque jamais l'encaissement */
-        }
-
-        // Récompense parrainage à la 1ère commande payée. Claim ATOMIQUE du flag
-        // (WHERE referral_rewarded=false) : un seul appel concurrent gagne → pas
-        // de double +500. Crédit parrain via add_xp (incrément atomique).
-        if (isFirstOrder && profile.referred_by && !profile.referral_rewarded) {
-          try {
-            const { data: claimedRef } = await clients.admin
-              .from('profiles')
-              .update({ referral_rewarded: true })
-              .eq('id', order.user_id)
-              .eq('referral_rewarded', false)
-              .select('id');
-            if (claimedRef && claimedRef.length > 0) {
-              await clients.admin.rpc('add_xp', { p_user: profile.referred_by, p_amount: 500 });
-            }
-          } catch (err: any) {
-            console.warn('[mark-paid] referral reward failed:', err?.message);
-          }
-        }
-
-        return res.status(200).json({ ok: true, xpGained, newTotalSpent });
-      }
-    }
-    return res.status(200).json({ ok: true, anonymous: true });
+    // ⚠️ La validation « espèces » NE CRÉDITE PLUS d'XP. Elle sert uniquement à
+    // faire avancer le statut de la commande (pending_cash → paid → en prépa →
+    // prêt) pour le suivi client. Le crédit (XP, +1 commande, CA, parrainage,
+    // push « merci ») se fait UNIQUEMENT au SCAN du QR au comptoir (credit-manual).
+    // Raison : le comptoir doit forcément valider l'espèce (pour le statut) ET
+    // scanne le client → avant, ça créditait DEUX fois. Le scan est désormais
+    // le seul point de crédit → double-crédit impossible.
+    return res.status(200).json({ ok: true, statusOnly: true });
   }
 
   // ─── POST ?action=update-status (admin) ───────────────────────
