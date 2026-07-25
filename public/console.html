@@ -1190,16 +1190,26 @@ async function lookupUser(userId) {
     }
     // Client trouvé → on coupe la caméra et on remonte la fiche en haut
     stopCamera();
-    renderProfile(data.profile, data.rewards);
+    renderProfile(data.profile, data.rewards, data.recentOrder);
     $('scanner-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     showScannerResult('err', '❌ ' + err.message);
   }
 }
 
-function renderProfile(p, rewards) {
+function renderProfile(p, rewards, recentOrder) {
   const name = p.first_name || '(prénom non renseigné)';
   const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
+  // ⚠️ Garde-fou anti-doublon : déjà crédité dans les 45 dernières minutes.
+  let warnBlock = '';
+  if (recentOrder) {
+    const eur = (recentOrder.total_cents / 100).toFixed(2).replace('.', ',');
+    warnBlock =
+      '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(248,113,113,.16);border:2px solid #f87171;border-radius:14px;">' +
+        '<div style="font-weight:900;color:#f87171;font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
+        '<div style="font-size:13px;color:#e5f6f1;margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b>, <b>ne recrédite PAS</b> (doublon).</div>' +
+      '</div>';
+  }
   // Codes actifs en radio : 1 seul utilisable par encaissement (pas
   // cumulable). L'option par défaut "Aucun" évite d'appliquer un code par
   // erreur. Le code n'est marqué utilisé QUE si l'encaissement passe
@@ -1250,6 +1260,7 @@ function renderProfile(p, rewards) {
 
   $('scanner-result').innerHTML =
     '<button id="rescanBtn" class="primary teal" style="width:100%;margin-bottom:12px;">📷 Scanner un autre client</button>' +
+    warnBlock +
     '<div class="card" style="border-color: #14b8a6;">' +
       '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
       '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +

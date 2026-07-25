@@ -275,7 +275,7 @@
         showResult('err', '❌ ' + (data.error || 'Erreur'));
         return;
       }
-      renderProfile(data.profile, data.rewards);
+      renderProfile(data.profile, data.rewards, data.recentOrder);
     } catch (err) {
       showResult('err', '❌ ' + err.message);
     }
@@ -290,10 +290,21 @@
     return { icon: '🎁', big: r.reward_label, sub: '' };
   }
 
-  function renderProfile(p, rewards) {
+  function renderProfile(p, rewards, recentOrder) {
     const name = p.first_name || '(prénom non renseigné)';
     const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
     const active = rewards || [];
+
+    // ⚠️ Garde-fou anti-doublon : le client a déjà été crédité récemment.
+    let warnBlock = '';
+    if (recentOrder) {
+      const eur = (recentOrder.total_cents / 100).toFixed(2).replace('.', ',');
+      warnBlock =
+        '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(251,113,133,.16);border:2px solid #fb7185;border-radius:14px;">' +
+          '<div style="font-family:Outfit;font-weight:900;color:#fb7185;font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
+          '<div style="font-size:13px;color:#ecfdf5;margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b> (ex. payé en carte + commande espèces dans l\'app), <b>ne recrédite PAS</b> — ce serait un doublon.</div>' +
+        '</div>';
+    }
 
     // Remises/cadeaux SÉLECTIONNABLES : celui coché est marqué "utilisé"
     // atomiquement à l'encaissement (credit-manual → wheelSpinId).
@@ -344,6 +355,7 @@
     }).join('');
 
     $('result').innerHTML =
+      warnBlock +
       '<div class="card scan-client-card" style="border-color: #14b8a6;">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
           '<div style="min-width:0;">' +

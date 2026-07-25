@@ -467,7 +467,28 @@ export default async function handler(req: any, res: any) {
       .gt('expires_at', nowIso)
       .neq('reward_type', 'retry');
 
-    return res.status(200).json({ profile, rewards: rewards ?? [] });
+    // Garde-fou anti-doublon : ce client a-t-il déjà une commande CRÉDITÉE dans
+    // les 45 dernières minutes ? (via l'app « espèces » OU un scan précédent).
+    // Sert à afficher un avertissement au comptoir avant de re-créditer.
+    const since = new Date(Date.now() - 45 * 60 * 1000).toISOString();
+    const { data: recentOrders } = await admin
+      .from('orders')
+      .select('total_cents, created_at, payment_method')
+      .eq('user_id', userId)
+      .in('status', ['paid', 'ready', 'preparing'])
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    const recentOrder =
+      recentOrders && recentOrders.length > 0
+        ? {
+            total_cents: recentOrders[0].total_cents,
+            minutes_ago: Math.max(0, Math.round((Date.now() - new Date(recentOrders[0].created_at).getTime()) / 60000)),
+            payment_method: recentOrders[0].payment_method,
+          }
+        : null;
+
+    return res.status(200).json({ profile, rewards: rewards ?? [], recentOrder });
   }
 
   // ─── POST ?action=credit-manual ───────────────────────────────
