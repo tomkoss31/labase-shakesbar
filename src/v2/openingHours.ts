@@ -1,13 +1,12 @@
 // Règle d'ouverture du bar — source unique pour l'affichage du statut
 // et le blocage éventuel des commandes hors horaires.
 //
-// Horaires (heure de Paris) :
-//   Mardi    10h30 – 17h30
-//   Mercredi 10h30 – 17h00
-//   Jeudi    10h30 – 17h30
-//   Vendredi 10h30 – 17h30
-//   Samedi   10h00 – 13h00
-//   Lundi & Dimanche : fermé
+// Horaires (heure de Paris) — à partir du 7 septembre 2026 :
+//   Mardi    11h00 – 17h00
+//   Mercredi 11h00 – 13h00
+//   Jeudi    11h00 – 13h00
+//   Vendredi 11h00 – 17h30
+//   Samedi, Lundi & Dimanche : fermé
 //
 // ⚠️ Les horaires peuvent varier selon les événements — c'est une base.
 
@@ -22,11 +21,11 @@ interface DaySlot {
 const SCHEDULE: Record<number, DaySlot | null> = {
   0: null, // dimanche
   1: null, // lundi
-  2: { open: 10 * 60 + 30, close: 17 * 60 + 30 }, // mardi
-  3: { open: 10 * 60 + 30, close: 17 * 60 + 0 }, // mercredi
-  4: { open: 10 * 60 + 30, close: 17 * 60 + 30 }, // jeudi
-  5: { open: 10 * 60 + 30, close: 17 * 60 + 30 }, // vendredi
-  6: { open: 10 * 60 + 0, close: 13 * 60 + 0 }, // samedi
+  2: { open: 11 * 60 + 0, close: 17 * 60 + 0 }, // mardi
+  3: { open: 11 * 60 + 0, close: 13 * 60 + 0 }, // mercredi
+  4: { open: 11 * 60 + 0, close: 13 * 60 + 0 }, // jeudi
+  5: { open: 11 * 60 + 0, close: 17 * 60 + 30 }, // vendredi
+  6: null, // samedi (fermé depuis le 7 sept. 2026)
 };
 
 const DAY_NAMES = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
@@ -143,10 +142,9 @@ export function useOpenStatus(): OpenStatus {
 
 // Liste lisible des horaires (pour une éventuelle section "Horaires")
 export const OPENING_HOURS_TEXT: Array<{ day: string; hours: string }> = [
-  { day: 'Mardi', hours: '10h30 – 17h30' },
-  { day: 'Mercredi', hours: '10h30 – 17h00' },
-  { day: 'Jeudi', hours: '10h30 – 17h30' },
-  { day: 'Vendredi', hours: '10h30 – 17h30' },
-  { day: 'Samedi', hours: '10h00 – 13h00' },
-  { day: 'Dimanche & Lundi', hours: 'Fermé' },
+  { day: 'Mardi', hours: '11h – 17h' },
+  { day: 'Mercredi', hours: '11h – 13h' },
+  { day: 'Jeudi', hours: '11h – 13h' },
+  { day: 'Vendredi', hours: '11h – 17h30' },
+  { day: 'Samedi, Dimanche & Lundi', hours: 'Fermé' },
 ];
