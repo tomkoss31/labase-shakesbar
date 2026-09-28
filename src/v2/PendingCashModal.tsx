@@ -44,6 +44,13 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
       },
       (err) => {
         if (err) console.error('[PendingCashModal] QR generation failed', err);
+        // La lib fixe style.width/height en px → on rend le QR fluide (il suit
+        // le cadre carré, sans déborder sur les petits écrans). Pixels intacts.
+        const c = canvasRef.current;
+        if (c) {
+          c.style.width = '100%';
+          c.style.height = '100%';
+        }
       },
     );
   }, [open, code]);
@@ -77,6 +84,10 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
         style={{
           width: '100%',
           maxWidth: 420,
+          // Petits écrans : la fenêtre défile au lieu d'être coupée
+          maxHeight: '92dvh',
+          overflowY: 'auto',
+          boxSizing: 'border-box',
           background: `linear-gradient(180deg, ${palette.cardHi}, ${palette.card})`,
           border: `1px solid ${palette.line}`,
           borderRadius: 28,
@@ -136,8 +147,9 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
         {/* QR code généré localement */}
         <div
           style={{
-            width: 280,
-            height: 280,
+            width: 'min(280px, 100%)',
+            aspectRatio: '1 / 1',
+            boxSizing: 'border-box',
             margin: '0 auto 16px',
             background: '#fff',
             borderRadius: 16,
@@ -150,7 +162,7 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
         >
           <canvas
             ref={canvasRef}
-            style={{ display: 'block', width: 256, height: 256 }}
+            style={{ display: 'block', width: '100%', height: '100%' }}
           />
         </div>
 

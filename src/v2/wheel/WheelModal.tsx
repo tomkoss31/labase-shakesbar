@@ -51,6 +51,20 @@ export function WheelModal({ palette, open, onClose, isAdmin = false, onSpun }: 
   // Admin : on ignore le cooldown (client) pour pouvoir tester en boucle.
   const canSpin = isAdmin || cooldown.canSpin;
   const audioRef = useRef<number | null>(null);
+  // Mise à l'échelle de la roue (dessinée en 320 px) selon la largeur d'écran :
+  // sur un iPhone 375 px, la place utile n'est que de ~295 px → débordement.
+  const [wheelScale, setWheelScale] = useState(1);
+  useEffect(() => {
+    if (!open) return;
+    const compute = () => {
+      // 16 px de marge écran + 24 px de padding carte, de chaque côté
+      const available = Math.min(window.innerWidth, 480 + 32) - 2 * 16 - 2 * 24;
+      setWheelScale(Math.min(1, Math.max(0.7, available / WHEEL_SIZE)));
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, [open]);
 
   // Reset quand on (re)ouvre
   useEffect(() => {
@@ -185,8 +199,8 @@ export function WheelModal({ palette, open, onClose, isAdmin = false, onSpun }: 
             position: 'absolute',
             top: 14,
             right: 14,
-            width: 36,
-            height: 36,
+            width: 44,
+            height: 44,
             borderRadius: '50%',
             background: 'rgba(0,0,0,.3)',
             border: `1px solid ${palette.line}`,
@@ -237,10 +251,18 @@ export function WheelModal({ palette, open, onClose, isAdmin = false, onSpun }: 
         `}</style>
         <div
           style={{
+            width: WHEEL_SIZE * wheelScale,
+            height: (WHEEL_SIZE + 24) * wheelScale,
+            margin: '0 auto 24px',
+          }}
+        >
+        <div
+          style={{
             position: 'relative',
             width: WHEEL_SIZE,
             height: WHEEL_SIZE + 24,
-            margin: '0 auto 24px',
+            transform: wheelScale < 1 ? `scale(${wheelScale})` : undefined,
+            transformOrigin: 'top left',
           }}
         >
           {/* Halo doré pulsant */}
@@ -445,6 +467,7 @@ export function WheelModal({ palette, open, onClose, isAdmin = false, onSpun }: 
           />
 
           {phase === 'result' && <ResultConfetti palette={palette} />}
+        </div>
         </div>
 
         {/* Result panel */}

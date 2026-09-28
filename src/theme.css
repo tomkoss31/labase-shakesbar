@@ -37,7 +37,7 @@ html {
 body {
   margin: 0;
   color: var(--dlx-text);
-  font-family: 'Instrument Sans', 'Segoe UI', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: transparent;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -58,7 +58,7 @@ body {
 .delivery-luxe h3,
 .delivery-luxe .dlx-display,
 .delivery-luxe .dlx-brand-wordmark {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   letter-spacing: -0.03em;
 }
 

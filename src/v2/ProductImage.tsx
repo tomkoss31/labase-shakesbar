@@ -12,6 +12,11 @@ interface ProductImageProps {
 
 export function ProductImage({ src, alt, palette, size = 100, rounded = false }: ProductImageProps) {
   const [errored, setErrored] = useState(false);
+  // Les photos sont servies en WebP (~40 Ko au lieu de ~2 Mo). Si le WebP ne
+  // se charge pas (très vieux téléphone), on retente une fois avec le PNG
+  // d'origine, toujours présent à côté.
+  const [pngFallback, setPngFallback] = useState(false);
+  const displaySrc = pngFallback && src ? src.replace(/\.webp$/, '.png') : src;
 
   if (!src || errored) {
     return (
@@ -38,9 +43,13 @@ export function ProductImage({ src, alt, palette, size = 100, rounded = false }:
 
   return (
     <img
-      src={src}
+      src={displaySrc}
       alt={alt}
-      onError={() => setErrored(true)}
+      decoding="async"
+      onError={() => {
+        if (!pngFallback && src.endsWith('.webp')) setPngFallback(true);
+        else setErrored(true);
+      }}
       loading="lazy"
       style={{
         width: '100%',

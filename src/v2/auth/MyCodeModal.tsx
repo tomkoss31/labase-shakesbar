@@ -42,6 +42,13 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
       },
       (err) => {
         if (err) console.error('[MyCodeModal] QR generation failed', err);
+        // La lib fixe style.width/height en px → on rend le QR fluide (il suit
+        // le cadre carré, sans déborder sur les petits écrans). Pixels intacts.
+        const c = canvasRef.current;
+        if (c) {
+          c.style.width = '100%';
+          c.style.height = '100%';
+        }
       },
     );
   }, [open, userId]);
@@ -75,6 +82,10 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
         style={{
           width: '100%',
           maxWidth: 420,
+          // Petits écrans (iPhone SE) : la fenêtre défile au lieu d'être coupée
+          maxHeight: '92dvh',
+          overflowY: 'auto',
+          boxSizing: 'border-box',
           background: `linear-gradient(180deg, ${palette.cardHi}, ${palette.card})`,
           border: `1px solid ${palette.line}`,
           borderRadius: 28,
@@ -163,8 +174,10 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
         {/* QR code généré localement via lib qrcode */}
         <div
           style={{
-            width: 320,
-            height: 320,
+            // Carré qui s'adapte à la largeur (max 320 px) → jamais coupé
+            width: 'min(320px, 100%)',
+            aspectRatio: '1 / 1',
+            boxSizing: 'border-box',
             margin: '0 auto 16px',
             background: '#fff',
             borderRadius: 18,
@@ -177,7 +190,7 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
         >
           <canvas
             ref={canvasRef}
-            style={{ display: 'block', width: 292, height: 292 }}
+            style={{ display: 'block', width: '100%', height: '100%' }}
           />
         </div>
 
@@ -195,7 +208,7 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
         >
           💡 Quand tu commandes au comptoir,{' '}
           <b style={{ color: palette.text }}>présente ce code</b> pour gagner tes XP
-          et bénéficier de tes réductions VIP.
+          et récupérer tes cadeaux.
         </div>
 
         <button
