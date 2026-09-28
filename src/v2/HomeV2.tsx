@@ -22,6 +22,8 @@ import { MyCodeModal } from './auth/MyCodeModal';
 import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
 import { usePushNotifications, linkPushSubscriptionToAccount } from './notifications/usePushNotifications';
+import { HomeBanners } from './HomeBanners';
+import { shareReferralLink } from './referral';
 import { PushActivationModal } from './PushActivationModal';
 import { tryAcquirePrompt, releasePrompt } from './promptLock';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
@@ -108,6 +110,36 @@ export function HomeV2({
       }
     } catch {}
   }, []);
+
+  // Raccourcis de l'icône de l'app (appui long, Android) : ?qr=1 → QR fidélité
+  // direct au comptoir, ?menu=1 → menu. On attend que la connexion soit connue.
+  const shortcutRef = React.useRef<'qr' | 'menu' | null>(null);
+  React.useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sc = params.get('qr') === '1' ? 'qr' : params.get('menu') === '1' ? 'menu' : null;
+      if (!sc) return;
+      shortcutRef.current = sc;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('qr');
+      url.searchParams.delete('menu');
+      window.history.replaceState({}, '', url.toString());
+    } catch {}
+  }, []);
+  React.useEffect(() => {
+    const sc = shortcutRef.current;
+    if (!sc) return;
+    if (sc === 'menu') {
+      shortcutRef.current = null;
+      handleBottomTab('menu');
+      return;
+    }
+    if (auth.status === 'loading') return;
+    shortcutRef.current = null;
+    if (isAuthed) setMyCodeOpen(true);
+    else setAuthOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.status, isAuthed]);
 
   function openInbox() {
     // On rafraîchit à l'ouverture (sans tout marquer lu : le client coche
@@ -236,22 +268,7 @@ export function HomeV2({
       setProfileOpen(true);
       return;
     }
-    const link = `${window.location.origin}/jeu?ref=${code}`;
-    const text = 'Je te parraine chez La Base 🥤 Tourne la roue, gagne un cadeau à récupérer en boutique 🎁 : ';
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'La Base Shakes & Drinks', text, url: link });
-        return;
-      }
-    } catch {
-      /* annulé → fallback copie */
-    }
-    try {
-      await navigator.clipboard.writeText(link);
-      window.alert('Lien de parrainage copié ! Partage-le à tes amis 🤝');
-    } catch {
-      window.prompt('Copie ton lien de parrainage :', link);
-    }
+    await shareReferralLink(code);
   }
 
   // Ouvre la roue (ou l'auth si pas connecté)
@@ -439,6 +456,7 @@ export function HomeV2({
         }}
       >
         <div className="v2-hero-main">
+          <HomeBanners palette={palette} />
           <XpCard
             palette={palette}
             connected={isAuthed}
@@ -516,7 +534,7 @@ export function HomeV2({
               >
                 <span style={{ color: '#fbbf24', letterSpacing: 1, fontSize: 13 }}>★★★★★</span>
                 <span>
-                  <b style={{ color: palette.text }}>4,9</b> sur Google · avis vérifiés
+                  <b style={{ color: palette.text }}>4,9</b> sur Google · avis clients
                 </span>
               </div>
             )}

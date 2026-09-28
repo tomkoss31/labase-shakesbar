@@ -16,6 +16,8 @@ import { ProductModalV2 } from './v2/ProductModalV2';
 import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
 import { tryAcquirePrompt, releasePrompt } from './v2/promptLock';
+import { VisitThanksModal } from './v2/VisitThanksModal';
+import { shareReferralLink } from './v2/referral';
 import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
@@ -376,39 +378,74 @@ function App() {
     }
   }, []);
 
-  // Avis in-app pour les clients COMPTOIR (90% du volume) : ils ouvrent l'app à
-  // chaque visite pour montrer leur QR. Quand leur nombre de commandes augmente
-  // depuis la dernière ouverture (= ils viennent de passer au comptoir), on
-  // propose l'avis au retour dans l'app. Conforme Google : demande à leur rythme,
-  // sans récompense, et sans filtrer par note (cf. ReviewPromptModal).
+  // Retour dans l'app APRÈS un passage au comptoir (90 % du volume : ils ouvrent
+  // l'app pour montrer leur QR) : quand le nombre de commandes a augmenté depuis
+  // la dernière ouverture, on affiche « Merci pour ta visite ! +X XP » (XP gagnés,
+  // jauge, roue, parrainage), puis la demande d'avis Google à sa fermeture.
+  // Avis conforme Google : à leur rythme, sans récompense, sans filtrer la note.
+  const [visitThanks, setVisitThanks] = useState<{ xpGained: number } | null>(null);
+
+  function askReviewSoon() {
+    if (!shouldShowReviewPrompt()) return;
+    window.setTimeout(() => {
+      // Une seule pop-up auto à la fois (cf. push d'activation).
+      if (!shouldShowReviewPrompt() || !tryAcquirePrompt('review')) return;
+      setShowReviewPrompt(true);
+    }, 1600);
+  }
+
   useEffect(() => {
     const orders = appAuth.profile?.total_orders;
+    const xpNow = appAuth.profile?.xp;
     if (typeof orders !== 'number') return;
     const KEY = 'labase_last_seen_orders';
+    const XP_KEY = 'labase_last_seen_xp';
     let lastSeen: number | null = null;
+    let lastXp: number | null = null;
     try {
       const raw = window.localStorage.getItem(KEY);
       lastSeen = raw == null ? null : parseInt(raw, 10);
+      const rawXp = window.localStorage.getItem(XP_KEY);
+      lastXp = rawXp == null ? null : parseInt(rawXp, 10);
     } catch {}
-    // Première fois sur cet appareil → on pose juste la référence, pas de prompt.
+    const rememberXp = () => {
+      if (typeof xpNow === 'number') {
+        try { window.localStorage.setItem(XP_KEY, String(xpNow)); } catch {}
+      }
+    };
+    // Première fois sur cet appareil → on pose juste la référence, pas de pop-up.
     if (lastSeen == null || Number.isNaN(lastSeen)) {
       try { window.localStorage.setItem(KEY, String(orders)); } catch {}
+      rememberXp();
       return;
     }
     if (orders > lastSeen) {
       try { window.localStorage.setItem(KEY, String(orders)); } catch {}
-      // Pas en même temps que l'écran de remerciement du paiement en ligne.
-      if (shouldShowReviewPrompt() && !showThankYou) {
+      const gained =
+        typeof xpNow === 'number' && lastXp != null && !Number.isNaN(lastXp) ? Math.max(0, xpNow - lastXp) : 0;
+      // Pas en même temps que l'écran de confirmation du paiement en ligne.
+      if (!showThankYou) {
         window.setTimeout(() => {
-          // Une seule pop-up auto à la fois (cf. push d'activation).
-          if (!shouldShowReviewPrompt() || !tryAcquirePrompt('review')) return;
-          setShowReviewPrompt(true);
-        }, 1600);
+          if (tryAcquirePrompt('visit')) setVisitThanks({ xpGained: gained });
+          else askReviewSoon();
+        }, 900);
       }
     } else if (orders !== lastSeen) {
       try { window.localStorage.setItem(KEY, String(orders)); } catch {}
     }
-  }, [appAuth.profile?.total_orders, showThankYou]);
+    rememberXp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appAuth.profile?.total_orders, appAuth.profile?.xp, showThankYou]);
+
+  function closeVisitThanks(next?: 'spin') {
+    setVisitThanks(null);
+    releasePrompt('visit');
+    if (next === 'spin') setWheelOpen(true);
+    else askReviewSoon();
+  }
+
+  const lastSpinAt = appAuth.profile?.last_spin_at;
+  const canSpinWheel = !lastSpinAt || Date.now() - new Date(lastSpinAt).getTime() >= 7 * 24 * 60 * 60 * 1000;
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -1254,6 +1291,22 @@ function App() {
             totalCents={pendingCashTotal}
             customerName={customerName}
             onClose={() => setPendingCashCode(null)}
+          />
+          {/* « Merci pour ta visite ! +X XP » après un passage au comptoir */}
+          <VisitThanksModal
+            palette={activePalette}
+            open={!!visitThanks}
+            onClose={() => closeVisitThanks()}
+            firstName={appAuth.profile?.first_name}
+            xp={appAuth.profile?.xp ?? 0}
+            xpGained={visitThanks?.xpGained ?? 0}
+            canSpin={canSpinWheel}
+            onSpin={() => closeVisitThanks('spin')}
+            referralCode={appAuth.profile?.referral_code}
+            onShareReferral={() => {
+              const code = appAuth.profile?.referral_code;
+              if (code) void shareReferralLink(code);
+            }}
           />
           {/* Live tracking post-paiement V2 (remplace le bandeau Thank You legacy) */}
           <OrderTracking

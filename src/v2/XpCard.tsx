@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Palette } from './palette';
 import { Mascotte } from './Mascotte';
+import { REWARDS_CATALOG, nextReward } from './rewards/catalog';
 
 interface XpCardProps {
   palette: Palette;
@@ -26,9 +27,13 @@ export function XpCard({
   onConnect,
   onOpenRewards,
 }: XpCardProps) {
-  const pct = Math.min(100, (xp / xpNext) * 100);
-  const maxed = xp >= xpNext; // palier le plus haut atteint
-  const mascotteLevel = pct > 80 ? 'pro' : pct > 40 ? 'regulier' : 'apprenti';
+  const levelPct = Math.min(100, (xp / xpNext) * 100);
+  const mascotteLevel = levelPct > 80 ? 'pro' : levelPct > 40 ? 'regulier' : 'apprenti';
+  // Jauge « Plus que X XP pour… » : progression vers le PROCHAIN CADEAU (paliers
+  // du catalogue, source unique) — effet « carte Starbucks » qui fait revenir.
+  const goal = nextReward(xp);
+  const available = [...REWARDS_CATALOG].reverse().find((r) => xp >= r.cost) ?? null;
+  const pct = goal ? Math.min(100, (xp / goal.cost) * 100) : 100;
 
   return (
     <div style={{ padding: '4px 16px 16px' }}>
@@ -164,21 +169,37 @@ export function XpCard({
               }}
             >
               <span>
-                {maxed ? (
+                {goal ? (
                   <>
-                    Palier max <b style={{ color: palette.text, fontWeight: 700 }}>{nextLevel}</b> 🔥
+                    Plus que <b style={{ color: palette.text, fontWeight: 800 }}>{goal.cost - xp} XP</b> pour{' '}
+                    {goal.emoji} <b style={{ color: palette.text, fontWeight: 700 }}>{goal.short.toLowerCase()}</b>
                   </>
                 ) : (
                   <>
-                    {xpNext - xp} XP avant{' '}
-                    <b style={{ color: palette.text, fontWeight: 700 }}>{nextLevel}</b>
+                    🎁 <b style={{ color: palette.text, fontWeight: 700 }}>Tous les cadeaux débloqués !</b>
                   </>
                 )}
               </span>
-              <span style={{ color: palette.primary, fontWeight: 700 }}>
-                Mes récompenses →
+              <span style={{ color: palette.primary, fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 8 }}>
+                Mes cadeaux →
               </span>
             </div>
+            {available && (
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: '7px 10px',
+                  borderRadius: 10,
+                  background: `${palette.accent}1f`,
+                  border: `1px solid ${palette.accent}55`,
+                  fontSize: 11.5,
+                  color: palette.text,
+                  lineHeight: 1.35,
+                }}
+              >
+                🎉 Déjà dispo : <b>{available.emoji} {available.title}</b> — demande-le au comptoir !
+              </div>
+            )}
           </div>
         )}
 

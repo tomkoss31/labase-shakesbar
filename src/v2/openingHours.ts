@@ -53,6 +53,10 @@ export interface OpenStatus {
   label: string;
   // Prochaine ouverture si fermé (ex: "Ouvre mardi à 10h30")
   nextOpenLabel: string | null;
+  // Minutes avant la fermeture si ouvert selon les horaires (null sinon)
+  minutesToClose?: number | null;
+  // Heure de fermeture du jour, ex "13h" (si ouvert selon les horaires)
+  closeLabel?: string | null;
 }
 
 // ─── Override admin (piloté depuis la console) ───────────────────────
@@ -94,6 +98,8 @@ export function getOpenStatus(): OpenStatus {
       isOpen: true,
       label: `Ouvert · ferme à ${fmtTime(today.close)}`,
       nextOpenLabel: null,
+      minutesToClose: today.close - minutes,
+      closeLabel: fmtTime(today.close),
     };
   }
 
@@ -183,6 +189,11 @@ export function checkPickupTime(hhmm: string, win: PickupWindow | null = getPick
   return win.isToday
     ? `Retrait possible aujourd'hui ${range} — choisis une heure dans ce créneau.`
     : `Le bar est fermé à cette heure-là. Retrait possible ${win.dayLabel} ${range}.`;
+}
+
+// Mardi (heure de Paris) → journée Double XP
+export function isParisTuesday(): boolean {
+  return parisNow().day === 2;
 }
 
 // Hook React : récupère le réglage distant au montage et renvoie le statut

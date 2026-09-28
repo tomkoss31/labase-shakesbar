@@ -8,6 +8,7 @@ import { Mascotte } from '../Mascotte';
 import type { Profile } from './types';
 import { computeMascotteLevel, VIP_TIERS } from './types';
 import { useModalA11y } from '../useModalA11y';
+import { useUserRewards } from '../rewards/useUserRewards';
 
 interface MyCodeModalProps {
   palette: Palette;
@@ -19,6 +20,10 @@ interface MyCodeModalProps {
 
 export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Codes roue à présenter (rechargés à chaque ouverture). On exclut les lots
+  // appliqués automatiquement (« Retente », Boost XP) : rien à montrer.
+  const { rewards } = useUserRewards(undefined, open);
+  const codes = rewards.filter((r) => r.reward_type !== 'retry' && r.reward_type !== 'xp_multiplier');
 
   const xp = profile?.xp ?? 0;
   const level = computeMascotteLevel(xp);
@@ -193,6 +198,73 @@ export function MyCodeModal({ palette, open, onClose, userId, profile }: MyCodeM
             style={{ display: 'block', width: '100%', height: '100%' }}
           />
         </div>
+
+        {codes.length > 0 && (
+          <div
+            style={{
+              marginBottom: 12,
+              padding: 12,
+              borderRadius: 14,
+              background: `${palette.accent}14`,
+              border: `1px solid ${palette.accent}55`,
+              textAlign: 'left',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: '.08em',
+                textTransform: 'uppercase',
+                color: palette.accent,
+                marginBottom: 8,
+              }}
+            >
+              🎟️ Tes cadeaux à utiliser
+            </div>
+            {codes.map((r) => {
+              const exp = new Date(r.expires_at);
+              return (
+                <div
+                  key={r.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '6px 0',
+                    borderTop: `1px solid ${palette.line}`,
+                  }}
+                >
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 13, fontWeight: 800, color: palette.text }}>
+                      {r.reward_label}
+                    </span>
+                    {!isNaN(exp.getTime()) && (
+                      <span style={{ display: 'block', fontSize: 11, color: palette.textDim }}>
+                        jusqu’au {exp.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'ui-monospace, Menlo, monospace',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: palette.text,
+                      background: 'rgba(0,0,0,.3)',
+                      padding: '4px 8px',
+                      borderRadius: 8,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {r.reward_code}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <div
           style={{
