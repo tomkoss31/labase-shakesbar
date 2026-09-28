@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
+import { useImageColor } from './imageColor';
 import type { ProductExtra, ComboOffer } from '../data/menu';
 import { EXTRAS, CATEGORIES_WITH_EXTRAS, comboOffers } from '../data/menu';
 import { colorForProduct } from './FlyAnimation';
@@ -68,6 +69,10 @@ export function ProductModalV2({
 
   const dialogRef = useModalA11y<HTMLDivElement>(open && !!product, onClose);
 
+  // Vraie couleur dominante de la photo (repli : couleur par nom de produit).
+  // ⚠️ Hook appelé AVANT le return anticipé (règle des hooks React).
+  const photoColor = useImageColor(open && product ? product.image : undefined);
+
   if (!open || !product) return null;
 
   const basePriceCents = getPrice(product);
@@ -80,6 +85,7 @@ export function ProductModalV2({
 
   const relevantCombos = getRelevantCombos(product.categoryId);
   const productColor = colorForProduct(product.name, product.categoryId, palette);
+  const heroColor = photoColor ?? productColor;
 
   function toggleExtra(label: string) {
     setSelectedExtras((prev) =>
@@ -167,20 +173,44 @@ export function ProductModalV2({
             paddingBottom: 110,
           }}
         >
-          {/* Image hero */}
+          {/* Photo pleine largeur sur un halo de la couleur de la boisson. Les
+              bords de la photo (fond noir) sont estompés → pas de carré visible. */}
           <div
             style={{
-              marginTop: -40,
-              height: 240,
-              background: `radial-gradient(circle at 50% 50%, ${productColor}44, ${productColor}11 45%, transparent 75%)`,
+              margin: '-40px -20px 0',
+              height: 'min(86vw, 340px)',
+              position: 'relative',
+              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 20,
-              padding: 20,
+              background: `radial-gradient(circle at 50% 48%, #050606 30%, ${heroColor}55 58%, ${heroColor}1f 76%, transparent 100%)`,
+              transition: 'background .4s ease',
             }}
           >
-            <ProductImage src={product.image} alt={product.name} palette={palette} />
+            <div
+              style={{
+                height: '100%',
+                aspectRatio: '1 / 1',
+                maxWidth: '100%',
+                WebkitMaskImage: 'radial-gradient(closest-side, #000 72%, transparent 100%)',
+                maskImage: 'radial-gradient(closest-side, #000 72%, transparent 100%)',
+              }}
+            >
+              <ProductImage src={product.image} alt={product.name} palette={palette} />
+            </div>
+            <div
+              aria-hidden
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 56,
+                background: `linear-gradient(180deg, transparent, ${palette.card})`,
+                pointerEvents: 'none',
+              }}
+            />
           </div>
 
           {/* Badges */}

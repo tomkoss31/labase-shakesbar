@@ -6,6 +6,7 @@ import { track as vercelTrack } from '@vercel/analytics';
 type EventName =
   | 'order_started'      // ouverture panier
   | 'order_paid_square'  // paiement Square réussi
+  | 'usual_order_reordered' // « Ta commande habituelle » ajoutée en un geste
   | 'order_paid_cash'    // commande espèces (pending_cash créée)
   | 'order_whatsapp'     // commande envoyée via WhatsApp
   | 'wheel_spun'         // roue cadeau utilisée

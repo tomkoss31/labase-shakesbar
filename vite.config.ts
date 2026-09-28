@@ -13,8 +13,7 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           // Supabase — gros lib (auth + storage + realtime)
           'supabase': ['@supabase/supabase-js'],
-          // Animations + scanner + QR — features lourdes mais optionnelles
-          'animations': ['framer-motion'],
+          // QR — feature lourde mais optionnelle (framer-motion retiré : plus utilisé)
           'qr': ['qrcode'],
           // Icônes Lucide — peuvent être tree-shaken mais on les groupe
           'icons': ['lucide-react'],

@@ -1,6 +1,4 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle2, X } from 'lucide-react';
 import { BRAND, categories, comboOffers, googleReviewUrl } from './data/menu';
 import type { Category, ComboOffer, ComboSelectionConfig, Product } from './data/menu';
 import {
@@ -17,7 +15,10 @@ import { CartDrawerV2 } from './v2/CartDrawerV2';
 import { ReviewPromptModal, shouldShowReviewPrompt } from './v2/ReviewPromptModal';
 import { tryAcquirePrompt, releasePrompt } from './v2/promptLock';
 import { VisitThanksModal } from './v2/VisitThanksModal';
+import { ComboModalV2 } from './v2/ComboModalV2';
+import { Toast } from './v2/Toast';
 import { shareReferralLink } from './v2/referral';
+import type { UsualOrder } from './v2/usualOrder';
 import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
@@ -71,154 +72,6 @@ function buildWhatsAppMessage(
   ];
 
   return encodeURIComponent(lines.join('\n'));
-}
-
-function getBadgeLabel(badge?: string) {
-  switch (badge) {
-    case 'Produit du mois':
-      return 'Nouveau';
-    case 'Best-seller':
-      return 'Le plus commandé';
-    case 'Ultra gourmand':
-    case 'Gourmand':
-      return 'Gourmand';
-    case 'Performance':
-      return 'Perf';
-    case 'Iconique':
-      return 'Le plus commandé';
-    default:
-      return badge ?? '';
-  }
-}
-
-function getBadgeClassName(badge?: string) {
-  switch (badge) {
-    case 'Produit du mois':
-    case 'Nouveau':
-      return 'border-cyan-400/20 bg-cyan-400/12 text-cyan-200';
-    case 'Best-seller':
-    case 'Iconique':
-      return 'border-emerald-400/20 bg-emerald-400/12 text-emerald-200';
-    case 'Ultra gourmand':
-    case 'Gourmand':
-      return 'border-pink-400/20 bg-pink-400/12 text-pink-200';
-    case 'Performance':
-      return 'border-orange-400/20 bg-orange-400/12 text-orange-200';
-    default:
-      return 'border-yellow-400/20 bg-yellow-400/12 text-yellow-300';
-  }
-}
-
-function ProductCardBackground({
-  image,
-  name,
-}: {
-  image?: string;
-  name: string;
-}) {
-  const [errored, setErrored] = useState(false);
-
-  if (!image || errored) {
-    return (
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_55%),linear-gradient(180deg,rgba(20,20,20,0.95),rgba(5,5,5,1))]" />
-    );
-  }
-
-  return (
-    <div className="absolute inset-0">
-      <img
-        src={image}
-        alt={name}
-        onError={() => setErrored(true)}
-        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.28)_35%,rgba(0,0,0,0.78)_78%,rgba(0,0,0,0.95)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),transparent_35%)]" />
-    </div>
-  );
-}
-
-function ProductModalImage({
-  image,
-  name,
-}: {
-  image?: string;
-  name: string;
-}) {
-  const [errored, setErrored] = useState(false);
-
-  if (!image || errored) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.07),_transparent_55%),linear-gradient(180deg,rgba(20,20,20,0.95),rgba(5,5,5,1))]">
-        <div className="text-center">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-            LA BASE
-          </p>
-          <p className="mt-2 text-xl font-black text-white/80">{name}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={image}
-      alt={name}
-      onError={() => setErrored(true)}
-      className="h-full w-full object-cover"
-    />
-  );
-}
-
-function ComboCardImage({
-  image,
-  name,
-}: {
-  image?: string;
-  name: string;
-}) {
-  const [errored, setErrored] = useState(false);
-
-  if (!image || errored) {
-    return (
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_transparent_55%),linear-gradient(180deg,rgba(30,30,30,0.98),rgba(8,8,8,1))]" />
-    );
-  }
-
-  return (
-    <div className="absolute inset-0">
-      <img
-        src={image}
-        alt={name}
-        onError={() => setErrored(true)}
-        className="h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.12)_0%,rgba(0,0,0,0.28)_45%,rgba(0,0,0,0.88)_100%)]" />
-    </div>
-  );
-}
-
-function FilterPill({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-sm font-medium transition ${
-        active
-          ? 'border-[#dfb86f]/40 bg-[linear-gradient(135deg,#f0d7a7,#dfb86f,#c99745)] font-black text-[#1d160d] shadow-[0_14px_28px_rgba(227,188,114,0.18)]'
-          : 'border-[#e3d6b7]/10 bg-[rgba(255,250,240,0.05)] text-white/75 hover:border-[#e3d6b7]/20 hover:bg-[rgba(255,250,240,0.08)]'
-      }`}
-    >
-      {label}
-    </button>
-  );
 }
 
 function App() {
@@ -596,6 +449,18 @@ function App() {
       }
       return true;
     });
+  }
+
+  // « Ta commande habituelle » (accueil) : même produit, même format, mêmes extras
+  function reorderUsual(u: UsualOrder) {
+    const product =
+      allProducts.find((p) => p.name === u.product.name && p.categoryId === u.product.categoryId) ??
+      allProducts.find((p) => p.name === u.product.name);
+    if (!product) return;
+    const option =
+      u.option && product.options?.some((o) => o.label === u.option) ? u.option : product.options?.[0]?.label ?? '';
+    addPreparedProductToCart(product, option, product.name, u.extras);
+    track('usual_order_reordered', { source: product.name.slice(0, 30) });
   }
 
   function openProductFromCategory(category: Category, item: Product) {
@@ -983,209 +848,31 @@ function App() {
   );
 
   return (
-    <div className="delivery-luxe min-h-screen bg-[#050505] text-white">
+    <div className="delivery-luxe" style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
 
-      <AnimatePresence>
-        {selectedCombo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/80 p-4 backdrop-blur-md md:grid md:place-items-center"
-            onClick={() => setSelectedCombo(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-              className="dlx-modal absolute bottom-0 left-0 right-0 mx-auto max-h-[92vh] overflow-y-auto rounded-t-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.12),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.09),_transparent_26%),linear-gradient(180deg,rgba(10,10,10,0.99),rgba(17,17,17,0.98))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:static md:max-w-2xl md:rounded-[34px]"
-            >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${selectedCombo.accent} px-3 py-1 text-sm font-black text-black`}>
-                  Formule combo
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedCombo(null)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="relative mb-5 h-72 overflow-hidden rounded-[26px] border border-white/8">
-                <ComboCardImage image={selectedCombo.image} name={selectedCombo.name} />
-              </div>
-
-              <h3 className="text-3xl font-black text-white">{selectedCombo.name}</h3>
-              <p className="mt-2 text-white/68">{selectedCombo.description}</p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <span className="dlx-chip-gold rounded-full border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-300">
-                  Prix : {euroFromCents(selectedCombo.priceCents)}
-                </span>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300">
-                  Économie : {euroFromCents(selectedCombo.normalPriceCents - selectedCombo.priceCents)}
-                </span>
-              </div>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="mb-3 font-bold text-white">{selectedCombo.primary.label}</p>
-
-                  {selectedComboPrimaryCandidates.length > 1 && !selectedCombo.primary.fixedProductName && (
-                    <div className="space-y-2">
-                      {selectedComboPrimaryCandidates.map((product) => (
-                        <button
-                          key={product.name}
-                          type="button"
-                          onClick={() => handleComboPrimaryProductChange(product.name)}
-                          className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${
-                            selectedComboPrimaryName === product.name
-                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
-                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          {product.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCombo.primary.fixedProductName && selectedComboPrimaryProduct && (
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white">
-                      {selectedComboPrimaryProduct.name}
-                    </div>
-                  )}
-
-                  {selectedComboPrimaryProduct?.options?.length && !selectedCombo.primary.fixedOptionLabel && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {selectedComboPrimaryProduct.options.map((opt) => (
-                        <button
-                          key={opt.label}
-                          type="button"
-                          onClick={() => setSelectedComboPrimaryOption(opt.label)}
-                          className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                            selectedComboPrimaryOption === opt.label
-                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
-                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCombo.primary.fixedOptionLabel && (
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white/80">
-                      {selectedCombo.primary.fixedOptionLabel}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <p className="mb-3 font-bold text-white">{selectedCombo.secondary.label}</p>
-
-                  {selectedComboSecondaryCandidates.length > 1 && !selectedCombo.secondary.fixedProductName && (
-                    <div className="space-y-2">
-                      {selectedComboSecondaryCandidates.map((product) => (
-                        <button
-                          key={product.name}
-                          type="button"
-                          onClick={() => handleComboSecondaryProductChange(product.name)}
-                          className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${
-                            selectedComboSecondaryName === product.name
-                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
-                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          {product.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCombo.secondary.fixedProductName && selectedComboSecondaryProduct && (
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white">
-                      {selectedComboSecondaryProduct.name}
-                    </div>
-                  )}
-
-                  {selectedComboSecondaryProduct?.options?.length && !selectedCombo.secondary.fixedOptionLabel && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {selectedComboSecondaryProduct.options.map((opt) => (
-                        <button
-                          key={opt.label}
-                          type="button"
-                          onClick={() => setSelectedComboSecondaryOption(opt.label)}
-                          className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                            selectedComboSecondaryOption === opt.label
-                              ? 'border-yellow-400 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-black'
-                              : 'border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCombo.secondary.fixedOptionLabel && (
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white/80">
-                      {selectedCombo.secondary.fixedOptionLabel}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="text-sm text-white/70">Formule sélectionnée</p>
-                <p className="mt-2 text-lg font-black text-white">
-                  {selectedComboPrimaryName || 'Choisis le premier produit'} + {selectedComboSecondaryName || 'Choisis le second produit'}
-                </p>
-                <p className="mt-1 text-sm text-white/60">{selectedCombo.subtitle}</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={addComboToCart}
-                disabled={!selectedComboPrimaryName || !selectedComboSecondaryName}
-                className="dlx-primary-btn mt-8 w-full rounded-2xl bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 py-4 text-lg font-black text-black shadow-[0_14px_35px_rgba(250,204,21,0.22)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Ajouter la formule au panier
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Composer une formule combo (style V2) */}
+      <ComboModalV2
+        palette={activePalette}
+        combo={selectedCombo}
+        onClose={() => setSelectedCombo(null)}
+        onAdd={addComboToCart}
+        primaryCandidates={selectedComboPrimaryCandidates}
+        secondaryCandidates={selectedComboSecondaryCandidates}
+        primaryName={selectedComboPrimaryName}
+        secondaryName={selectedComboSecondaryName}
+        onPrimaryChange={handleComboPrimaryProductChange}
+        onSecondaryChange={handleComboSecondaryProductChange}
+        primaryProduct={selectedComboPrimaryProduct}
+        secondaryProduct={selectedComboSecondaryProduct}
+        primaryOption={selectedComboPrimaryOption}
+        secondaryOption={selectedComboSecondaryOption}
+        onPrimaryOption={setSelectedComboPrimaryOption}
+        onSecondaryOption={setSelectedComboSecondaryOption}
+      />
 
 
 
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 18, scale: 0.98 }}
-            className="dlx-toast fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 overflow-hidden rounded-[22px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.16),rgba(0,0,0,0.86))] px-4 py-3 text-white shadow-[0_20px_40px_rgba(0,0,0,0.35)] backdrop-blur md:bottom-5"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
-                <CheckCircle2 size={18} />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300">
-                  Ajout confirmé
-                </p>
-                <p className="text-sm font-black text-white">{toastMessage}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast palette={activePalette} message={toastMessage} />
 
       {/* Interface principale */}
           <HomeV2
@@ -1195,6 +882,7 @@ function App() {
             onOpenProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
             onOpenCombo={(v2c) => openCombo(v2c.raw.id)}
             onAddProduct={(v2p) => openProductFromCategory(v2p.category, v2p.raw)}
+            onReorderUsual={reorderUsual}
             onLeaveReview={() => window.open(googleReviewUrl, '_blank', 'noopener')}
             authOpen={authOpen}
             setAuthOpen={setAuthOpen}

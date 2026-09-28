@@ -23,6 +23,9 @@ import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
 import { usePushNotifications, linkPushSubscriptionToAccount } from './notifications/usePushNotifications';
 import { HomeBanners } from './HomeBanners';
+import { matchesSearch, searchProducts } from './search';
+import { useUsualOrder, type UsualOrder } from './usualOrder';
+import { UsualOrderCard } from './UsualOrderCard';
 import { shareReferralLink } from './referral';
 import { PushActivationModal } from './PushActivationModal';
 import { tryAcquirePrompt, releasePrompt } from './promptLock';
@@ -37,6 +40,7 @@ import {
   V2_HEALTH,
   V2_KIDS,
   V2_WAFFLES,
+  ALL_V2_PRODUCTS,
   type V2Product,
   type V2Combo,
 } from './products-adapter';
@@ -48,6 +52,8 @@ interface HomeV2Props {
   onOpenProduct: (product: V2Product) => void;
   onOpenCombo: (combo: V2Combo) => void;
   onAddProduct: (product: V2Product, fromButton: HTMLElement) => void;
+  // « Ta commande habituelle » : ajoute au panier avec le même format + extras
+  onReorderUsual?: (usual: UsualOrder) => void;
   onLeaveReview?: () => void;
   // Contrôle externe (depuis App.tsx) pour ouvrir auth / roue depuis le panier
   authOpen?: boolean;
@@ -66,6 +72,7 @@ export function HomeV2({
   onOpenProduct,
   onOpenCombo,
   onAddProduct,
+  onReorderUsual,
   onLeaveReview,
   authOpen: authOpenProp,
   setAuthOpen: setAuthOpenProp,
@@ -97,6 +104,7 @@ export function HomeV2({
   const isAuthed = auth.status === 'authenticated';
   const inbox = useInbox(auth.session?.access_token ?? null);
   const push = usePushNotifications();
+  const usualOrder = useUsualOrder(isAuthed ? auth.session?.user.id : null);
   const [pushModalOpen, setPushModalOpen] = useState(false);
 
   // Ouvre la boîte de réception si on arrive via une notification push (?inbox=1)
@@ -337,14 +345,15 @@ export function HomeV2({
 
   // Filtrage par recherche (sur tous les produits)
   const filteredQuery = query.trim().toLowerCase();
+  // Recherche intelligente (accents, saveurs, synonymes) — cf. search.ts
   function matchesQuery(p: V2Product): boolean {
-    if (!filteredQuery) return true;
-    return (
-      p.name.toLowerCase().includes(filteredQuery) ||
-      p.sub.toLowerCase().includes(filteredQuery) ||
-      p.categoryName.toLowerCase().includes(filteredQuery)
-    );
+    return matchesSearch(p, query);
   }
+  const searchResults = useMemo(
+    () => (filteredQuery ? searchProducts(ALL_V2_PRODUCTS, query) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filteredQuery],
+  );
 
   // Puce / « Voir tout » : filtre la catégorie ET remonte en haut de la liste
   // (avant : on restait en bas de page, la rubrique choisie hors de vue).
@@ -379,6 +388,8 @@ export function HomeV2({
   }
 
   function shouldShowSection(sectionId: string): boolean {
+    // Pendant une recherche : une seule grille de résultats (sans doublons)
+    if (filteredQuery) return false;
     if (activeChip === 'all') return true;
     return activeChip === sectionId;
   }
@@ -548,6 +559,7 @@ export function HomeV2({
             >
               📷 Mon QR fidélité
             </button>
+            {usualOrder && onReorderUsual && <UsualOrderCard palette={palette} usual={usualOrder} onReorder={onReorderUsual} />}
             {/* Preuve sociale : note Google (ouvre les avis). Pas de récompense. */}
             {onLeaveReview && (
               <div
@@ -661,6 +673,58 @@ export function HomeV2({
       <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
       <CategoryChips palette={palette} active={activeChip} onChange={selectChip} />
+
+      {/* Résultats de recherche : une grille unique, ou des suggestions si rien */}
+      {filteredQuery && (
+        <>
+          <SectionHead
+            palette={palette}
+            icon="🔎"
+            title={`« ${query.trim()} »`}
+            sub={searchResults.length ? `${searchResults.length} produit${searchResults.length > 1 ? 's' : ''}` : 'Aucun produit trouvé'}
+          />
+          {searchResults.length > 0 ? (
+            <ProductGrid>
+              {searchResults.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  palette={palette}
+                  product={p}
+                  width="100%"
+                  onClick={() => onOpenProduct(p)}
+                  onAdd={handleAddProduct(p)}
+                />
+              ))}
+            </ProductGrid>
+          ) : (
+            <div style={{ padding: '0 16px', color: palette.textDim, fontSize: 13, lineHeight: 1.5 }}>
+              Essaie une saveur ou un besoin :
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                {['chocolat', 'fraise', 'café', 'protéines', 'énergie', 'enfant'].map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => setQuery(w)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 999,
+                      border: `1px solid ${palette.line}`,
+                      background: palette.card,
+                      color: palette.text,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {w}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div style={{ height: 22 }} />
+        </>
+      )}
 
       {/* Nouveautés — boissons signature fraîchement ajoutées */}
       {shouldShowSection('popular') && nouveautes.length > 0 && (
