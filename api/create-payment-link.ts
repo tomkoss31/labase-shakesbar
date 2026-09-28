@@ -95,6 +95,12 @@ const EXTRA_PRICE_ENTRIES: Array<[string, number]> = [
   ['Protéines', 250],
 ];
 
+// Erreur de panier (article inconnu, quantité…) → renvoyée en 400 au client.
+class CartError extends Error {}
+
+// Plafond par ligne du panier (même valeur que create-pending côté espèces).
+const MAX_QTY_PER_LINE = 30;
+
 const productPrices: Record<string, number> = Object.fromEntries(PRODUCT_PRICE_ENTRIES);
 const optionPrices: Record<string, number> = Object.fromEntries(OPTION_PRICE_ENTRIES);
 const comboPrices: Record<string, number> = Object.fromEntries(COMBO_PRICE_ENTRIES);
@@ -170,16 +176,16 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Panier vide ou invalide' });
     }
 
+    // 🔒 Le prix vient UNIQUEMENT du catalogue serveur ci-dessus. Le
+    // unitPriceCents envoyé par le téléphone est ignoré (sinon : combo inventé
+    // à 0,01 € × 1000 = paiement dérisoire + 25 000 XP crédités par le webhook).
+    // Tout article inconnu est refusé → penser à ajouter chaque nouveau produit
+    // / format / combo dans les tables PRODUCT/OPTION/COMBO_PRICE_ENTRIES.
     const getBaseAmount = (item: CartItemPayload): number => {
       if (item.categoryName === 'Formule combo') {
-        const key = normalizeKey(item.name ?? '');
-        const comboAmount =
-          normalizedComboPrices[key] ??
-          (Number.isFinite(Number(item.unitPriceCents))
-            ? Number(item.unitPriceCents)
-            : undefined);
+        const comboAmount = normalizedComboPrices[normalizeKey(item.name ?? '')];
         if (!comboAmount) {
-          throw new Error(`Combo inconnu: ${item.name}`);
+          throw new CartError(`« ${item.name} » n'est plus disponible en ligne. Retire-le du panier et réessaie.`);
         }
         return comboAmount;
       }
@@ -190,46 +196,33 @@ export default async function handler(req: any, res: any) {
       const productAmount = normalizedProductPrices[normalizeKey(item.name ?? '')];
       if (productAmount) return productAmount;
 
-      // Fallback : si le front a envoyé un unitPriceCents valide, on accepte
-      if (Number.isFinite(Number(item.unitPriceCents)) && Number(item.unitPriceCents) > 0) {
-        return Number(item.unitPriceCents);
-      }
+      throw new CartError(`« ${item.name} » n'est plus disponible en ligne. Retire-le du panier et réessaie.`);
+    };
 
-      throw new Error(`Produit inconnu: ${item.name}`);
+    const extraPrice = (extra: string): number => {
+      const price = extraPrices[extra] ?? normalizedExtraPrices[normalizeKey(extra)];
+      if (!price) throw new CartError(`L'extra « ${extra} » n'est plus disponible. Retire-le du panier et réessaie.`);
+      return price;
     };
 
     const extrasAmount = (item: CartItemPayload): number =>
       Array.isArray(item.extras)
-        ? item.extras.reduce(
-            (sum: number, extra: string) =>
-              sum + (extraPrices[extra] ?? normalizedExtraPrices[normalizeKey(extra)] ?? 0),
-            0,
-          )
+        ? item.extras.reduce((sum: number, extra: string) => sum + extraPrice(extra), 0)
         : 0;
 
     // Prix unitaire complet (base + extras) — sert au calcul BOGO côté serveur.
     const unitTotal = (item: CartItemPayload): number => getBaseAmount(item) + extrasAmount(item);
 
-    const lineItems = cart.map((item: CartItemPayload) => {
+    const buildLineItems = () => cart.map((item: CartItemPayload) => {
       const quantity = Number(item.quantity || 1);
       if (!item.name || !Number.isInteger(quantity) || quantity <= 0) {
-        throw new Error('Article invalide dans le panier');
+        throw new CartError('Article invalide dans le panier');
+      }
+      if (quantity > MAX_QTY_PER_LINE) {
+        throw new CartError(`Quantité trop élevée (max ${MAX_QTY_PER_LINE} par article)`);
       }
 
-      const baseAmount = getBaseAmount(item);
-
-      const extrasTotal = Array.isArray(item.extras)
-        ? item.extras.reduce((sum: number, extra: string) => {
-            return (
-              sum +
-              (extraPrices[extra] ??
-                normalizedExtraPrices[normalizeKey(extra)] ??
-                0)
-            );
-          }, 0)
-        : 0;
-
-      const totalUnitAmount = baseAmount + extrasTotal;
+      const totalUnitAmount = unitTotal(item);
 
       const extrasLabel =
         Array.isArray(item.extras) && item.extras.length > 0
@@ -246,6 +239,16 @@ export default async function handler(req: any, res: any) {
         },
       };
     });
+
+    // Panier invalide (article inconnu, quantité…) → 400 avec message clair,
+    // AVANT tout appel Square / débit XP / code roue.
+    let lineItems: ReturnType<typeof buildLineItems>;
+    try {
+      lineItems = buildLineItems();
+    } catch (err) {
+      if (err instanceof CartError) return res.status(400).json({ error: err.message });
+      throw err;
+    }
 
     const userEmail =
       typeof bodyPayload?.userEmail === 'string'
