@@ -129,7 +129,7 @@ export function PushActivationModal({
             style={{
               fontSize: 12.5,
               color: palette.textDim,
-              background: 'rgba(0,0,0,.25)',
+              background: palette.chip,
               border: `1px solid ${palette.line}`,
               borderRadius: 12,
               padding: '12px 14px',
@@ -145,7 +145,7 @@ export function PushActivationModal({
               style={{
                 fontSize: 12.5,
                 color: palette.textDim,
-                background: 'rgba(0,0,0,.25)',
+                background: palette.chip,
                 border: `1px solid ${palette.line}`,
                 borderRadius: 12,
                 padding: '12px 14px',

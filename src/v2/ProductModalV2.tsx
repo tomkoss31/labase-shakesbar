@@ -152,7 +152,7 @@ export function ProductModalV2({
               width: 44,
               height: 44,
               borderRadius: '50%',
-              background: 'rgba(0,0,0,.4)',
+              background: palette.track,
               border: `1px solid ${palette.line}`,
               color: palette.text,
               cursor: 'pointer',
@@ -184,7 +184,11 @@ export function ProductModalV2({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: `radial-gradient(circle at 50% 48%, #050606 30%, ${heroColor}55 58%, ${heroColor}1f 76%, transparent 100%)`,
+              // Clair : panneau sombre pleine largeur (vitrine) ; sombre : halo fondu
+              background:
+                palette.mode === 'light'
+                  ? `radial-gradient(circle at 50% 50%, ${heroColor}4d, transparent 68%), ${palette.photoBg}`
+                  : `radial-gradient(circle at 50% 48%, ${palette.photoBg} 30%, ${heroColor}55 58%, ${heroColor}1f 76%, transparent 100%)`,
               transition: 'background .4s ease',
             }}
           >
@@ -208,6 +212,7 @@ export function ProductModalV2({
                 bottom: 0,
                 height: 56,
                 background: `linear-gradient(180deg, transparent, ${palette.card})`,
+                display: palette.mode === 'light' ? 'none' : undefined,
                 pointerEvents: 'none',
               }}
             />

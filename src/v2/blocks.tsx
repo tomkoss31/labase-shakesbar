@@ -402,7 +402,7 @@ export function InstaCard({ palette }: { palette: Palette }) {
             width: 44,
             height: 44,
             borderRadius: 12,
-            background: 'rgba(0,0,0,.25)',
+            background: 'rgba(0,0,0,.25)', // posé sur le dégradé Instagram : reste sombre
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -421,7 +421,7 @@ export function InstaCard({ palette }: { palette: Palette }) {
           style={{
             padding: '8px 12px',
             borderRadius: 999,
-            background: 'rgba(0,0,0,.4)',
+            background: 'rgba(0,0,0,.4)', // posé sur le dégradé Instagram : reste sombre
             color: '#fff',
             border: 0,
             fontSize: 12,

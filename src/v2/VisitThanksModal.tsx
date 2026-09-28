@@ -99,7 +99,7 @@ export function VisitThanksModal({
             width: 44,
             height: 44,
             borderRadius: '50%',
-            background: 'rgba(0,0,0,.3)',
+            background: palette.chip,
             border: `1px solid ${palette.line}`,
             color: palette.text,
             cursor: 'pointer',
@@ -148,7 +148,7 @@ export function VisitThanksModal({
 
         {/* Jauge vers le prochain cadeau */}
         <div style={{ marginTop: 16, textAlign: 'left' }}>
-          <div style={{ height: 10, background: 'rgba(0,0,0,.4)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ height: 10, background: palette.track, borderRadius: 999, overflow: 'hidden' }}>
             <div
               style={{
                 height: '100%',

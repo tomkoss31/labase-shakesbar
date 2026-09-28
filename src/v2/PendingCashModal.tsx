@@ -108,7 +108,7 @@ export function PendingCashModal({ palette, open, code, totalCents, customerName
             width: 44,
             height: 44,
             borderRadius: '50%',
-            background: 'rgba(0,0,0,.3)',
+            background: palette.chip,
             border: `1px solid ${palette.line}`,
             color: palette.text,
             cursor: 'pointer',

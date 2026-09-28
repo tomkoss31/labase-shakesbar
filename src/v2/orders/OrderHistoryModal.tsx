@@ -117,7 +117,7 @@ export function OrderHistoryModal({ palette, open, onClose }: Props) {
             aria-label="Fermer"
             style={{
               width: 44, height: 44, borderRadius: '50%',
-              background: 'rgba(0,0,0,.3)', border: `1px solid ${palette.line}`,
+              background: palette.chip, border: `1px solid ${palette.line}`,
               color: palette.text, cursor: 'pointer', fontSize: 18,
             }}
           >

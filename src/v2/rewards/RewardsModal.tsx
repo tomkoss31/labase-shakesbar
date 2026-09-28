@@ -127,7 +127,7 @@ function ChallengesBlock({ palette }: { palette: Palette }) {
                   {c.claimed ? `✅ +${c.xp} XP` : `+${c.xp} XP`}
                 </div>
               </div>
-              <div style={{ height: 7, background: 'rgba(0,0,0,.4)', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ height: 7, background: palette.track, borderRadius: 999, overflow: 'hidden' }}>
                 <div
                   style={{
                     height: '100%',
@@ -193,7 +193,7 @@ function ReferralStats({ palette }: { palette: Palette }) {
         gap: 8,
         padding: '10px 8px',
         marginBottom: 12,
-        background: 'rgba(0,0,0,.22)',
+        background: palette.chip,
         border: `1px solid ${palette.line}`,
         borderRadius: 12,
       }}
@@ -294,7 +294,7 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
             aria-label="Fermer"
             style={{
               width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-              background: 'rgba(0,0,0,.3)', border: `1px solid ${palette.line}`,
+              background: palette.chip, border: `1px solid ${palette.line}`,
               color: palette.text, cursor: 'pointer', fontSize: 18,
             }}
           >
@@ -328,7 +328,7 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
               </div>
             )}
           </div>
-          <div style={{ height: 10, background: 'rgba(0,0,0,.4)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ height: 10, background: palette.track, borderRadius: 999, overflow: 'hidden' }}>
             <div
               style={{
                 height: '100%',

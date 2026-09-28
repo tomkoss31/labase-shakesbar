@@ -97,7 +97,7 @@ export function XpCard({
                 alignItems: 'center',
                 gap: 6,
                 padding: '6px 10px',
-                background: 'rgba(0,0,0,.3)',
+                background: palette.chip,
                 borderRadius: 999,
                 border: `1px solid ${palette.line}`,
                 flexShrink: 0,
@@ -142,7 +142,7 @@ export function XpCard({
             <div
               style={{
                 height: 8,
-                background: 'rgba(0,0,0,.4)',
+                background: palette.track,
                 borderRadius: 999,
                 overflow: 'hidden',
                 position: 'relative',

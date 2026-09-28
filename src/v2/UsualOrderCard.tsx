@@ -40,7 +40,7 @@ export function UsualOrderCard({
         border: `1px solid ${palette.line}`,
       }}
     >
-      <div style={{ width: 56, height: 56, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#050606' }}>
+      <div style={{ width: 56, height: 56, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: palette.photoBg }}>
         <ProductImage src={usual.product.image} alt={usual.product.name} palette={palette} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>

@@ -200,7 +200,7 @@ export function ProfileSheet({
             <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 24, color: palette.primary, marginTop: 2 }}>
               {xp}
             </div>
-            <div style={{ marginTop: 8, height: 6, background: 'rgba(0,0,0,.4)', borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{ marginTop: 8, height: 6, background: palette.track, borderRadius: 999, overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',

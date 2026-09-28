@@ -121,7 +121,7 @@ export function ReviewPromptModal({
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: 'rgba(0,0,0,.3)',
+            background: palette.chip,
             border: `1px solid ${palette.line}`,
             color: palette.text,
             cursor: 'pointer',

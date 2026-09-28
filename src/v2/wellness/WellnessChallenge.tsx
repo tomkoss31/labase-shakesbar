@@ -226,7 +226,7 @@ export function WellnessChallenge({ palette, isAuthed, onConnect }: Props) {
 
       {/* Progression */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <div style={{ flex: 1, height: 8, background: 'rgba(0,0,0,.35)', borderRadius: 999, overflow: 'hidden' }}>
+        <div style={{ flex: 1, height: 8, background: palette.chip, borderRadius: 999, overflow: 'hidden' }}>
           <div
             style={{
               height: '100%',

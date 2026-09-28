@@ -23,7 +23,7 @@ import { PasswordRecoveryModal } from './v2/auth/PasswordRecoveryModal';
 import { track } from './lib/analytics';
 import { OrderTracking } from './v2/OrderTracking';
 import { PendingCashModal } from './v2/PendingCashModal';
-import { PALETTE_E, applyTheme } from './v2/palette';
+import { applyTheme, getBasePalette } from './v2/palette';
 import { useActiveThemeId } from './v2/theme/useActiveTheme';
 import { useUserRewards } from './v2/rewards/useUserRewards';
 import { useAuth } from './v2/auth/useAuth';
@@ -101,7 +101,17 @@ function App() {
   }, [appAuth.profile?.first_name]);
   // Thème saisonnier actif (Coupe du Monde, Noël…) — accents seulement.
   const activeThemeId = useActiveThemeId();
-  const activePalette = useMemo(() => applyTheme(PALETTE_E, activeThemeId), [activeThemeId]);
+  // Thème de base (clair par défaut dans cette version) + thème de saison par-dessus
+  const basePalette = useMemo(() => getBasePalette(), []);
+  const activePalette = useMemo(() => applyTheme(basePalette, activeThemeId), [basePalette, activeThemeId]);
+  // Fond de page (visible quand on tire l'écran) + barre d'état du téléphone
+  // aux couleurs du thème (sinon barre noire au-dessus d'une appli claire).
+  useEffect(() => {
+    document.documentElement.style.background = activePalette.bg;
+    document.body.style.background = activePalette.bg;
+    document.documentElement.style.colorScheme = activePalette.mode === 'light' ? 'light' : 'dark';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', activePalette.bg);
+  }, [activePalette]);
   const [claimedGift, setClaimedGift] = useState<{ id: string; title: string; emoji: string; cost: number } | null>(null);
 
   // Après une inscription lancée depuis le panier : on rouvre le panier
@@ -848,7 +858,7 @@ function App() {
   );
 
   return (
-    <div className="delivery-luxe" style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
+    <div className="delivery-luxe" style={{ minHeight: '100vh', background: activePalette.bg, color: activePalette.text }}>
 
       {/* Composer une formule combo (style V2) */}
       <ComboModalV2

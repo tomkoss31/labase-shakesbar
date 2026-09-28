@@ -33,7 +33,7 @@ export function Toast({ palette, message }: { palette: Palette; message: string 
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           boxShadow: '0 20px 40px rgba(0,0,0,.35)',
-          color: palette.text,
+          color: '#ecfdf5',
           animation: 'lbToastIn .22s ease-out',
         }}
       >

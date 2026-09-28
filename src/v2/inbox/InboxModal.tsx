@@ -223,7 +223,7 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
             aria-label="Fermer"
             style={{
               width: 44, height: 44, borderRadius: '50%',
-              background: 'rgba(0,0,0,.3)', border: `1px solid ${palette.line}`,
+              background: palette.chip, border: `1px solid ${palette.line}`,
               color: palette.text, cursor: 'pointer', fontSize: 18,
             }}
           >
@@ -240,7 +240,7 @@ export function InboxModal({ palette, open, onClose, items, unread, onMarkRead, 
               padding: '6px 12px',
               borderRadius: 999,
               border: `1px solid ${palette.line}`,
-              background: 'rgba(0,0,0,.25)',
+              background: palette.chip,
               color: palette.textDim,
               fontSize: 12, fontWeight: 700, cursor: 'pointer',
             }}

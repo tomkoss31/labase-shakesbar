@@ -21,11 +21,63 @@ export const PALETTE_E = {
   cta: '#f59e0b',
   ctaText: '#1a0f00',
   emotion: '#fb7185',
+  // Couleurs d'interface qui s'adaptent au thème (clair / sombre)
+  chip: 'rgba(0,0,0,.3)', // fond des pastilles et boutons ronds sur une carte
+  track: 'rgba(0,0,0,.4)', // fond des jauges (XP, défi…)
+  photoBg: '#050606', // cadre des photos produits (fond noir des visuels)
+  mode: 'dark',
 } as const;
 
 // Type élargi (string) pour permettre les thèmes saisonniers qui remplacent
 // certaines couleurs. PALETTE_E reste assignable (littéraux → string).
 export type Palette = { [K in keyof typeof PALETTE_E]: string };
+
+// Palette CLAIRE (variante « D » du nuancier) : fond blanc cassé teinté vert,
+// cartes blanches, teal plus foncé pour rester lisible sur blanc. Les photos
+// (fond noir) restent présentées dans des cadres sombres (photoBg).
+export const PALETTE_LIGHT: Palette = {
+  id: 'D',
+  name: 'Clair',
+  primary: '#0f766e', // teal foncé : petits textes lisibles sur blanc (≥ 4,5:1)
+  primaryDeep: '#115e59',
+  accent: '#d97706', // ambre plus profond : lisible en texte sur blanc (le bouton CTA reste #f59e0b)
+  accentDeep: '#b45309',
+  glow1: '#5eead4',
+  glow2: '#14b8a6',
+  glow3: '#06b6d4',
+  bg: '#f3f8f6',
+  bgSoft: '#eaf3f0',
+  card: '#ffffff',
+  cardHi: '#eef8f5',
+  line: 'rgba(13,148,136,.16)',
+  text: '#0b2622',
+  textDim: '#48695f', // ≥ 4,5:1 sur le fond clair (lisibilité)
+  cta: '#f59e0b',
+  ctaText: '#1a0f00',
+  emotion: '#fb7185', // badges : texte foncé lisible dessus
+  chip: 'rgba(11,38,34,.06)',
+  track: '#dcebe7',
+  photoBg: '#050606',
+  mode: 'light',
+};
+
+// ── Thème de base (clair / sombre) ───────────────────────────────────
+// Défaut de cette version : CLAIR. Pour comparer sur le même lien :
+// ?theme=dark ou ?theme=light (mémorisé sur le téléphone).
+const DEFAULT_BASE_THEME: 'light' | 'dark' = 'light';
+const BASE_THEME_KEY = 'labase-base-theme';
+
+export function getBasePalette(): Palette {
+  let mode: string = DEFAULT_BASE_THEME;
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get('theme');
+    if (fromUrl === 'light' || fromUrl === 'dark') localStorage.setItem(BASE_THEME_KEY, fromUrl);
+    mode = localStorage.getItem(BASE_THEME_KEY) || DEFAULT_BASE_THEME;
+  } catch {
+    /* navigation privée : thème par défaut */
+  }
+  return mode === 'dark' ? PALETTE_E : PALETTE_LIGHT;
+}
 
 // ── THÈMES SAISONNIERS / ÉVÉNEMENTS ──────────────────────────────────
 // On ne remplace QUE les accents (boutons, halos, roue, badges, CTA) ;

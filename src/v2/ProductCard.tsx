@@ -55,12 +55,17 @@ export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: P
         style={{
           height: imageZone,
           position: 'relative',
-          background: `radial-gradient(circle at 50% 60%, ${productColor}44, ${productColor}11 40%, transparent 70%)`,
+          // Thème clair : la photo (fond noir) est posée sur un bandeau sombre
+          // pleine largeur, façon vitrine — pas de carré noir flottant sur blanc.
+          background:
+            palette.mode === 'light'
+              ? `radial-gradient(circle at 50% 60%, ${productColor}40, transparent 70%), ${palette.photoBg}`
+              : `radial-gradient(circle at 50% 60%, ${productColor}44, ${productColor}11 40%, transparent 70%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          padding: 12,
+          padding: palette.mode === 'light' ? 6 : 12,
         }}
       >
         <ProductImage src={product.image} alt={product.name} palette={palette} />
@@ -191,7 +196,10 @@ export function ComboCard({ palette, combo, onClick }: ComboCardProps) {
         style={{
           height: 140,
           position: 'relative',
-          background: `radial-gradient(circle at 60% 60%, ${comboColor}55, ${comboColor}11 45%, transparent 75%)`,
+          background:
+            palette.mode === 'light'
+              ? `radial-gradient(circle at 60% 60%, ${comboColor}40, transparent 75%), ${palette.photoBg}`
+              : `radial-gradient(circle at 60% 60%, ${comboColor}55, ${comboColor}11 45%, transparent 75%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

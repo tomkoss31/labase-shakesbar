@@ -67,7 +67,7 @@ function Step({ palette, config, candidates, selectedName, onSelect, product, op
                   textAlign: 'center',
                 }}
               >
-                <div style={{ height: 74, borderRadius: 11, overflow: 'hidden', background: '#050606' }}>
+                <div style={{ height: 74, borderRadius: 11, overflow: 'hidden', background: palette.photoBg }}>
                   <ProductImage src={p.image} alt={p.name} palette={palette} />
                 </div>
                 <div
@@ -102,7 +102,7 @@ function Step({ palette, config, candidates, selectedName, onSelect, product, op
               background: palette.bgSoft,
             }}
           >
-            <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', background: '#050606', flexShrink: 0 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', background: palette.photoBg, flexShrink: 0 }}>
               <ProductImage src={product.image} alt={product.name} palette={palette} />
             </div>
             <span style={{ fontWeight: 800, fontSize: 14 }}>{product.name}</span>
@@ -213,7 +213,7 @@ export function ComboModalV2(props: ComboModalV2Props) {
               position: 'relative',
               margin: '0 -20px',
               height: 'min(56vw, 250px)',
-              background: `radial-gradient(circle at 50% 50%, ${palette.primary}33, transparent 70%), #050606`,
+              background: `radial-gradient(circle at 50% 50%, ${palette.primary}33, transparent 70%), ${palette.photoBg}`,
             }}
           >
             <ProductImage src={combo.image} alt={combo.name} palette={palette} />

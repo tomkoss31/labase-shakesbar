@@ -2,7 +2,7 @@
 // Activable via ?v2. Click produit/combo → callback vers App.tsx pour
 // réutiliser les modales et la logique panier/Square existantes.
 import React, { useMemo, useState } from 'react';
-import { PALETTE_E, type Palette } from './palette';
+import { getBasePalette, type Palette } from './palette';
 import { Header } from './Header';
 import { XpCard } from './XpCard';
 import { QuickActions } from './QuickActions';
@@ -83,7 +83,7 @@ export function HomeV2({
   onInstall,
 }: HomeV2Props) {
   const [installDismissed, setInstallDismissed] = useState(false);
-  const palette = paletteProp ?? PALETTE_E;
+  const palette = paletteProp ?? getBasePalette();
   const [tab, setTab] = useState<NavTab>('home');
   const [headerTab, setHeaderTab] = useState<HeaderTab>('home');
   const [query, setQuery] = useState('');
@@ -576,7 +576,7 @@ export function HomeV2({
                   color: palette.textDim,
                 }}
               >
-                <span style={{ color: '#fbbf24', letterSpacing: 1, fontSize: 13 }}>★★★★★</span>
+                <span style={{ color: palette.mode === 'light' ? '#d97706' : '#fbbf24', letterSpacing: 1, fontSize: 13 }}>★★★★★</span>
                 <span>
                   <b style={{ color: palette.text }}>4,9</b> sur Google · avis clients
                 </span>
@@ -650,7 +650,7 @@ export function HomeV2({
               style={{
                 display: 'inline-block',
                 padding: '10px 16px',
-                background: 'rgba(0,0,0,.22)',
+                background: palette.chip,
                 borderRadius: 12,
                 fontFamily: 'Outfit, sans-serif',
                 fontWeight: 900,

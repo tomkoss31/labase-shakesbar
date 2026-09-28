@@ -89,9 +89,9 @@ export function OrderTracking({ palette, open, customerName = '', pickupTime = '
             width: 44,
             height: 44,
             borderRadius: 12,
-            background: 'rgba(0,0,0,.35)',
-            border: '1px solid rgba(255,255,255,.10)',
-            color: '#fff',
+            background: palette.chip,
+            border: `1px solid ${palette.line}`,
+            color: palette.text,
             cursor: 'pointer',
             fontSize: 18,
           }}
