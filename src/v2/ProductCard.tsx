@@ -25,7 +25,7 @@ interface ProductCardProps {
   product: V2Product;
   onClick: () => void;
   onAdd: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  width?: number;
+  width?: number | string;
 }
 
 export function ProductCard({ palette, product, onClick, onAdd, width = 168 }: ProductCardProps) {

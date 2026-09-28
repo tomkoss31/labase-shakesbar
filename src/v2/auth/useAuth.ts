@@ -14,6 +14,41 @@ import {
 import type { Profile } from './types';
 import { track } from '../../lib/analytics';
 
+// ─── Dernier profil connu, gardé sur le téléphone ───────────────────
+// Affiché immédiatement au démarrage (et sans réseau au comptoir : solde XP,
+// prénom), puis remplacé dès que le serveur répond. Lié à l'id du compte :
+// jamais le profil d'un autre client. Effacé à la déconnexion.
+const PROFILE_CACHE_KEY = 'labase-profile-cache-v1';
+
+function readCachedProfile(userId: string | undefined | null): Profile | null {
+  if (!userId) return null;
+  try {
+    const raw = window.localStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    return cached?.id === userId && cached.profile ? (cached.profile as Profile) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(profile: Profile | null | undefined): void {
+  if (!profile?.id) return;
+  try {
+    window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ id: profile.id, profile, savedAt: Date.now() }));
+  } catch {
+    /* stockage plein / privé : pas grave */
+  }
+}
+
+function clearCachedProfile(): void {
+  try {
+    window.localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export type AuthStatus = 'loading' | 'unconfigured' | 'anonymous' | 'authenticated';
 
 interface AuthState {
@@ -114,6 +149,7 @@ function useAuthState(): AuthContextValue {
       const rows = (await resp.json()) as Profile[];
       if (rows.length > 0) {
         maybeWelcome(rows[0]);
+        writeCachedProfile(rows[0]);
         return rows[0];
       }
 
@@ -131,6 +167,7 @@ function useAuthState(): AuthContextValue {
       if (createResp.ok) {
         const created = (await createResp.json()) as Profile[];
         maybeWelcome(created[0]);
+        writeCachedProfile(created[0]);
         return created[0] ?? null;
       }
       return null;
@@ -256,7 +293,7 @@ function useAuthState(): AuthContextValue {
                     token_type: parsed.token_type ?? 'bearer',
                     user: parsed.user,
                   } as Session,
-                  profile: null,
+                  profile: readCachedProfile(userId),
                   email: parsed.user?.email ?? null,
                   inPasswordRecovery: false,
                 });
@@ -304,24 +341,23 @@ function useAuthState(): AuthContextValue {
           user: parsed.user,
         } as Session;
 
-        // Set state immédiat AVEC profile=null — UI montre "Mon compte" direct
+        // Set state immédiat avec le DERNIER PROFIL CONNU (solde XP affiché
+        // tout de suite, même sans réseau) — UI montre "Mon compte" direct
+        const userId = parsed.user?.id;
         if (!cancelled) {
           setState({
             status: 'authenticated',
             session: fakeSession,
-            profile: null,
+            profile: readCachedProfile(userId),
             email: parsed.user?.email ?? null,
             inPasswordRecovery: false,
           });
         }
 
-        // fetchProfile en arrière-plan (1.5s timeout) — met à jour le state
-        // quand il arrive sans bloquer le rendu initial
-        const userId = parsed.user?.id;
+        // Profil serveur en arrière-plan : remplace le cache DÈS qu'il arrive,
+        // même lentement (avant : ignoré après 1,5 s → 0 XP en 4G faible).
         if (userId) {
-          const profilePromise = fetchProfile(userId);
-          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
-          Promise.race([profilePromise, timeout]).then((profile) => {
+          fetchProfile(userId).then((profile) => {
             if (cancelled || !profile) return;
             setState((s) => ({ ...s, profile }));
           });
@@ -354,7 +390,7 @@ function useAuthState(): AuthContextValue {
         });
         return;
       }
-      const profile = await fetchProfile(session.user.id);
+      const profile = (await fetchProfile(session.user.id)) ?? readCachedProfile(session.user.id);
       if (cancelled) return;
       // (La bienvenue est déclenchée dans fetchProfile si welcome_sent=false.)
       // PASSWORD_RECOVERY = user a cliqué le lien "reset password" dans le mail
@@ -735,6 +771,7 @@ function useAuthState(): AuthContextValue {
   }, [state.session, fetchProfile]);
 
   const signOut = useCallback(async () => {
+    clearCachedProfile();
     const supabase = getSupabase();
     if (!supabase) return;
     await supabase.auth.signOut();

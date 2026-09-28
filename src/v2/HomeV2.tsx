@@ -11,7 +11,7 @@ import { WellnessChallenge } from './wellness/WellnessChallenge';
 import type { CartItem } from './cart/useCart';
 import { ProductCard, ComboCard } from './ProductCard';
 import { BottomNav, type NavTab } from './BottomNav';
-import { SearchBar, CategoryChips, SectionHead, Carousel, InfoBlock, InstaCard } from './blocks';
+import { SearchBar, CategoryChips, SectionHead, Carousel, ProductGrid, useCarouselCardWidth, InfoBlock, InstaCard } from './blocks';
 import { WheelModal } from './wheel/WheelModal';
 import type { HeaderTab } from './Header';
 import { useAuth } from './auth/useAuth';
@@ -346,6 +346,38 @@ export function HomeV2({
     );
   }
 
+  // Puce / « Voir tout » : filtre la catégorie ET remonte en haut de la liste
+  // (avant : on restait en bas de page, la rubrique choisie hors de vue).
+  function selectChip(id: string) {
+    setActiveChip(id);
+    // Saut instantané (le contenu change de toute façon, comme un onglet) :
+    // un défilement animé sur une longue distance, pendant que la liste
+    // rétrécit, pouvait s'interrompre et laisser l'écran en bas de page.
+    // setTimeout (et non requestAnimationFrame, gelé quand la page est masquée) :
+    // laisse React afficher la catégorie filtrée, puis remonte.
+    window.setTimeout(() => {
+      document.querySelector('[data-v2-section="menu"]')?.scrollIntoView({ block: 'start' });
+    }, 0);
+  }
+
+  // Rangée à faire glisser en vue « Tout » ; grille 2 colonnes quand la
+  // catégorie est sélectionnée (tout est visible d'un coup d'œil).
+  const cardWidth = useCarouselCardWidth();
+  function renderProducts(sectionId: string, items: V2Product[]) {
+    const grid = activeChip === sectionId;
+    const cards = items.map((p) => (
+      <ProductCard
+        key={p.id}
+        palette={palette}
+        product={p}
+        width={grid ? '100%' : cardWidth}
+        onClick={() => onOpenProduct(p)}
+        onAdd={handleAddProduct(p)}
+      />
+    ));
+    return grid ? <ProductGrid>{cards}</ProductGrid> : <Carousel>{cards}</Carousel>;
+  }
+
   function shouldShowSection(sectionId: string): boolean {
     if (activeChip === 'all') return true;
     return activeChip === sectionId;
@@ -628,23 +660,13 @@ export function HomeV2({
 
       <div data-v2-section="menu" />
       <SearchBar palette={palette} value={query} onChange={setQuery} />
-      <CategoryChips palette={palette} active={activeChip} onChange={setActiveChip} />
+      <CategoryChips palette={palette} active={activeChip} onChange={selectChip} />
 
       {/* Nouveautés — boissons signature fraîchement ajoutées */}
       {shouldShowSection('popular') && nouveautes.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="✨" title="Nouveautés" sub={`${nouveautes.length} à découvrir`} />
-          <Carousel>
-            {nouveautes.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="✨" title="Nouveautés" onSeeAll={activeChip === 'all' ? () => selectChip('popular') : undefined} sub={`${nouveautes.length} à découvrir`} />
+          {renderProducts('popular', nouveautes)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -652,18 +674,8 @@ export function HomeV2({
       {/* Populaires */}
       {shouldShowSection('popular') && populaires.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="🔥" title="Populaires au club" sub={`${populaires.length} recettes`} />
-          <Carousel>
-            {populaires.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="🔥" title="Populaires au club" onSeeAll={activeChip === 'all' ? () => selectChip('popular') : undefined} sub={`${populaires.length} recettes`} />
+          {renderProducts('popular', populaires)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -685,18 +697,8 @@ export function HomeV2({
       {/* Smoothies */}
       {shouldShowSection('smoothies') && smoothies.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="🥤" title="Smoothies nutritionnels" sub={`${smoothies.length} recettes · 24g protéines`} />
-          <Carousel>
-            {smoothies.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="🥤" title="Smoothies nutritionnels" onSeeAll={activeChip === 'all' ? () => selectChip('smoothies') : undefined} sub={`${smoothies.length} recettes · 24g protéines`} />
+          {renderProducts('smoothies', smoothies)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -704,18 +706,8 @@ export function HomeV2({
       {/* Drinks énergisants */}
       {shouldShowSection('drinks') && drinks.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="⚡" title="Boissons énergisantes" sub={`${drinks.length} recettes · 0 sucre`} />
-          <Carousel>
-            {drinks.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="⚡" title="Boissons énergisantes" onSeeAll={activeChip === 'all' ? () => selectChip('drinks') : undefined} sub={`${drinks.length} recettes · 0 sucre`} />
+          {renderProducts('drinks', drinks)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -723,18 +715,8 @@ export function HomeV2({
       {/* Boissons enfants — sans énergisant */}
       {shouldShowSection('kids') && kids.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="🧒" title="Boissons enfants" sub={`${kids.length} recettes · sans énergisant`} />
-          <Carousel>
-            {kids.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="🧒" title="Boissons enfants" onSeeAll={activeChip === 'all' ? () => selectChip('kids') : undefined} sub={`${kids.length} recettes · sans énergisant`} />
+          {renderProducts('kids', kids)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -742,18 +724,8 @@ export function HomeV2({
       {/* Hot */}
       {shouldShowSection('hot') && hot.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="☕" title="Pauses chaudes" sub={`${hot.length} produits`} />
-          <Carousel>
-            {hot.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="☕" title="Pauses chaudes" onSeeAll={activeChip === 'all' ? () => selectChip('hot') : undefined} sub={`${hot.length} produits`} />
+          {renderProducts('hot', hot)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -761,18 +733,8 @@ export function HomeV2({
       {/* Santé */}
       {shouldShowSection('health') && health.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="💧" title="Boissons santé" sub={`${health.length} recettes`} />
-          <Carousel>
-            {health.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="💧" title="Boissons santé" onSeeAll={activeChip === 'all' ? () => selectChip('health') : undefined} sub={`${health.length} recettes`} />
+          {renderProducts('health', health)}
           <div style={{ height: 22 }} />
         </>
       )}
@@ -780,18 +742,8 @@ export function HomeV2({
       {/* Gaufre */}
       {shouldShowSection('waffles') && waffles.length > 0 && (
         <>
-          <SectionHead palette={palette} icon="🧇" title="Gaufre healthy" sub="5 toppings au choix" />
-          <Carousel>
-            {waffles.map((p) => (
-              <ProductCard
-                key={p.id}
-                palette={palette}
-                product={p}
-                onClick={() => onOpenProduct(p)}
-                onAdd={handleAddProduct(p)}
-              />
-            ))}
-          </Carousel>
+          <SectionHead palette={palette} icon="🧇" title="Gaufre healthy" onSeeAll={activeChip === 'all' ? () => selectChip('waffles') : undefined} sub="5 toppings au choix" />
+          {renderProducts('waffles', waffles)}
           <div style={{ height: 22 }} />
         </>
       )}

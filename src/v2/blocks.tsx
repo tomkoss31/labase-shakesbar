@@ -182,6 +182,39 @@ export function SectionHead({
   );
 }
 
+// ── Grille 2 colonnes (catégorie filtrée via une puce / « Voir tout ») ──
+export function ProductGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: 12,
+        padding: '0 16px 4px',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Largeur des cartes dans les rangées : 2 cartes + un bout de la 3e visible
+// (~40 px), pour qu'on comprenne qu'on peut faire glisser. Avant : 168 px fixes
+// → sur un iPhone 375 px, 2 cartes remplissaient l'écran, la 3e était invisible.
+export function useCarouselCardWidth(): number {
+  const compute = () =>
+    typeof window === 'undefined'
+      ? 168
+      : Math.round(Math.min(168, Math.max(140, (window.innerWidth - 16 - 12 * 2 - 40) / 2)));
+  const [w, setW] = React.useState(compute);
+  React.useEffect(() => {
+    const onResize = () => setW(compute());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return w;
+}
+
 // ── Carousel wrapper ────────────────────────────────────────────
 export function Carousel({ children }: { children: React.ReactNode }) {
   return (
