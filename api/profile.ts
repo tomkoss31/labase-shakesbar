@@ -514,6 +514,11 @@ export default async function handler(req: any, res: any) {
     if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) {
       return res.status(400).json({ error: 'userId + amountCents > 0 requis' });
     }
+    // Garde-fou faute de frappe (« 890 » au lieu de « 8,90 » = +8 900 XP).
+    // Même plafond que les commandes espèces de l'app (300 €).
+    if (amountCents > 30000) {
+      return res.status(400).json({ error: 'Montant trop élevé (max 300 €) — vérifie la saisie (ex : 8.90)' });
+    }
 
     const { data: profile, error: profileError } = await admin
       .from('profiles')
@@ -542,7 +547,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const nowIso = new Date().toISOString();
-    const { data: createdOrder } = await admin
+    const { data: createdOrder, error: orderError } = await admin
       .from('orders')
       .insert({
         user_id: userId,
@@ -555,6 +560,10 @@ export default async function handler(req: any, res: any) {
       })
       .select('id')
       .maybeSingle();
+    // Pas de commande enregistrée → on ne crédite PAS (sinon XP sans trace).
+    if (orderError || !createdOrder) {
+      return res.status(500).json({ error: 'Vente non enregistrée, réessaie (aucun XP crédité).' });
+    }
 
     // Note libre du comptoir (« 2 smoothies + gaufre ») → on la stocke comme
     // un order_item unique, ce qui la fait apparaître dans le détail de la
@@ -586,20 +595,22 @@ export default async function handler(req: any, res: any) {
     const comboBonus = comboCount * 25;
     const xpGained = xpFromEuros + 50 + comboBonus + (isFirstOrder ? 200 : 0);
 
-    const newTotalSpent = profile.total_spent_cents + amountCents;
-    const newTotalOrders = profile.total_orders + 1;
-    const newXp = profile.xp + xpGained;
-
-    await admin
-      .from('profiles')
-      .update({
-        total_spent_cents: newTotalSpent,
-        total_orders: newTotalOrders,
-        xp: newXp,
-        vip_tier: computeVipTier(newTotalSpent),
-        level: computeMascotteLevel(newXp),
-      })
-      .eq('id', userId);
+    // Crédit ATOMIQUE (XP + CA + nb commandes en une requête) : un cadeau
+    // échangé dans l'app au même instant n'est plus écrasé par le scan.
+    const { data: credited, error: creditError } = await admin.rpc('credit_order', {
+      p_user: userId,
+      p_xp: xpGained,
+      p_amount_cents: amountCents,
+    });
+    const creditedRow = Array.isArray(credited) ? credited[0] : credited;
+    if (creditError || !creditedRow) {
+      console.error('[credit-manual] credit_order failed:', creditError?.message);
+      return res.status(500).json({ error: 'Crédit XP impossible, réessaie.' });
+    }
+    const newXp: number = creditedRow.new_xp;
+    const newTotalSpent: number = creditedRow.new_total_spent;
+    // Palier VIP (dérivé du CA) — champ d'affichage, recalculé à chaque vente.
+    await admin.from('profiles').update({ vip_tier: computeVipTier(newTotalSpent) }).eq('id', userId);
 
     // 💚 Push « merci pour ta visite » (récap + XP + avis) — best-effort
     try {
@@ -673,20 +684,13 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Raison requise (3 caractères min)' });
     }
 
-    const { data: profile, error: profileError } = await admin
-      .from('profiles')
-      .select('xp')
-      .eq('id', userId)
-      .single();
-    if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
-
-    const newXp = profile.xp + Math.floor(xpAmount);
-
-    const { error: updateError } = await admin
-      .from('profiles')
-      .update({ xp: newXp, level: computeMascotteLevel(newXp) })
-      .eq('id', userId);
+    // Crédit ATOMIQUE (add_xp met aussi à jour le niveau). NULL = profil inconnu.
+    const { data: newXp, error: updateError } = await admin.rpc('add_xp', {
+      p_user: userId,
+      p_amount: Math.floor(xpAmount),
+    });
     if (updateError) return res.status(500).json({ error: updateError.message });
+    if (newXp === null || newXp === undefined) return res.status(404).json({ error: 'Profil non trouvé' });
 
     // Log la trace même si l'insert échoue (table absente sur prod p.ex.) :
     // l'XP a été crédité, on ne reverse pas pour un log raté.

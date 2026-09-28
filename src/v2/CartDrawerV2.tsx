@@ -45,6 +45,8 @@ interface CartDrawerV2Props {
   onPayOnSite?: () => void;
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
+  // Commande espèces en cours de création (désactive le bouton : anti double appui)
+  isCreatingPendingCash?: boolean;
   // Créneau de retrait autorisé (null = pas de contrainte) + erreur si hors créneau
   pickupWindow?: PickupWindow | null;
   pickupError?: string | null;
@@ -184,6 +186,7 @@ export function CartDrawerV2({
   onPayOnSite,
   isCreatingPayment,
   hasRequiredPickupInfo,
+  isCreatingPendingCash = false,
   pickupWindow = null,
   pickupError = null,
   onAddSuggestion,
@@ -1122,7 +1125,7 @@ export function CartDrawerV2({
             {onPayOnSite && (
               <button
                 onClick={onPayOnSite}
-                disabled={customerName.trim().length === 0 || !!pickupError}
+                disabled={customerName.trim().length === 0 || !!pickupError || isCreatingPendingCash}
                 style={{
                   width: '100%',
                   marginTop: 8,
@@ -1135,14 +1138,14 @@ export function CartDrawerV2({
                   fontSize: 13,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  opacity: customerName.trim().length === 0 || pickupError ? 0.4 : 1,
+                  opacity: customerName.trim().length === 0 || pickupError || isCreatingPendingCash ? 0.4 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 6,
                 }}
               >
-                💵 Payer en espèces sur place
+                {isCreatingPendingCash ? '⏳ Création de ta commande…' : '💵 Payer en espèces sur place'}
               </button>
             )}
 

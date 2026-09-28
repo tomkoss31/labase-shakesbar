@@ -88,3 +88,88 @@ export function getStoredSession(): {
     return null;
   }
 }
+
+// ─── Rafraîchissement de session partagé (REST direct, sans Web Lock) ──
+// Remplace autoRefreshToken (désactivé ci-dessus). Un seul rafraîchissement à
+// la fois (« single-flight ») même si plusieurs écrans le demandent.
+//   'ok'      → nouvelle session écrite en localStorage
+//   'invalid' → refresh_token refusé par Supabase (400/401) : déconnexion justifiée
+//   'network' → coupure / 4G faible / serveur indisponible : on GARDE la session
+//               (le QR fidélité n'a besoin que de l'id client) et on réessaiera.
+export type RefreshResult = 'ok' | 'invalid' | 'network';
+export const SESSION_REFRESHED_EVENT = 'labase:session-refreshed';
+
+function storageKey(): string | null {
+  if (!url) return null;
+  return `sb-${url.replace(/^https?:\/\//, '').split('.')[0]}-auth-token`;
+}
+
+let refreshInFlight: Promise<RefreshResult> | null = null;
+
+export function refreshStoredSession(): Promise<RefreshResult> {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async (): Promise<RefreshResult> => {
+    const key = storageKey();
+    if (!key || !anonKey || typeof window === 'undefined') return 'network';
+    let refreshToken: string | undefined;
+    try {
+      refreshToken = JSON.parse(window.localStorage.getItem(key) || 'null')?.refresh_token;
+    } catch {
+      /* JSON corrompu */
+    }
+    if (!refreshToken) return 'invalid';
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const resp = await fetch(`${url}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        signal: controller.signal,
+      });
+      const data = await resp.json().catch(() => null);
+      if (resp.status === 400 || resp.status === 401) return 'invalid';
+      if (!resp.ok || !data?.access_token || !data?.refresh_token) return 'network';
+
+      const sessionData = {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type || 'bearer',
+        expires_in: data.expires_in,
+        expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+        user: data.user,
+      };
+      window.localStorage.setItem(key, JSON.stringify(sessionData));
+      window.dispatchEvent(new CustomEvent(SESSION_REFRESHED_EVENT, { detail: sessionData }));
+      return 'ok';
+    } catch {
+      return 'network';
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
+}
+
+/**
+ * Comme getStoredSession(), mais rafraîchit d'abord le jeton s'il est expiré
+ * ou expire dans moins de 2 min. À appeler avant chaque appel API authentifié
+ * (roue, paiement, codes cadeaux…) : après une mise en veille iOS, le jeton
+ * est souvent périmé alors que l'app affiche « connecté ».
+ */
+export async function getFreshSession(): Promise<ReturnType<typeof getStoredSession>> {
+  const key = storageKey();
+  if (!key || typeof window === 'undefined') return null;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) || 'null');
+    if (!parsed?.refresh_token) return getStoredSession();
+    const now = Math.floor(Date.now() / 1000);
+    if (!parsed.expires_at || parsed.expires_at - now < 120) await refreshStoredSession();
+  } catch {
+    /* on retombe sur la lecture simple */
+  }
+  return getStoredSession();
+}

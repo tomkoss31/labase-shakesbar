@@ -218,7 +218,8 @@ interface RewardsModalProps {
 }
 
 export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCode, onShareReferral }: RewardsModalProps) {
-  const { rewards } = useUserRewards();
+  // Rechargé à chaque ouverture (codes gagnés entre-temps à la roue)
+  const { rewards } = useUserRewards(undefined, open);
   // Codes gagnés à la roue, actifs et utilisables (on exclut les "tente encore")
   const activeCodes = rewards.filter((r) => r.reward_type !== 'retry');
 

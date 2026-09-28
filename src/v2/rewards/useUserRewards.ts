@@ -1,7 +1,10 @@
 // Hook qui récupère les récompenses actives (codes roue non utilisés non expirés)
-// du user authentifié. Refetch quand le user change ou quand on demande explicitement.
+// du user authentifié. Se recharge :
+//   - quand le client change (connexion / déconnexion) → passer son id en paramètre
+//   - quand l'écran qui l'utilise s'ouvre → paramètre `active`
+//   - dès qu'un code est gagné à la roue → notifyRewardsChanged()
 import { useCallback, useEffect, useState } from 'react';
-import { getSupabase, getStoredSession } from '../../lib/supabase';
+import { getSupabase, getFreshSession } from '../../lib/supabase';
 
 export interface UserReward {
   id: string;
@@ -13,7 +16,14 @@ export interface UserReward {
   spun_at: string;
 }
 
-export function useUserRewards() {
+const REWARDS_CHANGED_EVENT = 'labase:rewards-changed';
+
+// À appeler après un gain à la roue : toutes les instances du hook se rechargent.
+export function notifyRewardsChanged(): void {
+  window.dispatchEvent(new Event(REWARDS_CHANGED_EVENT));
+}
+
+export function useUserRewards(userId?: string | null, active = true) {
   const [rewards, setRewards] = useState<UserReward[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +37,8 @@ export function useUserRewards() {
         setRewards([]);
         return;
       }
-      // Bypass getSession() qui hang iOS PWA
-      const stored = getStoredSession();
-      const token = stored?.access_token;
+      // Jeton rafraîchi si périmé (bypass getSession() qui hang iOS PWA)
+      const token = (await getFreshSession())?.access_token;
       if (!token) {
         setRewards([]);
         return;
@@ -38,22 +47,32 @@ export function useUserRewards() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!resp.ok) {
+        // On garde la liste déjà connue plutôt que de la vider sur une erreur réseau
         setError(`HTTP ${resp.status}`);
-        setRewards([]);
         return;
       }
       const data = await resp.json();
       setRewards(data.rewards ?? []);
     } catch (err: any) {
       setError(err?.message ?? 'Erreur');
-      setRewards([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    if (!active) return;
+    if (userId === null) {
+      setRewards([]); // déconnecté
+      return;
+    }
     fetchRewards();
+  }, [fetchRewards, userId, active]);
+
+  useEffect(() => {
+    const onChanged = () => void fetchRewards();
+    window.addEventListener(REWARDS_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(REWARDS_CHANGED_EVENT, onChanged);
   }, [fetchRewards]);
 
   return { rewards, loading, error, refetch: fetchRewards };

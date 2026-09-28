@@ -1,6 +1,6 @@
 // Hook pour gérer l'inscription aux push notifications web (PWA)
 import { useCallback, useEffect, useState } from 'react';
-import { getSupabase, getStoredSession } from '../../lib/supabase';
+import { getSupabase, getFreshSession } from '../../lib/supabase';
 
 export type PushPermission = NotificationPermission | 'unsupported';
 
@@ -31,6 +31,51 @@ function isPushSupported(): boolean {
     'PushManager' in window &&
     'Notification' in window
   );
+}
+
+// Envoie l'abonnement au serveur, avec le jeton de connexion s'il existe
+// (le serveur en déduit le compte — jamais d'id client dans le corps).
+async function sendSubscription(subscription: PushSubscription): Promise<Response> {
+  const token = (await getFreshSession())?.access_token;
+  const payload = subscription.toJSON();
+  return fetch('/api/push?action=subscribe', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      endpoint: payload.endpoint,
+      p256dh: payload.keys?.p256dh,
+      auth: payload.keys?.auth,
+      userAgent: navigator.userAgent,
+    }),
+  });
+}
+
+/**
+ * Rattache au compte un appareil déjà abonné (cas fréquent : notifications
+ * activées AVANT la connexion → abonnement anonyme qui ne recevait jamais les
+ * messages personnels : anniversaire, merci après visite, relance…).
+ * 1 fois par session et par compte.
+ */
+export async function linkPushSubscriptionToAccount(userId: string): Promise<void> {
+  if (!isPushSupported() || Notification.permission !== 'granted') return;
+  const flag = `labase_push_linked_${userId}`;
+  try {
+    if (sessionStorage.getItem(flag) === '1') return;
+  } catch {
+    /* ignore */
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const subscription = await reg.pushManager.getSubscription();
+    if (!subscription) return;
+    const resp = await sendSubscription(subscription);
+    if (resp.ok) sessionStorage.setItem(flag, '1');
+  } catch {
+    /* best-effort : on réessaiera à la prochaine session */
+  }
 }
 
 export function usePushNotifications() {
@@ -95,22 +140,8 @@ export function usePushNotifications() {
         });
       }
 
-      // 3. Récupère le user id si connecté (bypass getSession iOS PWA hang)
-      const userId: string | null = getStoredSession()?.user.id ?? null;
-
-      // 4. Envoie au backend
-      const payload = subscription.toJSON();
-      const response = await fetch('/api/push?action=subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: payload.endpoint,
-          p256dh: payload.keys?.p256dh,
-          auth: payload.keys?.auth,
-          userId,
-          userAgent: navigator.userAgent,
-        }),
-      });
+      // 3. Envoie au backend (le serveur rattache au compte via le JWT vérifié)
+      const response = await sendSubscription(subscription);
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));

@@ -27,6 +27,9 @@ import { useAuth } from './v2/auth/useAuth';
 import { getSupabase, getStoredSession } from './lib/supabase';
 
 const PENDING_SQUARE_CHECKOUT_KEY = 'labase-pending-square-checkout';
+// Prénom + heure de retrait mis de côté avant la redirection Square (la page
+// est rechargée au retour) → affichés sur l'écran de confirmation.
+const PENDING_SQUARE_INFO_KEY = 'labase-pending-square-info';
 const PENDING_GIFT_KEY = 'labase-pending-gift';
 const INSTALL_BANNER_DISMISS_KEY = 'labase-install-banner-dismissed';
 // Flag : rouvrir le panier après une inscription lancée depuis le panier
@@ -225,9 +228,12 @@ function App() {
   const [selected, setSelected] = useState<SelectedProduct | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [selectedRewardCode, setSelectedRewardCode] = useState<string | null>(null);
-  const { rewards: userRewards, refetch: refetchRewards } = useUserRewards();
   const [xpToSpend, setXpToSpend] = useState(0);
   const appAuth = useAuth();
+  // Codes roue actifs : rechargés à la connexion / déconnexion et après chaque gain
+  const { rewards: userRewards } = useUserRewards(
+    appAuth.status === 'loading' ? undefined : appAuth.session?.user.id ?? null,
+  );
   const userXp = appAuth.profile?.xp ?? 0;
 
   // Préremplit le prénom depuis le profil : plus besoin de le retaper à chaque
@@ -307,6 +313,7 @@ function App() {
   const [editingExtras, setEditingExtras] = useState<string[]>([]);
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [thankYouInfo, setThankYouInfo] = useState({ name: '', pickup: '' });
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deferredInstallPrompt, setDeferredInstallPrompt] =
@@ -329,6 +336,18 @@ function App() {
         window.sessionStorage.getItem(PENDING_SQUARE_CHECKOUT_KEY) === '1';
 
       if (hasPendingSquareCheckout) {
+        try {
+          const info = JSON.parse(window.sessionStorage.getItem(PENDING_SQUARE_INFO_KEY) || 'null');
+          if (info && typeof info === 'object') {
+            setThankYouInfo({
+              name: typeof info.name === 'string' ? info.name : '',
+              pickup: typeof info.pickup === 'string' ? info.pickup : '',
+            });
+          }
+        } catch {
+          /* pas bloquant */
+        }
+        window.sessionStorage.removeItem(PENDING_SQUARE_INFO_KEY);
         setShowThankYou(true);
         clearCart();
         window.sessionStorage.removeItem(PENDING_SQUARE_CHECKOUT_KEY);
@@ -780,6 +799,8 @@ function App() {
   }
 
   async function handlePayOnSite() {
+    // Anti double appui : une seule commande espèces à la fois
+    if (isCreatingPendingCash) return;
     if (cart.length === 0) {
       window.alert('Ton panier est vide.');
       return;
@@ -889,9 +910,17 @@ function App() {
       }
 
       window.sessionStorage.setItem(PENDING_SQUARE_CHECKOUT_KEY, '1');
-      // Mémorise le cadeau XP choisi : débité au retour (payment=success)
+      window.sessionStorage.setItem(
+        PENDING_SQUARE_INFO_KEY,
+        JSON.stringify({ name: customerName.trim(), pickup: pickupTime.trim() }),
+      );
+      // Mémorise le cadeau XP choisi : débité au retour (payment=success).
+      // Sans cadeau, on efface un éventuel ancien choix (paiement abandonné
+      // puis repayé sans cadeau → ne pas débiter l'ancien).
       if (claimedGift) {
         window.sessionStorage.setItem(PENDING_GIFT_KEY, claimedGift.id);
+      } else {
+        window.sessionStorage.removeItem(PENDING_GIFT_KEY);
       }
       window.location.href = data.url;
     } catch (error) {
@@ -1189,6 +1218,7 @@ function App() {
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
+            isCreatingPendingCash={isCreatingPendingCash}
             pickupWindow={pickupWindow}
             pickupError={pickupError}
             onAddSuggestion={(v2p) => {
@@ -1229,7 +1259,8 @@ function App() {
           <OrderTracking
             palette={activePalette}
             open={showThankYou}
-            customerName={customerName || 'toi'}
+            customerName={thankYouInfo.name || customerName}
+            pickupTime={thankYouInfo.pickup}
             onClose={() => setShowThankYou(false)}
           />
           {/* Demande d'avis Google — 4 ou 5 étoiles → Google reviews,

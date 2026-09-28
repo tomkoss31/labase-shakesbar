@@ -4,7 +4,13 @@
 // pendant verifyOtp).
 import React, { useEffect, useState, useCallback, createContext, useContext } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { getSupabase, isSupabaseConfigured } from '../../lib/supabase';
+import {
+  getSupabase,
+  isSupabaseConfigured,
+  refreshStoredSession,
+  SESSION_REFRESHED_EVENT,
+  type RefreshResult,
+} from '../../lib/supabase';
 import type { Profile } from './types';
 import { track } from '../../lib/analytics';
 
@@ -135,68 +141,27 @@ function useAuthState(): AuthContextValue {
     }
   }, []);
 
-  // Rafraîchit la session via REST direct (bypass supabase-js autoRefreshToken,
-  // désactivé car il hang sur iOS PWA — cf. lib/supabase.ts). Écrit la nouvelle
-  // session en localStorage + state, comme callAuthEndpoint. Retourne false si
-  // le refresh_token est invalide/révoqué (déconnexion réellement nécessaire).
-  const refreshingRef = React.useRef(false);
-  const refreshSession = useCallback(async (refreshToken: string): Promise<boolean> => {
-    if (refreshingRef.current) return true; // un refresh est déjà en cours
-    refreshingRef.current = true;
-    const envUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    if (!envUrl || !anonKey) {
-      refreshingRef.current = false;
-      return false;
-    }
+  // Rafraîchit la session via le helper partagé lib/supabase (REST direct,
+  // bypass autoRefreshToken désactivé car il hang sur iOS PWA). Le state est
+  // mis à jour par l'écouteur SESSION_REFRESHED_EVENT ci-dessous.
+  //   'invalid' = refresh_token refusé → déconnexion justifiée
+  //   'network' = coupure / 4G faible → on GARDE la session et on réessaie
+  const refreshSession = useCallback((): Promise<RefreshResult> => refreshStoredSession(), []);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    try {
-      const resp = await fetch(`${envUrl}/auth/v1/token?grant_type=refresh_token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: anonKey,
-          Authorization: `Bearer ${anonKey}`,
-        },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      const data = await resp.json().catch(() => null);
-      if (!resp.ok || !data?.access_token || !data?.refresh_token) {
-        console.warn('[useAuth] refreshSession échoué', resp.status);
-        return false;
-      }
-
-      const projectRef = envUrl.replace(/^https?:\/\//, '').split('.')[0];
-      const storageKey = `sb-${projectRef}-auth-token`;
-      const sessionData = {
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        token_type: data.token_type || 'bearer',
-        expires_in: data.expires_in,
-        expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
-        user: data.user,
-      };
-      window.localStorage.setItem(storageKey, JSON.stringify(sessionData));
+  // Toute session rafraîchie (par useAuth, la roue, le paiement…) met à jour le state.
+  useEffect(() => {
+    const onRefreshed = (e: Event) => {
+      const sessionData = (e as CustomEvent).detail;
+      if (!sessionData?.access_token) return;
       setState((s) => ({
         ...s,
         status: 'authenticated',
         session: sessionData as unknown as Session,
         email: sessionData.user?.email ?? s.email,
       }));
-      console.log('[useAuth] session rafraîchie, nouvelle expiration:', sessionData.expires_at);
-      return true;
-    } catch (e: any) {
-      clearTimeout(timeoutId);
-      console.warn('[useAuth] refreshSession error:', e?.message ?? e);
-      return false;
-    } finally {
-      refreshingRef.current = false;
-    }
+    };
+    window.addEventListener(SESSION_REFRESHED_EVENT, onRefreshed);
+    return () => window.removeEventListener(SESSION_REFRESHED_EVENT, onRefreshed);
   }, []);
 
   useEffect(() => {
@@ -212,6 +177,7 @@ function useAuthState(): AuthContextValue {
     }
 
     let cancelled = false;
+    let bootRetry: number | undefined;
 
     // ⚠️ BYPASS supabase.auth.getSession() qui HANG sur iOS PWA et même
     // sur Chrome dans certains cas (Web Lock acquise et jamais relâchée par
@@ -264,13 +230,52 @@ function useAuthState(): AuthContextValue {
           const refreshToken = parsed.refresh_token as string | undefined;
           if (refreshToken) {
             console.log('[useAuth] BOOT — session expirée, tentative de rafraîchissement');
-            const refreshed = await refreshSession(refreshToken);
-            if (refreshed) {
-              const userId = parsed.user?.id;
+            const result = await refreshSession();
+            const userId = parsed.user?.id as string | undefined;
+            if (result === 'ok') {
               if (userId && !cancelled) {
                 const profile = await fetchProfile(userId);
                 if (!cancelled && profile) setState((s) => ({ ...s, profile }));
               }
+              return;
+            }
+            if (result === 'network' && userId) {
+              // Coupure réseau / 4G faible (ex. dans la boutique) : on NE
+              // déconnecte PAS. On garde la session pour que le QR fidélité
+              // (qui n'a besoin que de l'id client) reste affichable, et on
+              // réessaie en arrière-plan jusqu'à ce que le réseau revienne.
+              console.log('[useAuth] BOOT — réseau indisponible, session conservée');
+              if (!cancelled) {
+                setState({
+                  status: 'authenticated',
+                  session: {
+                    access_token: parsed.access_token,
+                    refresh_token: refreshToken,
+                    expires_in: parsed.expires_in ?? 3600,
+                    expires_at: parsed.expires_at,
+                    token_type: parsed.token_type ?? 'bearer',
+                    user: parsed.user,
+                  } as Session,
+                  profile: null,
+                  email: parsed.user?.email ?? null,
+                  inPasswordRecovery: false,
+                });
+              }
+              const retry = async () => {
+                if (cancelled) return;
+                const r = await refreshSession();
+                if (cancelled) return;
+                if (r === 'ok') {
+                  const profile = await fetchProfile(userId);
+                  if (!cancelled && profile) setState((s) => ({ ...s, profile }));
+                } else if (r === 'network') {
+                  bootRetry = window.setTimeout(retry, 20000);
+                } else {
+                  window.localStorage.removeItem(key);
+                  setState({ status: 'anonymous', session: null, profile: null, email: null, inPasswordRecovery: false });
+                }
+              };
+              bootRetry = window.setTimeout(retry, 15000);
               return;
             }
           }
@@ -366,6 +371,7 @@ function useAuthState(): AuthContextValue {
 
     return () => {
       cancelled = true;
+      if (bootRetry) window.clearTimeout(bootRetry);
       sub.subscription.unsubscribe();
     };
   }, [fetchProfile, refreshSession]);
@@ -374,29 +380,48 @@ function useAuthState(): AuthContextValue {
   // (remplace autoRefreshToken, désactivé — cf. lib/supabase.ts). Sans ça,
   // toute session mourait exactement 1h après connexion, sans exception :
   // c'était la déconnexion « systématique » observée en usage réel.
+  // + au retour au premier plan : iOS met les minuteries en pause quand l'app
+  // est en arrière-plan, donc le jeton est souvent périmé à la réouverture.
   useEffect(() => {
-    const interval = window.setInterval(() => {
+    const readStored = (): any => {
       const envUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!envUrl) return;
-      let parsed: any;
+      if (!envUrl) return null;
       try {
         const projectRef = envUrl.replace(/^https?:\/\//, '').split('.')[0];
-        const raw = window.localStorage.getItem(`sb-${projectRef}-auth-token`);
-        if (!raw) return;
-        parsed = JSON.parse(raw);
+        return JSON.parse(window.localStorage.getItem(`sb-${projectRef}-auth-token`) || 'null');
       } catch {
-        return;
+        return null;
       }
+    };
+    const refreshIfNeeded = async (reloadProfile: boolean) => {
+      const parsed = readStored();
       const expiresAt = parsed?.expires_at as number | undefined;
-      const refreshToken = parsed?.refresh_token as string | undefined;
-      if (!expiresAt || !refreshToken) return;
+      if (!expiresAt || !parsed?.refresh_token) return;
       const now = Math.floor(Date.now() / 1000);
       // Rafraîchit dès qu'il reste moins de 10 min avant expiration —
       // l'utilisateur ne voit jamais la session mourir en cours d'usage.
-      if (expiresAt - now < 600) void refreshSession(refreshToken);
-    }, 4 * 60 * 1000);
-    return () => window.clearInterval(interval);
-  }, [refreshSession]);
+      if (expiresAt - now < 600) {
+        const r = await refreshSession();
+        if (r === 'invalid') return;
+      }
+      // Retour dans l'app : recharge le profil (solde XP à jour après un scan
+      // au comptoir, sans avoir à relancer l'app).
+      const userId = parsed?.user?.id as string | undefined;
+      if (reloadProfile && userId) {
+        const profile = await fetchProfile(userId);
+        if (profile) setState((s) => (s.status === 'authenticated' ? { ...s, profile } : s));
+      }
+    };
+    const interval = window.setInterval(() => void refreshIfNeeded(false), 4 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshIfNeeded(true);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [refreshSession, fetchProfile]);
 
   const sendMagicLink = useCallback(
     async (email: string): Promise<{ ok: boolean; error?: string }> => {

@@ -21,7 +21,7 @@ import { RewardsModal } from './rewards/RewardsModal';
 import { MyCodeModal } from './auth/MyCodeModal';
 import { OnboardingModal, hasSeenOnboarding } from './OnboardingModal';
 import { InboxModal, useInbox } from './inbox/InboxModal';
-import { usePushNotifications } from './notifications/usePushNotifications';
+import { usePushNotifications, linkPushSubscriptionToAccount } from './notifications/usePushNotifications';
 import { PushActivationModal } from './PushActivationModal';
 import { tryAcquirePrompt, releasePrompt } from './promptLock';
 import { computeMascotteLevel, nextLevelThreshold } from './auth/types';
@@ -144,9 +144,17 @@ export function HomeV2({
   // l'utilisateur n'a pas activé les push (règle : activation "obligatoire").
   // 1×/session (sessionStorage), jamais en même temps que l'onboarding, et
   // même sans compte (un abonnement anonyme reçoit les annonces « à tous »).
+  // Appareil déjà abonné + client connecté → rattache l'abonnement au compte.
+  const authedUserId = isAuthed ? auth.session?.user.id : undefined;
+  React.useEffect(() => {
+    if (authedUserId && push.subscribed) void linkPushSubscriptionToAccount(authedUserId);
+  }, [authedUserId, push.subscribed]);
+
   React.useEffect(() => {
     if (push.loading || push.subscribed) return;
     if (onboardingOpen) return;
+    // Jamais par-dessus le QR fidélité (le client est en train de se faire scanner)
+    if (myCodeOpen) return;
     try {
       if (sessionStorage.getItem('labase_push_prompt') === '1') return;
     } catch {}
@@ -160,7 +168,7 @@ export function HomeV2({
       } catch {}
     }, 1600);
     return () => window.clearTimeout(t);
-  }, [push.loading, push.subscribed, onboardingOpen]);
+  }, [push.loading, push.subscribed, onboardingOpen, myCodeOpen]);
 
   const xp = auth.profile?.xp ?? 0;
   const next = nextLevelThreshold(xp);

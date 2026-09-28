@@ -621,18 +621,24 @@ export default async function handler(req: any, res: any) {
       }
       const newCount = row.count + 1;
       const completedNow = newCount >= TOTAL;
-      await clients.admin
+      // Garde ATOMIQUE : la mise à jour n'aboutit que si le compteur n'a pas
+      // bougé entre-temps → des validations simultanées ne créditent qu'une fois.
+      const { data: claimed } = await clients.admin
         .from('wellness_challenge')
         .update({
           count: newCount,
           last_checkin: parisToday,
           completed_at: completedNow ? new Date().toISOString() : null,
         })
-        .eq('user_id', uid);
+        .eq('user_id', uid)
+        .eq('count', row.count)
+        .select('user_id');
+      if (!claimed || claimed.length === 0) {
+        return res.status(409).json({ error: 'Déjà validé aujourd’hui', count: row.count });
+      }
 
       const xpAwarded = XP_PER_DAY + (completedNow ? XP_BONUS : 0);
-      const { data: p } = await clients.admin.from('profiles').select('xp').eq('id', uid).single();
-      if (p) await clients.admin.from('profiles').update({ xp: (p.xp ?? 0) + xpAwarded }).eq('id', uid);
+      await clients.admin.rpc('add_xp', { p_user: uid, p_amount: xpAwarded });
 
       return res.status(200).json({ ok: true, count: newCount, completed: completedNow, xpAwarded });
     }

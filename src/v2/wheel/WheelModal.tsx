@@ -4,15 +4,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Palette } from '../palette';
 import {
   WHEEL_SEGMENTS,
-  pickWheelSegment,
-  generateRewardCode,
   getWheelCooldown,
   markWheelSpun,
   WHEEL_COOLDOWN_DAYS,
   type WheelSegment,
 } from './segments';
-import { getSupabase, getStoredSession } from '../../lib/supabase';
+import { getFreshSession } from '../../lib/supabase';
 import { track } from '../../lib/analytics';
+import { notifyRewardsChanged } from '../rewards/useUserRewards';
 
 interface WheelModalProps {
   palette: Palette;
@@ -20,6 +19,8 @@ interface WheelModalProps {
   onClose: () => void;
   // Admin : peut faire tourner la roue en illimité (test des cadeaux)
   isAdmin?: boolean;
+  // Appelé après un VRAI gain enregistré côté serveur (recharge « Mes récompenses »)
+  onSpun?: () => void;
 }
 
 interface SpinResult {
@@ -39,11 +40,14 @@ const WHEEL_COLORS = [
   '#e0870a', '#0f766e', '#fbbf24', '#b45309',
 ];
 
-export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelModalProps) {
+export function WheelModal({ palette, open, onClose, isAdmin = false, onSpun }: WheelModalProps) {
   const [phase, setPhase] = useState<'idle' | 'loading' | 'spinning' | 'result'>('idle');
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
-  const cooldown = useMemo(() => getWheelCooldown(), [open]);
+  const [error, setError] = useState<string | null>(null);
+  // Incrémenté quand le serveur renvoie le vrai délai → recalcule le cooldown affiché
+  const [cooldownTick, setCooldownTick] = useState(0);
+  const cooldown = useMemo(() => getWheelCooldown(), [open, cooldownTick]);
   // Admin : on ignore le cooldown (client) pour pouvoir tester en boucle.
   const canSpin = isAdmin || cooldown.canSpin;
   const audioRef = useRef<number | null>(null);
@@ -54,6 +58,7 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
     setPhase('idle');
     setRotation(0);
     setResult(null);
+    setError(null);
   }, [open]);
 
   if (!open) return null;
@@ -65,50 +70,54 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
     // "La roue tourne…") pour qu'il n'y ait pas 2s de flottement pendant l'appel.
     setPhase('loading');
 
-    // Tentative API serveur si user authentifié — sinon fallback simulation locale
-    let winIdx = pickWheelSegment(); // valeur par défaut (fallback)
-    let winSegment: WheelSegment = WHEEL_SEGMENTS[winIdx];
-    let code: string | null = generateRewardCode();
-    let usedServerSide = false;
+    setError(null);
 
-    const supabase = getSupabase();
-    if (supabase) {
-      try {
-        // Bypass getSession() qui hang iOS PWA
-        const stored = getStoredSession();
-        const token = stored?.access_token;
-        if (token) {
-          const resp = await fetch('/api/wheel?action=spin', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (resp.ok) {
-            const data = await resp.json();
-            const idx = WHEEL_SEGMENTS.findIndex((s) => s.id === data.segment?.id);
-            if (idx >= 0) {
-              winIdx = idx;
-              winSegment = WHEEL_SEGMENTS[idx];
-              code = data.code;
-              usedServerSide = true;
-              track('wheel_spun', { segment_id: winSegment.id });
-            }
-          } else if (resp.status === 429) {
-            // Cooldown serveur — on resync localStorage et on stop
-            const data = await resp.json();
-            if (data.nextSpinAt) {
-              const nextTs = new Date(data.nextSpinAt).getTime();
-              const lastTs = nextTs - 7 * 24 * 60 * 60 * 1000;
-              window.localStorage.setItem('labase-wheel-last-spin', String(lastTs));
-            }
-            setPhase('idle'); // on ré-affiche l'état initial
-            return; // pas de spin
-          }
-          // Si erreur autre, fallback simulation locale ci-dessous
-        }
-      } catch (err) {
-        console.warn('[wheel] API failed, fallback to local:', err);
+    // Tirage 100 % serveur : le lot et le code DOIVENT exister en base, sinon
+    // le code serait refusé au comptoir. Plus aucun tirage « local » de secours.
+    let winIdx = -1;
+    let code = '';
+    try {
+      // Jeton rafraîchi si périmé (fréquent après une mise en veille iOS)
+      const token = (await getFreshSession())?.access_token;
+      if (!token) {
+        setError('Ta session a expiré — reconnecte-toi pour tourner la roue.');
+        setPhase('idle');
+        return;
       }
+      const resp = await fetch('/api/wheel?action=spin', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.status === 429) {
+        // Délai serveur (7 j) : on resynchronise le téléphone et on affiche la date
+        if (data.nextSpinAt) {
+          const nextTs = new Date(data.nextSpinAt).getTime();
+          const lastTs = nextTs - WHEEL_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+          window.localStorage.setItem('labase-wheel-last-spin', String(lastTs));
+        }
+        setCooldownTick((n) => n + 1);
+        setError('Tu as déjà tourné la roue cette semaine 😉');
+        setPhase('idle');
+        return;
+      }
+      const idx = resp.ok ? WHEEL_SEGMENTS.findIndex((seg) => seg.id === data.segment?.id) : -1;
+      if (idx < 0) {
+        setError('La roue n’a pas pu tourner (connexion). Réessaie dans un instant.');
+        setPhase('idle');
+        return;
+      }
+      winIdx = idx;
+      // code = null pour les lots appliqués automatiquement (Boost XP ×2, Retente)
+      code = typeof data.code === 'string' ? data.code : '';
+      track('wheel_spun', { segment_id: WHEEL_SEGMENTS[idx].id });
+    } catch (err) {
+      console.warn('[wheel] API failed:', err);
+      setError('Pas de connexion — réessaie dans un instant.');
+      setPhase('idle');
+      return;
     }
+    const winSegment: WheelSegment = WHEEL_SEGMENTS[winIdx];
 
     // Animation rotation
     const segmentCenter = winIdx * SEGMENT_ANGLE;
@@ -120,11 +129,13 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
 
     const duration = 4200;
     audioRef.current = window.setTimeout(() => {
-      setResult({ segment: winSegment, code: code ?? '' });
+      setResult({ segment: winSegment, code });
       setPhase('result');
       // Admin : on ne marque PAS le cooldown → tests illimités.
       // Sinon on note le spin (serveur déjà persisté, on marque local par sécurité).
       if (!isAdmin) markWheelSpun();
+      notifyRewardsChanged(); // le code apparaît tout de suite dans panier / « Mes récompenses »
+      onSpun?.();
     }, duration);
   }
 
@@ -505,6 +516,24 @@ export function WheelModal({ palette, open, onClose, isAdmin = false }: WheelMod
         )}
 
         {/* CTA */}
+        {phase === 'idle' && error && (
+          <div
+            role="alert"
+            style={{
+              margin: '0 0 12px',
+              padding: '10px 12px',
+              borderRadius: 12,
+              background: 'rgba(251,113,133,.12)',
+              border: '1px solid rgba(251,113,133,.4)',
+              color: '#fecdd3',
+              fontSize: 13,
+              fontWeight: 600,
+              textAlign: 'center',
+            }}
+          >
+            {error}
+          </div>
+        )}
         {phase === 'idle' && canSpin && (
           <button
             onClick={handleSpin}

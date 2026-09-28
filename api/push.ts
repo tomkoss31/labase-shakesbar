@@ -128,21 +128,30 @@ export default async function handler(req: any, res: any) {
   if (action === 'subscribe') {
     if (req.method === 'POST') {
       const body = await readBody(req);
-      const { endpoint, p256dh, auth, userId, userAgent } = body;
+      const { endpoint, p256dh, auth, userAgent } = body;
       if (!endpoint || !p256dh || !auth) {
         return res.status(400).json({ error: 'Champs requis : endpoint, p256dh, auth' });
       }
-      const { error } = await admin.from('push_subscriptions').upsert(
-        {
-          endpoint,
-          p256dh_key: p256dh,
-          auth_key: auth,
-          user_id: userId ?? null,
-          user_agent: userAgent ?? null,
-          last_used_at: new Date().toISOString(),
-        },
-        { onConflict: 'endpoint' },
-      );
+      // 🔒 L'identité vient du JWT VÉRIFIÉ, jamais d'un userId envoyé dans le
+      // corps (sinon n'importe qui pouvait rattacher son appareil au compte
+      // d'un autre et recevoir ses notifications personnelles).
+      let verifiedUserId: string | null = null;
+      const accessToken = (req.headers?.authorization ?? '').replace(/^Bearer\s+/, '').trim();
+      if (accessToken) {
+        const { data: userData } = await admin.auth.getUser(accessToken);
+        verifiedUserId = userData?.user?.id ?? null;
+      }
+      const row: Record<string, unknown> = {
+        endpoint,
+        p256dh_key: p256dh,
+        auth_key: auth,
+        user_agent: userAgent ?? null,
+        last_used_at: new Date().toISOString(),
+      };
+      // Anonyme : on n'envoie PAS user_id → un appareil déjà rattaché à un
+      // compte le reste (l'upsert ne met à jour que les colonnes fournies).
+      if (verifiedUserId) row.user_id = verifiedUserId;
+      const { error } = await admin.from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
       if (error) return res.status(500).json({ error: error.message });
       return res.status(200).json({ ok: true });
     }

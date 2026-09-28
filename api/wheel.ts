@@ -133,14 +133,37 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    const now = new Date();
+
+    // 🔒 Réservation ATOMIQUE du tour de la semaine AVANT le tirage : une seule
+    // requête « UPDATE … WHERE délai écoulé ». 10 appuis simultanés → 1 seul
+    // passe, les autres reçoivent 429 (avant : 10 codes cadeaux).
+    const previousSpinAt = profile?.last_spin_at ?? null;
+    if (!isAdmin) {
+      const cutoffIso = new Date(now.getTime() - COOLDOWN_MS).toISOString();
+      const { data: reserved } = await admin
+        .from('profiles')
+        .update({ last_spin_at: now.toISOString() })
+        .eq('id', userId)
+        .or(`last_spin_at.is.null,last_spin_at.lt.${cutoffIso}`)
+        .select('id');
+      if (!reserved || reserved.length === 0) {
+        const nextDate = new Date(now.getTime() + COOLDOWN_MS);
+        return res.status(429).json({
+          error: 'Cooldown actif',
+          nextSpinAt: nextDate.toISOString(),
+          daysRemaining: Math.ceil(COOLDOWN_MS / (24 * 60 * 60 * 1000)),
+        });
+      }
+    }
+
     const segment = pick(WHEEL_SEGMENTS);
     const code = generateCode('SPIN');
-    const now = new Date();
     const expiresAt = new Date(now.getTime() + EXPIRY_MS);
     // 'retry' et 'xp_multiplier' s'appliquent AUTOMATIQUEMENT → pas de code à présenter au comptoir.
     const autoApplied = segment.rewardType === 'retry' || segment.rewardType === 'xp_multiplier';
 
-    await admin.from('wheel_spins').insert({
+    const { error: insertError } = await admin.from('wheel_spins').insert({
       user_id: userId,
       reward_code: code,
       reward_label: segment.label,
@@ -149,16 +172,19 @@ export default async function handler(req: any, res: any) {
       expires_at: expiresAt.toISOString(),
       used_at: autoApplied ? now.toISOString() : null,
     });
+    if (insertError) {
+      // Le lot n'a pas pu être enregistré → on rend son tour au client.
+      if (!isAdmin) {
+        await admin.from('profiles').update({ last_spin_at: previousSpinAt }).eq('id', userId);
+      }
+      return res.status(500).json({ error: 'Tirage non enregistré, réessaie.' });
+    }
 
     // 🎁 Boost XP ×2 pendant 24h : on arme le multiplicateur sur le profil.
     // Il est ensuite appliqué à chaque commande (online + comptoir) tant qu'actif.
     if (segment.rewardType === 'xp_multiplier') {
       const until = new Date(now.getTime() + 24 * 60 * 60 * 1000);
       await admin.from('profiles').update({ xp_multiplier_until: until.toISOString() }).eq('id', userId);
-    }
-
-    if (!isAdmin) {
-      await admin.from('profiles').update({ last_spin_at: now.toISOString() }).eq('id', userId);
     }
 
     return res.status(200).json({
