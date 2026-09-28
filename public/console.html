@@ -809,13 +809,13 @@ document.querySelectorAll('.settings-mode').forEach((btn) => {
       });
       const data = await resp.json();
       if (!resp.ok) {
-        out.innerHTML = '<span style="color:#f87171;">❌ ' + (data.error || 'Erreur') + '</span>';
+        out.innerHTML = '<span style="color:#f87171;">❌ ' + escapeHtml(data.error || 'Erreur') + '</span>';
         return;
       }
       out.innerHTML = '<span style="color:#34d399;">✅ Enregistré</span>';
       loadSettings();
     } catch (e) {
-      out.innerHTML = '<span style="color:#f87171;">❌ ' + e.message + '</span>';
+      out.innerHTML = '<span style="color:#f87171;">❌ ' + escapeHtml(e.message) + '</span>';
     }
   });
 });
@@ -845,13 +845,13 @@ async function loadComptoir() {
     });
     if (!resp.ok) {
       const data = await resp.json();
-      $('comptoir-list').innerHTML = '<div class="empty">❌ ' + (data.error || 'Erreur') + '</div>';
+      $('comptoir-list').innerHTML = '<div class="empty">❌ ' + escapeHtml(data.error || 'Erreur') + '</div>';
       return;
     }
     const data = await resp.json();
     renderComptoirList(data.orders);
   } catch (err) {
-    $('comptoir-list').innerHTML = '<div class="empty">❌ ' + err.message + '</div>';
+    $('comptoir-list').innerHTML = '<div class="empty">❌ ' + escapeHtml(err.message) + '</div>';
   }
 }
 
@@ -865,32 +865,32 @@ function renderComptoirList(orders) {
     const time = dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const total = (o.total_cents / 100).toFixed(2).replace('.', ',');
     const name = o.customer_name || 'Client';
-    const pickup = o.pickup_time ? ' • retrait ' + o.pickup_time : '';
+    const pickup = o.pickup_time ? ' • retrait ' + escapeHtml(o.pickup_time) : '';
     const statusLabel = {
       pending_cash: '💵 ESPÈCES',
       paid: 'Payée',
       preparing: 'En prépa',
       ready: 'Prête',
       cancelled: 'Annulée',
-    }[o.status] || o.status;
+    }[o.status] || escapeHtml(o.status);
 
     const buttons = [];
     // ℹ️ Détail complet (articles + client + XP/cadeau) — toujours dispo.
-    buttons.push('<button class="btn-row" data-detail="' + o.id + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(94,234,212,.35);color:#5eead4;padding:8px 12px;">ℹ️ Infos</button>');
+    buttons.push('<button class="btn-row" data-detail="' + escapeAttr(o.id) + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(94,234,212,.35);color:#5eead4;padding:8px 12px;">ℹ️ Infos</button>');
     // ✏️ Heure de retrait modifiable TANT QUE pas « en prépa » (verrouillé après).
     if (o.status === 'pending_cash' || o.status === 'paid') {
-      const pt = o.pickup_time || '';
-      buttons.push('<button class="btn-row" data-pickup="' + o.id + '" data-time="' + pt + '" title="Modifier l\'heure de retrait" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbe4df;padding:8px 10px;">✏️ ' + (pt ? pt : 'heure') + '</button>');
+      const pt = escapeHtml(o.pickup_time || '');
+      buttons.push('<button class="btn-row" data-pickup="' + escapeAttr(o.id) + '" data-time="' + pt + '" title="Modifier l\'heure de retrait" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbe4df;padding:8px 10px;">✏️ ' + (pt ? pt : 'heure') + '</button>');
     }
     if (o.status === 'pending_cash') {
       const code = (o.square_order_id || '').replace('CASH-', '');
-      buttons.push('<button class="btn-row btn-ambre" data-action="cash" data-id="' + o.id + '">💵 Encaisser ' + code + '</button>');
+      buttons.push('<button class="btn-row btn-ambre" data-action="cash" data-id="' + escapeAttr(o.id) + '">💵 Encaisser ' + escapeHtml(code) + '</button>');
     }
     if (o.status === 'paid') {
-      buttons.push('<button class="btn-row btn-ambre" data-action="preparing" data-id="' + o.id + '">▶ En prépa</button>');
+      buttons.push('<button class="btn-row btn-ambre" data-action="preparing" data-id="' + escapeAttr(o.id) + '">▶ En prépa</button>');
     }
     if (o.status === 'preparing') {
-      buttons.push('<button class="btn-row btn-teal" data-action="ready" data-id="' + o.id + '">✓ Prête</button>');
+      buttons.push('<button class="btn-row btn-teal" data-action="ready" data-id="' + escapeAttr(o.id) + '">✓ Prête</button>');
     }
     if (o.status === 'ready') {
       buttons.push('<span style="font-size: 11px; color: #22c55e; font-weight: 700;">À retirer</span>');
@@ -899,7 +899,7 @@ function renderComptoirList(orders) {
     // sont pas des commandes à préparer (passe en "cancelled" côté app, sans
     // toucher Square).
     if (o.status !== 'pending_cash') {
-      buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + o.id + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#7f8a88;padding:8px 10px;">✕</button>');
+      buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + escapeAttr(o.id) + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#7f8a88;padding:8px 10px;">✕</button>');
     }
 
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -916,11 +916,11 @@ function renderComptoirList(orders) {
       itemsHtml = '<div style="margin-top:6px;font-size:11px;color:#7f8a88;font-style:italic;">Détail non dispo (vente Square)</div>';
     }
 
-    return '<div class="row" data-status="' + o.status + '">' +
+    return '<div class="row" data-status="' + escapeAttr(o.status) + '">' +
       '<div>' +
         '<div class="meta">' + esc(name) + '</div>' +
         '<div class="meta-sub">' + time + pickup + '</div>' +
-        '<span class="status-pill status-' + o.status + '">' + statusLabel + '</span>' +
+        '<span class="status-pill status-' + escapeAttr(o.status) + '">' + statusLabel + '</span>' +
         itemsHtml +
       '</div>' +
       '<div class="total">' + total + '€</div>' +
@@ -943,11 +943,16 @@ function renderComptoirList(orders) {
 async function editPickup(orderId, current) {
   const t = prompt('Nouvelle heure de retrait (ex : 14:30). Laisse vide pour enlever.', current || '');
   if (t === null) return; // annulé
+  // Tolère « 14h30 », « 14h », « 9:30 » → « 14:30 », « 14:00 », « 09:30 ».
+  let hhmm = '';
+  const m = t.trim().toLowerCase().match(/^(\d{1,2})\s*[:h]\s*(\d{2})?$/);
+  if (m) hhmm = m[1].padStart(2, '0') + ':' + (m[2] || '00');
+  else if (t.trim()) { alert('Heure non reconnue. Exemple : 14:30'); return; }
   try {
     const res = await fetch('/api/orders?action=update-pickup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getPassword() },
-      body: JSON.stringify({ orderId, pickupTime: t.trim() }),
+      body: JSON.stringify({ orderId, pickupTime: hhmm }),
     });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) { alert(d.error || 'Erreur'); return; }
@@ -988,7 +993,7 @@ async function showOrderDetail(orderId) {
     const closeBtn = document.getElementById('order-detail-close');
     if (closeBtn) closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
   } catch (e) {
-    box.innerHTML = '<div style="color:#ff9b9b;padding:20px;">Erreur : ' + (e && e.message ? e.message : e) + '</div>';
+    box.innerHTML = '<div style="color:#ff9b9b;padding:20px;">Erreur : ' + escapeHtml(e && e.message ? e.message : e) + '</div>';
   }
 }
 
@@ -997,7 +1002,7 @@ function renderOrderDetail(d) {
   const o = d.order || {};
   const c = d.client;
   const total = ((o.total_cents || 0) / 100).toFixed(2).replace('.', ',');
-  const pay = o.payment_method === 'cash' ? '💵 Espèces' : (o.payment_method === 'card' ? '💳 Carte' : (o.payment_method || '—'));
+  const pay = o.payment_method === 'cash' ? '💵 Espèces' : (o.payment_method === 'card' ? '💳 Carte' : escapeHtml(o.payment_method || '—'));
   const dt = new Date(o.paid_at || o.created_at);
   const when = isNaN(dt) ? '' : dt.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   const statusLabel = { pending_cash: 'Espèces (à encaisser)', paid: 'Payée', preparing: 'En prépa', ready: 'Prête', cancelled: 'Annulée' }[o.status] || o.status;
@@ -1120,7 +1125,7 @@ async function startCamera() {
     scanning = true;
     scanLoop();
   } catch (err) {
-    showScannerResult('err', '❌ Caméra refusée : ' + err.message);
+    showScannerResult('err', '❌ Caméra refusée : ' + escapeHtml(err.message));
   }
 }
 
@@ -1161,9 +1166,9 @@ function handleScanned(text) {
     lookupUser(text.replace('LABASE-USER:', ''));
   } else if (text.startsWith('LABASE-CASH:')) {
     const code = text.replace('LABASE-CASH:', '');
-    showScannerResult('ok', '💵 Code commande espèces : <b>' + code + '</b>. Va dans l\'onglet Comptoir pour encaisser.');
+    showScannerResult('ok', '💵 Code commande espèces : <b>' + escapeHtml(code.slice(0, 40)) + '</b>. Va dans l\'onglet Comptoir pour encaisser.');
   } else {
-    showScannerResult('err', 'QR non reconnu : ' + text.slice(0, 40));
+    showScannerResult('err', 'QR non reconnu : ' + escapeHtml(text.slice(0, 40)));
     $('scanner-debug').textContent = '❌ QR non reconnu (préfixe LABASE-USER: manquant)';
   }
 }
@@ -1185,7 +1190,7 @@ async function lookupUser(userId) {
     });
     const data = await resp.json();
     if (!resp.ok) {
-      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      showScannerResult('err', '❌ ' + escapeHtml(data.error || 'Erreur'));
       return;
     }
     // Client trouvé → on coupe la caméra et on remonte la fiche en haut
@@ -1193,7 +1198,7 @@ async function lookupUser(userId) {
     renderProfile(data.profile, data.rewards, data.recentOrder);
     $('scanner-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
-    showScannerResult('err', '❌ ' + err.message);
+    showScannerResult('err', '❌ ' + escapeHtml(err.message));
   }
 }
 
@@ -1226,7 +1231,7 @@ function renderProfile(p, rewards, recentOrder) {
         rewardsList.map(r => {
           const hint = rewardHint(r);
           return '<label class="reward-radio reward-radio-code">' +
-            '<input type="radio" name="useReward" value="' + r.id + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:#fb7185;" />' +
+            '<input type="radio" name="useReward" value="' + escapeAttr(r.id) + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:#fb7185;" />' +
             '<div class="reward-label-wrap">' +
               '<div class="reward-label-title">🎁 ' + escapeHtml(r.reward_label) + '</div>' +
               '<div class="reward-label-code">' + escapeHtml(r.reward_code) + '</div>' +
@@ -1263,12 +1268,12 @@ function renderProfile(p, rewards, recentOrder) {
     warnBlock +
     '<div class="card" style="border-color: #14b8a6;">' +
       '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
-      '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
-      '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+      '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + escapeHtml(name) + '</div>' +
+      '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + escapeHtml(p.email || 'Email inconnu') + '</div>' +
       '<div class="stats">' +
-        '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + p.xp + '</div></div>' +
-        '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + p.vip_tier + '</div></div>' +
-        '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
+        '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + escapeHtml(p.xp) + '</div></div>' +
+        '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + escapeHtml(p.vip_tier) + '</div></div>' +
+        '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + escapeHtml(p.total_orders) + '</div></div>' +
         '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
       '</div>' +
       rewardsHtml +
@@ -1347,10 +1352,10 @@ async function redeemReward(userId, rewardId, label, cost) {
       showScannerResult('ok', '🎁 « ' + data.rewardLabel + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
       lookupUser(userId);
     } else {
-      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      showScannerResult('err', '❌ ' + escapeHtml(data.error || 'Erreur'));
     }
   } catch (err) {
-    showScannerResult('err', '❌ ' + err.message);
+    showScannerResult('err', '❌ ' + escapeHtml(err.message));
   }
 }
 
@@ -1396,11 +1401,11 @@ async function creditXP(userId) {
       showScannerResult('ok', msg);
       lookupUser(userId);
     } else {
-      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      showScannerResult('err', '❌ ' + escapeHtml(data.error || 'Erreur'));
       btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
     }
   } catch (err) {
-    showScannerResult('err', '❌ ' + err.message);
+    showScannerResult('err', '❌ ' + escapeHtml(err.message));
     btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
   }
 }
@@ -1438,11 +1443,11 @@ async function creditXpManual(userId) {
       showScannerResult('ok', '✅ +' + data.xpAdded + ' XP crédités manuellement. Nouveau total : ' + data.newXp + ' XP.');
       lookupUser(userId);
     } else {
-      showScannerResult('err', '❌ ' + (data.error || 'Erreur'));
+      showScannerResult('err', '❌ ' + escapeHtml(data.error || 'Erreur'));
       btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
     }
   } catch (err) {
-    showScannerResult('err', '❌ ' + err.message);
+    showScannerResult('err', '❌ ' + escapeHtml(err.message));
     btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
   }
 }
@@ -1527,18 +1532,18 @@ $('push-send').addEventListener('click', async () => {
     const data = await resp.json();
     if (resp.ok) {
       showPushResult('ok',
-        '✅ Envoyé à ' + data.sent + ' / ' + data.total + ' abonnés (' + (data.segment || 'tous') + ')' +
-        (data.note ? ' · ' + data.note : '') +
+        '✅ Envoyé à ' + data.sent + ' / ' + data.total + ' abonnés (' + escapeHtml(data.segment || 'tous') + ')' +
+        (data.note ? ' · ' + escapeHtml(data.note) : '') +
         (data.failed ? ` · ${data.failed} échecs` : '')
       );
       $('push-title').value = '';
       $('push-body').value = '';
       updatePreview();
     } else {
-      showPushResult('err', '❌ ' + (data.error || 'Erreur'));
+      showPushResult('err', '❌ ' + escapeHtml(data.error || 'Erreur'));
     }
   } catch (err) {
-    showPushResult('err', '❌ ' + err.message);
+    showPushResult('err', '❌ ' + escapeHtml(err.message));
   } finally {
     $('push-send').disabled = false;
     $('push-send').textContent = '📣 Envoyer la notification';
@@ -1559,12 +1564,12 @@ async function loadRedemptions() {
       headers: { 'Authorization': 'Bearer ' + password },
     });
     const data = await r.json();
-    if (!r.ok) { $('redemptions-result').innerHTML = '<div class="err">❌ ' + (data.error || 'Erreur') + '</div>'; return; }
+    if (!r.ok) { $('redemptions-result').innerHTML = '<div class="err">❌ ' + escapeHtml(data.error || 'Erreur') + '</div>'; return; }
 
     function block(title, t) {
       const rows = (t.byType || []).map(x =>
         '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
-        '<span>' + x.label + '</span><span style="font-weight:800;color:#5eead4;">×' + x.count + '</span></div>'
+        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color:#5eead4;">×' + x.count + '</span></div>'
       ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
       return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:12px;padding:14px;margin-top:10px;">' +
         '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x) · ' + t.totalXp + ' XP</div>' +
@@ -1573,7 +1578,7 @@ async function loadRedemptions() {
     function wheelBlock(title, t) {
       const rows = (t.byType || []).map(x =>
         '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
-        '<span>' + x.label + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'
+        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'
       ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
       return '<div style="background:#04100f;border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:14px;margin-top:10px;">' +
         '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x)</div>' +
@@ -1586,7 +1591,7 @@ async function loadRedemptions() {
       '<div class="hint" style="margin-top:2px;">Gagnés à la roue puis remis (hors XP).</div>' +
       wheelBlock("Aujourd'hui", w.today) + wheelBlock('Ce mois', w.month);
   } catch (err) {
-    $('redemptions-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
+    $('redemptions-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>';
   }
 }
 
@@ -1620,7 +1625,7 @@ async function loadStats() {
       headers: { 'Authorization': 'Bearer ' + password },
     });
     const d = await r.json();
-    if (!r.ok) { $('stats-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    if (!r.ok) { $('stats-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
     const euro = (d.revenueCents / 100).toFixed(2).replace('.', ',');
     function tile(emoji, value, label, accent) {
       return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:14px;padding:16px;text-align:center;">' +
@@ -1655,7 +1660,7 @@ async function loadStats() {
           '</div></div>';
       })();
   } catch (err) {
-    $('stats-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
+    $('stats-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>';
   }
 }
 
@@ -1682,7 +1687,7 @@ async function loadCatalogAudit() {
       headers: { 'Authorization': 'Bearer ' + password },
     });
     const d = await r.json();
-    if (!r.ok) { $('catalog-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    if (!r.ok) { $('catalog-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
 
     const esc = (s) => String(s).replace(/[&<>]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
     let html = '';
@@ -1721,7 +1726,7 @@ async function loadCatalogAudit() {
 
     $('catalog-result').innerHTML = html;
   } catch (err) {
-    $('catalog-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>';
+    $('catalog-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>';
   }
 }
 
@@ -1737,7 +1742,7 @@ async function loadThemeCurrent() {
     const t = d && d.theme;
     if (t && t.id && t.endsAt && new Date(t.endsAt).getTime() > Date.now()) {
       const end = new Date(t.endsAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      $('theme-current').innerHTML = '🎨 Thème actif : <b style="color:#5eead4;">' + (THEME_LABELS[t.id] || t.id) + '</b> jusqu\'au <b>' + end + '</b>';
+      $('theme-current').innerHTML = '🎨 Thème actif : <b style="color:#5eead4;">' + (THEME_LABELS[t.id] || escapeHtml(t.id)) + '</b> jusqu\'au <b>' + end + '</b>';
       if ($('theme-select')) $('theme-select').value = t.id;
     } else {
       $('theme-current').innerHTML = 'Thème actuel : <b style="color:#5eead4;">🟢 Par défaut</b>';
@@ -1756,10 +1761,10 @@ $('theme-apply').addEventListener('click', async () => {
       body: JSON.stringify({ themeId, durationDays }),
     });
     const d = await r.json();
-    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
     $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">✅ Thème appliqué. Les clients le verront au prochain chargement de l\'app.</div>';
     loadThemeCurrent();
-  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>'; }
+  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>'; }
 });
 $('theme-reset').addEventListener('click', async () => {
   const password = getPassword();
@@ -1771,11 +1776,11 @@ $('theme-reset').addEventListener('click', async () => {
       body: JSON.stringify({ themeId: 'default', durationDays: 0 }),
     });
     const d = await r.json();
-    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
+    if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
     $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">↩️ Retour au thème par défaut.</div>';
     if ($('theme-select')) $('theme-select').value = 'default';
     loadThemeCurrent();
-  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + err.message + '</div>'; }
+  } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>'; }
 });
 loadThemeCurrent();
 

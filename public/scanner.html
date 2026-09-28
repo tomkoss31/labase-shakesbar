@@ -148,6 +148,8 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
+  // Échappe tout texte venant d'un client / du serveur avant insertion HTML (anti-XSS).
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const STORAGE_KEY = 'labase-scanner-token';
 
   try {
@@ -189,7 +191,7 @@
       scanning = true;
       scanLoop();
     } catch (err) {
-      showResult('err', '❌ Accès caméra refusé : ' + err.message);
+      showResult('err', '❌ Accès caméra refusé : ' + esc(err.message));
     }
   }
 
@@ -243,9 +245,9 @@
       lookupUser(userId);
     } else if (text.startsWith('LABASE-CASH:')) {
       const code = text.replace('LABASE-CASH:', '');
-      showResult('ok', '💵 Code commande espèces : <b>' + code + '</b> — va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a> pour encaisser.');
+      showResult('ok', '💵 Code commande espèces : <b>' + esc(code.slice(0, 40)) + '</b> — va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a> pour encaisser.');
     } else {
-      showResult('err', 'QR non reconnu : ' + text.slice(0, 40));
+      showResult('err', 'QR non reconnu : ' + esc(text.slice(0, 40)));
     }
   }
 
@@ -272,12 +274,12 @@
       });
       const data = await resp.json();
       if (!resp.ok) {
-        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        showResult('err', '❌ ' + esc(data.error || 'Erreur'));
         return;
       }
       renderProfile(data.profile, data.rewards, data.recentOrder);
     } catch (err) {
-      showResult('err', '❌ ' + err.message);
+      showResult('err', '❌ ' + esc(err.message));
     }
   }
 
@@ -318,12 +320,12 @@
           const exp = r.expires_at ? new Date(r.expires_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '';
           return (
             '<label style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid rgba(245,158,11,.35); border-radius:12px; margin-bottom:8px; cursor:pointer; background:#04100f;">' +
-              '<input type="radio" name="applyReward" value="' + r.id + '" style="width:22px; height:22px; flex:none; accent-color:#f59e0b;" />' +
+              '<input type="radio" name="applyReward" value="' + esc(r.id) + '" style="width:22px; height:22px; flex:none; accent-color:#f59e0b;" />' +
               '<span style="font-size:26px;">' + m.icon + '</span>' +
               '<span style="flex:1; min-width:0;">' +
-                '<span style="font-family:Outfit; font-weight:900; font-size:22px; color:#f59e0b;">' + m.big + '</span>' +
-                '<span style="display:block; font-size:12px; color:#ecfdf5; margin-top:1px;">' + r.reward_label + '</span>' +
-                '<span style="display:block; font-size:10.5px; color:#94b8b1;">' + m.sub + (exp ? ' · exp. ' + exp : '') + ' · ' + r.reward_code + '</span>' +
+                '<span style="font-family:Outfit; font-weight:900; font-size:22px; color:#f59e0b;">' + esc(m.big) + '</span>' +
+                '<span style="display:block; font-size:12px; color:#ecfdf5; margin-top:1px;">' + esc(r.reward_label) + '</span>' +
+                '<span style="display:block; font-size:10.5px; color:#94b8b1;">' + m.sub + (exp ? ' · exp. ' + exp : '') + ' · ' + esc(r.reward_code) + '</span>' +
               '</span>' +
             '</label>'
           );
@@ -360,15 +362,15 @@
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
           '<div style="min-width:0;">' +
             '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
-            '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + name + '</div>' +
-            '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + (p.email || 'Email inconnu') + '</div>' +
+            '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + esc(name) + '</div>' +
+            '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + esc(p.email || 'Email inconnu') + '</div>' +
           '</div>' +
           '<button id="historyBtn" class="btn-secondary" style="padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;">🧾 Historique</button>' +
         '</div>' +
         '<div class="stats">' +
-          '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + p.xp + '</div></div>' +
-          '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + p.vip_tier + '</div></div>' +
-          '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + p.total_orders + '</div></div>' +
+          '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + esc(p.xp) + '</div></div>' +
+          '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + esc(p.vip_tier) + '</div></div>' +
+          '<div class="stat"><div class="stat-label">Commandes</div><div class="stat-value">' + esc(p.total_orders) + '</div></div>' +
           '<div class="stat"><div class="stat-label">Total dépensé</div><div class="stat-value">' + total + '€</div></div>' +
         '</div>' +
         '<div id="history-box"></div>' +
@@ -419,13 +421,13 @@
       });
       const data = await resp.json();
       if (resp.ok) {
-        showResult('ok', '🎁 « ' + data.rewardLabel + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
+        showResult('ok', '🎁 « ' + esc(data.rewardLabel) + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
         lookupUser(userId);
       } else {
-        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        showResult('err', '❌ ' + esc(data.error || 'Erreur'));
       }
     } catch (err) {
-      showResult('err', '❌ ' + (err && err.message ? err.message : err));
+      showResult('err', '❌ ' + esc(err && err.message ? err.message : err));
     }
   }
 
@@ -449,11 +451,11 @@
         showResult('ok', '✅ +' + data.xpAdded + ' XP crédités manuellement. Nouveau total : ' + data.newXp + ' XP.');
         lookupUser(userId);
       } else {
-        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        showResult('err', '❌ ' + esc(data.error || 'Erreur'));
         btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
       }
     } catch (err) {
-      showResult('err', '❌ ' + (err && err.message ? err.message : err));
+      showResult('err', '❌ ' + esc(err && err.message ? err.message : err));
       btn.disabled = false; btn.textContent = '📋 Créditer XP manuellement';
     }
   }
@@ -470,8 +472,7 @@
         headers: { 'Authorization': 'Bearer ' + $('password').value.trim() },
       });
       const d = await resp.json();
-      if (!resp.ok) { box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + (d.error || 'Erreur') + '</div>'; return; }
-      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      if (!resp.ok) { box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + esc(d.error || 'Erreur') + '</div>'; return; }
       const fmt = (iso) => { const dt = new Date(iso); return isNaN(dt) ? '' : dt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }); };
       const orders = (d.orders || []).map((o) => {
         const items = (o.items || []).map((it) => (it.quantity > 1 ? it.quantity + '× ' : '') + esc(it.product_name)).join(', ');
@@ -492,7 +493,7 @@
           (reds ? '<div class="stat-label" style="margin:12px 0 4px;color:#f59e0b;">🎁 POINTS CONSOMMÉS</div>' + reds : '') +
         '</div>';
     } catch (err) {
-      box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + (err && err.message ? err.message : err) + '</div>';
+      box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + esc(err && err.message ? err.message : err) + '</div>';
     }
   }
 
@@ -526,12 +527,12 @@
         showResult('ok', '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.' + (wheelSpinId ? ' 🎟️ Remise marquée utilisée.' : ''));
         lookupUser(userId); // refresh
       } else {
-        showResult('err', '❌ ' + (data.error || 'Erreur'));
+        showResult('err', '❌ ' + esc(data.error || 'Erreur'));
         btn.disabled = false;
         btn.textContent = '✓ Encaisser & créditer XP';
       }
     } catch (err) {
-      showResult('err', '❌ ' + err.message);
+      showResult('err', '❌ ' + esc(err.message));
       btn.disabled = false;
       btn.textContent = '✓ Encaisser & créditer XP';
     }

@@ -9,7 +9,7 @@ import type { UserReward } from './rewards/useUserRewards';
 import { REWARDS_CATALOG } from './rewards/catalog';
 import { useModalA11y } from './useModalA11y';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
-import { useOpenStatus } from './openingHours';
+import { useOpenStatus, formatHHMM, type PickupWindow } from './openingHours';
 import { getWheelCooldown } from './wheel/segments';
 
 interface CartItem {
@@ -45,6 +45,9 @@ interface CartDrawerV2Props {
   onPayOnSite?: () => void;
   isCreatingPayment: boolean;
   hasRequiredPickupInfo: boolean;
+  // Créneau de retrait autorisé (null = pas de contrainte) + erreur si hors créneau
+  pickupWindow?: PickupWindow | null;
+  pickupError?: string | null;
   onAddSuggestion?: (product: V2Product) => void;
   rewards?: UserReward[];
   selectedRewardCode?: string | null;
@@ -181,6 +184,8 @@ export function CartDrawerV2({
   onPayOnSite,
   isCreatingPayment,
   hasRequiredPickupInfo,
+  pickupWindow = null,
+  pickupError = null,
   onAddSuggestion,
   rewards,
   selectedRewardCode,
@@ -956,12 +961,16 @@ export function CartDrawerV2({
                   type="time"
                   value={pickupTime}
                   onChange={(e) => setPickupTime(e.target.value)}
+                  min={pickupWindow?.min}
+                  max={pickupWindow?.max}
+                  step={300}
+                  aria-invalid={pickupError ? true : undefined}
                   enterKeyHint="done"
                   style={{
                     width: '100%',
                     padding: '12px 14px',
                     background: palette.bg,
-                    border: `1px solid ${palette.line}`,
+                    border: `1px solid ${pickupError ? '#fb7185' : palette.line}`,
                     borderRadius: 12,
                     color: palette.text,
                     fontSize: 16,
@@ -982,6 +991,17 @@ export function CartDrawerV2({
               }}
             >
               💡 On utilise ton prénom pour la commande au comptoir et l'heure pour préparer pile à temps.
+              {pickupWindow && (
+                <div style={{ marginTop: 4, color: palette.text, fontWeight: 600 }}>
+                  🕐 Retrait possible {pickupWindow.dayLabel} entre {formatHHMM(pickupWindow.min)} et{' '}
+                  {formatHHMM(pickupWindow.max)}
+                </div>
+              )}
+              {pickupError && (
+                <div role="alert" style={{ marginTop: 4, color: '#fb7185', fontWeight: 700 }}>
+                  ⚠️ {pickupError}
+                </div>
+              )}
             </div>
 
             {/* Récap réductions si appliquées */}
@@ -1102,7 +1122,7 @@ export function CartDrawerV2({
             {onPayOnSite && (
               <button
                 onClick={onPayOnSite}
-                disabled={customerName.trim().length === 0}
+                disabled={customerName.trim().length === 0 || !!pickupError}
                 style={{
                   width: '100%',
                   marginTop: 8,
@@ -1115,7 +1135,7 @@ export function CartDrawerV2({
                   fontSize: 13,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  opacity: customerName.trim().length === 0 ? 0.4 : 1,
+                  opacity: customerName.trim().length === 0 || pickupError ? 0.4 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1137,7 +1157,9 @@ export function CartDrawerV2({
               >
                 {customerName.trim().length === 0
                   ? 'Renseigne ton prénom pour commander'
-                  : "Ajoute une heure de retrait pour payer en ligne — pas besoin pour les espèces sur place"}
+                  : pickupError
+                    ? "Choisis une heure de retrait dans le créneau d'ouverture"
+                    : "Ajoute une heure de retrait pour payer en ligne — pas besoin pour les espèces sur place"}
               </div>
             )}
           </div>

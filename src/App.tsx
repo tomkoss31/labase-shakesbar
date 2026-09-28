@@ -9,6 +9,7 @@ import {
   getOptionSectionLabel,
   getDefaultOptionForComboProduct,
 } from './data/product-helpers';
+import { getPickupWindow, checkPickupTime } from './v2/openingHours';
 import { HomeV2 } from './v2/HomeV2';
 import { useCart, type CartItem } from './v2/cart/useCart';
 import { ProductModalV2 } from './v2/ProductModalV2';
@@ -473,8 +474,11 @@ function App() {
     return new Set(cart.filter((i) => names.has(i.name)).map((i) => i.key));
   }, [cart, allProducts]);
 
+  // Créneau de retrait autorisé selon les horaires (aujourd'hui ou prochain jour d'ouverture)
+  const pickupWindow = getPickupWindow();
+  const pickupError = checkPickupTime(pickupTime.trim(), pickupWindow);
   const hasRequiredPickupInfo =
-    customerName.trim().length > 0 && pickupTime.trim().length > 0;
+    customerName.trim().length > 0 && pickupTime.trim().length > 0 && !pickupError;
 
   function addPreparedProductToCart(
     product: SelectedProduct,
@@ -756,7 +760,7 @@ function App() {
 
   function handleWhatsAppOrder() {
     if (!hasRequiredPickupInfo) {
-      window.alert('Merci de renseigner ton prénom / nom et ton heure de retrait.');
+      window.alert(pickupError ?? 'Merci de renseigner ton prénom / nom et ton heure de retrait.');
       return;
     }
     maybeSaveFirstName();
@@ -784,6 +788,10 @@ function App() {
     // retrait reste optionnelle — inutile de bloquer un paiement immédiat.
     if (customerName.trim().length === 0) {
       window.alert('Merci de renseigner ton prénom.');
+      return;
+    }
+    if (pickupError) {
+      window.alert(pickupError);
       return;
     }
     maybeSaveFirstName();
@@ -828,7 +836,7 @@ function App() {
       }
 
       if (!hasRequiredPickupInfo) {
-        window.alert('Merci de renseigner ton prénom / nom et ton heure de retrait.');
+        window.alert(pickupError ?? 'Merci de renseigner ton prénom / nom et ton heure de retrait.');
         return;
       }
 
@@ -1181,6 +1189,8 @@ function App() {
             onWhatsAppOrder={handleWhatsAppOrder}
             isCreatingPayment={isCreatingPayment}
             hasRequiredPickupInfo={hasRequiredPickupInfo}
+            pickupWindow={pickupWindow}
+            pickupError={pickupError}
             onAddSuggestion={(v2p) => {
               setDrawerOpen(false);
               openProductFromCategory(v2p.category, v2p.raw);

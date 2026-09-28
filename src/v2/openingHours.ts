@@ -122,6 +122,69 @@ export function getOpenStatus(): OpenStatus {
   return { isOpen: false, label: 'Fermé', nextOpenLabel: null };
 }
 
+// ─── Créneau de retrait autorisé ─────────────────────────────────────
+// Aujourd'hui si le bar est encore ouvert (au plus tôt dans 10 min), sinon le
+// prochain jour d'ouverture. Dernier retrait 5 min avant la fermeture.
+const PICKUP_LEAD_MIN = 10;
+const PICKUP_LAST_BEFORE_CLOSE_MIN = 5;
+
+export interface PickupWindow {
+  // "aujourd'hui" / "demain" / "mardi"
+  dayLabel: string;
+  isToday: boolean;
+  min: string; // HH:MM
+  max: string; // HH:MM
+}
+
+function toHHMM(minutes: number): string {
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+}
+
+// null = pas de contrainte (bar forcé ouvert par l'admin)
+export function getPickupWindow(): PickupWindow | null {
+  if (_override === 'force_open') return null;
+
+  const { day, minutes } = parisNow();
+  const today = _override === 'force_closed' ? null : SCHEDULE[day];
+  if (today) {
+    const last = today.close - PICKUP_LAST_BEFORE_CLOSE_MIN;
+    // Arrondi aux 5 min supérieures pour des créneaux lisibles
+    const earliest = Math.max(today.open, Math.ceil((minutes + PICKUP_LEAD_MIN) / 5) * 5);
+    if (earliest <= last) {
+      return { dayLabel: "aujourd'hui", isToday: true, min: toHHMM(earliest), max: toHHMM(last) };
+    }
+  }
+  for (let i = 1; i <= 7; i++) {
+    const d = (day + i) % 7;
+    const slot = SCHEDULE[d];
+    if (slot) {
+      return {
+        dayLabel: i === 1 ? 'demain' : DAY_NAMES[d],
+        isToday: false,
+        min: toHHMM(slot.open),
+        max: toHHMM(slot.close - PICKUP_LAST_BEFORE_CLOSE_MIN),
+      };
+    }
+  }
+  return null;
+}
+
+// "11:00" → "11h", "12:55" → "12h55"
+export function formatHHMM(hhmm: string): string {
+  const [h, m] = hhmm.split(':');
+  return m === '00' ? `${Number(h)}h` : `${Number(h)}h${m}`;
+}
+
+// Message d'erreur si l'heure choisie tombe hors du créneau, sinon null.
+export function checkPickupTime(hhmm: string, win: PickupWindow | null = getPickupWindow()): string | null {
+  if (!hhmm || !win) return null;
+  if (hhmm >= win.min && hhmm <= win.max) return null;
+  const range = `entre ${formatHHMM(win.min)} et ${formatHHMM(win.max)}`;
+  return win.isToday
+    ? `Retrait possible aujourd'hui ${range} — choisis une heure dans ce créneau.`
+    : `Le bar est fermé à cette heure-là. Retrait possible ${win.dayLabel} ${range}.`;
+}
+
 // Hook React : récupère le réglage distant au montage et renvoie le statut
 // (re-render quand le réglage admin est connu). Fallback = horaires du code.
 export function useOpenStatus(): OpenStatus {

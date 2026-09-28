@@ -793,8 +793,10 @@ export default async function handler(req: any, res: any) {
     const cart: any[] = Array.isArray(body?.cart) ? body.cart : [];
     if (cart.length === 0) return res.status(400).json({ error: 'Panier vide' });
 
-    const customerName = typeof body?.customerName === 'string' ? body.customerName.trim() : null;
-    const pickupTime = typeof body?.pickupTime === 'string' ? body.pickupTime : null;
+    const customerName = typeof body?.customerName === 'string' ? body.customerName.trim().slice(0, 40) || null : null;
+    // Heure de retrait : format HH:MM strict (sinon ignorée) — texte libre = faille XSS console.
+    const rawPickup = typeof body?.pickupTime === 'string' ? body.pickupTime.trim() : '';
+    const pickupTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(rawPickup) ? rawPickup : null;
     const userEmail = typeof body?.userEmail === 'string' ? body.userEmail.trim().toLowerCase() : null;
 
     // Le prix vient du panier client. On ne duplique pas le catalogue serveur
@@ -960,6 +962,9 @@ export default async function handler(req: any, res: any) {
     const orderId = typeof body?.orderId === 'string' ? body.orderId : null;
     const pickupTime = typeof body?.pickupTime === 'string' ? body.pickupTime.trim() : '';
     if (!orderId) return res.status(400).json({ error: 'orderId requis' });
+    if (pickupTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime)) {
+      return res.status(400).json({ error: 'Heure invalide (format HH:MM)' });
+    }
 
     const { data: order } = await clients.admin
       .from('orders')
