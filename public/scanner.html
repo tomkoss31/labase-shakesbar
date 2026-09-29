@@ -9,12 +9,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
+  /* ── Thème CLAIR (aligné sur l'appli client) ── */
+  :root {
+    color-scheme: light;
+    --bg: #f3f8f6;          /* fond de page + champs / cases (effet « creusé ») */
+    --card: #ffffff;
+    --card2: #f7fbfa;
+    --line: rgba(13,148,136,.18);
+    --text: #0b2622;
+    --dim: #48695f;
+    --faint: #5b6b68;
+    --disabled: #5f736e;    /* cadeaux verrouillés : lisibles, signalés par 🔒 */
+    --teal: #0d9488;        /* bordures, boutons, cases à cocher */
+    --teal-text: #0f766e;   /* textes teal (≥ 4,5:1 sur blanc) */
+    --amber: #f59e0b;       /* fonds de boutons */
+    --amber-text: #9a4a06;  /* textes ambre lisibles sur blanc (même sur fond ambre pâle) */
+    --rose: #e11d48;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     padding: 16px;
-    background: #04100f;
-    color: #ecfdf5;
+    background: var(--bg);
+    color: var(--text);
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh;
   }
@@ -24,12 +41,12 @@
     font-size: 28px;
     letter-spacing: -0.02em;
     margin: 4px 0 4px;
-    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    background: linear-gradient(135deg, #0f766e, #0d9488, #d97706);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .sub { color: #94b8b1; font-size: 13px; margin-bottom: 16px; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 16px; }
   .container { max-width: 980px; margin: 0 auto; }
   /* Tablette (iPad 10") : on prend la largeur — 2 colonnes au lieu du format iPhone. */
   .top-grid { display: flex; flex-direction: column; }
@@ -41,19 +58,20 @@
     h1 { font-size: 34px; }
   }
   .card {
-    background: linear-gradient(135deg, #13302c, #0e1f1d);
-    border: 1px solid rgba(94,234,212,.10);
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--line);
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(11,38,34,.05), 0 8px 24px rgba(11,38,34,.06);
   }
   input {
     width: 100%;
     padding: 12px 14px;
-    background: #04100f;
-    border: 1px solid rgba(94,234,212,.10);
+    background: var(--bg);
+    border: 1px solid rgba(13,148,136,.18);
     border-radius: 10px;
-    color: #ecfdf5;
+    color: var(--text);
     font-size: 14px;
     font-family: inherit;
     outline: none;
@@ -63,14 +81,14 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: .08em;
-    color: #94b8b1;
+    color: var(--dim);
     text-transform: uppercase;
     margin-bottom: 6px;
   }
   .btn {
     width: 100%;
     padding: 14px;
-    background: #f59e0b;
+    background: var(--amber);
     color: #1a0f00;
     border: 0;
     border-radius: 12px;
@@ -79,8 +97,8 @@
     font-size: 14px;
     cursor: pointer;
   }
-  .btn-teal { background: #14b8a6; color: #02100e; }
-  .btn-secondary { background: transparent; color: #ecfdf5; border: 1px solid rgba(94,234,212,.20); }
+  .btn-teal { background: var(--teal); color: #ffffff; }
+  .btn-secondary { background: transparent; color: var(--text); border: 1px solid rgba(13,148,136,.28); }
   video {
     width: 100%;
     max-height: 360px;
@@ -89,26 +107,26 @@
   }
   .scanner-zone {
     position: relative;
-    border: 2px dashed rgba(94,234,212,.30);
+    border: 2px dashed rgba(13,148,136,.38);
     border-radius: 14px;
     overflow: hidden;
   }
   .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
-  .stat { background: #04100f; padding: 12px; border-radius: 10px; border: 1px solid rgba(94,234,212,.10); }
-  .stat-label { font-size: 10px; color: #94b8b1; text-transform: uppercase; letter-spacing: .08em; }
-  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: #f59e0b; margin-top: 2px; }
+  .stat { background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid rgba(13,148,136,.18); }
+  .stat-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: var(--amber-text); margin-top: 2px; }
   .reward-pill {
     display: inline-block;
     padding: 4px 10px;
-    background: #fb718522;
-    color: #fb7185;
+    background: var(--rose)22;
+    color: var(--rose);
     border-radius: 999px;
     font-size: 11px;
     font-weight: 700;
     margin: 2px 4px 2px 0;
   }
-  .ok { background: rgba(20,184,166,.15); color: #5eead4; padding: 10px 14px; border-radius: 10px; border: 1px solid #14b8a6; font-size: 13px; }
-  .err { background: rgba(251,113,133,.15); color: #fb7185; padding: 10px 14px; border-radius: 10px; border: 1px solid #fb7185; font-size: 13px; }
+  .ok { background: rgba(13,148,136,.15); color: var(--teal-text); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--teal); font-size: 13px; }
+  .err { background: rgba(251,113,133,.15); color: var(--rose); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--rose); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -245,7 +263,7 @@
       lookupUser(userId);
     } else if (text.startsWith('LABASE-CASH:')) {
       const code = text.replace('LABASE-CASH:', '');
-      showResult('ok', '💵 Code commande espèces : <b>' + esc(code.slice(0, 40)) + '</b> — va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a> pour encaisser.');
+      showResult('ok', '💵 Code commande espèces : <b>' + esc(code.slice(0, 40)) + '</b> — va sur <a href="/comptoir.html" style="color:var(--teal-text)">/comptoir.html</a> pour encaisser.');
     } else {
       showResult('err', 'QR non reconnu : ' + esc(text.slice(0, 40)));
     }
@@ -255,7 +273,7 @@
     const id = $('manualId').value.trim();
     if (!id) return;
     if (id.startsWith('CASH-')) {
-      showResult('ok', '💵 Code commande espèces. Va sur <a href="/comptoir.html" style="color:#5eead4">/comptoir.html</a>.');
+      showResult('ok', '💵 Code commande espèces. Va sur <a href="/comptoir.html" style="color:var(--teal-text)">/comptoir.html</a>.');
     } else {
       lookupUser(id);
     }
@@ -302,9 +320,9 @@
     if (recentOrder) {
       const eur = (recentOrder.total_cents / 100).toFixed(2).replace('.', ',');
       warnBlock =
-        '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(251,113,133,.16);border:2px solid #fb7185;border-radius:14px;">' +
-          '<div style="font-family:Outfit;font-weight:900;color:#fb7185;font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
-          '<div style="font-size:13px;color:#ecfdf5;margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b> (ex. payé en carte + commande espèces dans l\'app), <b>ne recrédite PAS</b> — ce serait un doublon.</div>' +
+        '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(251,113,133,.16);border:2px solid var(--rose);border-radius:14px;">' +
+          '<div style="font-family:Outfit;font-weight:900;color:var(--rose);font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
+          '<div style="font-size:13px;color:var(--text);margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b> (ex. payé en carte + commande espèces dans l\'app), <b>ne recrédite PAS</b> — ce serait un doublon.</div>' +
         '</div>';
     }
 
@@ -314,25 +332,25 @@
     if (active.length) {
       rewardsBlock =
         '<div style="margin: 2px 0 12px;">' +
-        '<div class="stat-label" style="margin-bottom: 8px; color:#f59e0b;">🎟️ REMISES / CADEAUX ACTIFS — coche celle que tu appliques</div>' +
+        '<div class="stat-label" style="margin-bottom: 8px; color: var(--amber-text);">🎟️ REMISES / CADEAUX ACTIFS — coche celle que tu appliques</div>' +
         active.map((r) => {
           const m = rewardMeta(r);
           const exp = r.expires_at ? new Date(r.expires_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '';
           return (
-            '<label style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid rgba(245,158,11,.35); border-radius:12px; margin-bottom:8px; cursor:pointer; background:#04100f;">' +
-              '<input type="radio" name="applyReward" value="' + esc(r.id) + '" style="width:22px; height:22px; flex:none; accent-color:#f59e0b;" />' +
+            '<label style="display:flex; align-items:center; gap:12px; padding:12px; border:1px solid rgba(245,158,11,.35); border-radius:12px; margin-bottom:8px; cursor:pointer; background:var(--bg);">' +
+              '<input type="radio" name="applyReward" value="' + esc(r.id) + '" style="width:22px; height:22px; flex:none; accent-color:var(--amber);" />' +
               '<span style="font-size:26px;">' + m.icon + '</span>' +
               '<span style="flex:1; min-width:0;">' +
-                '<span style="font-family:Outfit; font-weight:900; font-size:22px; color:#f59e0b;">' + esc(m.big) + '</span>' +
-                '<span style="display:block; font-size:12px; color:#ecfdf5; margin-top:1px;">' + esc(r.reward_label) + '</span>' +
-                '<span style="display:block; font-size:10.5px; color:#94b8b1;">' + m.sub + (exp ? ' · exp. ' + exp : '') + ' · ' + esc(r.reward_code) + '</span>' +
+                '<span style="font-family:Outfit; font-weight:900; font-size:22px; color: var(--amber-text);">' + esc(m.big) + '</span>' +
+                '<span style="display:block; font-size:12px; color:var(--text); margin-top:1px;">' + esc(r.reward_label) + '</span>' +
+                '<span style="display:block; font-size:10.5px; color:var(--dim);">' + m.sub + (exp ? ' · exp. ' + exp : '') + ' · ' + esc(r.reward_code) + '</span>' +
               '</span>' +
             '</label>'
           );
         }).join('') +
         '<label style="display:flex; align-items:center; gap:12px; padding:8px 12px; cursor:pointer;">' +
-          '<input type="radio" name="applyReward" value="" checked style="width:22px; height:22px; flex:none; accent-color:#94b8b1;" />' +
-          '<span style="font-size:13px; color:#94b8b1;">Aucune remise sur cette commande</span>' +
+          '<input type="radio" name="applyReward" value="" checked style="width:22px; height:22px; flex:none; accent-color:var(--dim);" />' +
+          '<span style="font-size:13px; color:var(--dim);">Aucune remise sur cette commande</span>' +
         '</label>' +
         '</div>';
     }
@@ -348,22 +366,22 @@
       const ok = p.xp >= c.cost;
       return '<button class="gift-btn" data-rid="' + c.id + '" data-cost="' + c.cost + '" data-label="' + c.title + '"' + (ok ? '' : ' disabled') +
         ' style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:13px 14px;border-radius:12px;border:1px solid ' +
-        (ok ? '#14b8a6' : 'rgba(94,234,212,.12)') + ';background:' + (ok ? 'rgba(20,184,166,.12)' : '#04100f') +
-        ';color:' + (ok ? '#ecfdf5' : '#5e7a73') + ';font-family:inherit;font-size:14px;font-weight:700;cursor:' +
+        (ok ? 'var(--teal)' : 'rgba(13,148,136,.20)') + ';background:' + (ok ? 'rgba(13,148,136,.12)' : 'var(--bg)') +
+        ';color:' + (ok ? 'var(--text)' : 'var(--disabled)') + ';font-family:inherit;font-size:14px;font-weight:700;cursor:' +
         (ok ? 'pointer' : 'not-allowed') + ';text-align:left;">' +
         '<span style="font-size:22px;">' + c.emoji + '</span>' +
         '<span style="flex:1;">' + c.title + '</span>' +
-        '<span style="font-weight:800;color:' + (ok ? '#5eead4' : '#5e7a73') + ';">' + (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
+        '<span style="font-weight:800;color:' + (ok ? 'var(--teal-text)' : 'var(--disabled)') + ';">' + (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
     }).join('');
 
     $('result').innerHTML =
       warnBlock +
-      '<div class="card scan-client-card" style="border-color: #14b8a6;">' +
+      '<div class="card scan-client-card" style="border-color: var(--teal);">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
           '<div style="min-width:0;">' +
-            '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
+            '<div style="font-size: 11px; color: var(--teal-text); font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
             '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + esc(name) + '</div>' +
-            '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + esc(p.email || 'Email inconnu') + '</div>' +
+            '<div style="font-size: 12px; color: var(--dim); margin-top: 2px;">' + esc(p.email || 'Email inconnu') + '</div>' +
           '</div>' +
           '<button id="historyBtn" class="btn-secondary" style="padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;">🧾 Historique</button>' +
         '</div>' +
@@ -378,24 +396,24 @@
       '<div class="card">' +
         '<label>💳 Encaissement Square caisse + crédit XP</label>' +
         rewardsBlock +
-        (active.length ? '<div style="font-size:11.5px; color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:8px 10px; margin-bottom:10px; line-height:1.45;">⚠️ Applique la remise <b>sur la tablette Square</b> d\'abord, PUIS coche-la ici → marquée utilisée.</div>' : '') +
+        (active.length ? '<div style="font-size:11.5px; color: var(--amber-text); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:8px 10px; margin-bottom:10px; line-height:1.45;">⚠️ Applique la remise <b>sur la tablette Square</b> d\'abord, PUIS coche-la ici → marquée utilisée.</div>' : '') +
         '<input type="number" id="amount" placeholder="Montant encaissé en € (ex: 8.90)" step="0.10" min="0" />' +
-        '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#ecfdf5;">' +
-          '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:#14b8a6;" />' +
-          '⚡ Commande combo (boisson + smoothie) <b style="color:#5eead4;">+25 XP</b>' +
+        '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text);">' +
+          '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:var(--teal);" />' +
+          '⚡ Commande combo (boisson + smoothie) <b style="color:var(--teal-text);">+25 XP</b>' +
         '</label>' +
         '<input type="text" id="saleNote" placeholder="Détail vente (ex: 2 smoothies + gaufre) — optionnel" maxlength="120" style="margin-top:10px;" />' +
         '<button class="btn btn-teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
-        '<div style="font-size: 11px; color: #94b8b1; margin-top: 8px; line-height: 1.5;">Montant encaissé sur Square. XP auto : 10 XP/€ + 50 XP/cmd (+25 combo, ×2 mardi). La remise cochée est marquée utilisée.</div>' +
+        '<div style="font-size: 11px; color: var(--dim); margin-top: 8px; line-height: 1.5;">Montant encaissé sur Square. XP auto : 10 XP/€ + 50 XP/cmd (+25 combo, ×2 mardi). La remise cochée est marquée utilisée.</div>' +
       '</div>' +
       '<div class="card">' +
         '<label>🎁 Offrir un cadeau (déduit les XP)</label>' +
-        '<div style="font-size:11px;color:#94b8b1;margin:4px 0 2px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
+        '<div style="font-size:11px;color:var(--dim);margin:4px 0 2px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
         giftButtons +
       '</div>' +
-      '<div class="card" style="border-color:rgba(94,234,212,.25);">' +
+      '<div class="card" style="border-color:rgba(13,148,136,.33);">' +
         '<label>📋 Migration carte fidélité papier</label>' +
-        '<div style="font-size:11px;color:#94b8b1;margin:4px 0 8px;line-height:1.45;">Client qui passait par la carte papier ? Ajoute ses points en XP ici. Ne touche pas au CA ni au nombre de commandes.</div>' +
+        '<div style="font-size:11px;color:var(--dim);margin:4px 0 8px;line-height:1.45;">Client qui passait par la carte papier ? Ajoute ses points en XP ici. Ne touche pas au CA ni au nombre de commandes.</div>' +
         '<input type="number" id="manualXp" placeholder="XP à créditer (ex: 230)" step="1" min="1" max="100000" />' +
         '<input type="text" id="manualReason" placeholder="Raison (ex: Carte papier — 230 points)" maxlength="280" style="margin-top:8px;" />' +
         '<button class="btn btn-teal" id="manualXpBtn" style="margin-top:10px;">📋 Créditer XP manuellement</button>' +
@@ -465,35 +483,35 @@
     const box = $('history-box');
     if (!box) return;
     if (box.dataset.open === '1') { box.innerHTML = ''; box.dataset.open = '0'; return; }
-    box.innerHTML = '<div style="padding:12px 2px;color:#7f8a88;font-size:12px;">Chargement de l\'historique…</div>';
+    box.innerHTML = '<div style="padding:12px 2px;color:var(--faint);font-size:12px;">Chargement de l\'historique…</div>';
     box.dataset.open = '1';
     try {
       const resp = await fetch('/api/orders?action=client-history&userId=' + encodeURIComponent(userId), {
         headers: { 'Authorization': 'Bearer ' + $('password').value.trim() },
       });
       const d = await resp.json();
-      if (!resp.ok) { box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + esc(d.error || 'Erreur') + '</div>'; return; }
+      if (!resp.ok) { box.innerHTML = '<div style="color:var(--rose);font-size:12px;padding:8px 2px;">❌ ' + esc(d.error || 'Erreur') + '</div>'; return; }
       const fmt = (iso) => { const dt = new Date(iso); return isNaN(dt) ? '' : dt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }); };
       const orders = (d.orders || []).map((o) => {
         const items = (o.items || []).map((it) => (it.quantity > 1 ? it.quantity + '× ' : '') + esc(it.product_name)).join(', ');
         const eur = (o.total_cents / 100).toFixed(2).replace('.', ',');
-        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(94,234,212,.08);">' +
-          '<span style="flex:1;min-width:0;"><b style="color:#94b8b1;">' + fmt(o.paid_at || o.created_at) + '</b> · ' + (items || '<i style="color:#7f8a88;">détail non dispo</i>') + '</span>' +
-          '<span style="color:#5eead4;white-space:nowrap;">' + eur + '€</span></div>';
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(13,148,136,.16);">' +
+          '<span style="flex:1;min-width:0;"><b style="color:var(--dim);">' + fmt(o.paid_at || o.created_at) + '</b> · ' + (items || '<i style="color:var(--faint);">détail non dispo</i>') + '</span>' +
+          '<span style="color:var(--teal-text);white-space:nowrap;">' + eur + '€</span></div>';
       }).join('');
       const reds = (d.rewards || []).map((r) =>
         '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 0;">' +
-          '<span>🎁 ' + esc(r.reward_label) + ' <span style="color:#7f8a88;">(' + fmt(r.created_at) + ')</span></span>' +
-          '<span style="color:#f59e0b;white-space:nowrap;">−' + (r.xp_cost || 0) + ' XP</span></div>'
+          '<span>🎁 ' + esc(r.reward_label) + ' <span style="color:var(--faint);">(' + fmt(r.created_at) + ')</span></span>' +
+          '<span style="color: var(--amber-text);white-space:nowrap;">−' + (r.xp_cost || 0) + ' XP</span></div>'
       ).join('');
       box.innerHTML =
-        '<div style="margin-top:12px;border-top:1px solid rgba(94,234,212,.15);padding-top:10px;">' +
+        '<div style="margin-top:12px;border-top:1px solid rgba(13,148,136,.23);padding-top:10px;">' +
           '<div class="stat-label" style="margin-bottom:6px;">🧾 COMMANDES (' + (d.orders || []).length + ')</div>' +
-          (orders || '<div style="font-size:12px;color:#7f8a88;">Aucune commande.</div>') +
-          (reds ? '<div class="stat-label" style="margin:12px 0 4px;color:#f59e0b;">🎁 POINTS CONSOMMÉS</div>' + reds : '') +
+          (orders || '<div style="font-size:12px;color:var(--faint);">Aucune commande.</div>') +
+          (reds ? '<div class="stat-label" style="margin:12px 0 4px;color: var(--amber-text);">🎁 POINTS CONSOMMÉS</div>' + reds : '') +
         '</div>';
     } catch (err) {
-      box.innerHTML = '<div style="color:#fb7185;font-size:12px;padding:8px 2px;">❌ ' + esc(err && err.message ? err.message : err) + '</div>';
+      box.innerHTML = '<div style="color:var(--rose);font-size:12px;padding:8px 2px;">❌ ' + esc(err && err.message ? err.message : err) + '</div>';
     }
   }
 
