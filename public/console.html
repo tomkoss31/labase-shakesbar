@@ -8,19 +8,39 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scan Caisse">
-<meta name="theme-color" content="#04100f">
+<meta name="theme-color" content="#f3f8f6">
 <link rel="apple-touch-icon" href="/scanner-icon-180.png?v=1">
 <link rel="icon" type="image/png" sizes="512x512" href="/scanner-icon-512.png?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
+  /* ── Thème CLAIR (aligné sur l'appli client et le scanner) ── */
+  :root {
+    color-scheme: light;
+    --bg: #f3f8f6;          /* fond de page + champs / cases (effet « creusé ») */
+    --card: #ffffff;
+    --card2: #f7fbfa;
+    --line: rgba(13,148,136,.18);
+    --text: #0b2622;
+    --soft: #2f4f48;        /* texte secondaire appuyé */
+    --dim: #48695f;
+    --faint: #5b6b68;
+    --disabled: #5f736e;
+    --teal: #0f766e;        /* bordures, boutons */
+    --teal-text: #0f766e;   /* textes teal (≥ 4,5:1 sur blanc) */
+    --amber: #f59e0b;       /* fonds de boutons */
+    --amber-text: #9a4a06;  /* textes ambre lisibles sur blanc */
+    --rose: #be123c;
+    --red: #dc2626;
+    --green-text: #166534;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     padding: 0;
-    background: #04100f;
-    color: #ecfdf5;
+    background: var(--bg);
+    color: var(--text);
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh;
   }
@@ -30,10 +50,10 @@
     position: sticky;
     top: 0;
     z-index: 30;
-    background: rgba(4, 16, 15, .92);
+    background: rgba(243,248,246,.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(94,234,212,.1);
+    border-bottom: 1px solid rgba(13,148,136,.18);
     padding: 12px 16px;
   }
   .topbar-inner {
@@ -48,16 +68,16 @@
     display: inline-flex;
     align-items: center;
     padding: 8px 12px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(13,148,136,.06);
+    border: 1px solid var(--line);
     border-radius: 10px;
-    color: #e6f4f1;
+    color: var(--text);
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;
     transition: background .15s ease;
   }
-  .back-btn:hover { background: rgba(255,255,255,.12); }
+  .back-btn:hover { background: rgba(13,148,136,.12); }
   .brand {
     display: flex;
     align-items: center;
@@ -69,21 +89,21 @@
     color: #04100f;
     font-family: 'Outfit'; font-weight: 900; font-size: 22px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 20px rgba(20,184,166,.5);
+    box-shadow: 0 0 20px rgba(13,148,136,.5);
   }
   .brand-name {
     font-family: 'Outfit'; font-weight: 900; font-size: 18px; letter-spacing: -.02em;
   }
   .brand-sub {
-    font-size: 9px; color: #94b8b1; letter-spacing: .2em; font-weight: 600; margin-top: 2px;
+    font-size: 9px; color: var(--dim); letter-spacing: .2em; font-weight: 600; margin-top: 2px;
   }
   .topbar-spacer { flex: 1; }
   .pwd-input {
     padding: 8px 12px;
-    background: #0e1f1d;
-    border: 1px solid rgba(94,234,212,.1);
+    background: var(--card2);
+    border: 1px solid rgba(13,148,136,.18);
     border-radius: 10px;
-    color: #ecfdf5;
+    color: var(--text);
     font-size: 13px;
     font-family: inherit;
     outline: none;
@@ -92,8 +112,8 @@
 
   /* Nav tabs */
   .nav-tabs {
-    background: #0a1a18;
-    border-bottom: 1px solid rgba(94,234,212,.1);
+    background: var(--card);
+    border-bottom: 1px solid rgba(13,148,136,.18);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -109,7 +129,7 @@
     padding: 10px 16px;
     background: transparent;
     border: 0;
-    color: #94b8b1;
+    color: var(--dim);
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 14px;
@@ -118,10 +138,10 @@
     white-space: nowrap;
     transition: all .15s;
   }
-  .tab:hover { color: #ecfdf5; background: rgba(94,234,212,.05); }
+  .tab:hover { color: var(--text); background: rgba(13,148,136,.13); }
   .tab.active {
-    background: rgba(20,184,166,.15);
-    color: #14b8a6;
+    background: rgba(13,148,136,.15);
+    color: var(--teal-text);
   }
 
   /* Container */
@@ -136,17 +156,18 @@
     font-size: 28px;
     letter-spacing: -.02em;
     margin: 0 0 6px;
-    background: linear-gradient(135deg, #5eead4, #14b8a6, #f59e0b);
+    background: linear-gradient(135deg, #0f766e, #0d9488, #d97706);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .sub { color: #94b8b1; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+  .sub { color: var(--dim); font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
 
   /* Cards & inputs */
   .card {
-    background: linear-gradient(135deg, #13302c, #0e1f1d);
-    border: 1px solid rgba(94,234,212,.1);
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    box-shadow: 0 1px 2px rgba(11,38,34,.05), 0 8px 24px rgba(11,38,34,.06);
+    border: 1px solid var(--line);
     border-radius: 18px;
     padding: 18px;
     margin-bottom: 14px;
@@ -156,7 +177,7 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: .08em;
-    color: #94b8b1;
+    color: var(--dim);
     margin-bottom: 6px;
     margin-top: 12px;
     text-transform: uppercase;
@@ -165,20 +186,20 @@
   input, textarea {
     width: 100%;
     padding: 12px 14px;
-    background: #04100f;
-    border: 1px solid rgba(94,234,212,.1);
+    background: var(--bg);
+    border: 1px solid rgba(13,148,136,.18);
     border-radius: 12px;
-    color: #ecfdf5;
+    color: var(--text);
     font-size: 14px;
     font-family: inherit;
     outline: none;
     resize: vertical;
   }
-  input:focus, textarea:focus { border-color: #14b8a6; }
+  input:focus, textarea:focus { border-color: var(--teal); }
   button.primary {
     width: 100%;
     padding: 14px;
-    background: #f59e0b;
+    background: var(--amber);
     color: #1a0f00;
     border: 0;
     border-radius: 14px;
@@ -189,19 +210,19 @@
     box-shadow: 0 8px 24px rgba(245,158,11,.3);
   }
   button.teal {
-    background: #14b8a6;
-    color: #02100e;
-    box-shadow: 0 8px 24px rgba(20,184,166,.3);
+    background: var(--teal);
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(13,148,136,.3);
   }
   button.secondary {
     background: transparent;
-    color: #ecfdf5;
-    border: 1px solid rgba(94,234,212,.2);
+    color: var(--text);
+    border: 1px solid rgba(13,148,136,.28);
     box-shadow: none;
   }
   button:disabled { opacity: 0.5; cursor: wait; }
-  .ok { background: rgba(20,184,166,.15); color: #5eead4; padding: 10px 14px; border-radius: 10px; border: 1px solid #14b8a6; font-size: 13px; margin-top: 10px; }
-  .err { background: rgba(251,113,133,.15); color: #fb7185; padding: 10px 14px; border-radius: 10px; border: 1px solid #fb7185; font-size: 13px; margin-top: 10px; }
+  .ok { background: rgba(13,148,136,.15); color: var(--teal-text); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--teal); font-size: 13px; margin-top: 10px; }
+  .err { background: rgba(251,113,133,.15); color: var(--rose); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--rose); font-size: 13px; margin-top: 10px; }
 
   /* Hidden by default */
   .view { display: none; }
@@ -214,24 +235,24 @@
     gap: 12px;
     align-items: center;
     padding: 12px;
-    border: 1px solid rgba(94,234,212,.1);
+    border: 1px solid rgba(13,148,136,.18);
     border-radius: 14px;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #0e1f1d, #13302c);
+    background: linear-gradient(135deg, var(--card2), var(--card));
   }
-  .row[data-status="ready"] { border-color: #14b8a6; background: linear-gradient(135deg, #14302c, #1a4a3e); }
-  .row[data-status="preparing"] { border-color: #f59e0b; }
-  .row[data-status="pending_cash"] { border-color: #fb7185; background: linear-gradient(135deg, #2d1620, #1a0908); }
+  .row[data-status="ready"] { border-color: var(--teal); background: linear-gradient(135deg, #eefaf6, #dcf3ec); }
+  .row[data-status="preparing"] { border-color: var(--amber); }
+  .row[data-status="pending_cash"] { border-color: var(--rose); background: linear-gradient(135deg, #fff5f6, #ffe6ea); }
   .meta { font-family: 'Outfit'; font-weight: 800; }
-  .meta-sub { font-size: 11px; color: #94b8b1; margin-top: 2px; }
+  .meta-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
   .total { font-family: 'Outfit'; font-weight: 900; font-size: 18px; text-align: right; }
   .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .btn-row {
     padding: 8px 12px; border-radius: 10px; border: 0;
     font-family: 'Outfit'; font-weight: 800; font-size: 12px; cursor: pointer;
   }
-  .btn-ambre { background: #f59e0b; color: #1a0f00; }
-  .btn-teal { background: #14b8a6; color: #02100e; }
+  .btn-ambre { background: var(--amber); color: #1a0f00; }
+  .btn-teal { background: var(--teal); color: #ffffff; }
   .status-pill {
     display: inline-block;
     padding: 2px 8px;
@@ -242,24 +263,24 @@
     letter-spacing: .06em;
     margin-top: 4px;
   }
-  .status-pending_cash { background: rgba(251,113,133,.13); color: #fb7185; }
-  .status-paid { background: rgba(20,184,166,.13); color: #14b8a6; }
-  .status-preparing { background: rgba(245,158,11,.13); color: #f59e0b; }
-  .status-ready { background: rgba(34,197,94,.13); color: #22c55e; }
-  .empty { padding: 32px; text-align: center; color: #94b8b1; font-size: 13px; }
+  .status-pending_cash { background: rgba(251,113,133,.13); color: var(--rose); }
+  .status-paid { background: rgba(13,148,136,.13); color: var(--teal-text); }
+  .status-preparing { background: rgba(245,158,11,.13); color: var(--amber-text); }
+  .status-ready { background: rgba(34,197,94,.13); color: var(--green-text); }
+  .empty { padding: 32px; text-align: center; color: var(--dim); font-size: 13px; }
 
   /* Scanner */
   video { width: 100%; max-height: 400px; border-radius: 12px; background: #000; }
-  .scanner-zone { position: relative; border: 2px dashed rgba(94,234,212,.3); border-radius: 14px; overflow: hidden; }
+  .scanner-zone { position: relative; border: 2px dashed rgba(13,148,136,.38); border-radius: 14px; overflow: hidden; }
   .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
-  .stat { background: #04100f; padding: 12px; border-radius: 10px; border: 1px solid rgba(94,234,212,.1); }
-  .stat-label { font-size: 10px; color: #94b8b1; text-transform: uppercase; letter-spacing: .08em; }
-  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: #f59e0b; margin-top: 2px; }
+  .stat { background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid rgba(13,148,136,.18); }
+  .stat-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+  .stat-value { font-family: 'Outfit'; font-weight: 900; font-size: 20px; color: var(--amber-text); margin-top: 2px; }
   .reward-pill {
     display: inline-block;
     padding: 4px 10px;
     background: rgba(251,113,133,.15);
-    color: #fb7185;
+    color: var(--rose);
     border-radius: 999px;
     font-size: 11px;
     font-weight: 700;
@@ -296,21 +317,21 @@
   label.reward-radio .reward-label-title {
     font-size: 13px;
     font-weight: 700;
-    color: #fb7185;
+    color: var(--rose);
     word-wrap: break-word;
     overflow-wrap: anywhere;
   }
   label.reward-radio .reward-label-code {
     font-size: 10px;
-    color: #94b8b1;
+    color: var(--dim);
     margin-top: 2px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     word-wrap: break-word;
     overflow-wrap: anywhere;
   }
   label.reward-radio.reward-radio-none {
-    background: #04100f;
-    border: 1px solid rgba(94,234,212,.15);
+    background: var(--bg);
+    border: 1px solid rgba(13,148,136,.23);
   }
   label.reward-radio.reward-radio-code {
     background: rgba(251,113,133,.08);
@@ -322,7 +343,7 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: radial-gradient(ellipse at top, #0a2520 0%, #04100f 60%);
+    background: radial-gradient(ellipse at top, #dff2ec 0%, #f3f8f6 60%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,12 +353,12 @@
   .gate-card {
     width: 100%;
     max-width: 380px;
-    background: linear-gradient(180deg, #0a2520, #061a17);
-    border: 1px solid rgba(94,234,212,.2);
+    background: linear-gradient(180deg, #ffffff, #f7fbfa);
+    border: 1px solid rgba(13,148,136,.28);
     border-radius: 20px;
     padding: 32px 28px;
     text-align: center;
-    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    box-shadow: 0 24px 80px rgba(11,38,34,.14);
   }
   .gate-logo {
     width: 56px; height: 56px;
@@ -347,35 +368,35 @@
     color: #04100f;
     font-family: 'Outfit'; font-weight: 900; font-size: 32px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 32px rgba(94,234,212,.5);
+    box-shadow: 0 0 32px rgba(13,148,136,.45);
   }
   .gate-title {
     font-family: 'Outfit'; font-weight: 900;
-    font-size: 22px; letter-spacing: -.02em; color: #ecfdf5;
+    font-size: 22px; letter-spacing: -.02em; color: var(--text);
     margin: 8px 0 4px;
   }
   .gate-sub {
-    font-size: 13px; color: #94b8b1; margin-bottom: 24px;
+    font-size: 13px; color: var(--dim); margin-bottom: 24px;
   }
   .gate-input {
     width: 100%;
     padding: 14px 16px;
-    background: #04100f;
-    border: 1.5px solid rgba(94,234,212,.2);
+    background: var(--bg);
+    border: 1.5px solid rgba(13,148,136,.28);
     border-radius: 12px;
-    color: #ecfdf5;
+    color: var(--text);
     font-size: 15px;
     font-family: inherit;
     outline: none;
     transition: border-color .15s;
     box-sizing: border-box;
   }
-  .gate-input:focus { border-color: #5eead4; }
+  .gate-input:focus { border-color: var(--teal-text); }
   .gate-btn {
     width: 100%;
     margin-top: 12px;
     padding: 14px;
-    background: #f59e0b;
+    background: var(--amber);
     color: #1a0f00;
     border: 0;
     border-radius: 12px;
@@ -390,7 +411,7 @@
   .gate-error {
     margin-top: 12px;
     font-size: 12px;
-    color: #ef4444;
+    color: var(--red);
     font-weight: 600;
     min-height: 16px;
   }
@@ -422,7 +443,7 @@
   .preview-title { font-weight: 700; font-size: 13.5px; }
   .preview-body { font-size: 13px; color: #555; margin-top: 2px; }
 
-  .hint { font-size: 11px; color: #94b8b1; margin-top: 6px; line-height: 1.5; }
+  .hint { font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
 </style>
 </head>
 <body class="locked">
@@ -438,8 +459,8 @@
       <button type="submit" class="gate-btn" id="gate-submit">Déverrouiller</button>
       <div class="gate-error" id="gate-error"></div>
     </form>
-    <div style="margin-top:18px;font-size:11px;color:#94b8b1;">
-      <a href="/" style="color:#5eead4;text-decoration:none;">← Retour à l'app</a>
+    <div style="margin-top:18px;font-size:11px;color:var(--dim);">
+      <a href="/" style="color:var(--teal-text);text-decoration:none;">← Retour à l'app</a>
     </div>
   </div>
 </div>
@@ -455,7 +476,7 @@
       </div>
     </div>
     <div class="topbar-spacer"></div>
-    <button id="lock-btn" class="back-btn" title="Verrouiller" style="cursor:pointer;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#ef4444;">🔒 Verrouiller</button>
+    <button id="lock-btn" class="back-btn" title="Verrouiller" style="cursor:pointer;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red);">🔒 Verrouiller</button>
   </div>
 </div>
 <!-- Hidden password field for backward compatibility avec le code existant -->
@@ -477,7 +498,7 @@
   <!-- ─── COMPTOIR ─── -->
   <div class="view active" id="view-comptoir">
     <h1>🏪 Commandes du jour</h1>
-    <div class="sub">Toutes tes ventes Square remontent ici. Appuie sur <b style="color:#cbd5d1;">✕</b> pour masquer une vente caisse / produit (ça ne touche pas Square). Auto-refresh 15s.</div>
+    <div class="sub">Toutes tes ventes Square remontent ici. Appuie sur <b style="color:var(--dim);">✕</b> pour masquer une vente caisse / produit (ça ne touche pas Square). Auto-refresh 15s.</div>
     <div id="comptoir-list"></div>
   </div>
 
@@ -496,7 +517,7 @@
         <canvas id="canvas" style="display: none;"></canvas>
       </div>
       <!-- Debug live : ce que voit le scanner en ce moment -->
-      <div id="scanner-debug" style="display: none; margin-top: 8px; padding: 8px 10px; background: #04100f; border: 1px solid rgba(94,234,212,.2); border-radius: 8px; font-size: 11px; font-family: monospace; color: #94b8b1; word-break: break-all;">
+      <div id="scanner-debug" style="display: none; margin-top: 8px; padding: 8px 10px; background: var(--bg); border: 1px solid rgba(13,148,136,.28); border-radius: 8px; font-size: 11px; font-family: monospace; color: var(--dim); word-break: break-all;">
         En attente de QR…
       </div>
       <div style="margin-top: 10px;">
@@ -529,14 +550,14 @@
       <div class="hint" style="margin-top:4px;margin-bottom:10px;">Copie et colle dans tes stories Instagram ou ta bio.</div>
 
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div style="flex:1;min-width:0;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:#5eead4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <div style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(13,148,136,.23);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:var(--teal-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           🎰 commande.labase-nutrition.com/jeu
         </div>
         <button class="primary teal copy-link" data-url="https://commande.labase-nutrition.com/jeu" style="width:auto;flex:none;padding:10px 14px;border-radius:10px;font-size:12px;white-space:nowrap;cursor:pointer;">📋 Copier</button>
       </div>
 
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="flex:1;min-width:0;background:#04100f;border:1px solid rgba(94,234,212,.15);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:#5eead4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <div style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(13,148,136,.23);border-radius:10px;padding:10px 12px;font-size:12px;font-family:ui-monospace,monospace;color:var(--teal-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           ✨ commande.labase-nutrition.com/club
         </div>
         <button class="primary teal copy-link" data-url="https://commande.labase-nutrition.com/club" style="width:auto;flex:none;padding:10px 14px;border-radius:10px;font-size:12px;white-space:nowrap;cursor:pointer;">📋 Copier</button>
@@ -546,7 +567,7 @@
     <div class="card">
       <label>⚡ Notifs express (1 clic)</label>
       <div class="hint" style="margin-top:4px;margin-bottom:10px;">Clique une notif prête → vérifie l'aperçu plus bas → « Envoyer ». Pas besoin de tout retaper.</div>
-      <style>.preset-btn{padding:9px 14px;border-radius:999px;border:1px solid rgba(245,158,11,.45);background:#04100f;color:#f5b94a;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}.preset-btn:hover{background:rgba(245,158,11,.14);}</style>
+      <style>.preset-btn{padding:9px 14px;border-radius:999px;border:1px solid rgba(245,158,11,.45);background:var(--bg);color:var(--amber-text);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}.preset-btn:hover{background:rgba(245,158,11,.14);}</style>
       <div id="push-presets" style="display:flex;flex-wrap:wrap;gap:8px;">
         <button type="button" class="preset-btn" data-title="⚡ Aujourd'hui : Double XP !" data-body="Tes points comptent DOUBLE aujourd'hui 🔥 Profites-en, passe vite à La Base !" data-url="/">⚡ Double XP</button>
         <button type="button" class="preset-btn" data-title="🆕 6 nouveaux smoothies sont là !" data-body="Dubaï · Bali · Tiramisu · Ruby · Ube · Zen 🤤 Commande sur l'app, prêt en 5-10 min !" data-url="/">🆕 Nouveautés</button>
@@ -571,8 +592,8 @@
       <label>🎯 Cible</label>
       <div class="hint" style="margin-top:4px;margin-bottom:8px;">À qui envoyer. "Tous" archive aussi dans la boîte de réception ; les cibles sont des push directes uniquement.</div>
       <style>
-        .seg-btn { padding:8px 12px; border-radius:999px; border:1px solid rgba(94,234,212,.25); background:#04100f; color:#94b8b1; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
-        .seg-btn.active { background:#14b8a6; color:#02100e; border-color:#14b8a6; }
+        .seg-btn { padding:8px 12px; border-radius:999px; border:1px solid rgba(13,148,136,.33); background:var(--bg); color:var(--dim); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .seg-btn.active { background:var(--teal); color:#ffffff; border-color:var(--teal); }
       </style>
       <div id="push-segments" style="display:flex;flex-wrap:wrap;gap:8px;">
         <button type="button" class="seg-btn active" data-segment="all">👥 Tous</button>
@@ -602,7 +623,7 @@
 
     <div class="card">
       <label>État actuel</label>
-      <div id="settings-current" style="margin:8px 0 14px;font-weight:700;color:#5eead4;">Chargement…</div>
+      <div id="settings-current" style="margin:8px 0 14px;font-weight:700;color:var(--teal-text);">Chargement…</div>
 
       <label>Forcer l'état</label>
       <div class="hint" style="margin-top:4px;margin-bottom:12px;">
@@ -610,13 +631,13 @@
         <b>Forcer ouvert/fermé</b> = pratique pour un événement ou une fermeture exceptionnelle.
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
-        <button class="settings-mode primary" data-mode="auto" style="background:#1a1f2e;color:#ecfdf5;border:1px solid rgba(94,234,212,.3);">⏰ Auto (horaires habituels)</button>
+        <button class="settings-mode primary" data-mode="auto" style="background:var(--bg);color:var(--text);border:1px solid rgba(13,148,136,.38);">⏰ Auto (horaires habituels)</button>
         <button class="settings-mode primary teal" data-mode="force_open">🟢 Forcer ouvert</button>
         <button class="settings-mode primary" data-mode="force_closed" style="background:#7f1d1d;color:#fff;">🔴 Forcer fermé (exceptionnel)</button>
       </div>
       <div id="settings-result" style="margin-top:14px;font-size:13px;"></div>
 
-      <div class="hint" style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(94,234,212,.12);">
+      <div class="hint" style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(13,148,136,.20);">
         Horaires habituels : Mardi 11h-17h · Mercredi 11h-13h · Jeudi 11h-13h · Vendredi 11h-17h30 · Samedi fermé.
         Pour changer ces horaires de base en dur, demande à ton dev.
       </div>
@@ -639,7 +660,7 @@
 
     <div class="card">
       <button class="primary" id="health-check">🔍 Vérifier /api/health</button>
-      <pre id="health-result" style="margin-top: 14px; padding: 12px; background: #04100f; border: 1px solid rgba(94,234,212,.1); border-radius: 10px; font-family: ui-monospace, monospace; font-size: 11px; color: #94b8b1; white-space: pre-wrap; word-break: break-all; overflow-x: auto;"></pre>
+      <pre id="health-result" style="margin-top: 14px; padding: 12px; background: var(--bg); border: 1px solid rgba(13,148,136,.18); border-radius: 10px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--dim); white-space: pre-wrap; word-break: break-all; overflow-x: auto;"></pre>
     </div>
 
     <div class="card">
@@ -653,7 +674,7 @@
       <label>🎨 Thème saisonnier de l'app</label>
       <div class="hint" style="margin-bottom:10px;">Change les couleurs d'accent de l'app pour une durée, puis retour auto au thème normal.</div>
       <div id="theme-current" class="hint" style="margin-bottom:10px;"></div>
-      <select id="theme-select" style="width:100%;padding:12px;border-radius:10px;background:#04100f;border:1px solid rgba(94,234,212,.2);color:#ecfdf5;font-size:15px;">
+      <select id="theme-select" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid rgba(13,148,136,.28);color:var(--text);font-size:15px;">
         <option value="default">🟢 Par défaut (Teal × Ambre)</option>
         <option value="coupe-monde">🇫🇷 Coupe du Monde (bleu/blanc/rouge)</option>
         <option value="noel">🎄 Noël (rouge/vert/or)</option>
@@ -662,9 +683,9 @@
         <option value="printemps">🌸 Printemps (rose/vert)</option>
       </select>
       <label style="margin-top:12px;">Durée (jours)</label>
-      <input id="theme-days" type="number" min="1" max="365" value="3" style="width:100%;padding:12px;border-radius:10px;background:#04100f;border:1px solid rgba(94,234,212,.2);color:#ecfdf5;font-size:15px;" />
+      <input id="theme-days" type="number" min="1" max="365" value="3" style="width:100%;padding:12px;border-radius:10px;background:var(--bg);border:1px solid rgba(13,148,136,.28);color:var(--text);font-size:15px;" />
       <button class="primary teal" id="theme-apply" style="margin-top:12px;">✅ Appliquer le thème</button>
-      <button class="primary" id="theme-reset" style="margin-top:8px;background:transparent;border:1px solid rgba(94,234,212,.25);">↩️ Revenir au thème par défaut</button>
+      <button class="primary" id="theme-reset" style="margin-top:8px;background:transparent;border:1px solid rgba(13,148,136,.33);">↩️ Revenir au thème par défaut</button>
       <div id="theme-result" style="margin-top: 12px;"></div>
     </div>
   </div>
@@ -790,7 +811,7 @@ async function loadSettings() {
     const mode = data.override_mode || 'auto';
     el.textContent = SETTINGS_LABELS[mode] || mode;
     document.querySelectorAll('.settings-mode').forEach((b) => {
-      b.style.outline = b.dataset.mode === mode ? '3px solid #f59e0b' : 'none';
+      b.style.outline = b.dataset.mode === mode ? '3px solid var(--amber)' : 'none';
     });
   } catch {
     el.textContent = '⚠️ Impossible de charger (migration 009 jouée ?)';
@@ -809,13 +830,13 @@ document.querySelectorAll('.settings-mode').forEach((btn) => {
       });
       const data = await resp.json();
       if (!resp.ok) {
-        out.innerHTML = '<span style="color:#f87171;">❌ ' + escapeHtml(data.error || 'Erreur') + '</span>';
+        out.innerHTML = '<span style="color:var(--red);">❌ ' + escapeHtml(data.error || 'Erreur') + '</span>';
         return;
       }
-      out.innerHTML = '<span style="color:#34d399;">✅ Enregistré</span>';
+      out.innerHTML = '<span style="color:var(--green-text);">✅ Enregistré</span>';
       loadSettings();
     } catch (e) {
-      out.innerHTML = '<span style="color:#f87171;">❌ ' + escapeHtml(e.message) + '</span>';
+      out.innerHTML = '<span style="color:var(--red);">❌ ' + escapeHtml(e.message) + '</span>';
     }
   });
 });
@@ -876,11 +897,11 @@ function renderComptoirList(orders) {
 
     const buttons = [];
     // ℹ️ Détail complet (articles + client + XP/cadeau) — toujours dispo.
-    buttons.push('<button class="btn-row" data-detail="' + escapeAttr(o.id) + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(94,234,212,.35);color:#5eead4;padding:8px 12px;">ℹ️ Infos</button>');
+    buttons.push('<button class="btn-row" data-detail="' + escapeAttr(o.id) + '" title="Infos commande + client" style="background:transparent;border:1px solid rgba(13,148,136,.43);color:var(--teal-text);padding:8px 12px;">ℹ️ Infos</button>');
     // ✏️ Heure de retrait modifiable TANT QUE pas « en prépa » (verrouillé après).
     if (o.status === 'pending_cash' || o.status === 'paid') {
       const pt = escapeHtml(o.pickup_time || '');
-      buttons.push('<button class="btn-row" data-pickup="' + escapeAttr(o.id) + '" data-time="' + pt + '" title="Modifier l\'heure de retrait" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbe4df;padding:8px 10px;">✏️ ' + (pt ? pt : 'heure') + '</button>');
+      buttons.push('<button class="btn-row" data-pickup="' + escapeAttr(o.id) + '" data-time="' + pt + '" title="Modifier l\'heure de retrait" style="background:transparent;border:1px solid var(--line);color:var(--soft);padding:8px 10px;">✏️ ' + (pt ? pt : 'heure') + '</button>');
     }
     if (o.status === 'pending_cash') {
       const code = (o.square_order_id || '').replace('CASH-', '');
@@ -893,13 +914,13 @@ function renderComptoirList(orders) {
       buttons.push('<button class="btn-row btn-teal" data-action="ready" data-id="' + escapeAttr(o.id) + '">✓ Prête</button>');
     }
     if (o.status === 'ready') {
-      buttons.push('<span style="font-size: 11px; color: #22c55e; font-weight: 700;">À retirer</span>');
+      buttons.push('<span style="font-size: 11px; color: var(--green-text); font-weight: 700;">À retirer</span>');
     }
     // Bouton masquer : retire de la liste les ventes caisse/produits qui ne
     // sont pas des commandes à préparer (passe en "cancelled" côté app, sans
     // toucher Square).
     if (o.status !== 'pending_cash') {
-      buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + escapeAttr(o.id) + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#7f8a88;padding:8px 10px;">✕</button>');
+      buttons.push('<button class="btn-row" data-action="cancelled" data-id="' + escapeAttr(o.id) + '" title="Masquer (vente caisse / produit)" style="background:transparent;border:1px solid var(--line);color:var(--faint);padding:8px 10px;">✕</button>');
     }
 
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -908,12 +929,12 @@ function renderComptoirList(orders) {
       itemsHtml = '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">' +
         o.items.map((it) => {
           const qty = (it.quantity > 1 ? it.quantity + '× ' : '');
-          const opt = it.option_label ? ' <span style="color:#94b8b1;">· ' + esc(it.option_label) + '</span>' : '';
-          return '<div style="font-size:13px;color:#ecfdf5;line-height:1.35;">🥤 <b>' + qty + '</b>' + esc(it.product_name) + opt + '</div>';
+          const opt = it.option_label ? ' <span style="color:var(--dim);">· ' + esc(it.option_label) + '</span>' : '';
+          return '<div style="font-size:13px;color:var(--text);line-height:1.35;">🥤 <b>' + qty + '</b>' + esc(it.product_name) + opt + '</div>';
         }).join('') +
         '</div>';
     } else {
-      itemsHtml = '<div style="margin-top:6px;font-size:11px;color:#7f8a88;font-style:italic;">Détail non dispo (vente Square)</div>';
+      itemsHtml = '<div style="margin-top:6px;font-size:11px;color:var(--faint);font-style:italic;">Détail non dispo (vente Square)</div>';
     }
 
     return '<div class="row" data-status="' + escapeAttr(o.status) + '">' +
@@ -968,11 +989,11 @@ function ensureDetailOverlay() {
   if (overlay) return overlay;
   overlay = document.createElement('div');
   overlay.id = 'order-detail-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(11,38,34,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;';
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
   const box = document.createElement('div');
   box.id = 'order-detail-box';
-  box.style.cssText = 'width:100%;max-width:440px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#13302c,#0e1f1d);border:1px solid rgba(94,234,212,.2);border-radius:20px;padding:20px;color:#ecfdf5;font-family:system-ui,sans-serif;';
+  box.style.cssText = 'width:100%;max-width:440px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid rgba(13,148,136,.28);border-radius:20px;padding:20px;color:var(--text);font-family:system-ui,sans-serif;';
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   return overlay;
@@ -981,7 +1002,7 @@ function ensureDetailOverlay() {
 async function showOrderDetail(orderId) {
   const overlay = ensureDetailOverlay();
   const box = document.getElementById('order-detail-box');
-  box.innerHTML = '<div style="text-align:center;padding:34px 10px;color:#7f8a88;">Chargement…</div>';
+  box.innerHTML = '<div style="text-align:center;padding:34px 10px;color:var(--faint);">Chargement…</div>';
   overlay.style.display = 'flex';
   try {
     const res = await fetch('/api/orders?action=order-detail&orderId=' + encodeURIComponent(orderId), {
@@ -993,7 +1014,7 @@ async function showOrderDetail(orderId) {
     const closeBtn = document.getElementById('order-detail-close');
     if (closeBtn) closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
   } catch (e) {
-    box.innerHTML = '<div style="color:#ff9b9b;padding:20px;">Erreur : ' + escapeHtml(e && e.message ? e.message : e) + '</div>';
+    box.innerHTML = '<div style="color:var(--red);padding:20px;">Erreur : ' + escapeHtml(e && e.message ? e.message : e) + '</div>';
   }
 }
 
@@ -1012,12 +1033,12 @@ function renderOrderDetail(d) {
     itemsHtml = d.items.map((it) => {
       const qty = (it.quantity > 1 ? it.quantity + '× ' : '');
       const opt = it.option_label ? ' · ' + esc(it.option_label) : '';
-      const price = it.unit_price_cents ? '<span style="color:#94b8b1;font-size:12px;">' + ((it.unit_price_cents * (it.quantity || 1)) / 100).toFixed(2).replace('.', ',') + '€</span>' : '';
+      const price = it.unit_price_cents ? '<span style="color:var(--dim);font-size:12px;">' + ((it.unit_price_cents * (it.quantity || 1)) / 100).toFixed(2).replace('.', ',') + '€</span>' : '';
       return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:3px 0;">' +
         '<span>🥤 <b>' + esc(qty) + '</b>' + esc(it.product_name) + opt + '</span>' + price + '</div>';
     }).join('');
   } else {
-    itemsHtml = '<div style="font-size:12px;color:#7f8a88;font-style:italic;">Détail des articles non disponible (vente Square/CB non détaillée).</div>';
+    itemsHtml = '<div style="font-size:12px;color:var(--faint);font-style:italic;">Détail des articles non disponible (vente Square/CB non détaillée).</div>';
   }
 
   let clientHtml;
@@ -1025,37 +1046,37 @@ function renderOrderDetail(d) {
     const vip = c.vip_tier && c.vip_tier !== 'starter' ? ' · ' + esc(c.vip_tier).toUpperCase() : '';
     clientHtml =
       '<div style="font-size:14px;font-weight:700;">' + esc(c.first_name || c.email || 'Client') + '</div>' +
-      (c.email ? '<div style="font-size:12px;color:#94b8b1;">' + esc(c.email) + '</div>' : '') +
+      (c.email ? '<div style="font-size:12px;color:var(--dim);">' + esc(c.email) + '</div>' : '') +
       '<div style="display:flex;gap:14px;margin-top:8px;font-size:13px;">' +
         '<span>⭐ <b>' + (c.xp != null ? c.xp : '—') + '</b> XP</span>' +
         '<span>🧾 <b>' + (c.total_orders != null ? c.total_orders : '—') + '</b> cmd' + vip + '</span>' +
       '</div>';
   } else {
-    clientHtml = '<div style="font-size:12px;color:#7f8a88;font-style:italic;">Commande non liée à un compte (client non enregistré).</div>';
+    clientHtml = '<div style="font-size:12px;color:var(--faint);font-style:italic;">Commande non liée à un compte (client non enregistré).</div>';
   }
 
   let rewardsHtml = '';
   if (d.rewards && d.rewards.length) {
     rewardsHtml =
       '<div style="margin-top:14px;">' +
-      '<div style="font-size:11px;letter-spacing:.08em;color:#f59e0b;font-weight:800;text-transform:uppercase;margin-bottom:6px;">🎁 Cadeaux récents du client</div>' +
+      '<div style="font-size:11px;letter-spacing:.08em;color: var(--amber-text);font-weight:800;text-transform:uppercase;margin-bottom:6px;">🎁 Cadeaux récents du client</div>' +
       d.rewards.map((r) => {
         const rdt = new Date(r.created_at);
         const rd = isNaN(rdt) ? '' : rdt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-        return '<div style="font-size:13px;padding:2px 0;">• ' + esc(r.reward_label) + ' <span style="color:#94b8b1;">(−' + (r.xp_cost || 0) + ' XP · ' + rd + ')</span></div>';
+        return '<div style="font-size:13px;padding:2px 0;">• ' + esc(r.reward_label) + ' <span style="color:var(--dim);">(−' + (r.xp_cost || 0) + ' XP · ' + rd + ')</span></div>';
       }).join('') +
       '</div>';
   }
 
-  const sec = (title, inner) => '<div style="margin-top:16px;"><div style="font-size:11px;letter-spacing:.08em;color:#5eead4;font-weight:800;text-transform:uppercase;margin-bottom:6px;">' + title + '</div>' + inner + '</div>';
+  const sec = (title, inner) => '<div style="margin-top:16px;"><div style="font-size:11px;letter-spacing:.08em;color:var(--teal-text);font-weight:800;text-transform:uppercase;margin-bottom:6px;">' + title + '</div>' + inner + '</div>';
 
   return '' +
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
       '<div style="font-family:sans-serif;font-weight:900;font-size:20px;">🧾 Détail commande</div>' +
-      '<button id="order-detail-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:#ecfdf5;cursor:pointer;font-size:16px;">✕</button>' +
+      '<button id="order-detail-close" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:16px;">✕</button>' +
     '</div>' +
-    '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:#cbe4df;">' +
-      '<span><b style="color:#ecfdf5;font-size:16px;">' + total + '€</b></span>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--soft);">' +
+      '<span><b style="color:var(--text);font-size:16px;">' + total + '€</b></span>' +
       '<span>' + pay + '</span>' +
       '<span>' + esc(statusLabel) + '</span>' +
       (o.pickup_time ? '<span>⏰ retrait ' + esc(o.pickup_time) + '</span>' : '') +
@@ -1064,7 +1085,7 @@ function renderOrderDetail(d) {
     sec('Articles', itemsHtml) +
     sec('Client', clientHtml) +
     rewardsHtml +
-    sec('XP', '<div style="font-size:13px;color:#cbe4df;">≈ <b style="color:#ecfdf5;">+' + (d.xpEstimate || 0) + ' XP</b> gagnés sur cette commande <span style="color:#7f8a88;">(estimation, hors multiplicateurs mardi/roue)</span></div>');
+    sec('XP', '<div style="font-size:13px;color:var(--soft);">≈ <b style="color:var(--text);">+' + (d.xpEstimate || 0) + ' XP</b> gagnés sur cette commande <span style="color:var(--faint);">(estimation, hors multiplicateurs mardi/roue)</span></div>');
 }
 
 async function updateOrderStatus(orderId, action, btn) {
@@ -1210,9 +1231,9 @@ function renderProfile(p, rewards, recentOrder) {
   if (recentOrder) {
     const eur = (recentOrder.total_cents / 100).toFixed(2).replace('.', ',');
     warnBlock =
-      '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(248,113,113,.16);border:2px solid #f87171;border-radius:14px;">' +
-        '<div style="font-weight:900;color:#f87171;font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
-        '<div style="font-size:13px;color:#e5f6f1;margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b>, <b>ne recrédite PAS</b> (doublon).</div>' +
+      '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(248,113,113,.16);border:2px solid var(--red);border-radius:14px;">' +
+        '<div style="font-weight:900;color:var(--red);font-size:15px;">⚠️ Déjà crédité il y a ' + recentOrder.minutes_ago + ' min</div>' +
+        '<div style="font-size:13px;color:var(--text);margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b>, <b>ne recrédite PAS</b> (doublon).</div>' +
       '</div>';
   }
   // Codes actifs en radio : 1 seul utilisable par encaissement (pas
@@ -1225,13 +1246,13 @@ function renderProfile(p, rewards, recentOrder) {
       '<div class="stat-label" style="margin-bottom: 8px;">Codes actifs · à appliquer à la prochaine vente</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;">' +
         '<label class="reward-radio reward-radio-none">' +
-          '<input type="radio" name="useReward" value="" checked data-label="" data-hint="" style="accent-color:#14b8a6;" />' +
-          '<span class="reward-label-wrap" style="color:#94b8b1;">Aucun code utilisé sur cette vente</span>' +
+          '<input type="radio" name="useReward" value="" checked data-label="" data-hint="" style="accent-color:var(--teal);" />' +
+          '<span class="reward-label-wrap" style="color:var(--dim);">Aucun code utilisé sur cette vente</span>' +
         '</label>' +
         rewardsList.map(r => {
           const hint = rewardHint(r);
           return '<label class="reward-radio reward-radio-code">' +
-            '<input type="radio" name="useReward" value="' + escapeAttr(r.id) + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:#fb7185;" />' +
+            '<input type="radio" name="useReward" value="' + escapeAttr(r.id) + '" data-label="' + escapeAttr(r.reward_label) + '" data-hint="' + escapeAttr(hint) + '" style="accent-color:var(--rose);" />' +
             '<div class="reward-label-wrap">' +
               '<div class="reward-label-title">🎁 ' + escapeHtml(r.reward_label) + '</div>' +
               '<div class="reward-label-code">' + escapeHtml(r.reward_code) + '</div>' +
@@ -1239,7 +1260,7 @@ function renderProfile(p, rewards, recentOrder) {
           '</label>';
         }).join('') +
       '</div>' +
-      '<div id="rewardHint" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:10px;font-size:12px;color:#f59e0b;font-weight:600;"></div>' +
+      '<div id="rewardHint" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:10px;font-size:12px;color: var(--amber-text);font-weight:600;"></div>' +
     '</div>';
 
   // Catalogue cadeaux — GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts
@@ -1254,22 +1275,22 @@ function renderProfile(p, rewards, recentOrder) {
     return '<button class="gift-btn" data-rid="' + c.id + '" data-cost="' + c.cost +
       '" data-label="' + c.title + '"' + (ok ? '' : ' disabled') +
       ' style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid ' +
-      (ok ? '#14b8a6' : 'rgba(94,234,212,.12)') + ';background:' + (ok ? 'rgba(20,184,166,.12)' : '#04100f') +
-      ';color:' + (ok ? '#ecfdf5' : '#5e7a73') + ';font-family:inherit;font-size:13px;font-weight:700;cursor:' +
+      (ok ? 'var(--teal)' : 'rgba(13,148,136,.20)') + ';background:' + (ok ? 'rgba(13,148,136,.12)' : 'var(--bg)') +
+      ';color:' + (ok ? 'var(--text)' : 'var(--disabled)') + ';font-family:inherit;font-size:13px;font-weight:700;cursor:' +
       (ok ? 'pointer' : 'not-allowed') + ';text-align:left;">' +
       '<span style="font-size:20px;">' + c.emoji + '</span>' +
       '<span style="flex:1;">' + c.title + '</span>' +
-      '<span style="font-weight:800;color:' + (ok ? '#5eead4' : '#5e7a73') + ';">' +
+      '<span style="font-weight:800;color:' + (ok ? 'var(--teal-text)' : 'var(--disabled)') + ';">' +
       (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
   }).join('');
 
   $('scanner-result').innerHTML =
     '<button id="rescanBtn" class="primary teal" style="width:100%;margin-bottom:12px;">📷 Scanner un autre client</button>' +
     warnBlock +
-    '<div class="card" style="border-color: #14b8a6;">' +
-      '<div style="font-size: 11px; color: #5eead4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
+    '<div class="card" style="border-color: var(--teal);">' +
+      '<div style="font-size: 11px; color: var(--teal-text); font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">CLIENT IDENTIFIÉ</div>' +
       '<div style="font-family: Outfit; font-weight: 900; font-size: 24px; margin-top: 4px;">' + escapeHtml(name) + '</div>' +
-      '<div style="font-size: 12px; color: #94b8b1; margin-top: 2px;">' + escapeHtml(p.email || 'Email inconnu') + '</div>' +
+      '<div style="font-size: 12px; color: var(--dim); margin-top: 2px;">' + escapeHtml(p.email || 'Email inconnu') + '</div>' +
       '<div class="stats">' +
         '<div class="stat"><div class="stat-label">XP</div><div class="stat-value">' + escapeHtml(p.xp) + '</div></div>' +
         '<div class="stat"><div class="stat-label">Tier VIP</div><div class="stat-value" style="font-size: 16px;">' + escapeHtml(p.vip_tier) + '</div></div>' +
@@ -1281,12 +1302,12 @@ function renderProfile(p, rewards, recentOrder) {
     '<div class="card">' +
       '<label>💳 Crédit XP après paiement Square caisse</label>' +
       '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
-      '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#ecfdf5;">' +
-        '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:#14b8a6;" />' +
-        '⚡ Commande combo (boisson + smoothie) <b style="color:#5eead4;">+25 XP</b>' +
+      '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text);">' +
+        '<input type="checkbox" id="comboCheck" style="width:18px;height:18px;accent-color:var(--teal);" />' +
+        '⚡ Commande combo (boisson + smoothie) <b style="color:var(--teal-text);">+25 XP</b>' +
       '</label>' +
       '<input type="text" id="saleNote" placeholder="Détail vente (ex: 2 smoothies + gaufre) — optionnel" maxlength="120" style="margin-top:10px;" />' +
-      (isTuesdayClient() ? '<div class="hint" style="color:#f59e0b;font-weight:700;margin-top:8px;">🔥 Mardi Double XP actif : les XP sur le montant sont ×2 aujourd\'hui !</div>' : '') +
+      (isTuesdayClient() ? '<div class="hint" style="color: var(--amber-text);font-weight:700;margin-top:8px;">🔥 Mardi Double XP actif : les XP sur le montant sont ×2 aujourd\'hui !</div>' : '') +
       '<button class="primary teal" id="creditBtn" style="margin-top: 10px;">✓ Encaisser & créditer XP</button>' +
       '<div class="hint">' +
         'Saisis le montant encaissé sur Square. XP crédités : 10 XP/€ + 50 XP/cmd' +
@@ -1298,7 +1319,7 @@ function renderProfile(p, rewards, recentOrder) {
       '<div class="hint" style="margin-top:4px;margin-bottom:4px;">Le client réclame un cadeau ? Clique pour déduire ses XP.</div>' +
       giftButtons +
     '</div>' +
-    '<div class="card" style="border-color:rgba(94,234,212,.25);">' +
+    '<div class="card" style="border-color:rgba(13,148,136,.33);">' +
       '<label>📋 Migration carte fidélité papier</label>' +
       '<div class="hint" style="margin-top:4px;margin-bottom:8px;">Client qui passait par la carte papier ? Ajoute ses points en XP ici. Ne touche pas au CA ni au nombre de commandes.</div>' +
       '<input type="number" id="manualXp" placeholder="XP à créditer (ex: 230)" step="1" min="1" max="100000" />' +
@@ -1568,26 +1589,26 @@ async function loadRedemptions() {
 
     function block(title, t) {
       const rows = (t.byType || []).map(x =>
-        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
-        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color:#5eead4;">×' + x.count + '</span></div>'
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(13,148,136,.16);font-size:13px;">' +
+        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color:var(--teal-text);">×' + x.count + '</span></div>'
       ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
-      return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:12px;padding:14px;margin-top:10px;">' +
-        '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x) · ' + t.totalXp + ' XP</div>' +
+      return '<div style="background:var(--bg);border:1px solid rgba(13,148,136,.20);border-radius:12px;padding:14px;margin-top:10px;">' +
+        '<div style="font-weight:800;font-size:13px;color:var(--text);">' + title + ' · ' + t.total + ' cadeau(x) · ' + t.totalXp + ' XP</div>' +
         rows + '</div>';
     }
     function wheelBlock(title, t) {
       const rows = (t.byType || []).map(x =>
-        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(94,234,212,.08);font-size:13px;">' +
-        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'
+        '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(13,148,136,.16);font-size:13px;">' +
+        '<span>' + escapeHtml(x.label) + '</span><span style="font-weight:800;color: var(--amber-text);">×' + x.count + '</span></div>'
       ).join('') || '<div class="hint" style="margin-top:6px;">Aucun cadeau</div>';
-      return '<div style="background:#04100f;border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:14px;margin-top:10px;">' +
-        '<div style="font-weight:800;font-size:13px;color:#ecfdf5;">' + title + ' · ' + t.total + ' cadeau(x)</div>' +
+      return '<div style="background:var(--bg);border:1px solid rgba(245,158,11,.18);border-radius:12px;padding:14px;margin-top:10px;">' +
+        '<div style="font-weight:800;font-size:13px;color:var(--text);">' + title + ' · ' + t.total + ' cadeau(x)</div>' +
         rows + '</div>';
     }
     const w = data.wheel || { today: { total: 0, byType: [] }, month: { total: 0, byType: [] } };
     $('redemptions-result').innerHTML =
       block("Aujourd'hui", data.today) + block('Ce mois', data.month) +
-      '<div style="margin-top:18px;font-weight:800;font-size:13px;color:#f59e0b;">🎰 Cadeaux roue donnés au comptoir</div>' +
+      '<div style="margin-top:18px;font-weight:800;font-size:13px;color: var(--amber-text);">🎰 Cadeaux roue donnés au comptoir</div>' +
       '<div class="hint" style="margin-top:2px;">Gagnés à la roue puis remis (hors XP).</div>' +
       wheelBlock("Aujourd'hui", w.today) + wheelBlock('Ce mois', w.month);
   } catch (err) {
@@ -1628,21 +1649,21 @@ async function loadStats() {
     if (!r.ok) { $('stats-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
     const euro = (d.revenueCents / 100).toFixed(2).replace('.', ',');
     function tile(emoji, value, label, accent) {
-      return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:14px;padding:16px;text-align:center;">' +
+      return '<div style="background:var(--bg);border:1px solid rgba(13,148,136,.20);border-radius:14px;padding:16px;text-align:center;">' +
         '<div style="font-size:24px;">' + emoji + '</div>' +
-        '<div style="font-family:Outfit;font-weight:900;font-size:26px;color:' + (accent||'#ecfdf5') + ';margin-top:4px;">' + value + '</div>' +
-        '<div style="font-size:11px;color:#94b8b1;margin-top:2px;">' + label + '</div></div>';
+        '<div style="font-family:Outfit;font-weight:900;font-size:26px;color:' + (accent||'var(--text)') + ';margin-top:4px;">' + value + '</div>' +
+        '<div style="font-size:11px;color:var(--dim);margin-top:2px;">' + label + '</div></div>';
     }
     $('stats-result').innerHTML =
       '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">' +
-        tile('👥', d.members, 'Membres' + (d.newToday ? ' (+' + d.newToday + ' auj.)' : ''), '#5eead4') +
-        tile('🎰', d.publicPlayers, 'Joueurs roue (web)', '#f59e0b') +
+        tile('👥', d.members, 'Membres' + (d.newToday ? ' (+' + d.newToday + ' auj.)' : ''), 'var(--teal-text)') +
+        tile('🎰', d.publicPlayers, 'Joueurs roue (web)', 'var(--amber)') +
         tile('🛒', d.paidOrders, 'Commandes payées') +
-        tile('💶', euro + '€', 'CA encaissé (app)', '#5eead4') +
+        tile('💶', euro + '€', 'CA encaissé (app)', 'var(--teal-text)') +
         tile('🔔', d.pushSubs, 'Abonnés notifs') +
         tile('🎁', d.redemptions, 'Cadeaux offerts') +
-        tile('🤝', (d.referredTotal || 0), 'Filleuls parrainés', '#5eead4') +
-        tile('✅', (d.referredRewarded || 0), 'Parrainages validés', '#f59e0b') +
+        tile('🤝', (d.referredTotal || 0), 'Filleuls parrainés', 'var(--teal-text)') +
+        tile('✅', (d.referredRewarded || 0), 'Parrainages validés', 'var(--amber)') +
       '</div>' +
       '<div class="hint" style="margin-top:12px;">🎡 ' + d.wheelSpins + ' tours de roue membres au total.</div>' +
       (function(){
@@ -1651,12 +1672,12 @@ async function loadStats() {
         const members = d.members || 0;
         const buyers = d.paidOrders || 0;
         const pct = (a, b) => b > 0 ? Math.round((a / b) * 100) + '%' : '—';
-        return '<div style="margin-top:14px;padding:14px;background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:14px;">' +
-          '<div style="font-family:Outfit;font-weight:800;font-size:13px;color:#5eead4;margin-bottom:10px;">📊 Entonnoir</div>' +
-          '<div style="font-size:13px;color:#cbe4df;line-height:1.8;">' +
+        return '<div style="margin-top:14px;padding:14px;background:var(--bg);border:1px solid rgba(13,148,136,.20);border-radius:14px;">' +
+          '<div style="font-family:Outfit;font-weight:800;font-size:13px;color:var(--teal-text);margin-bottom:10px;">📊 Entonnoir</div>' +
+          '<div style="font-size:13px;color:var(--soft);line-height:1.8;">' +
             '🎰 Joueurs roue : <b>' + players + '</b><br>' +
-            '👥 Comptes créés : <b>' + members + '</b> <span style="color:#94b8b1;">(' + pct(members, players) + ' des joueurs)</span><br>' +
-            '🛒 Ont commandé : <b>' + buyers + '</b> <span style="color:#94b8b1;">(' + pct(buyers, members) + ' des membres)</span>' +
+            '👥 Comptes créés : <b>' + members + '</b> <span style="color:var(--dim);">(' + pct(members, players) + ' des joueurs)</span><br>' +
+            '🛒 Ont commandé : <b>' + buyers + '</b> <span style="color:var(--dim);">(' + pct(buyers, members) + ' des membres)</span>' +
           '</div></div>';
       })();
   } catch (err) {
@@ -1695,32 +1716,32 @@ async function loadCatalogAudit() {
     // Compteurs
     html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">' +
       ['categories|Catégories','items|Articles','variations|Variations','modifierLists|Listes modif.']
-        .map(x => { const [k,l] = x.split('|'); return '<div style="background:#04100f;border:1px solid rgba(94,234,212,.12);border-radius:10px;padding:10px;text-align:center;"><div style="font-family:Outfit;font-weight:900;font-size:22px;color:#5eead4;">' + (d.counts[k] ?? 0) + '</div><div style="font-size:11px;color:#94b8b1;">' + l + '</div></div>'; }).join('') +
+        .map(x => { const [k,l] = x.split('|'); return '<div style="background:var(--bg);border:1px solid rgba(13,148,136,.20);border-radius:10px;padding:10px;text-align:center;"><div style="font-family:Outfit;font-weight:900;font-size:22px;color:var(--teal-text);">' + (d.counts[k] ?? 0) + '</div><div style="font-size:11px;color:var(--dim);">' + l + '</div></div>'; }).join('') +
       '</div>';
 
     // Doublons (le point sensible)
     const dups = d.duplicates || [];
     const dupCats = d.duplicateCategories || [];
     if (dups.length || dupCats.length) {
-      html += '<div style="margin-top:12px;background:#1a0e04;border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:12px;">' +
-        '<div style="font-weight:800;color:#f59e0b;font-size:13px;">⚠️ Doublons détectés</div>';
-      if (dupCats.length) html += '<div style="font-size:12px;color:#fbbf24;margin-top:6px;">Catégories en double : ' + dupCats.map(c => esc(c.name) + ' ×' + c.count).join(', ') + '</div>';
-      dups.forEach(x => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-top:1px solid rgba(245,158,11,.12);"><span>' + esc(x.name) + '</span><span style="font-weight:800;color:#f59e0b;">×' + x.count + '</span></div>'; });
+      html += '<div style="margin-top:12px;background:#fff7e6;border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:12px;">' +
+        '<div style="font-weight:800;color: var(--amber-text);font-size:13px;">⚠️ Doublons détectés</div>';
+      if (dupCats.length) html += '<div style="font-size:12px;color:var(--amber-text);margin-top:6px;">Catégories en double : ' + dupCats.map(c => esc(c.name) + ' ×' + c.count).join(', ') + '</div>';
+      dups.forEach(x => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-top:1px solid rgba(245,158,11,.12);"><span>' + esc(x.name) + '</span><span style="font-weight:800;color: var(--amber-text);">×' + x.count + '</span></div>'; });
       html += '</div>';
     } else {
-      html += '<div style="margin-top:12px;color:#5eead4;font-size:13px;">✅ Aucun doublon détecté</div>';
+      html += '<div style="margin-top:12px;color:var(--teal-text);font-size:13px;">✅ Aucun doublon détecté</div>';
     }
 
     // Catégories + nb articles
-    html += '<div style="margin-top:14px;font-weight:800;font-size:13px;color:#5eead4;">Articles par catégorie</div>';
-    (d.categories || []).forEach(c => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid rgba(94,234,212,.08);"><span>' + esc(c.name) + '</span><span style="font-weight:800;color:#ecfdf5;">' + c.itemCount + '</span></div>'; });
+    html += '<div style="margin-top:14px;font-weight:800;font-size:13px;color:var(--teal-text);">Articles par catégorie</div>';
+    (d.categories || []).forEach(c => { html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid rgba(13,148,136,.16);"><span>' + esc(c.name) + '</span><span style="font-weight:800;color:var(--text);">' + c.itemCount + '</span></div>'; });
 
     // Liste complète repliable
     const items = d.items || [];
-    html += '<details style="margin-top:12px;"><summary style="cursor:pointer;color:#5eead4;font-size:13px;font-weight:700;">Voir les ' + items.length + ' articles en détail</summary><div style="margin-top:8px;">';
+    html += '<details style="margin-top:12px;"><summary style="cursor:pointer;color:var(--teal-text);font-size:13px;font-weight:700;">Voir les ' + items.length + ' articles en détail</summary><div style="margin-top:8px;">';
     items.forEach(it => {
       const vars = (it.variations || []).map(v => esc(v.name) + ' ' + esc(v.price)).join(' · ');
-      html += '<div style="font-size:12px;padding:5px 0;border-top:1px solid rgba(94,234,212,.06);"><b>' + esc(it.name) + '</b> <span style="color:#94b8b1;">[' + esc(it.category) + ']</span>' + (vars ? '<br><span style="color:#94b8b1;">' + vars + '</span>' : '') + '</div>';
+      html += '<div style="font-size:12px;padding:5px 0;border-top:1px solid rgba(13,148,136,.14);"><b>' + esc(it.name) + '</b> <span style="color:var(--dim);">[' + esc(it.category) + ']</span>' + (vars ? '<br><span style="color:var(--dim);">' + vars + '</span>' : '') + '</div>';
     });
     html += '</div></details>';
 
@@ -1742,10 +1763,10 @@ async function loadThemeCurrent() {
     const t = d && d.theme;
     if (t && t.id && t.endsAt && new Date(t.endsAt).getTime() > Date.now()) {
       const end = new Date(t.endsAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      $('theme-current').innerHTML = '🎨 Thème actif : <b style="color:#5eead4;">' + (THEME_LABELS[t.id] || escapeHtml(t.id)) + '</b> jusqu\'au <b>' + end + '</b>';
+      $('theme-current').innerHTML = '🎨 Thème actif : <b style="color:var(--teal-text);">' + (THEME_LABELS[t.id] || escapeHtml(t.id)) + '</b> jusqu\'au <b>' + end + '</b>';
       if ($('theme-select')) $('theme-select').value = t.id;
     } else {
-      $('theme-current').innerHTML = 'Thème actuel : <b style="color:#5eead4;">🟢 Par défaut</b>';
+      $('theme-current').innerHTML = 'Thème actuel : <b style="color:var(--teal-text);">🟢 Par défaut</b>';
     }
   } catch (e) { /* non bloquant */ }
 }
@@ -1762,7 +1783,7 @@ $('theme-apply').addEventListener('click', async () => {
     });
     const d = await r.json();
     if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
-    $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">✅ Thème appliqué. Les clients le verront au prochain chargement de l\'app.</div>';
+    $('theme-result').innerHTML = '<div style="color:var(--teal-text);font-size:13px;">✅ Thème appliqué. Les clients le verront au prochain chargement de l\'app.</div>';
     loadThemeCurrent();
   } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>'; }
 });
@@ -1777,7 +1798,7 @@ $('theme-reset').addEventListener('click', async () => {
     });
     const d = await r.json();
     if (!r.ok) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(d.error || 'Erreur') + '</div>'; return; }
-    $('theme-result').innerHTML = '<div style="color:#5eead4;font-size:13px;">↩️ Retour au thème par défaut.</div>';
+    $('theme-result').innerHTML = '<div style="color:var(--teal-text);font-size:13px;">↩️ Retour au thème par défaut.</div>';
     if ($('theme-select')) $('theme-select').value = 'default';
     loadThemeCurrent();
   } catch (err) { $('theme-result').innerHTML = '<div class="err">❌ ' + escapeHtml(err.message) + '</div>'; }
