@@ -221,6 +221,11 @@
     box-shadow: none;
   }
   button:disabled { opacity: 0.5; cursor: wait; }
+  .unlock-credit {
+    width: 100%; margin-bottom: 12px; padding: 13px 14px; border-radius: 12px;
+    border: 1.5px dashed var(--teal); background: transparent; color: var(--teal-text);
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer;
+  }
   .ok { background: rgba(13,148,136,.15); color: var(--teal-text); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--teal); font-size: 13px; margin-top: 10px; }
   .err { background: rgba(251,113,133,.15); color: var(--rose); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--rose); font-size: 13px; margin-top: 10px; }
 
@@ -1223,6 +1228,9 @@ async function lookupUser(userId) {
   }
 }
 
+// Dernier encaissement fait depuis cet écran (message vert + anti-doublon)
+let lastCredit = null;
+
 function renderProfile(p, rewards, recentOrder) {
   const name = p.first_name || '(prénom non renseigné)';
   const total = (p.total_spent_cents / 100).toFixed(2).replace('.', ',');
@@ -1236,6 +1244,23 @@ function renderProfile(p, rewards, recentOrder) {
         '<div style="font-size:13px;color:var(--text);margin-top:4px;line-height:1.4;">Ce client a déjà eu ses XP pour une commande de <b>' + eur + '€</b>. Si c\'est le <b>même achat</b>, <b>ne recrédite PAS</b> (doublon).</div>' +
       '</div>';
   }
+  // ✅ Encaissement fait À L'INSTANT depuis cet écran : message vert (et non
+  // l'alerte rouge « déjà crédité », qui voyait le passage qu'on vient de faire).
+  const jc = lastCredit && lastCredit.userId === p.id && Date.now() - lastCredit.at < 10 * 60 * 1000 ? lastCredit : null;
+  if (jc) {
+    const jcEur = (jc.amountCents / 100).toFixed(2).replace('.', ',');
+    warnBlock =
+      '<div style="margin:0 0 14px;padding:13px 15px;background:rgba(22,101,52,.09);border:2px solid var(--green-text);border-radius:14px;">' +
+        '<div style="font-family:Outfit;font-weight:900;color:var(--green-text);font-size:16px;">✅ Crédité à l\'instant : +' + jc.xpGained + ' XP</div>' +
+        '<div style="font-size:13px;color:var(--text);margin-top:4px;line-height:1.4;">Passage de <b>' + jcEur + ' €</b> enregistré. Nouveau total : <b>' + jc.newXp + ' XP</b>. C\'est tout bon, tu peux passer au client suivant.</div>' +
+      '</div>';
+  }
+  // Déjà crédité (à l'instant ou récemment) → formulaire replié derrière un
+  // bouton : impossible de recréditer le même passage par réflexe.
+  const lockCredit = !!(jc || recentOrder);
+  const unlockBtn = lockCredit
+    ? '<button type="button" id="unlockCredit" class="unlock-credit">➕ Autre achat pour ce client : créditer un nouveau passage</button>'
+    : '';
   // Codes actifs en radio : 1 seul utilisable par encaissement (pas
   // cumulable). L'option par défaut "Aucun" évite d'appliquer un code par
   // erreur. Le code n'est marqué utilisé QUE si l'encaissement passe
@@ -1299,7 +1324,8 @@ function renderProfile(p, rewards, recentOrder) {
       '</div>' +
       rewardsHtml +
     '</div>' +
-    '<div class="card">' +
+    unlockBtn +
+    '<div class="card" id="creditCard"' + (lockCredit ? ' style="display:none;"' : '') + '>' +
       '<label>💳 Crédit XP après paiement Square caisse</label>' +
       '<input type="number" id="amount" placeholder="Montant en euros (ex: 8.90)" step="0.10" min="0" />' +
       '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text);">' +
@@ -1328,6 +1354,12 @@ function renderProfile(p, rewards, recentOrder) {
     '</div>';
 
   $('creditBtn').addEventListener('click', () => creditXP(p.id));
+  const unlock = $('unlockCredit');
+  if (unlock) unlock.addEventListener('click', () => {
+    $('creditCard').style.display = '';
+    unlock.remove();
+    if ($('amount')) $('amount').focus();
+  });
   $('manualXpBtn').addEventListener('click', () => creditXpManual(p.id));
   document.querySelectorAll('.gift-btn').forEach(btn => {
     if (btn.disabled) return;
@@ -1384,7 +1416,7 @@ function isTuesdayClient() {
   return new Date().getDay() === 2; // 2 = mardi (heure locale tablette)
 }
 
-async function creditXP(userId) {
+async function creditXP(userId, force = false) {
   const password = getPassword();
   const eurosRaw = $('amount').value.trim().replace(',', '.');
   const euros = parseFloat(eurosRaw);
@@ -1411,10 +1443,18 @@ async function creditXP(userId) {
     const resp = await fetch('/api/profile?action=credit-manual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo, wheelSpinId, note: saleNote }),
+      body: JSON.stringify({ userId, amountCents, paymentMethod: 'square_pos', combo, wheelSpinId, note: saleNote, force }),
     });
     const data = await resp.json();
+    if (resp.status === 409 && data.duplicate) {
+      btn.disabled = false; btn.textContent = '✓ Encaisser & créditer XP';
+      const again = confirm('⚠️ ' + data.error + '\n\nSi c\'est le MÊME achat : Annuler (sinon doublon de points).\nSi c\'est un AUTRE achat au même prix : OK pour créditer quand même.');
+      if (again) return creditXP(userId, true);
+      showScannerResult('err', '⚠️ Pas de nouveau crédit : ' + escapeHtml(data.error));
+      return;
+    }
     if (resp.ok) {
+      lastCredit = { userId, xpGained: data.xpGained, newXp: data.newXp, amountCents, at: Date.now() };
       let msg = '✅ +' + data.xpGained + ' XP crédités. Nouveau total : ' + data.newXp + ' XP.';
       if (data.rewardUsed) {
         msg += ' · Code « ' + data.rewardUsed.label + ' » marqué utilisé.';

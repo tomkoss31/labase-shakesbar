@@ -527,6 +527,35 @@ export default async function handler(req: any, res: any) {
       .single();
     if (profileError || !profile) return res.status(404).json({ error: 'Profil non trouvé' });
 
+    // 🔒 Anti double-crédit : même client + même montant déjà crédité il y a
+    // moins de 5 min (double clic, re-scan, écran rechargé…). Refusé sauf
+    // confirmation explicite (force: true) pour un vrai second achat identique.
+    // Les pré-commandes espèces de l'appli (CASH-…) ne créditent pas → ignorées.
+    if (body?.force !== true) {
+      const dupSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data: dups } = await admin
+        .from('orders')
+        .select('created_at, square_order_id')
+        .eq('user_id', userId)
+        .eq('total_cents', amountCents)
+        .neq('status', 'cancelled')
+        .gte('created_at', dupSince)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      const credited = (dups ?? []).filter(
+        (o) => !(typeof o.square_order_id === 'string' && o.square_order_id.startsWith('CASH-')),
+      );
+      if (credited.length > 0) {
+        const minutesAgo = Math.max(0, Math.round((Date.now() - new Date(credited[0].created_at).getTime()) / 60000));
+        const eur = (amountCents / 100).toFixed(2).replace('.', ',');
+        return res.status(409).json({
+          duplicate: true,
+          minutesAgo,
+          error: `Ce client a déjà été crédité de ${eur} € il y a ${minutesAgo} min.`,
+        });
+      }
+    }
+
     // Si un code promo est passé : vérifier qu'il est valide (appartient au
     // client, non utilisé, non expiré) AVANT d'encaisser. Évite de marquer un
     // code utilisé qui ne l'était pas, et évite l'attaque "wheelSpinId d'un
