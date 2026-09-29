@@ -740,11 +740,12 @@ export default async function handler(req: any, res: any) {
   // src/v2/rewards/catalog.ts côté front.
   if (action === 'redeem-reward' && req.method === 'POST') {
     // GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG).
-    const REWARDS: Record<string, { cost: number; label: string }> = {
-      extra: { cost: 750, label: 'Un extra offert' },
-      boisson: { cost: 1500, label: 'Boisson energy ou smoothie' },
-      'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy' },
-      'cadeau-mois': { cost: 3800, label: 'Cadeau du mois' },
+    // minOrders = achats RÉELS minimum (profiles.total_orders), cf. catalog.ts.
+    const REWARDS: Record<string, { cost: number; label: string; minOrders: number }> = {
+      extra: { cost: 750, label: 'Un extra offert', minOrders: 0 },
+      boisson: { cost: 1500, label: 'Boisson energy ou smoothie', minOrders: 3 },
+      'combo-gaufre': { cost: 2200, label: 'Boisson + gaufre healthy', minOrders: 6 },
+      'cadeau-mois': { cost: 3800, label: 'Cadeau du mois', minOrders: 10 },
     };
 
     const body = await readBody(req);
@@ -754,6 +755,23 @@ export default async function handler(req: any, res: any) {
 
     const reward = REWARDS[rewardId];
     if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
+
+    // 🔒 Achats minimum. Au comptoir tu gardes la main : 409 → l'écran te demande
+    // confirmation, puis renvoie force:true (cas particulier : carte papier, geste
+    // commercial…). Sans force, le cadeau n'est PAS offert.
+    if (reward.minOrders > 0 && body?.force !== true) {
+      const { data: prof } = await admin.from('profiles').select('total_orders').eq('id', userId).maybeSingle();
+      const have = Number(prof?.total_orders ?? 0);
+      if (have < reward.minOrders) {
+        const missing = reward.minOrders - have;
+        return res.status(409).json({
+          locked: true,
+          have,
+          need: reward.minOrders,
+          error: `Ce client n'a que ${have} achat${have > 1 ? 's' : ''} au bar (${reward.minOrders} requis pour « ${reward.label} »).`,
+        });
+      }
+    }
 
     // Débit ATOMIQUE (anti double-cadeau en concurrence). Renvoie NULL si XP
     // insuffisants ou user inconnu → on ne journalise PAS le cadeau.
@@ -767,7 +785,9 @@ export default async function handler(req: any, res: any) {
     }
 
     // Journalise le cadeau offert (suivi stock, séparé du CA Square)
-    const source = typeof body?.source === 'string' ? body.source : 'comptoir';
+    // Cadeau offert malgré le seuil d'achats (confirmé au comptoir) : tracé dans la source.
+    const forced = body?.force === true && reward.minOrders > 0;
+    const source = (typeof body?.source === 'string' ? body.source : 'comptoir') + (forced ? ' (forcé, achats insuffisants)' : '');
     await admin.from('reward_redemptions').insert({
       user_id: userId,
       reward_id: rewardId,

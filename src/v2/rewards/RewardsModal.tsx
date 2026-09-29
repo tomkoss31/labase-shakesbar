@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Palette } from '../palette';
 import { Mascotte } from '../Mascotte';
-import { REWARDS_CATALOG, XP_RULES, nextReward } from './catalog';
+import { REWARDS_CATALOG, XP_RULES, nextReward, nextGoal, goalText, isClaimable, ordersMissing } from './catalog';
 import { useUserRewards } from './useUserRewards';
 import { computeMascotteLevel } from '../auth/types';
 import { getStoredSession } from '../../lib/supabase';
@@ -212,12 +212,13 @@ interface RewardsModalProps {
   open: boolean;
   onClose: () => void;
   xp: number;
+  orders?: number; // achats réels au bar
   firstName?: string;
   onShowMyCode?: () => void; // pour aller montrer son QR au comptoir
   onShareReferral?: () => void; // partage du lien de parrainage
 }
 
-export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCode, onShareReferral }: RewardsModalProps) {
+export function RewardsModal({ palette, open, onClose, xp, orders = 0, firstName, onShowMyCode, onShareReferral }: RewardsModalProps) {
   // Rechargé à chaque ouverture (codes gagnés entre-temps à la roue)
   const { rewards } = useUserRewards(undefined, open);
   // Codes gagnés à la roue, actifs et utilisables (on exclut les "tente encore")
@@ -228,6 +229,7 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
   if (!open) return null;
 
   const next = nextReward(xp);
+  const goal = nextGoal(xp, orders); // tient compte des achats requis
   const mascotteLevel = computeMascotteLevel(xp); // source unique (types.ts)
 
   // Progression vers le prochain palier (depuis le palier précédent)
@@ -316,13 +318,14 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
             <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 30, color: palette.primary, lineHeight: 1 }}>
               {xp} <span style={{ fontSize: 15, color: palette.textDim }}>XP</span>
             </div>
-            {next && (
+            {goal && (
               <div style={{ fontSize: 12, color: palette.textDim, textAlign: 'right' }}>
-                plus que <b style={{ color: palette.accent }}>{next.cost - xp} XP</b>
-                <br />pour {next.emoji} {next.title.toLowerCase()}
+                {goal.xpMissing > 0 ? 'plus que' : 'encore'}{' '}
+                <b style={{ color: palette.accent }}>{goalText(goal).replace(/ (pour|pour débloquer)$/, '')}</b>
+                <br />{goal.xpMissing > 0 ? 'pour' : 'pour débloquer'} {goal.tier.emoji} {goal.tier.title.toLowerCase()}
               </div>
             )}
-            {!next && (
+            {!goal && (
               <div style={{ fontSize: 12, color: palette.accent, fontWeight: 700, textAlign: 'right' }}>
                 🏆 Tout débloqué !
               </div>
@@ -478,7 +481,9 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
           {REWARDS_CATALOG.map((r) => {
-            const unlocked = xp >= r.cost;
+            const unlocked = isClaimable(r, xp, orders);
+            const needOrders = ordersMissing(r, orders);
+            const enoughXp = xp >= r.cost;
             return (
               <div
                 key={r.id}
@@ -523,7 +528,9 @@ export function RewardsModal({ palette, open, onClose, xp, firstName, onShowMyCo
                       </span>
                     ) : (
                       <span style={{ fontSize: 11, fontWeight: 700, color: palette.textDim }}>
-                        🔒 {r.cost} XP · encore {r.cost - xp} XP
+                        {enoughXp
+                          ? `🔒 Tes XP suffisent · encore ${needOrders} achat${needOrders > 1 ? 's' : ''} au bar pour le débloquer`
+                          : `🔒 ${r.cost} XP · encore ${r.cost - xp} XP${needOrders > 0 ? ` et ${needOrders} achat${needOrders > 1 ? 's' : ''}` : ''}`}
                       </span>
                     )}
                   </div>

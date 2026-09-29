@@ -6,7 +6,7 @@ import type { Palette } from './palette';
 import { ProductImage } from './ProductImage';
 import { findV2ProductByName, type V2Product } from './products-adapter';
 import type { UserReward } from './rewards/useUserRewards';
-import { REWARDS_CATALOG } from './rewards/catalog';
+import { REWARDS_CATALOG, isClaimable, ordersMissing } from './rewards/catalog';
 import { useModalA11y } from './useModalA11y';
 import { maxSpendableXp, xpToCents, XP_SPEND_STEP, XP_PER_EURO } from './xp/xp-spend';
 import { useOpenStatus, formatHHMM, type PickupWindow } from './openingHours';
@@ -699,7 +699,14 @@ export function CartDrawerV2({
               cost: r.cost,
               sub: r.short,
             }));
-            const affordable = GIFTS.filter((g) => userXp >= g.cost);
+            const affordable = GIFTS.filter((g) => {
+              const tier = REWARDS_CATALOG.find((r) => r.id === g.id)!;
+              return isClaimable(tier, userXp, userOrders);
+            });
+            // Cadeaux dont les XP suffisent mais pas le nombre d'achats : on explique
+            const lockedByOrders = REWARDS_CATALOG.filter(
+              (r) => userXp >= r.cost && ordersMissing(r, userOrders) > 0,
+            );
             if (claimedGift) {
               return (
                 <div style={{ marginTop: 20 }}>
@@ -741,7 +748,16 @@ export function CartDrawerV2({
                 </div>
               );
             }
-            if (affordable.length === 0) return null;
+            if (affordable.length === 0 && lockedByOrders.length === 0) return null;
+            if (affordable.length === 0) {
+              const t = lockedByOrders[0];
+              const n = ordersMissing(t, userOrders);
+              return (
+                <div style={{ marginTop: 20, fontSize: 12, color: palette.textDim, lineHeight: 1.4 }}>
+                  🔒 {t.emoji} {t.title} : tes XP suffisent, encore <b style={{ color: palette.text }}>{n} achat{n > 1 ? 's' : ''}</b> au bar pour le débloquer.
+                </div>
+              );
+            }
             return (
               <div style={{ marginTop: 20 }}>
                 <div

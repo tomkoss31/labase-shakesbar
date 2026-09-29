@@ -1288,15 +1288,19 @@ function renderProfile(p, rewards, recentOrder) {
       '<div id="rewardHint" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:10px;font-size:12px;color: var(--amber-text);font-weight:600;"></div>' +
     '</div>';
 
-  // Catalogue cadeaux — GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts
+  // Catalogue cadeaux — GARDER SYNCHRO (id + cost + minOrders) avec src/v2/rewards/catalog.ts
   const CATALOG = [
-    { id: 'extra', cost: 750, emoji: '✨', title: 'Un extra offert' },
-    { id: 'boisson', cost: 1500, emoji: '🥤', title: 'Boisson energy ou smoothie' },
-    { id: 'combo-gaufre', cost: 2200, emoji: '🧇', title: 'Boisson + gaufre' },
-    { id: 'cadeau-mois', cost: 3800, emoji: '🎁', title: 'Cadeau du mois' },
+    { id: 'extra', cost: 750, minOrders: 0, emoji: '✨', title: 'Un extra offert' },
+    { id: 'boisson', cost: 1500, minOrders: 3, emoji: '🥤', title: 'Boisson energy ou smoothie' },
+    { id: 'combo-gaufre', cost: 2200, minOrders: 6, emoji: '🧇', title: 'Boisson + gaufre' },
+    { id: 'cadeau-mois', cost: 3800, minOrders: 10, emoji: '🎁', title: 'Cadeau du mois' },
   ];
   const giftButtons = CATALOG.map(c => {
     const ok = p.xp >= c.cost;
+    // XP suffisants mais pas assez d'ACHATS au bar : bouton actif avec avertissement
+    const orders = Number(p.total_orders) || 0;
+    const short = ok && orders < c.minOrders;
+    const tag = short ? '⚠️ ' + orders + '/' + c.minOrders + ' achats' : (ok ? 'Donner · −' + c.cost + ' XP' : '🔒 ' + c.cost + ' XP');
     return '<button class="gift-btn" data-rid="' + c.id + '" data-cost="' + c.cost +
       '" data-label="' + c.title + '"' + (ok ? '' : ' disabled') +
       ' style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid ' +
@@ -1305,8 +1309,7 @@ function renderProfile(p, rewards, recentOrder) {
       (ok ? 'pointer' : 'not-allowed') + ';text-align:left;">' +
       '<span style="font-size:20px;">' + c.emoji + '</span>' +
       '<span style="flex:1;">' + c.title + '</span>' +
-      '<span style="font-weight:800;color:' + (ok ? 'var(--teal-text)' : 'var(--disabled)') + ';">' +
-      (ok ? 'Donner · −' + c.cost : '🔒 ' + c.cost) + ' XP</span></button>';
+      '<span style="font-weight:800;color:' + (short ? 'var(--amber-text)' : ok ? 'var(--teal-text)' : 'var(--disabled)') + ';">' + tag + '</span></button>';
   }).join('');
 
   $('scanner-result').innerHTML =
@@ -1391,16 +1394,23 @@ function renderProfile(p, rewards, recentOrder) {
   });
 }
 
-async function redeemReward(userId, rewardId, label, cost) {
-  if (!confirm('Offrir « ' + label + ' » et déduire ' + cost + ' XP ?')) return;
+async function redeemReward(userId, rewardId, label, cost, force = false) {
+  if (!force && !confirm('Offrir « ' + label + ' » et déduire ' + cost + ' XP ?')) return;
   const password = getPassword();
   try {
     const resp = await fetch('/api/profile?action=redeem-reward', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + password },
-      body: JSON.stringify({ userId, rewardId }),
+      body: JSON.stringify({ userId, rewardId, force }),
     });
     const data = await resp.json();
+    if (resp.status === 409 && data.locked) {
+      // Pas assez d'achats : on demande confirmation avant d'offrir quand même
+      if (confirm('⚠️ ' + data.error + '\n\nLes XP viennent surtout de bonus (défi, coaching, parrainage…).\nOffrir « ' + label + ' » quand même ?')) {
+        return redeemReward(userId, rewardId, label, cost, true);
+      }
+      return;
+    }
     if (resp.ok) {
       showScannerResult('ok', '🎁 « ' + data.rewardLabel + ' » offert ! −' + data.cost + ' XP. Nouveau total : ' + data.newXp + ' XP.');
       lookupUser(userId);

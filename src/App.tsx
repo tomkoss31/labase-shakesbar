@@ -998,6 +998,7 @@ function App() {
             firstName={appAuth.profile?.first_name}
             xp={appAuth.profile?.xp ?? 0}
             xpGained={visitThanks?.xpGained ?? 0}
+            orders={appAuth.profile?.total_orders ?? 0}
             canSpin={canSpinWheel}
             onSpin={() => closeVisitThanks('spin')}
             referralCode={appAuth.profile?.referral_code}

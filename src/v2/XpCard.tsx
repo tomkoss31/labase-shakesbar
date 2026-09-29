@@ -2,7 +2,7 @@
 import React from 'react';
 import type { Palette } from './palette';
 import { Mascotte } from './Mascotte';
-import { REWARDS_CATALOG, nextReward } from './rewards/catalog';
+import { nextGoal, bestClaimable, goalText } from './rewards/catalog';
 
 interface XpCardProps {
   palette: Palette;
@@ -10,6 +10,7 @@ interface XpCardProps {
   xp?: number;
   xpNext?: number;
   nextLevel?: string;
+  orders?: number; // achats réels au bar (débloquent les cadeaux avec les XP)
   firstName?: string;
   connected?: boolean;
   onConnect?: () => void;
@@ -22,6 +23,7 @@ export function XpCard({
   xp = 0,
   xpNext = 500,
   nextLevel = 'Régulier',
+  orders = 0,
   firstName,
   connected = false,
   onConnect,
@@ -31,9 +33,9 @@ export function XpCard({
   const mascotteLevel = levelPct > 80 ? 'pro' : levelPct > 40 ? 'regulier' : 'apprenti';
   // Jauge « Plus que X XP pour… » : progression vers le PROCHAIN CADEAU (paliers
   // du catalogue, source unique) — effet « carte Starbucks » qui fait revenir.
-  const goal = nextReward(xp);
-  const available = [...REWARDS_CATALOG].reverse().find((r) => xp >= r.cost) ?? null;
-  const pct = goal ? Math.min(100, (xp / goal.cost) * 100) : 100;
+  const goal = nextGoal(xp, orders);
+  const available = bestClaimable(xp, orders);
+  const pct = goal ? Math.min(100, (xp / goal.tier.cost) * 100) : 100;
 
   return (
     <div style={{ padding: '4px 16px 16px' }}>
@@ -171,8 +173,10 @@ export function XpCard({
               <span>
                 {goal ? (
                   <>
-                    Plus que <b style={{ color: palette.text, fontWeight: 800 }}>{goal.cost - xp} XP</b> pour{' '}
-                    {goal.emoji} <b style={{ color: palette.text, fontWeight: 700 }}>{goal.short.toLowerCase()}</b>
+                    {goal.xpMissing > 0 ? 'Plus que' : 'Encore'}{' '}
+                    <b style={{ color: palette.text, fontWeight: 800 }}>{goalText(goal).replace(/ (pour|pour débloquer)$/, '')}</b>{' '}
+                    {goal.xpMissing > 0 ? 'pour' : 'pour débloquer'} {goal.tier.emoji}{' '}
+                    <b style={{ color: palette.text, fontWeight: 700 }}>{goal.tier.short.toLowerCase()}</b>
                   </>
                 ) : (
                   <>

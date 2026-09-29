@@ -173,13 +173,17 @@ const GOOGLE_REVIEW_URL = 'https://g.page/r/CeJabN1yW1toEAE/review';
 // ⚠️ SOURCE UNIQUE CÔTÉ SERVEUR pour les cadeaux XP. Sert à la fois :
 //   - la deadline « prochain cadeau » des push (`tier`, phrase minuscule)
 //   - le débit réel des XP au claim (`label`, casse propre — cf. action claim-reward)
-// GARDER SYNCHRO (id + cost) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG),
+// GARDER SYNCHRO (id + cost + minOrders) avec src/v2/rewards/catalog.ts (REWARDS_CATALOG),
 // sinon le client affiche un faux prix et le claim échoue en silence.
+// minOrders = achats RÉELS minimum au bar (profiles.total_orders) : les XP du défi
+// 7 jours, de l'anniversaire, du parrainage ou du pont coaching ne donnent pas un
+// cadeau gratuit sans clientèle (l'extra reste à 0 : c'est un supplément sur une
+// boisson achetée).
 const REWARDS_LIST = [
-  { id: 'extra', cost: 750, label: 'Un extra offert', tier: 'un extra offert' },
-  { id: 'boisson', cost: 1500, label: 'Boisson energy ou smoothie', tier: 'une boisson offerte' },
-  { id: 'combo-gaufre', cost: 2200, label: 'Boisson + gaufre healthy', tier: 'une boisson + gaufre' },
-  { id: 'cadeau-mois', cost: 3800, label: 'Cadeau du mois', tier: 'le cadeau du mois' },
+  { id: 'extra', cost: 750, minOrders: 0, label: 'Un extra offert', tier: 'un extra offert' },
+  { id: 'boisson', cost: 1500, minOrders: 3, label: 'Boisson energy ou smoothie', tier: 'une boisson offerte' },
+  { id: 'combo-gaufre', cost: 2200, minOrders: 6, label: 'Boisson + gaufre healthy', tier: 'une boisson + gaufre' },
+  { id: 'cadeau-mois', cost: 3800, minOrders: 10, label: 'Cadeau du mois', tier: 'le cadeau du mois' },
 ];
 
 // Push « merci pour ta visite » ~à la fin d'un paiement : récap commande + XP
@@ -1006,13 +1010,27 @@ export default async function handler(req: any, res: any) {
     const userId = userData.user.id;
 
     // Dérivé de REWARDS_LIST (source unique serveur, cf. haut du fichier).
-    const REWARDS: Record<string, { cost: number; label: string }> = Object.fromEntries(
-      REWARDS_LIST.map((r) => [r.id, { cost: r.cost, label: r.label }]),
+    const REWARDS: Record<string, { cost: number; label: string; minOrders: number }> = Object.fromEntries(
+      REWARDS_LIST.map((r) => [r.id, { cost: r.cost, label: r.label, minOrders: r.minOrders }]),
     );
     const body = await readBody(req);
     const rewardId = typeof body?.rewardId === 'string' ? body.rewardId : null;
     const reward = rewardId ? REWARDS[rewardId] : null;
     if (!reward) return res.status(400).json({ error: 'Cadeau inconnu' });
+
+    // 🔒 Achats minimum : pas de cadeau (hors extra) uniquement avec des XP « gratuits ».
+    if (reward.minOrders > 0) {
+      const { data: prof } = await clients.admin.from('profiles').select('total_orders').eq('id', userId).maybeSingle();
+      const have = Number(prof?.total_orders ?? 0);
+      if (have < reward.minOrders) {
+        const missing = reward.minOrders - have;
+        return res.status(403).json({
+          locked: true,
+          ordersMissing: missing,
+          error: `Ce cadeau se débloque après ${reward.minOrders} achats au bar (tu en as ${have}). Encore ${missing} achat${missing > 1 ? 's' : ''} !`,
+        });
+      }
+    }
 
     // Débit ATOMIQUE (anti double-cadeau en concurrence). NULL = XP insuffisants.
     const { data: newXp, error: spendErr } = await clients.admin.rpc('spend_xp', {

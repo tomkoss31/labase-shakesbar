@@ -506,6 +506,7 @@ export function HomeV2({
             firstName={auth.profile?.first_name ?? undefined}
             level={mascotteLevel === 'pro' ? 'Pro' : mascotteLevel === 'regulier' ? 'Régulier' : 'Apprenti'}
             xp={xp}
+            orders={auth.profile?.total_orders ?? 0}
             xpNext={next.xp}
             nextLevel={next.name}
             onConnect={() => (isAuthed ? setProfileOpen(true) : setAuthOpen(true))}
@@ -942,6 +943,7 @@ export function HomeV2({
         open={rewardsOpen && isAuthed}
         onClose={() => setRewardsOpen(false)}
         xp={xp}
+        orders={auth.profile?.total_orders ?? 0}
         firstName={auth.profile?.first_name ?? undefined}
         onShowMyCode={() => {
           setRewardsOpen(false);

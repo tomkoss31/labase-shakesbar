@@ -5,7 +5,7 @@
 import React from 'react';
 import type { Palette } from './palette';
 import { Mascotte } from './Mascotte';
-import { nextReward } from './rewards/catalog';
+import { nextGoal, goalText } from './rewards/catalog';
 import { useModalA11y } from './useModalA11y';
 
 interface VisitThanksModalProps {
@@ -15,6 +15,7 @@ interface VisitThanksModalProps {
   firstName?: string | null;
   xp: number;
   xpGained: number; // > 0 : XP crédités depuis la dernière ouverture
+  orders?: number; // achats réels au bar
   canSpin: boolean;
   onSpin: () => void;
   referralCode?: string | null;
@@ -28,6 +29,7 @@ export function VisitThanksModal({
   firstName,
   xp,
   xpGained,
+  orders = 0,
   canSpin,
   onSpin,
   referralCode,
@@ -36,8 +38,8 @@ export function VisitThanksModal({
   const dialogRef = useModalA11y<HTMLDivElement>(open, onClose);
   if (!open) return null;
 
-  const goal = nextReward(xp);
-  const pct = goal ? Math.min(100, (xp / goal.cost) * 100) : 100;
+  const goal = nextGoal(xp, orders);
+  const pct = goal ? Math.min(100, (xp / goal.tier.cost) * 100) : 100;
 
   const secondaryBtn: React.CSSProperties = {
     width: '100%',
@@ -161,8 +163,10 @@ export function VisitThanksModal({
           <div style={{ fontSize: 13, marginTop: 8, color: palette.textDim, lineHeight: 1.4 }}>
             {goal ? (
               <>
-                Plus que <b style={{ color: palette.text }}>{goal.cost - xp} XP</b> pour {goal.emoji}{' '}
-                <b style={{ color: palette.text }}>{goal.short.toLowerCase()}</b>
+                {goal.xpMissing > 0 ? 'Plus que' : 'Encore'}{' '}
+                <b style={{ color: palette.text }}>{goalText(goal).replace(/ (pour|pour débloquer)$/, '')}</b>{' '}
+                {goal.xpMissing > 0 ? 'pour' : 'pour débloquer'} {goal.tier.emoji}{' '}
+                <b style={{ color: palette.text }}>{goal.tier.short.toLowerCase()}</b>
               </>
             ) : (
               <>🎁 Tous les cadeaux sont débloqués — fais-toi plaisir au comptoir !</>
